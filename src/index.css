@@ -1,0 +1,104 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens.
+ *
+ * The original app hard-coded hex values (#0A0A0A, #111111, #151515, #222222)
+ * across every component, which made the surface hierarchy impossible to
+ * adjust and drifted over time (both #181818 and #151515 were used for the
+ * same "raised" surface). Everything now flows from these tokens.
+ */
+@theme {
+  /* Surfaces: canvas -> card -> raised -> input, each one step lighter. */
+  --color-canvas: oklch(14.5% 0.004 260);
+  --color-surface: oklch(18% 0.005 260);
+  --color-raised: oklch(21.5% 0.006 260);
+  --color-inset: oklch(25% 0.007 260);
+
+  /* Hairlines. */
+  --color-line: oklch(28% 0.008 260);
+  --color-line-strong: oklch(36% 0.01 260);
+
+  /* Text. */
+  --color-ink: oklch(96% 0.003 260);
+  --color-ink-muted: oklch(72% 0.008 260);
+  --color-ink-faint: oklch(56% 0.008 260);
+
+  /* Brand + data colours. Tuned for >=4.5:1 on --color-surface. */
+  --color-brand: oklch(84% 0.17 92);
+  --color-brand-dim: oklch(70% 0.14 92);
+  --color-warm: oklch(70% 0.19 25);
+  --color-hot: oklch(75% 0.17 55);
+  --color-cool: oklch(76% 0.13 235);
+  --color-cold: oklch(68% 0.15 255);
+  --color-wet: oklch(78% 0.12 205);
+  --color-dry: oklch(78% 0.13 75);
+  --color-good: oklch(76% 0.17 150);
+  --color-bad: oklch(68% 0.2 25);
+
+  --radius-card: 0.625rem;
+
+  --font-sans: 'Inter var', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    Roboto, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Fira Code', Menlo,
+    monospace;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-canvas text-ink font-sans antialiased;
+    /* Subtle vignette so the wide 12-section layout does not read as a flat slab. */
+    background-image: radial-gradient(
+      110ch 60ch at 50% -10%,
+      oklch(22% 0.02 92 / 0.5),
+      transparent 70%
+    );
+    background-attachment: fixed;
+  }
+
+  /* The original app relied on the browser default focus ring, which is
+     invisible against a near-black background. */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand;
+  }
+
+  ::selection {
+    @apply bg-brand text-canvas;
+  }
+
+  /* Scrollbars inside the many scrollable tables. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line-strong) transparent;
+  }
+}
+
+@layer utilities {
+  /* Small caps label used for every metric caption and column header. */
+  .label {
+    @apply text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-faint;
+  }
+
+  .numeric {
+    @apply font-mono tabular-nums;
+  }
+
+  /* Sticky table headers need an opaque backdrop or rows bleed through. */
+  .sticky-head {
+    @apply sticky top-0 z-10 bg-surface;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
