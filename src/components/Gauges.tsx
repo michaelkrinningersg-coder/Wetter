@@ -162,8 +162,11 @@ export function Gauges() {
         <strong>PEGELONLINE der WSV</strong> für Wahmbeck eine offene Schnittstelle mit
         rollierenden 30 Tagen im 15-Minuten-Takt. Leine und Rhume sind Landesgewässer;
         das <strong>NLWKN-Portal</strong> veröffentlicht dort nur den aktuellen Wert,
-        keine Zeitreihe. Für diese beiden baut die App ihre Reihe daher selbst auf —
-        jeder Abruf wird gespeichert. Alle Angaben in Zentimeter über Pegelnullpunkt.
+        keine Zeitreihe. Für diese beiden baut die App ihre Reihe daher selbst auf:
+        Ein stündlicher GitHub-Workflow holt die aktuellen Werte und legt sie als CSV
+        im Repository ab, der Server liest dieses Archiv beim Start ein. Die Historie
+        wächst also mit der Laufzeit des Projekts. Alle Angaben in Zentimeter über
+        Pegelnullpunkt.
       </InfoPanel>
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
@@ -311,9 +314,9 @@ export function Gauges() {
                 </dd>
               </div>
               <div>
-                <dt className="label">Messwerte</dt>
+                <dt className="label">Messwerte im Archiv</dt>
                 <dd className="numeric mt-0.5 font-semibold text-ink-muted">
-                  {active.window.count.toLocaleString('de-DE')}
+                  {(active.archive?.count ?? active.window.count).toLocaleString('de-DE')}
                 </dd>
               </div>
             </dl>

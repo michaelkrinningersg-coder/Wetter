@@ -167,6 +167,47 @@ die App jeden Abruf in der Datenbank ab und baut ihre Zeitreihe damit selbst
 auf.** Meldestufen, Hauptwerte und Extremwerte stammen für alle drei Pegel vom
 NLWKN.
 
+### Pegelarchiv
+
+Weil die Quellen keine Historie herausgeben, sammelt das Projekt sie selbst.
+Ein stündlicher GitHub-Workflow (`.github/workflows/pegel.yml`) ruft die
+aktuellen Werte ab und hängt sie an eine CSV je Pegel unter `data/gauges/` an:
+
+```
+data/gauges/leine-goettingen.csv
+data/gauges/rhume-northeim.csv
+data/gauges/weser-wahmbeck.csv
+```
+
+```csv
+timestamp,value_cm
+2026-07-31T22:15:00+02:00,35
+```
+
+Der Server liest dieses Archiv beim Start in die Datenbank ein — ein frischer
+Klon hat die gesammelte Historie also sofort im Diagramm. Manuell:
+
+```bash
+npm run fetch:gauges
+```
+
+Drei Eigenschaften, die den Lauf robust halten:
+
+- **Keine Abhängigkeiten.** Das Skript nutzt nur die Node-Standardbibliothek,
+  der Workflow braucht daher kein `npm ci` und keinen nativen Build von
+  better-sqlite3. Ein Lauf dauert Sekunden.
+- **Append-only.** Geschrieben werden ausschließlich Messwerte, die neuer sind
+  als der letzte Eintrag. Das hält die git-Diffs klein — bei stündlichen
+  Commits ist das der Unterschied zwischen wenigen Zeilen und einem neuen Blob
+  pro Lauf.
+- **Teiltoleranz.** Fällt ein Portal aus, werden die übrigen Pegel trotzdem
+  gespeichert. Der Lauf scheitert nur, wenn keine einzige Quelle erreichbar ist.
+
+Zwei Dinge, die man über geplante Workflows wissen sollte: Sie laufen nur auf
+dem **Standard-Branch**, und GitHub deaktiviert sie in öffentlichen
+Repositories nach 60 Tagen ohne Aktivität. Da der Workflow selbst committet,
+hält er sich in der Regel am Leben.
+
 Historische Pegelzeitreihen sind online nirgends frei abrufbar. Die Daten
 existieren (Leine ab 1958, Weser ab 1973, Rhume ab 1993), werden aber nur auf
 Anfrage bei der NLWKN-Daten-Servicestelle abgegeben. Alle Pegelangaben ohne

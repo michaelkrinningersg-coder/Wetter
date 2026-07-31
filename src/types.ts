@@ -404,6 +404,8 @@ export interface GaugeSummary {
     max: number | null
     mean: number | null
   }
+  /** Everything ever collected, across the committed CSV archive. */
+  archive?: { count: number; first: string | null }
   gaugeDatum?: number | null
   current?: { cm: number; mNN: number | null; measuredAt: string | null } | null
   trend?: string | null

@@ -12,7 +12,8 @@
     "preview": "vite preview",
     "start": "NODE_ENV=production node server/index.js",
     "typecheck": "tsc -b --noEmit",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "fetch:gauges": "node scripts/fetch-gauges.js"
   },
   "dependencies": {
     "better-sqlite3": "^11.7.0",
