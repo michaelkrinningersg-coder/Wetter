@@ -264,10 +264,11 @@ function rank(rows, category, { limit = 5 } = {}) {
  *
  * The limit costs nothing worth optimising: reading and sorting the day's ~2200
  * rows takes about twelve milliseconds whether the answer carries three ranks
- * or fifty, because the slice happens after the sort either way. Twenty is the
- * depth the view offers; it adds some thirty kilobytes over a podium of three.
+ * or fifty, because the slice happens after the sort either way. Fifty is the
+ * depth the view offers — roughly 100 kB of JSON, 13 kB over the wire once
+ * compressed.
  */
-export function superlatives(date, { limit = 20 } = {}) {
+export function superlatives(date, { limit = 50 } = {}) {
   const rows = dayStmt.all(date)
   if (rows.length === 0) return null
 

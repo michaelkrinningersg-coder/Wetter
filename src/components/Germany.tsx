@@ -76,6 +76,34 @@ function place(rank: GermanyRank): string {
   return parts.join(' · ')
 }
 
+/**
+ * Wind, in both units.
+ *
+ * The DWD publishes metres per second; German weather reporting speaks in
+ * kilometres per hour ("Böen bis 96 km/h"). Neither alone serves both readers,
+ * so km/h leads and the raw figure follows.
+ */
+function windPair(value: number): { primary: string; secondary: string } {
+  return { primary: `${num(value * 3.6, 1)} km/h`, secondary: `${num(value, 1)} m/s` }
+}
+
+const isWind = (category: GermanyCategory) => category.unit === 'm/s'
+
+/** Headline figure of a card, plus the alternate unit when there is one. */
+function headline(value: number, category: GermanyCategory) {
+  if (isWind(category)) return windPair(value)
+  return { primary: `${num(value, category.decimals)} ${category.unit}`, secondary: null }
+}
+
+/** Compact form for the ranking lists, where both units share one column. */
+function compact(value: number, category: GermanyCategory): string {
+  if (isWind(category)) {
+    const { primary, secondary } = windPair(value)
+    return `${primary} · ${secondary}`
+  }
+  return `${num(value, category.decimals)} ${category.unit}`
+}
+
 /** One numbered row of a full ranking. */
 function RankRow({
   rank,
@@ -92,8 +120,10 @@ function RankRow({
   return (
     <li className="flex items-baseline gap-2 py-0.5 text-[11px]">
       <span className="w-5 shrink-0 text-right text-ink-faint">{position}.</span>
-      <span className="numeric w-16 shrink-0 text-ink-muted">
-        {num(rank.value, category.decimals)} {category.unit}
+      <span
+        className={`numeric shrink-0 text-ink-muted ${isWind(category) ? 'w-36' : 'w-16'}`}
+      >
+        {compact(rank.value, category)}
       </span>
       <span className="min-w-0 flex-1 truncate text-ink" title={rank.name}>
         {rank.name}
@@ -173,7 +203,7 @@ function CategoryCard({
     )
   }
 
-  const value = `${num(winner.value, category.decimals)} ${category.unit}`
+  const value = headline(winner.value, category)
 
   return (
     <Card
@@ -191,8 +221,11 @@ function CategoryCard({
         </div>
 
         <p className={`numeric mt-2 text-3xl font-semibold tracking-tight ${ACCENT_TEXT[accent]}`}>
-          {value}
+          {value.primary}
         </p>
+        {value.secondary && (
+          <p className="numeric text-xs text-ink-faint">{value.secondary}</p>
+        )}
         <p className="mt-1 truncate text-sm font-medium text-ink" title={winner.name}>
           {winner.name}
         </p>
@@ -209,7 +242,7 @@ function CategoryCard({
               </span>
             </div>
             <p className="numeric mt-1 text-sm font-semibold text-ink">
-              {num(lowland.value, category.decimals)} {category.unit}
+              {compact(lowland.value, category)}
               <span className="ml-2 font-normal text-ink-muted">{lowland.name}</span>
             </p>
             <p className="text-[11px] text-ink-faint">{place(lowland)}</p>
@@ -237,8 +270,12 @@ function CategoryCard({
               {chasers.map((rank, i) => (
                 <li key={rank.station_id} className="flex items-baseline gap-2 text-[11px]">
                   <span className="w-3 shrink-0 text-ink-faint">{i + 2}.</span>
-                  <span className="numeric w-16 shrink-0 text-ink-muted">
-                    {num(rank.value, category.decimals)} {category.unit}
+                  <span
+                    className={`numeric shrink-0 text-ink-muted ${
+                      isWind(category) ? 'w-36' : 'w-16'
+                    }`}
+                  >
+                    {compact(rank.value, category)}
                   </span>
                   <span className="truncate text-ink-faint" title={rank.name}>
                     {rank.name}
