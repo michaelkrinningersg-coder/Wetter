@@ -436,3 +436,54 @@ export interface GaugeSeriesResponse {
   days: number
   readings: { ts: string; value: number }[]
 }
+
+/* -------------------------------------------------------------------------- */
+/* Germany-wide superlatives                                                  */
+/* -------------------------------------------------------------------------- */
+
+export interface GermanyRank {
+  station_id: string
+  name: string
+  state: string
+  elevation: number | null
+  lat: number | null
+  lon: number | null
+  value: number
+}
+
+export interface GermanyScope {
+  /** Stations that reported this parameter — the size of the field, not of the podium. */
+  count: number
+  top: GermanyRank[]
+}
+
+export interface GermanyCategory {
+  key: string
+  label: string
+  short: string
+  unit: string
+  decimals: number
+  direction: 'max' | 'min'
+  all: GermanyScope
+  lowland: GermanyScope
+  lowlandDiffers: boolean
+}
+
+export interface GermanyDay {
+  date: string
+  stations: {
+    total: number
+    lowland: number
+    byNetwork: { kl: number; rr: number }
+  }
+  lowlandLimit: number
+  highestStation: { name: string; elevation: number } | null
+  categories: GermanyCategory[]
+}
+
+export interface GermanyResponse {
+  range: { days: number; first: string | null; last: string | null }
+  dates: string[]
+  day: GermanyDay | null
+  hint?: string
+}

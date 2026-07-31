@@ -11,6 +11,7 @@ import {
   LineChart,
   Layers,
   Leaf,
+  Map,
   Scale,
   Snowflake,
   Umbrella,
@@ -44,6 +45,7 @@ import { RecordBalance } from './components/RecordBalance'
 import { PrecipIntensity } from './components/PrecipIntensity'
 import { DayInHistory } from './components/DayInHistory'
 import { Gauges } from './components/Gauges'
+import { Germany } from './components/Germany'
 
 const FALLBACK_STATIONS: Station[] = [
   { id: '01691', name: 'Göttingen', altitude: 167 },
@@ -71,12 +73,13 @@ type TabId =
   | 'precip-intensity'
   | 'day-in-history'
   | 'gauges'
+  | 'germany'
 
 interface TabDef {
   id: TabId
   label: string
   icon: typeof Thermometer
-  group: 'Messwerte' | 'Trends' | 'Rekorde' | 'Klimatologie' | 'Gewässer'
+  group: 'Messwerte' | 'Trends' | 'Rekorde' | 'Klimatologie' | 'Gewässer' | 'Deutschland'
 }
 
 const TABS: TabDef[] = [
@@ -99,9 +102,17 @@ const TABS: TabDef[] = [
   { id: 'comparison', label: 'Referenzperioden', icon: Layers, group: 'Klimatologie' },
   { id: 'forecast', label: 'Prognose', icon: Sparkles, group: 'Klimatologie' },
   { id: 'gauges', label: 'Flusspegel', icon: Waves, group: 'Gewässer' },
+  { id: 'germany', label: 'Deutschland gestern', icon: Map, group: 'Deutschland' },
 ]
 
-const GROUPS = ['Messwerte', 'Trends', 'Rekorde', 'Klimatologie', 'Gewässer'] as const
+const GROUPS = [
+  'Messwerte',
+  'Trends',
+  'Rekorde',
+  'Klimatologie',
+  'Gewässer',
+  'Deutschland',
+] as const
 
 const STORAGE_KEY = 'selected_station_id'
 
@@ -355,6 +366,8 @@ export default function App() {
             )}
             {tab === 'forecast' && <Forecast stationId={stationId} />}
             {tab === 'gauges' && <Gauges />}
+
+            {tab === 'germany' && <Germany />}
           </main>
         </div>
 

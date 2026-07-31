@@ -55,6 +55,11 @@ Jahresprognose
 **Gewässer** — Flusspegel Leine (Göttingen), Rhume (Northeim) und Weser
 (Wahmbeck) mit Verlauf, Meldestufen und langjährigen Kennwerten
 
+**Deutschland** — Spitzenreiter aller DWD-Stationen für einen einzelnen Tag:
+wärmste und kälteste Station im Mittel und absolut, stärkste Bö, windigste
+Station im Mittel, nasseste Station und größte Tagesspanne — jeweils für ganz
+Deutschland und für alles unterhalb 1000 m
+
 ## Aufbau
 
 ```
@@ -75,7 +80,11 @@ server/
   dwd.js               Download und Parser der DWD-Archive
   queries.js           sämtliche Aggregationen
   stations.js          Stationsverzeichnis
+  zip.js               ZIP-Leser auf node:zlib, ohne Abhängigkeit
   gauges.js            Flusspegel: Abruf, Parser, eigene Zeitreihe
+  germany-sources.js   bundesweiter Abruf beider DWD-Stationsnetze
+  germany-csv.js       Tagesarchiv, eine CSV je Tag
+  germany.js           Superlative je Tag und Höhenwertung
 ```
 
 Die Datenbank liegt unter `data/weather.sqlite` (per `.gitignore`
@@ -123,6 +132,17 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   Klimatologie-Fortschreibung, **keine Wettervorhersage**.
 - **Klimadiagramm.** Temperatur- und Niederschlagsachse stehen im Verhältnis
   1 °C : 2 mm, damit die Walter-&-Lieth-Leseregel gilt.
+- **Deutschlandwertung.** Zwei Ranglisten je Kategorie: ganz Deutschland und
+  alles unterhalb 1000 m. Ohne die zweite lautete die Antwort auf „wo war es am
+  kältesten" praktisch jeden Tag Zugspitze und auf „wo war es am windigsten"
+  Brocken — am 30.07.2026 lag die Zugspitze im Tagesmittel 9,4 K unter der
+  zweitkältesten Station. Temperatur, Wind und Spanne stammen aus dem
+  Klimanetz; für den Niederschlag kommt das dichtere reine Niederschlagsnetz
+  hinzu, weil Starkregen kleinräumig ist. Die Sonnenscheindauer wird
+  mitgespeichert, aber nicht bewertet: der DWD misst sie nur an rund 70
+  Stationen, ein zu grobes Netz für den Titel „sonnigste Station Deutschlands".
+  Stationen außerhalb Deutschlands — das Niederschlagsnetz enthält vier in
+  Tirol — bleiben außen vor, ebenso Tage mit weniger als 100 Stationen.
 - **Flusspegel.** Alle Werte in Zentimeter über Pegelnullpunkt. Die Achse des
   Verlaufs ist auf die Messwerte skaliert, weil die täglichen Schwankungen im
   Zentimeterbereich die eigentliche Information sind; Kennwerte und Meldestufen
@@ -149,6 +169,47 @@ Entscheidung offen).
 
 **Klimadaten:** [DWD Climate Data Center](https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/daily/kl/),
 Tageswerte (`kl`). Frei verwendbar nach GeoNutzV; Quellenangabe erforderlich.
+
+### Deutschlandarchiv
+
+Für die bundesweite Ansicht gibt es beim DWD **keine Sammeldatei**: die
+Tageswerte erscheinen ausschließlich als ein ZIP je Station. `timeseries_overview`
+ist ein Katalog der Reihenlängen, keine Messwerte; die abgeleiteten Produkte
+unter `weather_reports` sind Strahlungsdaten. Ganz Deutschland heißt daher rund
+2900 kleine Archive — bei 16 parallelen Verbindungen unter einer Minute.
+
+| Netz | Stationen | Parameter |
+|---|---|---|
+| [`daily/kl`](https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/daily/kl/recent/) | 576 | Temperatur, Wind, Niederschlag, Sonne, Bewölkung, Druck, Feuchte, Schnee |
+| [`daily/more_precip`](https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/daily/more_precip/recent/) | 2319 | nur Niederschlag und Schnee |
+
+483 Stationen liegen in beiden Netzen; dort gilt der Klimadatensatz. Ein
+täglicher Workflow (`.github/workflows/deutschland.yml`) holt den Vortag und
+legt ihn ab:
+
+```
+data/germany/stations.csv          Register: Name, Bundesland, Lage, Höhe
+data/germany/2026/2026-07-30.csv   ein Tag, eine Zeile je Station
+```
+
+```csv
+station,temp_mean,temp_max,temp_min,precipitation,wind_max,wind_mean,sunshine,cloud,pressure,humidity,snow
+01691,23.9,37.6,13.4,0.6,23.2,2.7,,2.4,995.93,61.88,0
+```
+
+Ein Tag umfasst rund 2300 Stationen (53 KB, gepackt 15 KB), das Jahr also etwa
+5 MB im Repository. Der Server liest das Archiv beim Start in die Datenbank.
+
+```bash
+npm run fetch:germany                 # Vortag
+npm run fetch:germany 2026-07-28      # ein bestimmter Tag
+npm run fetch:germany -- --backfill   # alles, was die Archive hergeben
+```
+
+`--backfill` lohnt einmalig: jedes Stationsarchiv reicht etwa 500 Tage zurück,
+ein Lauf füllt also rund anderthalb Jahre auf einmal. Wie beim Pegelarchiv
+braucht der Workflow kein `npm ci` — die ZIPs werden über `node:zlib` entpackt
+(`server/zip.js`), geprüft byte-identisch gegen `unzipper`.
 
 **Flusspegel:** zwei Quellen, weil die Pegel an unterschiedlichen Gewässern
 liegen.

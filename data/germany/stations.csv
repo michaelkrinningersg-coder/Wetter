@@ -1,0 +1,2409 @@
+id,network,name,state,lat,lon,elevation
+00006,rr,Aalen-Unterrombach,Baden-Württemberg,48.8361,10.0598,455
+00011,kl,Donaueschingen (Landeplatz),Baden-Württemberg,47.9736,8.5205,680
+00015,rr,Abenberg,Bayern,49.2346,10.9667,392
+00019,rr,Abtsgmünd-Neubronn,Baden-Württemberg,48.8795,9.971,471
+00020,rr,Abtsgmünd-Untergröningen,Baden-Württemberg,48.9219,9.9129,432
+00021,rr,Achberg-Doberatsweiler,Baden-Württemberg,47.6104,9.6981,498
+00022,rr,Achern-Fautenbach,Baden-Württemberg,48.6318,8.0466,138
+00023,rr,Achim-Embsen,Niedersachsen,53.0311,9.0232,8
+00029,rr,Adelsdorf (Kläranlage),Bayern,49.7175,10.9101,260
+00041,rr,Ahlden-Grethem,Niedersachsen,52.7356,9.5665,26
+00044,kl,Großenkneten,Niedersachsen,52.9336,8.237,44
+00046,rr,Aholfing,Bayern,48.945,12.4639,325
+00053,rr,Ahrensfelde,Brandenburg,52.585,13.5634,60
+00055,rr,"Aibling, Bad-Ellmosen",Bayern,47.8778,12.024,508
+00057,rr,Hollenbach/Bayern-Schönbach,Bayern,48.4799,11.0521,461
+00063,rr,Aitrang,Bayern,47.8173,10.5376,744
+00064,rr,Aken/Elbe,Sachsen-Anhalt,51.8488,12.0491,55
+00073,kl,Aldersbach-Kramersepp,Bayern,48.6183,13.062,374
+00078,kl,Alfhausen,Niedersachsen,52.4853,7.9125,64
+00079,rr,Alfter-Volmershoven,Nordrhein-Westfalen,50.6718,7.0155,160
+00087,rr,Alperstedt,Thüringen,51.095,11.0479,158
+00090,kl,Alsfeld,Hessen,50.7557,9.2583,305
+00091,kl,Alsfeld-Eifa,Hessen,50.7446,9.345,304
+00096,kl,Neuruppin-Alt Ruppin,Brandenburg,52.9437,12.8518,50
+00102,kl,Leuchtturm Alte Weser,Niedersachsen,53.8633,8.1275,0
+00103,rr,Hagelstadt,Bayern,48.896,12.217,364
+00105,rr,Ahrbrück,Rheinland-Pfalz,50.4844,6.9711,195
+00110,rr,Altenberge,Nordrhein-Westfalen,52.0487,7.4877,65
+00118,rr,Altendorf,Bayern,49.4053,12.2852,388
+00121,rr,Neitersen,Rheinland-Pfalz,50.6654,7.5765,218
+00124,rr,"Bibra, Bad-Altenroda",Sachsen-Anhalt,51.2388,11.577,265
+00125,kl,Altenstadt,Bayern,47.8342,10.8667,739
+00128,rr,Altenthann-Forstmühle,Bayern,49.0844,12.3232,446
+00129,rr,Altentreptow,Mecklenburg-Vorpommern,53.6893,13.2422,30
+00130,rr,Altertheim-Oberaltertheim,Bayern,49.7284,9.7692,301
+00131,kl,Geringswalde-Altgeringswalde,Sachsen,51.0881,12.9326,296
+00141,rr,Altmörbitz/Wyhra,Sachsen,50.9932,12.5731,207
+00142,kl,Altomünster-Maisbrunn,Bayern,48.406,11.3117,511
+00145,rr,Altusried-Krugzell,Bayern,47.7965,10.2779,648
+00146,rr,Altusried-Muthmannshofen,Bayern,47.7922,10.0988,730
+00150,kl,Alzey,Rheinland-Pfalz,49.7273,8.1164,215
+00151,kl,Amberg-Unterammersricht,Bayern,49.4691,11.8546,382
+00154,kl,Amerang-Pfaffing,Bayern,48.0197,12.2925,516
+00158,rr,Amöneburg-Rüdigheim,Hessen,50.784,8.9545,210
+00160,rr,Andechs-Erling,Bayern,47.9636,11.1778,682
+00161,kl,Andernach,Rheinland-Pfalz,50.4237,7.4202,75
+00163,rr,Anger-Stoißberg,Bayern,47.803,12.8193,828
+00164,kl,Angermünde,Brandenburg,53.0316,13.9908,54
+00167,kl,Anklam,Mecklenburg-Vorpommern,53.8409,13.6854,11
+00170,rr,Annaburg,Sachsen-Anhalt,51.7309,13.0546,76
+00173,rr,Annweiler,Rheinland-Pfalz,49.2133,7.9799,174
+00178,rr,Ansbach-Schalkhausen,Bayern,49.2993,10.5354,420
+00182,rr,Arendsee-Kläden,Sachsen-Anhalt,52.8682,11.44,33
+00183,kl,Arkona,Mecklenburg-Vorpommern,54.6791,13.4344,42
+00187,rr,Arnsberg-Holzen,Nordrhein-Westfalen,51.4188,7.9126,265
+00191,kl,Arnstein-Müdesheim,Bayern,49.9694,9.9114,217
+00194,rr,"Arolsen-Landau, Bad",Hessen,51.3431,9.0763,265
+00197,kl,"Arolsen-Volkhardinghausen, Bad",Hessen,51.3219,9.0558,365
+00198,kl,Artern,Thüringen,51.3744,11.292,164
+00200,rr,Lauperath-Scheidchen,Rheinland-Pfalz,50.085,6.3161,517
+00201,rr,Asbach,Rheinland-Pfalz,50.6661,7.4459,255
+00202,rr,Aschaffenburg,Bayern,49.9771,9.1091,111
+00203,rr,Aschau-Innerkoy,Bayern,47.786,12.3368,607
+00205,rr,Aschau-Stein,Bayern,47.7275,12.2982,681
+00211,rr,Aßlar Klein-Altenstädten,Hessen,50.58,8.4685,200
+00213,rr,Sargstedt,Sachsen-Anhalt,51.9375,10.9897,170
+00216,rr,Attendorn-Neulisternohl,Nordrhein-Westfalen,51.1143,7.8807,298
+00217,kl,Attenkam,Bayern,47.8774,11.3643,670
+00222,kl,Aue,Sachsen,50.5908,12.7139,393
+00223,rr,Auerbach/Oberpfalz,Bayern,49.7007,11.6235,419
+00227,rr,Aufseß-Hochstahl,Bayern,49.8823,11.2656,432
+00232,kl,Augsburg,Bayern,48.4253,10.9417,462
+00240,rr,Aura im Sinngrund,Bayern,50.1805,9.5743,293
+00245,rr,Aurich-Wiesens,Niedersachsen,53.4551,7.5756,8
+00257,kl,Baden-Baden-Geroldsau,Baden-Württemberg,48.727,8.2457,240
+00259,kl,Müllheim,Baden-Württemberg,47.8064,7.6387,275
+00262,rr,Bärnau-Naab,Bayern,49.7983,12.4288,607
+00269,rr,Baiersbronn-Mitteltal,Baden-Württemberg,48.5116,8.3176,597
+00275,rr,Balderschwang,Bayern,47.465,10.1043,1039
+00277,rr,Balingen-Heselwangen,Baden-Württemberg,48.2772,8.883,573
+00279,rr,Baltmannsweiler-Hohengehren,Baden-Württemberg,48.7574,9.4514,457
+00282,kl,Bamberg,Bayern,49.8743,10.9206,240
+00287,rr,Walternienburg-Ronney,Sachsen-Anhalt,51.961,11.9159,53
+00289,rr,Bargteheide,Schleswig-Holstein,53.7275,10.2514,47
+00290,rr,Hötensleben-Barneberg,Sachsen-Anhalt,52.1175,11.079,141
+00292,rr,Barnstorf,Niedersachsen,52.6965,8.487,37
+00294,kl,Barsinghausen-Hohenbostel,Niedersachsen,52.3199,9.43,110
+00296,rr,Barßel-Loher Ostmark,Niedersachsen,53.1665,7.7966,3
+00298,kl,Barth,Mecklenburg-Vorpommern,54.3405,12.7108,3
+00301,rr,Bartholomä,Baden-Württemberg,48.7584,9.9855,659
+00303,kl,Baruth,Brandenburg,52.0613,13.4997,55
+00309,rr,Battenberg-Berghofen,Hessen,51.0028,8.6693,328
+00310,rr,Battenberg-Hof Karlsburg,Hessen,51.0662,8.5375,590
+00312,rr,Baumgarten,Mecklenburg-Vorpommern,53.8149,11.8818,50
+00314,kl,"Kubschütz, Kr. Bautzen",Sachsen,51.1604,14.5042,234
+00316,rr,Bayerfeld-Steckweiler -Schmalfelderhof,Rheinland-Pfalz,49.6957,7.8387,310
+00318,rr,"Bayersoien, Bad",Bayern,47.6921,10.9954,811
+00319,rr,Eggenthal-Grub,Bayern,47.9209,10.5024,753
+00320,kl,Heinersreuth-Vollhof,Bayern,49.9666,11.5198,350
+00323,rr,Bechhofen/Voggendorf,Bayern,49.1626,10.5918,425
+00325,rr,Beckum-Vellern,Nordrhein-Westfalen,51.7948,8.0718,127
+00330,kl,Oberzent-Beerfelden,Hessen,49.5617,8.9673,455
+00333,rr,Beeskow,Brandenburg,52.1864,14.2361,44
+00336,rr,Hörselberg-Hainich-Behringen,Thüringen,51.0221,10.5148,290
+00342,kl,Belm,Niedersachsen,52.317,8.1694,103
+00349,rr,Benediktbeuern,Bayern,47.7064,11.4137,635
+00351,rr,Oberharz am Brocken-Sorge,Sachsen-Anhalt,51.6926,10.6978,502
+00354,rr,Zella-Mehlis-Benshausen,Thüringen,50.646,10.5896,458
+00357,rr,"Bentheim, Bad",Niedersachsen,52.3018,7.1301,50
+00359,rr,Beratzhausen,Bayern,49.1022,11.796,464
+00360,rr,Berching,Bayern,49.1116,11.4329,403
+00364,rr,Berchtesgaden-Oberau,Bayern,47.6525,13.056,716
+00366,rr,Berga/Elster,Thüringen,50.7524,12.1673,265
+00368,kl,Bergen,Niedersachsen,52.8152,9.9248,69
+00371,rr,Bergen/Rügen,Mecklenburg-Vorpommern,54.4215,13.4379,82
+00376,rr,Bergtheim,Bayern,49.8981,10.0653,270
+00377,kl,"Bergzabern, Bad",Rheinland-Pfalz,49.107,7.9967,210
+00378,rr,Berka,Niedersachsen,51.6842,10.1078,134
+00379,kl,"Berka, Bad (Flugplatz)",Thüringen,50.9075,11.2665,304
+00389,rr,"Berleburg, Bad-Arfeld",Nordrhein-Westfalen,51.0148,8.4318,436
+00390,kl,"Berleburg, Bad-Stünzel",Nordrhein-Westfalen,50.9837,8.3683,611
+00400,kl,Berlin-Buch,Berlin,52.631,13.5021,60
+00403,kl,Berlin-Dahlem (FU),Berlin,52.4537,13.3017,51
+00420,kl,Berlin-Marzahn,Berlin,52.5447,13.5598,61
+00426,rr,Berlin-Schmöckwitz,Berlin,52.3823,13.6236,36
+00427,kl,Berlin Brandenburg,Brandenburg,52.3805,13.5304,46
+00433,kl,Berlin-Tempelhof,Berlin,52.4676,13.402,48
+00440,rr,Bernau-Goldbach,Baden-Württemberg,47.815,8.0256,928
+00443,rr,Bernbeuren-Prachtsried,Bayern,47.7388,10.7448,936
+00445,kl,Bernburg/Saale (Nord),Sachsen-Anhalt,51.8218,11.711,85
+00446,rr,Berne-Katjenbüttel,Niedersachsen,53.1553,8.5395,1
+00447,rr,"Berneck, Bad",Bayern,50.0415,11.6479,366
+00460,kl,Berus,Saarland,49.2641,6.6868,362
+00465,rr,Rhönblick-Bettenhausen,Thüringen,50.5561,10.2891,352
+00468,rr,Beuren (Hochwald),Rheinland-Pfalz,49.7291,6.9175,505
+00475,rr,Biberbach-Markt,Bayern,48.5347,10.8119,437
+00476,rr,Biblis,Hessen,49.6896,8.4179,88
+00479,rr,Wächtersbach,Hessen,50.2435,9.2892,138
+00480,rr,Biedenkopf-Wallau,Hessen,50.9275,8.4937,296
+00488,rr,Bielefeld-Sennestadt,Nordrhein-Westfalen,51.9394,8.5932,127
+00490,rr,Bienenbüttel-Bargdorf,Niedersachsen,53.1173,10.4902,31
+00496,rr,Binz,Mecklenburg-Vorpommern,54.3941,13.6045,26
+00498,rr,Ühlingen-Birkendorf,Baden-Württemberg,47.7452,8.3111,763
+00502,rr,Bischbrunn-Oberndorf,Bayern,49.8643,9.5044,371
+00504,rr,Lübbenau/Spreewald-Bischdorf,Brandenburg,51.7982,13.9716,79
+00509,rr,Bischofsgrün (Hohe Reuth),Bayern,50.0509,11.7936,664
+00515,rr,Bischofswiesen-Loipl,Bayern,47.6523,12.9253,867
+00516,rr,Bischofswiesen-Winkl,Bayern,47.6871,12.9412,689
+00518,rr,Bispingen-Steinbeck/Luhe,Niedersachsen,53.1158,10.0693,98
+00521,rr,Bissendorf-Schledehausen,Niedersachsen,52.2834,8.251,106
+00522,rr,Bissingen (Kläranlage),Bayern,48.7092,10.6283,425
+00527,rr,Blankenburg/Harz,Sachsen-Anhalt,51.7901,10.9714,194
+00533,rr,Blankenheim-Ahrhütte,Nordrhein-Westfalen,50.3844,6.7376,401
+00535,kl,Blankenrath,Rheinland-Pfalz,50.0372,7.3079,417
+00537,rr,Blaubeuren-Wennenden,Baden-Württemberg,48.4369,9.7443,705
+00542,rr,Bleckede-Walmsburg,Niedersachsen,53.2401,10.8522,12
+00550,rr,Bobeck,Thüringen,50.9041,11.7985,344
+00551,rr,Weischlitz-Heinersgrün,Sachsen,50.3887,11.9955,519
+00552,rr,Bobingen,Bayern,48.2637,10.8214,515
+00554,rr,Bocholt-Liedern (Wasserwerk),Nordrhein-Westfalen,51.8293,6.5365,23
+00555,kl,Bochum,Nordrhein-Westfalen,51.5026,7.2289,110
+00560,rr,Bockenem,Niedersachsen,52.0145,10.1322,123
+00561,rr,Bockhorn-Grabstede,Niedersachsen,53.367,7.9679,11
+00562,rr,Bockhorn/Oberbayern -Grünbach,Bayern,48.3285,12.0032,454
+00567,rr,Bodenfelde-Amelith,Niedersachsen,51.6957,9.5135,260
+00572,rr,Bodenwöhr-Altenschwand,Bayern,49.2986,12.24,420
+00579,rr,Rossau-Moosheim,Sachsen,51.0133,13.0969,301
+00582,rr,Bönnigheim,Baden-Württemberg,49.0368,9.0875,227
+00583,rr,Börfink-Thranenweier,Rheinland-Pfalz,49.7067,7.0973,585
+00584,rr,Lossatal-Voigtshain,Sachsen,51.4075,12.8626,127
+00589,rr,Bogen-Pfelling,Bayern,48.8846,12.7453,343
+00590,rr,Boitin,Mecklenburg-Vorpommern,53.749,11.9799,56
+00591,kl,Boizenburg,Mecklenburg-Vorpommern,53.3911,10.6878,45
+00595,rr,Oberbarnim-Grunow,Brandenburg,52.6046,14.0363,77
+00596,kl,Boltenhagen,Mecklenburg-Vorpommern,54.0027,11.1908,15
+00603,kl,Königswinter-Heiderhof,Nordrhein-Westfalen,50.7293,7.204,147
+00604,rr,Bonndorf/Schwarzwald,Baden-Württemberg,47.8194,8.3348,875
+00606,rr,Boos,Bayern,48.079,10.1977,571
+00608,rr,Bopfingen-Flochberg,Baden-Württemberg,48.8474,10.3644,498
+00610,rr,"Boppard-Salzig, Bad",Rheinland-Pfalz,50.2028,7.6365,77
+00611,rr,Bordesholm,Schleswig-Holstein,54.1711,10.0433,29
+00613,rr,Borgentreich,Nordrhein-Westfalen,51.5677,9.2324,206
+00617,kl,Borken in Westfalen,Nordrhein-Westfalen,51.873,6.8863,47
+00619,kl,Borkum-Süderstraße,Niedersachsen,53.5788,6.6703,12
+00622,rr,Westheide-Born,Sachsen-Anhalt,52.3745,11.4655,66
+00624,rr,Bornhagen,Thüringen,51.3443,9.9465,297
+00628,rr,Borstel über Bad Oldesloe,Schleswig-Holstein,53.8306,10.1799,41
+00630,rr,Wanzleben-Börde-Klein Germersleben,Sachsen-Anhalt,52.0193,11.4059,87
+00633,rr,Boxberg,Sachsen,51.4036,14.5668,127
+00642,kl,Brake,Niedersachsen,53.3518,8.4969,4
+00644,rr,Brakel,Nordrhein-Westfalen,51.7049,9.1738,150
+00645,rr,Bramsche,Niedersachsen,52.4083,7.9682,75
+00647,rr,Brand/Oberpfalz,Bayern,49.9589,11.9125,592
+00653,rr,Brannenburg-Degerndorf,Bayern,47.7241,12.1092,483
+00654,rr,Braunfels,Hessen,50.5228,8.3978,230
+00656,kl,Braunlage,Niedersachsen,51.7234,10.6021,607
+00662,kl,Braunschweig,Niedersachsen,52.2915,10.4464,81
+00668,rr,Breddenberg,Niedersachsen,52.9556,7.6165,15
+00672,rr,Breese,Brandenburg,53.001,11.7954,22
+00677,rr,Breitenbrunn-Fürbuch,Bayern,48.1266,10.3649,610
+00684,rr,Breitnau,Baden-Württemberg,47.9385,8.0761,1000
+00690,rr,Bremen (Bürgerpark),Bremen,53.0958,8.827,2
+00691,kl,Bremen,Bremen,53.0451,8.7981,4
+00701,kl,Bremerhaven,Bremen,53.5332,8.5761,7
+00704,kl,Bremervörde,Niedersachsen,53.4451,9.139,11
+00708,rr,Brennes,Bayern,49.1333,13.1426,1035
+00710,rr,Bretten,Baden-Württemberg,49.0249,8.699,182
+00714,rr,Briesen (Mark)-Neu Madlitz,Brandenburg,52.3653,14.2474,46
+00721,rr,Schönwölkau-Brinnis,Sachsen,51.5171,12.4362,101
+00722,kl,Brocken,Sachsen-Anhalt,51.7986,10.6183,1135
+00723,rr,Kail,Rheinland-Pfalz,50.1841,7.24,290
+00731,rr,Bruchsal-Heidelsheim,Baden-Württemberg,49.1127,8.6372,130
+00732,rr,"Bruchweiler, Kr. Birkenfeld",Rheinland-Pfalz,49.7985,7.2278,545
+00734,rr,Bruckberg/Niederbayern-Pörndorf,Bayern,48.5638,11.9871,498
+00735,rr,Brück-Gömnigk,Brandenburg,52.1692,12.7333,53
+00741,rr,Brüel,Mecklenburg-Vorpommern,53.7426,11.7093,27
+00745,rr,Brünnsteinhaus,Bayern,47.6446,12.0982,1345
+00747,rr,Brunsbüttel,Schleswig-Holstein,53.9196,9.1417,1
+00752,rr,Buch am Wald-Schönbronn,Bayern,49.3273,10.2777,463
+00753,rr,Bucha,Thüringen,50.87,11.5022,305
+00755,kl,"Buchen, Kr. Neckar-Odenwald",Baden-Württemberg,49.5182,9.3213,340
+00756,rr,Mihla-Buchenau,Thüringen,51.0746,10.2919,200
+00757,kl,Buchenbach,Baden-Württemberg,47.9625,7.9983,445
+00759,rr,Buchenberg-Kreuzthal,Bayern,47.7083,10.1311,845
+00760,kl,Rosengarten-Klecken,Niedersachsen,53.3629,9.9435,83
+00766,kl,Büchel-Alflen,Rheinland-Pfalz,50.1745,7.0595,477
+00769,kl,Bückeburg,Niedersachsen,52.2817,9.089,68
+00774,rr,Bühlerzell,Baden-Württemberg,49.0025,9.9154,388
+00775,rr,Osterwieck-Rimbeck,Sachsen-Anhalt,51.9997,10.6327,100
+00788,kl,Büsum,Schleswig-Holstein,54.1193,8.8584,3
+00789,rr,Bütthard,Bayern,49.6063,9.8834,263
+00791,rr,Bordelum,Schleswig-Holstein,54.6328,8.937,5
+00796,rr,Burbach-Würgendorf,Nordrhein-Westfalen,50.7556,8.1257,412
+00797,rr,Burg-Blumenthal,Sachsen-Anhalt,52.3241,11.8339,39
+00801,rr,Burgbernheim,Bayern,49.4549,10.3241,331
+00803,rr,Burgebrach-Oberharnsbach,Bayern,49.827,10.7898,261
+00807,rr,Schlüsselfeld (Kläranlage),Bayern,49.745,10.6434,290
+00808,rr,"Mehring, Kr. Altötting-Niederholz",Bayern,48.187,12.8098,413
+00811,rr,Burgkirchen/Alz-Höresham,Bayern,48.1507,12.706,450
+00812,rr,Burgkunstadt,Bayern,50.1429,11.2322,278
+00814,rr,Pfarrweisach-Lohr (Pegel),Bayern,50.1457,10.7361,270
+00815,rr,Seegebiet Mansfelder Land-Dederstedt,Sachsen-Anhalt,51.5426,11.6947,162
+00816,rr,Burgstädt,Sachsen,50.9139,12.8077,325
+00817,kl,Burgwald-Bottendorf,Hessen,51.0306,8.8146,296
+00820,rr,Burgwedel-Kleinburgwedel,Niedersachsen,52.5069,9.8792,55
+00822,rr,Burkau-Kleinhänchen,Sachsen,51.2065,14.2371,205
+00827,rr,Butjadingen-Burhave,Niedersachsen,53.5802,8.3665,2
+00831,rr,Beetzseeheide-Butzow,Brandenburg,52.4927,12.6001,37
+00833,rr,Neuhausen/Erzgeb.-Rauschenbach,Sachsen,50.6951,13.4975,615
+00836,rr,Calvörde,Sachsen-Anhalt,52.3923,11.292,62
+00837,rr,"Camberg, Bad",Hessen,50.2863,8.2949,244
+00839,rr,Carlow,Mecklenburg-Vorpommern,53.7575,10.9288,27
+00840,kl,Carlsfeld,Sachsen,50.4313,12.6114,895
+00845,rr,Carpin-Serrahn,Mecklenburg-Vorpommern,53.3445,13.2034,71
+00848,rr,Celle (Stadt),Niedersachsen,52.6146,10.0726,38
+00850,kl,Celle,Niedersachsen,52.5959,10.0296,39
+00851,rr,Pemfling-Pitzling,Bayern,49.2505,12.6044,391
+00853,kl,Chemnitz,Sachsen,50.7913,12.872,416
+00856,kl,Chieming,Bayern,47.8843,12.5404,551
+00857,rr,Chiemsee-Herrenchiemsee,Bayern,47.8665,12.395,535
+00860,kl,Algermissen-Groß Lobke,Niedersachsen,52.2731,10.0163,80
+00867,kl,Lautertal-Oberlauter,Bayern,50.3066,10.9679,344
+00870,rr,Cölpin,Mecklenburg-Vorpommern,53.5231,13.4293,79
+00871,rr,Coesfeld,Nordrhein-Westfalen,51.9618,7.1585,87
+00874,rr,Zielitz,Sachsen-Anhalt,52.2994,11.6733,52
+00880,kl,Cottbus,Brandenburg,51.7759,14.3168,69
+00882,rr,Ohrdruf-Crawinkel,Thüringen,50.7813,10.786,471
+00885,rr,Creußen-Bühl,Bayern,49.8449,11.616,450
+00891,kl,Cuxhaven,Niedersachsen,53.8712,8.7058,5
+00893,rr,Hohen Pritz-Kukuk,Mecklenburg-Vorpommern,53.6377,11.9231,41
+00896,kl,Dachwig,Thüringen,51.0778,10.8619,170
+00902,rr,Dahlem-Schmidtheim,Nordrhein-Westfalen,50.4115,6.5615,573
+00911,rr,Danndorf,Niedersachsen,52.4266,10.9169,70
+00917,kl,Darmstadt,Hessen,49.8809,8.6779,162
+00922,rr,Dasing,Bayern,48.395,11.0594,460
+00923,rr,Heinade-Hellental,Niedersachsen,51.8122,9.6175,268
+00931,rr,Deggenhausertal-Azenweiler,Baden-Württemberg,47.8007,9.4108,712
+00932,rr,Deining-Mittersthal,Bayern,49.2143,11.5514,540
+00933,rr,"Deisenhofen, Kreis München",Bayern,48.0368,11.5777,585
+00934,rr,Delbrück,Nordrhein-Westfalen,51.7835,8.5658,88
+00936,rr,Delmenhorst-Adelheide,Niedersachsen,53.0163,8.6112,11
+00939,rr,Demmin-Drönnewitz,Mecklenburg-Vorpommern,53.9164,12.977,23
+00942,rr,Densborn,Rheinland-Pfalz,50.122,6.599,308
+00945,rr,Dermbach,Thüringen,50.712,10.1138,389
+00952,rr,Deuerling-Heimberg,Bayern,49.0208,11.8914,482
+00953,kl,Deuselbach,Rheinland-Pfalz,49.7619,7.0542,481
+00954,kl,UFS Deutsche Bucht,Hamburg,54.1796,7.4587,0
+00956,rr,Waldhufen-Diehsa,Sachsen,51.2386,14.7426,197
+00958,rr,Diemelsee-Rhenegge,Hessen,51.3626,8.7686,426
+00961,rr,Diemelstadt-Rhoden,Hessen,51.4743,9.0039,258
+00962,rr,Stadtilm-Dienstedt,Thüringen,50.8018,11.1692,326
+00963,kl,Diepholz,Niedersachsen,52.5881,8.3424,38
+00966,rr,Diesdorf,Sachsen-Anhalt,52.7522,10.8831,65
+00970,rr,Dietenhofen,Bayern,49.4158,10.6734,405
+00973,rr,Dietersburg,Bayern,48.4996,12.9258,397
+00974,rr,Südharz-Dietersdorf,Sachsen-Anhalt,51.5307,11.0457,440
+00978,rr,Holzheim bei Diez,Rheinland-Pfalz,50.3574,8.0485,155
+00983,kl,Dillingen/Donau-Fristingen,Bayern,48.5562,10.56,419
+00985,rr,Dinkelsbühl-Oberwinstetten,Bayern,49.0504,10.2892,492
+00988,rr,Dinklage,Niedersachsen,52.6746,8.1137,27
+00989,rr,Dinslaken,Nordrhein-Westfalen,51.5765,6.7849,46
+00991,kl,Dippoldiswalde-Reinberg,Sachsen,50.9116,13.7087,359
+01001,kl,Doberlug-Kirchhain,Brandenburg,51.6451,13.5747,97
+01011,kl,Dörrmoschel-Felsbergerhof,Rheinland-Pfalz,49.6017,7.7413,442
+01013,kl,Dogern,Baden-Württemberg,47.6026,8.1697,309
+01014,rr,Dollart-Kanalpolder,Niedersachsen,53.2289,7.2191,2
+01016,rr,Langballig,Schleswig-Holstein,54.7948,9.6429,26
+01021,rr,Donndorf,Thüringen,51.2946,11.3714,120
+01022,rr,Dorfchemnitz-Wolfsgrund,Sachsen,50.7684,13.4108,535
+01023,rr,Dorfen (Kläranlage),Bayern,48.2746,12.1616,430
+01024,rr,Dormagen-Zons,Nordrhein-Westfalen,51.1157,6.851,37
+01027,rr,Teutschenthal-Asendorf,Sachsen-Anhalt,51.4148,11.732,144
+01030,rr,Dornum,Niedersachsen,53.646,7.4302,3
+01039,rr,Dransfeld-Ossenfeld,Niedersachsen,51.5263,9.7978,317
+01046,rr,Drensteinfurt,Nordrhein-Westfalen,51.7585,7.7528,72
+01048,kl,Dresden-Klotzsche,Sachsen,51.1278,13.7543,228
+01050,kl,Dresden-Hosterwitz,Sachsen,51.0221,13.847,112
+01051,kl,Dresden-Strehlen,Sachsen,51.0249,13.775,119
+01052,kl,Möckern-Drewitz,Sachsen-Anhalt,52.2174,12.1641,80
+01054,rr,"Driburg, Bad-Dringenberg",Nordrhein-Westfalen,51.6609,9.0783,209
+01055,rr,Driedorf,Hessen,50.6316,8.1813,482
+01056,rr,Drochtersen,Niedersachsen,53.7118,9.3791,2
+01060,rr,Drognitz,Thüringen,50.5892,11.5766,504
+01067,rr,Düben,Sachsen-Anhalt,51.9265,12.3852,95
+01072,kl,"Dürkheim, Bad",Rheinland-Pfalz,49.4719,8.1929,107
+01078,kl,Düsseldorf,Nordrhein-Westfalen,51.296,6.7686,37
+01089,rr,Durbach-Ebersweier,Baden-Württemberg,48.5017,7.9943,197
+01090,rr,Laußig-Durchwehna,Sachsen,51.6223,12.66,109
+01092,rr,Ebensfeld-Döringstadt,Bayern,50.0863,10.9234,277
+01094,rr,Eberfing,Bayern,47.7958,11.1991,611
+01097,rr,Pretzfeld-Hagenbach,Bayern,49.7505,11.1888,295
+01103,kl,Ebersberg-Halbing,Bayern,48.1003,11.9872,592
+01107,kl,Ebrach,Bayern,49.852,10.4991,346
+01108,rr,Ebsdorfergrund-Ebsdorf,Hessen,50.735,8.813,202
+01118,rr,Eckertalsperre,Niedersachsen,51.8421,10.577,504
+01119,rr,Edelsfeld,Bayern,49.5767,11.6975,535
+01130,rr,Eggebek,Schleswig-Holstein,54.6282,9.3649,18
+01132,rr,Eggenfelden,Bayern,48.3956,12.7287,410
+01140,rr,Egling/Isar-Attenham,Bayern,47.932,11.5588,708
+01143,rr,"Ehingen, Kreis Ansbach",Bayern,49.089,10.5386,461
+01153,rr,Eibenstock-Neidhardtsthal,Sachsen,50.5312,12.5997,543
+01158,rr,Eichendorf,Bayern,48.6346,12.8492,352
+01161,kl,Eichstätt-Landershofen,Bayern,48.8778,11.2349,385
+01162,rr,Eichstetten,Baden-Württemberg,48.0918,7.7377,214
+01166,rr,Eilenburg,Sachsen,51.4603,12.6687,107
+01170,rr,Eimen-Vorwohle,Niedersachsen,51.8873,9.728,267
+01176,rr,Eisenbach,Baden-Württemberg,47.9634,8.2693,976
+01197,kl,Ellwangen-Rindelbach,Baden-Württemberg,48.9895,10.1312,463
+01200,kl,Elpersbüttel,Schleswig-Holstein,54.0691,9.0105,3
+01202,rr,Elsdorf-Ehestorf,Niedersachsen,53.2451,9.3779,30
+01207,kl,"Elster, Bad-Sohl",Sachsen,50.2705,12.2742,558
+01214,kl,Elzach-Fisnacht,Baden-Württemberg,48.2012,8.1088,431
+01216,rr,Elztal-Rittersbach,Baden-Württemberg,49.4251,9.243,312
+01223,rr,Ringe-Großringe,Niedersachsen,52.5983,6.9449,16
+01224,kl,Emmendingen-Mundingen,Baden-Württemberg,48.1378,7.8351,201
+01227,rr,Emmingen-Liptingen,Baden-Württemberg,47.9317,8.8584,744
+01228,kl,UFS TW Ems,Hamburg,54.1651,6.346,0
+01230,rr,Emsbüren-Ahlde,Niedersachsen,52.3683,7.2942,50
+01232,rr,Emsdetten,Nordrhein-Westfalen,52.1703,7.5637,43
+01235,rr,"Endorf, Bad-Jolling",Bayern,47.9229,12.283,520
+01237,rr,Tacherting-Spreit,Bayern,48.089,12.5073,507
+01241,rr,Enger,Nordrhein-Westfalen,52.15,8.5226,128
+01244,rr,Mehlingen/Pfalz,Rheinland-Pfalz,49.4949,7.851,299
+01246,kl,Ennigerloh-Ostenfelde,Nordrhein-Westfalen,51.8418,8.0607,104
+01248,rr,Ensdorf/Oberpfalz -Hirschwald,Bayern,49.353,11.8712,491
+01251,rr,"Schweix, Kr. Südwestpfalz",Rheinland-Pfalz,49.1313,7.5081,382
+01252,rr,Eppendorf,Sachsen,50.8036,13.2407,449
+01253,rr,Nentershausen (KA),Rheinland-Pfalz,50.426,7.9395,286
+01255,kl,Eppingen-Elsenz,Baden-Württemberg,49.1661,8.8483,226
+01256,rr,Eppishausen-Haselbach,Bayern,48.1994,10.5108,531
+01259,rr,Krummennaab-Sassenhof,Bayern,49.8286,12.0622,490
+01262,kl,München-Flughafen,Bayern,48.3477,11.8134,446
+01264,rr,Erdweg,Bayern,48.3324,11.2982,477
+01266,kl,Erfde,Schleswig-Holstein,54.2992,9.3162,18
+01270,kl,Erfurt-Weimar,Thüringen,50.9827,10.9613,317
+01277,rr,Erkelenz,Nordrhein-Westfalen,51.0713,6.3278,92
+01278,rr,Cremlingen-Destedt,Niedersachsen,52.2449,10.7182,163
+01279,kl,Möhrendorf-Kleinseebach,Bayern,49.6497,11.0075,268
+01282,rr,Erlbach-Eubabrunn,Sachsen,50.3043,12.3834,565
+01283,rr,Erndtebrück-Birkelbach,Nordrhein-Westfalen,51.0149,8.2824,500
+01290,rr,Eschbronn-Mariazell,Baden-Württemberg,48.1868,8.4672,716
+01297,kl,Eschwege,Hessen,51.2041,10.0138,156
+01298,rr,Eschweiler-Weisweiler,Nordrhein-Westfalen,50.8306,6.333,113
+01300,kl,Eslohe,Nordrhein-Westfalen,51.254,8.1565,351
+01301,rr,Espenau-Mönchehof,Hessen,51.3945,9.46,247
+01303,kl,Essen-Bredeney,Nordrhein-Westfalen,51.4041,6.9677,150
+01304,rr,"Essen-Brockhausen, Bad",Niedersachsen,52.3345,8.3877,48
+01305,rr,"Essen-Calhorn, Kreis Cloppenburg",Niedersachsen,52.7584,8.0223,34
+01309,rr,Essenbach,Bayern,48.6118,12.2163,389
+01313,rr,Ettal-Linderhof,Bayern,47.5695,10.9564,938
+01317,rr,Friedrichsthal,Thüringen,51.4945,10.5881,230
+01320,rr,Etzleben,Thüringen,51.261,11.1754,137
+01322,rr,Euerbach-Sömmersdorf,Bayern,50.0578,10.0925,282
+01325,rr,Eurasburg-Freienried,Bayern,48.3299,11.1325,524
+01327,kl,Weilerswist-Lommersum,Nordrhein-Westfalen,50.7119,6.7905,147
+01332,kl,"Falkenberg,Kr.Rottal-Inn",Bayern,48.4832,12.7241,471
+01333,rr,Falkenstein/Weiße Göltzsch,Sachsen,50.4683,12.3783,540
+01336,rr,"Fallingbostel, Bad",Niedersachsen,52.8568,9.6756,67
+01339,kl,Faßberg,Niedersachsen,52.9157,10.1885,74
+01343,rr,"Feilnbach,Bad",Bayern,47.7956,12.0161,530
+01346,kl,Feldberg/Schwarzwald,Baden-Württemberg,47.8748,8.0038,1486
+01350,rr,Nuthe-Urstromtal-Felgentreu,Brandenburg,52.0997,13.0016,49
+01351,rr,Fellbach,Baden-Württemberg,48.8122,9.2721,286
+01357,kl,Fichtelberg/Oberfranken-Hüttstadl,Bayern,49.9807,11.8376,655
+01358,kl,Fichtelberg,Sachsen,50.4283,12.9536,1213
+01363,rr,Finnentrop-Weringhausen,Nordrhein-Westfalen,51.1723,7.988,342
+01365,rr,Finningen (Brunnenmühle),Bayern,48.6414,10.4895,434
+01366,rr,Finsing,Bayern,48.2213,11.7989,498
+01369,rr,Finsterwalde,Brandenburg,51.6319,13.7168,107
+01374,rr,Fladungen-Heufurt,Bayern,50.505,10.1668,366
+01379,kl,Flensburg (Schäferhaus),Schleswig-Holstein,54.7737,9.3753,41
+01382,rr,Flintsbach/Inn-Asten,Bayern,47.6997,12.1163,1099
+01384,rr,Flörsbachtal-Flörsbach,Hessen,50.1346,9.4084,424
+01391,rr,Floß,Bayern,49.7209,12.2916,518
+01392,rr,Flossenbürg,Bayern,49.7316,12.3489,621
+01397,rr,Pockau-Forchheim,Sachsen,50.724,13.2687,464
+01401,rr,Forstinning,Bayern,48.1723,11.9061,508
+01404,rr,Frankenau,Hessen,51.1061,8.9209,351
+01408,rr,Frankenhain/Lütsche,Thüringen,50.7369,10.7658,588
+01411,kl,Birx/Rhön,Thüringen,50.5309,10.0479,747
+01413,rr,Frankenthal-Studernheim,Rheinland-Pfalz,49.5036,8.362,101
+01420,kl,Frankfurt/Main,Hessen,50.0259,8.5213,100
+01424,kl,Frankfurt/Main-Westend,Hessen,50.1269,8.6694,121
+01426,rr,Frankfurt/Oder,Brandenburg,52.3397,14.508,67
+01429,rr,Franzburg,Mecklenburg-Vorpommern,54.1867,12.88,14
+01432,rr,Frauenneuharting,Bayern,48.0378,12.0499,509
+01435,rr,Ilmenau-Frauenwald,Thüringen,50.5921,10.8575,768
+01440,rr,Freiamt-Ottoschwanden,Baden-Württemberg,48.2018,7.9339,476
+01441,rr,Freiberg,Sachsen,50.9263,13.2711,416
+01443,kl,Freiburg,Baden-Württemberg,48.0232,7.8343,237
+01451,kl,Freiburg/Elbe,Niedersachsen,53.8277,9.2493,2
+01458,rr,Freihung-Großschönbrunn,Bayern,49.5747,11.8859,492
+01459,rr,Freilassing,Bayern,47.8454,12.988,411
+01466,rr,Freudenberg/Oberpfalz,Bayern,49.481,11.9786,482
+01468,kl,Freudenstadt,Baden-Württemberg,48.4538,8.409,797
+01470,rr,Freudenstadt-Kniebis,Baden-Württemberg,48.472,8.305,898
+01473,rr,Freystadt-Michelbach,Bayern,49.1869,11.308,414
+01490,kl,Friedrichshafen,Baden-Württemberg,47.6454,9.4795,394
+01494,rr,Friedrichskoog,Schleswig-Holstein,53.9709,8.9167,1
+01495,rr,Friedrichsruhe-Goldenbow,Mecklenburg-Vorpommern,53.5389,11.7607,52
+01497,rr,Friedrichswalde,Brandenburg,53.0238,13.7088,74
+01498,rr,Frielendorf-Verna,Hessen,51.0002,9.3325,215
+01503,kl,Friesoythe-Altenoythe,Niedersachsen,53.0643,7.902,6
+01504,kl,Fritzlar/Eder,Hessen,51.119,9.2799,172
+01511,rr,Marklkofen (Betriebsstelle Vilstalsee),Bayern,48.5587,12.5719,400
+01514,rr,Fürstenberg/Havel,Brandenburg,53.1986,13.1513,58
+01516,rr,Fürstenwalde,Sachsen,50.7582,13.8749,679
+01517,rr,Fürstenwalde/Spree,Brandenburg,52.3539,14.0654,40
+01519,rr,Luckau-Fürstlich Drehna,Brandenburg,51.7566,13.8057,83
+01526,kl,Fulda-Horas,Hessen,50.5668,9.6532,245
+01528,rr,Furth im Wald,Bayern,49.3025,12.834,393
+01530,rr,Stollberg-Gablenz,Sachsen,50.6686,12.7609,511
+01534,rr,Gädheim-Greßhausen,Bayern,50.0368,10.3855,311
+01536,rr,Gager-Groß Zicker,Mecklenburg-Vorpommern,54.2966,13.6904,4
+01537,rr,"Gaggenau-Rotenfels,Bad",Baden-Württemberg,48.8248,8.2916,133
+01542,rr,Gangkofen (Kläranlage),Bayern,48.4327,12.5714,437
+01544,kl,Gardelegen,Sachsen-Anhalt,52.5129,11.3942,47
+01546,rr,Garding,Schleswig-Holstein,54.3282,8.7904,1
+01550,kl,Garmisch-Partenkirchen,Bayern,47.483,11.0621,719
+01551,rr,Garrel-Nikolausdorf,Niedersachsen,52.9813,8.0868,18
+01561,rr,Gedern-Schönhausen,Hessen,50.4034,9.2076,414
+01572,kl,Geilenkirchen-Neutevern,Nordrhein-Westfalen,50.9593,6.0392,80
+01573,rr,Geisa,Thüringen,50.7133,9.9539,281
+01575,rr,Geiselhöring,Bayern,48.8271,12.3907,349
+01577,rr,Geiselwind,Bayern,49.774,10.4677,351
+01578,rr,Geisenfeld-Engelbrechtsmünster,Bayern,48.6894,11.6353,376
+01580,kl,Geisenheim,Hessen,49.9859,7.9548,111
+01584,kl,Geisingen,Baden-Württemberg,47.9242,8.6474,673
+01587,kl,Gelbelsee,Bayern,48.9481,11.4289,536
+01588,rr,Gelchsheim,Bayern,49.5734,10.0205,304
+01590,kl,Geldern-Walbeck,Nordrhein-Westfalen,51.4942,6.2463,37
+01595,rr,Gelsenkirchen-Buer,Nordrhein-Westfalen,51.5762,7.0652,91
+01598,rr,Oberbachheim,Rheinland-Pfalz,50.248,7.7456,328
+01601,rr,Gemünden/Main-Adelsberg,Bayern,50.0329,9.7365,216
+01602,kl,Ohlsbach,Baden-Württemberg,48.433,7.993,177
+01605,kl,Genthin,Sachsen-Anhalt,52.3875,12.1602,35
+01607,rr,Georgensgmünd,Bayern,49.1934,11.0267,344
+01609,rr,Georgsmarienhütte-Oesede,Niedersachsen,52.1949,8.0918,111
+01612,kl,Gera-Leumnitz,Thüringen,50.8812,12.1289,311
+01619,rr,Gernsheim,Hessen,49.7622,8.4887,90
+01621,rr,Geroda-Platz,Bayern,50.2777,9.9144,553
+01627,rr,Gerstetten-Dettingen,Baden-Württemberg,48.5995,10.1313,561
+01639,kl,Gießen/Wettenberg,Hessen,50.6017,8.6439,203
+01641,rr,Gifhorn-Kästorf,Niedersachsen,52.5319,10.5183,63
+01642,rr,Gilching,Bayern,48.1085,11.2781,550
+01645,kl,Gilserberg-Moischeid,Hessen,50.9656,9.05,327
+01647,rr,"Grund-Windhausen, Bad",Niedersachsen,51.7902,10.2192,237
+01648,rr,Gladenbach-Weidenhausen,Hessen,50.7592,8.5572,282
+01650,rr,Henschtal,Rheinland-Pfalz,49.4648,7.4111,250
+01652,rr,Mistelgau-Hardt,Bayern,49.9014,11.4304,419
+01654,rr,"Lausick, Bad-Glasten",Sachsen,51.1595,12.7008,183
+01666,kl,Glücksburg-Meierwik,Schleswig-Holstein,54.8273,9.5058,12
+01669,rr,Borrentin-Wolkwitz,Mecklenburg-Vorpommern,53.808,12.9607,43
+01673,rr,Goch-Asperden,Nordrhein-Westfalen,51.6849,6.1053,16
+01674,rr,Göggingen,Baden-Württemberg,48.8621,9.8868,496
+01679,rr,Göllheim,Rheinland-Pfalz,49.5944,8.0422,243
+01680,rr,Göppingen-Jebenhausen,Baden-Württemberg,48.6889,9.6345,368
+01682,rr,Görisried,Bayern,47.7034,10.5135,819
+01684,kl,Görlitz,Sachsen,51.1621,14.9506,239
+01689,rr,Gößweinstein,Bayern,49.7656,11.3062,441
+01691,kl,Göttingen,Niedersachsen,51.5002,9.9507,167
+01693,rr,Dresden-Gohlis,Sachsen,51.0895,13.6321,107
+01694,kl,Goldberg,Mecklenburg-Vorpommern,53.6058,12.1034,59
+01697,rr,Golßen-Mahlsdorf,Brandenburg,51.9861,13.5422,88
+01708,rr,Gotha-Sundhausen,Thüringen,50.9331,10.67,321
+01710,rr,"Gottleuba, Bad/Osterzgebirge",Sachsen,50.8371,13.9343,430
+01711,rr,Gottmadingen,Baden-Württemberg,47.7344,8.7932,437
+01714,rr,"Graal-Müritz, Seeheilbad",Mecklenburg-Vorpommern,54.2475,12.2377,2
+01716,rr,Graben-Neudorf,Baden-Württemberg,49.1478,8.4687,109
+01717,rr,Grabow (Kläranlage Fahlenkamp),Mecklenburg-Vorpommern,53.2652,11.5042,29
+01721,kl,Gräfenberg-Kasberg,Bayern,49.664,11.2239,506
+01722,rr,Gräfenberg-Rangen,Bayern,49.6686,11.2019,492
+01723,rr,Geratal-Gräfenroda,Thüringen,50.7502,10.804,424
+01724,rr,Tonna-Gräfentonna,Thüringen,51.0869,10.7377,200
+01726,rr,Ilmenau-Gräfinau-Angstedt,Thüringen,50.7041,11.0182,408
+01727,rr,Grafenhausen/Hochschwarzwald,Baden-Württemberg,47.7728,8.2576,892
+01729,rr,Grafenwöhr-Bruckendorfgmünd,Bayern,49.6994,11.9594,405
+01730,rr,Grafling,Bayern,48.896,12.9763,448
+01731,rr,Grafling-Mühlen,Bayern,48.9488,12.9773,589
+01734,rr,Grainau-Eibsee,Bayern,47.4562,10.9939,1008
+01735,kl,Grainet-Rehberg,Bayern,48.7894,13.629,628
+01736,kl,Grambek,Schleswig-Holstein,53.5731,10.6797,26
+01742,rr,Grasellenbach-Hammelbach,Hessen,49.6387,8.8361,447
+01744,rr,Spremberg-Graustein,Brandenburg,51.5718,14.4764,139
+01746,rr,Grebenau-Reimenrod,Hessen,50.7431,9.4191,333
+01747,rr,Grebenhain,Hessen,50.4876,9.3322,435
+01750,rr,Grebenstein,Hessen,51.4511,9.4138,190
+01751,rr,Greding,Bayern,49.0369,11.3634,386
+01754,rr,Greifenstein,Hessen,50.6214,8.2925,430
+01757,kl,Greifswald,Mecklenburg-Vorpommern,54.0967,13.4056,2
+01759,kl,Greifswalder Oie,Mecklenburg-Vorpommern,54.2437,13.9104,11
+01764,rr,Gremsdorf,Bayern,49.6956,10.8344,273
+01766,kl,Münster/Osnabrück,Nordrhein-Westfalen,52.1344,7.6969,48
+01769,rr,Grevesmühlen,Mecklenburg-Vorpommern,53.8312,11.1713,24
+01770,rr,Tangerhütte-Grieben,Sachsen-Anhalt,52.4233,11.966,38
+01779,rr,Papenhagen-Hoikenhagen,Mecklenburg-Vorpommern,54.1412,13.0061,18
+01786,rr,Gröditz-Nauwalde,Sachsen,51.4131,13.4157,94
+01789,rr,Gröningen,Sachsen-Anhalt,51.9364,11.2202,91
+01792,kl,Groß Berßen,Niedersachsen,52.7553,7.4815,27
+01793,rr,Hecklingen-Groß Börnecke,Sachsen-Anhalt,51.8806,11.465,104
+01801,rr,Groß Kreutz-Krielow,Brandenburg,52.4169,12.8006,31
+01802,rr,Märkische Heide-Dollgen,Brandenburg,52.0218,14.0441,50
+01803,kl,Sanitz-Groß Lüsewitz,Mecklenburg-Vorpommern,54.0714,12.3238,35
+01810,rr,Schorfheide-Groß Schönebeck,Brandenburg,52.9094,13.5371,55
+01813,rr,Groß Wittensee,Schleswig-Holstein,54.4032,9.7654,17
+01814,rr,Groß-Gerau-Wallerstädten,Hessen,49.9052,8.4459,87
+01827,rr,Großenbrode,Schleswig-Holstein,54.3726,11.0828,3
+01832,kl,Großer Arber,Bayern,49.1129,13.1338,1436
+01844,rr,Feldkirchen-Westerham-Lenzmühle,Bayern,47.9411,11.9004,517
+01846,rr,Pilsting-Bäckermühle,Bayern,48.6773,12.6207,344
+01847,rr,Weißenfels-Wengelsdorf,Sachsen-Anhalt,51.2743,12.0517,92
+01848,rr,Markranstädt-Großlehna,Sachsen,51.309,12.1718,118
+01851,rr,Großostheim,Bayern,49.9229,9.0904,110
+01854,rr,Großröhrsdorf-Kleinröhrsdorf,Sachsen,51.1202,13.9794,263
+01858,rr,"Langensalza, Bad-Großwelsbach",Thüringen,51.1662,10.6354,188
+01863,kl,Gründau-Breitenborn,Hessen,50.2667,9.1854,258
+01869,kl,Grünow,Brandenburg,53.3154,13.9339,56
+01870,rr,Grünstadt,Rheinland-Pfalz,49.5665,8.178,160
+01876,rr,Guben,Brandenburg,51.9473,14.692,49
+01880,rr,Kyffhäuserland-Günserode,Thüringen,51.2978,11.0536,243
+01885,rr,Harzgerode-Güntersberge,Sachsen-Anhalt,51.6463,10.981,420
+01886,kl,Günzburg,Bayern,48.4878,10.2608,444
+01888,rr,Gülzow-Prüzen-Parum,Mecklenburg-Vorpommern,53.8119,12.114,10
+01891,rr,Rheda-Wiedenbrück-Lintel,Nordrhein-Westfalen,51.877,8.3577,73
+01899,rr,Gundelsheim,Baden-Württemberg,49.2859,9.1662,170
+01900,rr,Vilsheim-Münchsdorf,Bayern,48.4522,12.1549,450
+01907,rr,Guxhagen-Albshausen,Hessen,51.2048,9.5137,279
+01909,rr,"Haag, Kreis Mühldorf",Bayern,48.153,12.1704,530
+01927,rr,Hahausen,Niedersachsen,51.9495,10.2138,207
+01933,rr,Haidmühle-Bischofsreut,Bayern,48.8479,13.7271,1015
+01937,rr,Haigerloch-Weildorf,Baden-Württemberg,48.3705,8.7666,525
+01938,rr,Haimhausen-Ottershausen,Bayern,48.3028,11.5318,464
+01945,rr,Börde-Hakel-Hakeborn,Sachsen-Anhalt,51.9147,11.3616,114
+01948,rr,Malschwitz-Halbendorf/Spree,Sachsen,51.2975,14.5548,142
+01949,rr,Halberstadt,Sachsen-Anhalt,51.9045,11.0629,111
+01950,rr,Halblech-Trauchgau,Bayern,47.6463,10.8073,780
+01954,rr,Halle-Döllnitz,Sachsen-Anhalt,51.4293,12.0145,105
+01963,kl,Hallig Hooge,Schleswig-Holstein,54.5742,8.5133,4
+01964,kl,Olsdorf,Rheinland-Pfalz,49.9445,6.3821,328
+01975,kl,Hamburg-Fuhlsbüttel,Hamburg,53.6332,9.9881,11
+01981,kl,Hamburg-Neuwiedenthal,Hamburg,53.4776,9.8957,4
+01993,kl,Hameln,Niedersachsen,52.0848,9.3896,68
+01997,rr,Hammelburg,Bayern,50.1219,9.9079,220
+01999,rr,Hamminkeln (Mühlenrott),Nordrhein-Westfalen,51.7217,6.5839,23
+02005,rr,Hankensbüttel,Niedersachsen,52.7199,10.5984,108
+02011,rr,Hannover-Herrenhausen,Niedersachsen,52.3965,9.6629,50
+02012,rr,Hannover-Kirchrode,Niedersachsen,52.3671,9.819,57
+02014,kl,Hannover,Niedersachsen,52.4644,9.6779,55
+02023,kl,Harburg,Bayern,48.7918,10.7062,501
+02025,rr,Harschbach,Rheinland-Pfalz,50.5787,7.5964,306
+02027,rr,Harsewinkel,Nordrhein-Westfalen,51.9753,8.2094,63
+02037,rr,Hartmannsdorf-Reichenau,Sachsen,50.8323,13.5894,527
+02039,kl,"Harzburg, Bad",Niedersachsen,51.9002,10.5699,203
+02044,kl,Harzgerode,Sachsen-Anhalt,51.652,11.1366,404
+02047,rr,Wriezen-Haselberg,Brandenburg,52.706,14.0308,110
+02049,rr,Haselünne,Niedersachsen,52.6981,7.5153,24
+02050,rr,Haslach im Kinzigtal,Baden-Württemberg,48.2766,8.0841,218
+02051,rr,Hasloch/Main,Bayern,49.7845,9.4722,130
+02062,rr,Hattingen-Holthausen,Nordrhein-Westfalen,51.3845,7.2136,164
+02064,rr,Haundorf-Obererlbach,Bayern,49.184,10.8243,449
+02066,rr,Haunetal-Wehrda,Hessen,50.7384,9.6607,257
+02068,rr,Selke-Aue-Hausneindorf,Sachsen-Anhalt,51.8426,11.2742,116
+02070,rr,Havelberg,Sachsen-Anhalt,52.8388,12.0621,34
+02073,rr,Südharz-Hayn/Harz,Sachsen-Anhalt,51.5683,11.0815,434
+02074,kl,Hechingen,Baden-Württemberg,48.3752,8.98,518
+02079,rr,Heideck,Bayern,49.1436,11.1609,390
+02088,rr,Heidenheim/Brenz,Baden-Württemberg,48.6849,10.142,522
+02096,rr,Heilbronn-Klingenberg,Baden-Württemberg,49.1181,9.1539,203
+02099,rr,Heiligenhaus-Abtsküche,Nordrhein-Westfalen,51.3392,6.9941,131
+02103,rr,Heilsbronn,Bayern,49.3343,10.7845,423
+02104,rr,Heimbach-Düttling,Nordrhein-Westfalen,50.6086,6.5495,385
+02109,rr,Heinrichsthal,Bayern,50.0664,9.3458,446
+02110,kl,Heinsberg-Schleiden,Nordrhein-Westfalen,51.0411,6.1042,57
+02113,rr,Heldenstein-Weidenbach,Bayern,48.2529,12.3395,431
+02115,kl,Helgoland,Schleswig-Holstein,54.175,7.892,4
+02117,rr,Hellenthal-Udenbreth,Nordrhein-Westfalen,50.4104,6.3901,650
+02118,rr,Heldburg-Hellingen,Thüringen,50.2553,10.6832,302
+02119,rr,Helmbrechts,Bayern,50.238,11.7033,650
+02123,rr,Hemau-Aichkirchen,Bayern,49.0098,11.7544,564
+02132,rr,Hengersberg-Unterfrohnstetten,Bayern,48.814,13.0466,368
+02135,rr,Hennef-Lückert,Nordrhein-Westfalen,50.726,7.3947,224
+02139,rr,Heppenheim-Mittershausen,Hessen,49.6567,8.7139,270
+02140,rr,Hepstedt,Niedersachsen,53.2604,9.0919,29
+02146,rr,Heiligenberg/Tübingen,Baden-Württemberg,47.874,9.2447,652
+02148,rr,Heringen/Werra,Hessen,50.8951,10.0111,215
+02152,rr,Herleshausen-Archfeld,Hessen,51.0425,10.1468,380
+02159,rr,Herrenberg,Baden-Württemberg,48.5915,8.8541,434
+02168,rr,Hersbruck,Bayern,49.5053,11.4028,332
+02170,rr,Weißenseifen,Rheinland-Pfalz,50.1499,6.5527,526
+02171,kl,"Hersfeld, Bad",Hessen,50.852,9.7377,272
+02174,kl,Herzberg,Niedersachsen,51.6255,10.3695,236
+02175,rr,Herzberg-Lonau,Niedersachsen,51.689,10.3571,336
+02178,rr,Herzogenaurach-Burgstall,Bayern,49.5491,10.8671,345
+02181,rr,Hesel-Schwerinsdorf,Niedersachsen,53.3,7.6639,8
+02184,rr,Hessisch Lichtenau-Fürstenhagen,Hessen,51.2099,9.6914,340
+02192,rr,Hettstedt,Sachsen-Anhalt,51.6383,11.5047,152
+02201,kl,Hiddensee-Vitte,Mecklenburg-Vorpommern,54.575,13.1044,1
+02211,kl,Hilgenroth,Rheinland-Pfalz,50.737,7.6525,295
+02213,rr,Lissendorf,Rheinland-Pfalz,50.3105,6.6236,407
+02222,rr,Unterjoch,Bayern,47.5561,10.4274,1015
+02233,rr,Hirschberg,Thüringen,50.404,11.8193,449
+02235,rr,Hirschhorn (Neckar),Hessen,49.4523,8.9068,125
+02249,rr,Höheischweiler,Rheinland-Pfalz,49.2287,7.5482,370
+02252,kl,Bertsdorf-Hörnitz,Sachsen,50.8992,14.7456,271
+02254,rr,Hörstel-Riesenbeck,Nordrhein-Westfalen,52.2396,7.6449,46
+02255,rr,Sailauf,Bayern,50.0229,9.2599,200
+02258,rr,Höxter-Lüchtringen,Nordrhein-Westfalen,51.7882,9.426,94
+02261,kl,Hof,Bayern,50.3123,11.876,565
+02262,rr,Hofbieber-Elters,Hessen,50.5782,9.8833,463
+02266,rr,Hofheim/Taunus,Hessen,50.0802,8.4346,172
+02268,rr,Hofheim,Bayern,50.1351,10.5156,265
+02272,rr,Ventschow,Mecklenburg-Vorpommern,53.7784,11.5595,44
+02273,rr,Hohenahr (Leiterhof),Hessen,50.6602,8.5235,329
+02274,rr,Hohenberg/Eger,Bayern,50.092,12.2134,518
+02276,rr,Märkische Heide-Hohenbrück-Neu Schadow,Brandenburg,52.0962,13.9073,46
+02278,rr,Hohenbucko,Brandenburg,51.764,13.47,131
+02284,rr,Schönhausen (Elbe),Sachsen-Anhalt,52.5812,12.0422,33
+02288,rr,Hohenmölsen-Webau,Sachsen-Anhalt,51.1755,12.0766,141
+02290,kl,Hohenpeißenberg,Bayern,47.8009,11.0108,977
+02293,rr,Hohenstein-Breithardt,Hessen,50.1918,8.0888,315
+02294,rr,Hohenthann,Bayern,48.6572,12.0887,468
+02296,rr,Hohenwarth,Bayern,49.2018,12.921,466
+02303,kl,Hohn,Schleswig-Holstein,54.3162,9.5385,10
+02306,kl,Hohwacht,Schleswig-Holstein,54.3194,10.6732,8
+02315,kl,Holzdorf-Bernsdorf,Brandenburg,51.7657,13.1666,78
+02316,rr,Loose,Schleswig-Holstein,54.5352,9.9006,31
+02317,rr,Rechenberg-Bienenmühle-Holzhau,Sachsen,50.7225,13.598,760
+02319,kl,Holzkirchen,Bayern,47.8823,11.6961,685
+02323,kl,"Bevern, Kr. Holzminden",Niedersachsen,51.8529,9.4953,110
+02329,rr,"Homburg, Bad (Filterwerk)",Hessen,50.2446,8.5725,255
+02331,rr,Homburg/Saar,Saarland,49.3278,7.3533,235
+02332,rr,"Honnef, Bad",Nordrhein-Westfalen,50.65,7.2158,58
+02340,rr,Horb-Betra,Baden-Württemberg,48.4095,8.6594,544
+02346,rr,Horn-Bad Meinberg - Leopoldstal,Nordrhein-Westfalen,51.8416,8.9695,242
+02349,kl,Hornisgrinde,Baden-Württemberg,48.6136,8.2033,1138
+02355,rr,Hude/Oldenburg,Niedersachsen,53.1228,8.4205,4
+02358,rr,Hückeswagen (Bevertalsperre),Nordrhein-Westfalen,51.1431,7.3667,297
+02359,rr,Hüfingen-Fürstenberg,Baden-Württemberg,47.8904,8.5531,786
+02362,kl,Hümmerich,Rheinland-Pfalz,50.5651,7.4843,331
+02372,rr,Stützengrün-Hundshübel,Sachsen,50.5467,12.5707,605
+02376,rr,Büchlberg-Tannöd,Bayern,48.6549,13.5077,455
+02377,kl,Kandern-Gupf,Baden-Württemberg,47.7001,7.5895,362
+02385,kl,Idar-Oberstein,Rheinland-Pfalz,49.6927,7.3263,376
+02386,rr,Idstein,Hessen,50.2471,8.2553,246
+02387,rr,Buchloe,Bayern,48.0443,10.7375,622
+02388,rr,Ihringen,Baden-Württemberg,48.0419,7.6322,193
+02403,rr,Immenstadt,Bayern,47.5621,10.2157,727
+02405,rr,Immenstadt-Reute,Bayern,47.6078,10.202,959
+02407,rr,Ingelheim,Rheinland-Pfalz,49.9819,8.0461,90
+02409,rr,Ingolstadt (Flussmeisterstelle),Bayern,48.7663,11.4537,367
+02410,kl,Ingolstadt-Manching,Bayern,48.7111,11.5363,364
+02411,rr,Schneverdingen-Osterwede,Niedersachsen,53.1327,9.7593,62
+02412,rr,Inzell,Bayern,47.7756,12.724,683
+02415,rr,Irschenberg-Kasthub,Bayern,47.8177,11.8681,713
+02416,rr,Isen-Westach,Bayern,48.2022,12.0382,549
+02419,rr,Iserlohn-Letmathe,Nordrhein-Westfalen,51.3513,7.6026,124
+02429,kl,Itzehoe,Schleswig-Holstein,53.9897,9.5697,20
+02431,rr,Itzgrund-Herreth,Bayern,50.1337,10.9317,367
+02432,rr,Erxleben-Bregenstedt,Sachsen-Anhalt,52.2536,11.2293,146
+02437,kl,Schleswig-Jagel,Schleswig-Holstein,54.457,9.5203,21
+02438,rr,Uckerland-Karlstein,Brandenburg,53.4277,13.8167,41
+02439,rr,Jagstzell,Baden-Württemberg,49.0347,10.0865,465
+02444,kl,Jena (Sternwarte),Thüringen,50.9251,11.583,155
+02446,rr,Gardelegen-Jerchel,Sachsen-Anhalt,52.4698,11.3309,60
+02449,rr,"Söllingen, Kr. Helmstedt",Niedersachsen,52.0957,10.9328,91
+02452,rr,Marxen,Niedersachsen,53.3052,10.0124,40
+02453,rr,Jettenbach,Bayern,48.178,12.3798,403
+02454,rr,Burgau,Bayern,48.4304,10.4011,480
+02457,rr,Pöhl-Jocketa,Sachsen,50.5515,12.1833,380
+02462,rr,Joldelund,Schleswig-Holstein,54.653,9.1381,20
+02463,rr,"Jonsdorf, Kurort",Sachsen,50.8532,14.6919,425
+02465,rr,Jork-Moorende,Niedersachsen,53.5083,9.7376,0
+02472,rr,Blankenfelde-Mahlow-Jühnsdorf,Brandenburg,52.3194,13.3878,50
+02473,rr,Jülich (Kläranlage),Nordrhein-Westfalen,50.9316,6.3431,76
+02475,rr,Jüterbog,Brandenburg,51.9999,13.101,75
+02480,kl,Kahl/Main,Bayern,50.0643,8.993,108
+02481,rr,Kahla,Thüringen,50.8035,11.5845,167
+02483,kl,Kahler Asten,Nordrhein-Westfalen,51.1803,8.4891,839
+02485,kl,Kaisersbach-Cronhütte,Baden-Württemberg,48.917,9.6871,489
+02486,kl,Kaiserslautern,Rheinland-Pfalz,49.4262,7.7557,271
+02491,rr,Kalchreuth,Bayern,49.5581,11.1406,410
+02492,rr,Kalefeld-Dögerode,Niedersachsen,51.8026,10.0653,194
+02497,kl,Kall-Sistig,Nordrhein-Westfalen,50.5014,6.5264,505
+02499,rr,Kallmünz,Bayern,49.1572,11.9604,366
+02500,rr,"Kaltenborn, Hohe Acht",Rheinland-Pfalz,50.3953,6.9896,575
+02502,rr,"Heiligenstadt, Heilbad-Kalteneber",Thüringen,51.318,10.1348,447
+02505,rr,Kamen,Nordrhein-Westfalen,51.5854,7.6536,60
+02511,rr,Kandel,Rheinland-Pfalz,49.0903,8.2159,123
+02518,rr,Groß Kiesow-Schlagtow,Mecklenburg-Vorpommern,54.0117,13.4999,34
+02521,rr,Karlshuld,Bayern,48.6725,11.3092,376
+02523,rr,Karlsruhe-Wolfartsweier,Baden-Württemberg,48.9735,8.447,124
+02526,rr,Karlstadt,Bayern,49.9551,9.776,174
+02529,rr,Plau am See-Karow,Mecklenburg-Vorpommern,53.5433,12.273,73
+02530,rr,Rabenau-Karsdorf,Sachsen,50.9429,13.7022,404
+02531,rr,Karstädt/Prignitz,Brandenburg,53.1724,11.7491,32
+02538,rr,"Kastl, Kreis Amberg-Sulzbach",Bayern,49.3658,11.6925,425
+02541,rr,Katzhütte,Thüringen,50.5467,11.0317,452
+02544,rr,Kaufungen-Niederkaufungen,Hessen,51.2857,9.6025,185
+02546,rr,Kehl-Odelshofen,Baden-Württemberg,48.5576,7.88,140
+02550,rr,Kelheim,Bayern,48.9244,11.85,350
+02557,rr,Bernstadt a. d. Eigen-Kemnitz,Sachsen,51.0559,14.7967,324
+02559,kl,Kempten,Bayern,47.7233,10.3348,705
+02562,rr,Helbedündorf-Keula,Thüringen,51.334,10.529,428
+02564,kl,Kiel-Holtenau,Schleswig-Holstein,54.3776,10.1424,28
+02573,kl,Waging am See-Schnöbling,Bayern,47.9588,12.7717,470
+02575,kl,Kirchberg/Jagst-Herboldshausen,Baden-Württemberg,49.1804,9.98,432
+02577,rr,"Kirchdorf, Kreis Diepholz",Niedersachsen,52.6007,8.8522,34
+02578,kl,Kirchdorf/Poel,Mecklenburg-Vorpommern,53.9995,11.4341,14
+02582,rr,Vorbach-Höflas,Bayern,49.818,11.7088,450
+02584,rr,Hatten-Dingstede,Niedersachsen,53.0292,8.4227,31
+02595,rr,Kirn,Rheinland-Pfalz,49.789,7.4853,181
+02597,kl,"Kissingen, Bad",Bayern,50.224,10.0792,282
+02598,rr,Kißlegg,Baden-Württemberg,47.7746,9.9096,698
+02600,kl,Kitzingen,Bayern,49.7363,10.1781,193
+02601,kl,Kleiner Feldberg/Taunus,Hessen,50.2218,8.4469,822
+02604,rr,Forst-Klein Bademeusel,Brandenburg,51.6725,14.7446,87
+02617,rr,Warmsen-Morlinge,Niedersachsen,52.42,8.891,49
+02618,kl,Kleiner Inselsberg,Thüringen,50.8458,10.4803,732
+02619,rr,"Kleinich, Kr. Bernkastel-Wittlich",Rheinland-Pfalz,49.8939,7.1885,447
+02621,rr,Kleinmachnow,Brandenburg,52.4045,13.2134,42
+02625,rr,Kleßen-Görne,Brandenburg,52.739,12.4984,39
+02627,kl,Schipkau-Klettwitz,Brandenburg,51.5554,13.8845,128
+02629,kl,Kleve,Nordrhein-Westfalen,51.7612,6.0954,46
+02630,rr,Kleve-Kellen,Nordrhein-Westfalen,51.812,6.1624,14
+02637,rr,Klink-Sembzin,Mecklenburg-Vorpommern,53.4635,12.607,69
+02638,kl,Klippeneck,Baden-Württemberg,48.1054,8.7548,974
+02641,kl,Klitzschen bei Torgau,Sachsen,51.5185,12.9065,90
+02644,rr,Klötze/Altmark,Sachsen-Anhalt,52.6168,11.1554,70
+02651,rr,Neustadt/Orla-Knau,Thüringen,50.652,11.7206,454
+02655,rr,Knüllwald-Niederbeisheim,Hessen,51.0426,9.5239,253
+02660,rr,Jachenau-Obernach,Bayern,47.5541,11.2914,824
+02662,rr,Köckte,Sachsen-Anhalt,52.5233,11.1261,59
+02663,rr,Köhlen,Niedersachsen,53.5324,8.868,6
+02667,kl,Köln/Bonn,Nordrhein-Westfalen,50.8645,7.1575,91
+02671,rr,Königsbach-Stein,Baden-Württemberg,48.9654,8.6389,229
+02673,rr,Königsborn,Sachsen-Anhalt,52.1331,11.7757,53
+02674,rr,Geretsried,Bayern,47.8433,11.4776,608
+02676,rr,Königsfeld-Poxdorf,Bayern,49.9374,11.12,506
+02677,rr,Königsfeld/Schwarzwald,Baden-Württemberg,48.1413,8.4285,730
+02680,kl,"Königshofen, Bad",Bayern,50.284,10.4456,289
+02689,rr,Königsmoor,Niedersachsen,53.2279,9.6527,40
+02696,rr,Königswartha,Sachsen,51.3113,14.3342,142
+02700,kl,Kösching,Bayern,48.8302,11.4872,416
+02704,kl,Köthen (Anhalt),Sachsen-Anhalt,51.7511,12.0094,76
+02708,kl,"Kohlgrub, Bad (Rosshof)",Bayern,47.6652,11.0805,742
+02709,rr,Kolitzheim,Bayern,49.9164,10.2363,230
+02712,kl,Konstanz,Baden-Württemberg,47.6952,9.1307,428
+02718,rr,Korbach-Rhena,Hessen,51.288,8.7928,458
+02724,rr,Krailling,Bayern,48.0949,11.4051,553
+02725,rr,Krakow am See,Mecklenburg-Vorpommern,53.6472,12.2587,51
+02728,rr,Kratzeburg-Granzin,Mecklenburg-Vorpommern,53.4133,12.903,68
+02732,rr,Einbeck-Greene,Niedersachsen,51.8619,9.9395,103
+02733,rr,Kremmen-Groß Ziethen,Brandenburg,52.7277,13.0121,46
+02734,rr,Krempel,Schleswig-Holstein,54.3237,9.0247,1
+02736,rr,Kreßberg-Asbach,Baden-Württemberg,49.1405,10.1873,457
+02738,rr,Kreuth,Bayern,47.6448,11.7438,776
+02740,rr,Kreuth-Glashütte,Bayern,47.6105,11.6462,897
+02744,rr,Kreuztal-Eichen,Nordrhein-Westfalen,50.983,7.9682,305
+02748,rr,Kröning-Leisteneck,Bayern,48.5501,12.3739,490
+02749,rr,Biendorf-Gersdorf,Mecklenburg-Vorpommern,54.0805,11.7425,52
+02750,kl,Kronach,Bayern,50.2524,11.3209,310
+02754,rr,Kronburg,Bayern,47.9084,10.1514,670
+02755,rr,Kroppen,Brandenburg,51.3839,13.7921,110
+02759,rr,Krün,Bayern,47.5041,11.2814,873
+02763,rr,Norden-Leybuchtpolder,Niedersachsen,53.5039,7.1217,1
+02765,rr,Neetzow,Mecklenburg-Vorpommern,53.8819,13.4057,10
+02773,kl,Kümmersbruck,Bayern,49.4283,11.9016,416
+02778,rr,Küstrin-Kietz,Brandenburg,52.5629,14.6066,13
+02779,rr,Kuhbier,Brandenburg,53.1486,12.0851,59
+02787,rr,Kupferzell-Rechbach,Baden-Württemberg,49.2428,9.6786,355
+02792,rr,Diedorf/Schwaben-Biburg,Bayern,48.3737,10.7605,494
+02794,kl,Kyritz,Brandenburg,52.9362,12.4093,40
+02796,kl,Laage-Kronskamp,Mecklenburg-Vorpommern,53.9156,12.279,40
+02802,rr,"Laasphe, Bad-Hesselbach",Nordrhein-Westfalen,50.8864,8.3685,459
+02804,rr,Laatzen-Rethen,Niedersachsen,52.2898,9.813,64
+02805,rr,Lachendorf,Niedersachsen,52.6255,10.2496,47
+02810,rr,"Lage, Kreis Lippe-Hörste",Nordrhein-Westfalen,51.9446,8.7749,150
+02812,kl,Lahr,Baden-Württemberg,48.3647,7.828,156
+02814,kl,Merklingen,Baden-Württemberg,48.5122,9.7644,687
+02819,rr,Lampertheim-Neuschloß,Hessen,49.6,8.5092,94
+02820,rr,Palling-Lampertsham,Bayern,47.9916,12.6858,566
+02822,rr,Lamstedt,Niedersachsen,53.6369,9.0979,26
+02827,rr,Fehmarn-Bisdorf,Schleswig-Holstein,54.4638,11.1423,6
+02838,rr,Langelsheim (Innerstetalsperre),Niedersachsen,51.9165,10.2988,233
+02839,rr,Langelsheim-Astfeld,Niedersachsen,51.9262,10.3461,210
+02844,rr,"Langen-Holßel, Kreis Cuxhaven",Niedersachsen,53.6956,8.6291,9
+02847,rr,Langenbach,Bayern,48.4348,11.8455,432
+02848,rr,Langenburg-Atzenrod,Baden-Württemberg,49.2575,9.8594,458
+02850,rr,Langenenslingen-Ittenhausen,Baden-Württemberg,48.1994,9.3327,778
+02852,rr,Langenhagen,Niedersachsen,51.5374,10.3265,234
+02853,rr,Langenhessen/Koberbach,Sachsen,50.7672,12.3541,275
+02856,kl,Niedergörsdorf-Langenlipsdorf,Brandenburg,51.9173,13.0878,92
+02860,rr,Langenzenn,Bayern,49.5076,10.7885,371
+02863,rr,Michendorf-Langerwisch,Brandenburg,52.3175,13.0679,43
+02865,rr,Langgöns-Niederkleen,Hessen,50.4841,8.6027,213
+02867,rr,Langquaid,Bayern,48.8269,12.0592,393
+02878,kl,"Lauchstädt, Bad",Sachsen-Anhalt,51.3909,11.8786,117
+02880,rr,Lauda-Königshofen-Heckfeld,Baden-Württemberg,49.5522,9.6345,319
+02882,rr,Altenberg-Lauenstein,Sachsen,50.7842,13.8185,502
+02884,rr,Lauf/Pegnitz,Bayern,49.5042,11.2736,310
+02885,rr,Laufen/Obb.-Lebenau,Bayern,47.9522,12.8978,430
+02886,kl,Laupheim,Baden-Württemberg,48.2175,9.9097,539
+02887,rr,Laußnitz-Glauschnitz,Sachsen,51.2671,13.8469,167
+02890,rr,"Lauterberg,Bad-Bartolfelde",Niedersachsen,51.5957,10.463,306
+02893,rr,Lauterecken,Rheinland-Pfalz,49.6616,7.5978,160
+02894,rr,Lauterhofen-Traunfeld,Bayern,49.4128,11.4753,541
+02897,kl,Lautertal-Hörgenau,Hessen,50.5808,9.2857,522
+02898,rr,Lautertal-Meiches,Hessen,50.6221,9.2556,471
+02900,rr,Lautertal/Odenwald-Reichenbach,Hessen,49.709,8.6908,208
+02902,rr,Lebus,Brandenburg,52.4338,14.5223,48
+02905,kl,Lechfeld,Bayern,48.1849,10.8507,550
+02907,kl,Leck,Schleswig-Holstein,54.7903,8.9514,7
+02908,rr,Leer,Niedersachsen,53.2136,7.4737,7
+02916,rr,Kloster Lehnin,Brandenburg,52.3135,12.7403,41
+02925,kl,Leinefelde,Thüringen,51.3932,10.3123,356
+02928,kl,Leipzig-Holzhausen,Sachsen,51.3151,12.4462,138
+02932,kl,Leipzig/Halle,Sachsen,51.4347,12.2396,131
+02933,rr,Leiwen,Rheinland-Pfalz,49.818,6.8816,140
+02936,rr,Lemgo,Nordrhein-Westfalen,52.0423,8.9053,137
+02943,rr,Lenggries,Bayern,47.68,11.5826,697
+02947,kl,Lennestadt-Theten,Nordrhein-Westfalen,51.1333,8.0348,286
+02951,kl,Lenzen/Elbe,Brandenburg,53.1007,11.4864,20
+02953,kl,Lenzkirch-Ruhbühl,Baden-Württemberg,47.8597,8.2308,854
+02955,rr,Leonberg-Höfingen,Baden-Württemberg,48.8154,9.0244,362
+02956,rr,Gardelegen-Letzlingen,Sachsen-Anhalt,52.4423,11.4857,71
+02958,rr,Ostritz,Sachsen,51.0265,14.9357,204
+02961,kl,Leuchtturm Kiel,Schleswig-Holstein,54.4996,10.2737,0
+02965,rr,Leutenberg,Thüringen,50.5563,11.4655,298
+02968,kl,Köln-Stammheim,Nordrhein-Westfalen,50.9894,6.9777,43
+02970,rr,Leverkusen-Pattscheid,Nordrhein-Westfalen,51.0933,7.0706,140
+02975,rr,Lich,Hessen,50.513,8.805,166
+02976,rr,Lichtenau in Westfalen,Nordrhein-Westfalen,51.6153,8.9009,307
+02979,rr,Lichtenberg/Erzgeb.,Sachsen,50.8111,13.4502,518
+02984,rr,Schwarzatal-Lichtenhain/Bergbahn,Thüringen,50.5914,11.1265,640
+02985,kl,Lichtenhain-Mittelndorf,Sachsen,50.9383,14.2094,321
+02988,rr,Liebenau-Haueda,Hessen,51.4882,9.2493,162
+02992,rr,Remptendorf,Thüringen,50.5275,11.6605,495
+02997,rr,Lieberose,Brandenburg,51.9861,14.3044,50
+02999,rr,Lienen-Kattenvenne,Nordrhein-Westfalen,52.1211,7.8699,55
+03012,rr,Lindberg-Buchenau,Bayern,49.0315,13.3272,750
+03014,rr,Lochum,Rheinland-Pfalz,50.6099,7.8588,463
+03015,kl,Lindenberg,Brandenburg,52.2085,14.118,98
+03020,rr,Lindlar-Oberlichtinghagen,Nordrhein-Westfalen,51.0645,7.4436,337
+03022,rr,Gardelegen-Lindstedterhorst,Sachsen-Anhalt,52.606,11.5565,35
+03024,rr,Lingerhahn/Hunsrück,Rheinland-Pfalz,50.094,7.5675,485
+03025,rr,Linthe,Brandenburg,52.1564,12.7866,47
+03028,kl,"Lippspringe, Bad",Nordrhein-Westfalen,51.7854,8.8388,157
+03029,rr,"Lippstadt-Waldliesborn, Bad",Nordrhein-Westfalen,51.7078,8.322,75
+03031,kl,Lippstadt-Bökenförde,Nordrhein-Westfalen,51.6336,8.3945,92
+03032,kl,List auf Sylt,Schleswig-Holstein,55.011,8.4125,25
+03034,kl,"Lobenstein, Bad",Thüringen,50.4505,11.635,496
+03036,rr,Loburg,Sachsen-Anhalt,52.1177,12.0873,76
+03041,rr,Löffingen-Dittishausen,Baden-Württemberg,47.914,8.3681,776
+03042,kl,Löhnberg-Obershausen,Hessen,50.5617,8.2386,230
+03047,rr,Weil am Rhein-Haltingen,Baden-Württemberg,47.6133,7.6207,277
+03055,rr,Lohr/Main -Ruppertshütten,Bayern,50.0802,9.5419,370
+03059,rr,Lonsee-Ettlenschieß,Baden-Württemberg,48.5659,9.924,663
+03061,rr,"Lorch, Kreis Ostalb-Waldhausen",Baden-Württemberg,48.7821,9.6401,300
+03063,rr,Losheim-Niederlosheim,Saarland,49.5013,6.7863,275
+03064,rr,Finne-Lossa,Sachsen-Anhalt,51.2189,11.4203,303
+03065,rr,Loßburg,Baden-Württemberg,48.4142,8.4522,667
+03068,rr,Loxstedt,Niedersachsen,53.4647,8.6472,8
+03070,rr,Luckau-Gießmannsdorf,Brandenburg,51.8794,13.6924,66
+03080,rr,Ludwigsstadt,Bayern,50.4926,11.3791,426
+03081,rr,Espelkamp-Isenstedt,Nordrhein-Westfalen,52.3452,8.6477,65
+03083,kl,Lübben-Blumenfelde,Brandenburg,51.9267,13.8797,57
+03086,kl,Lübeck-Blankensee,Schleswig-Holstein,53.8025,10.6989,15
+03090,rr,Lübstorf,Mecklenburg-Vorpommern,53.727,11.4098,50
+03091,rr,Lübtheen,Mecklenburg-Vorpommern,53.294,11.0941,17
+03093,kl,Lüchow,Niedersachsen,52.9724,11.1374,16
+03094,rr,Kamenz-Cunnersdorf,Sachsen,51.3122,14.0499,166
+03098,kl,Lüdenscheid,Nordrhein-Westfalen,51.2452,7.6425,387
+03106,rr,Wangelau,Schleswig-Holstein,53.4543,10.544,36
+03113,rr,Luisenthal/Ohra,Thüringen,50.7663,10.7201,528
+03114,rr,Lunow-Stolzenhagen,Brandenburg,52.9213,14.1091,23
+03121,rr,Mähring,Bayern,49.9113,12.5276,677
+03124,rr,Nuthe-Urstromtal-Berkenbrück,Brandenburg,52.1392,13.123,48
+03126,kl,Magdeburg,Sachsen-Anhalt,52.1029,11.5827,79
+03131,rr,Waldsassen-Hatzenreuth,Bayern,50.012,12.3779,503
+03136,rr,Mühlheim/Main,Hessen,50.1294,8.8209,102
+03137,kl,Mainz-Lerchenberg (ZDF),Rheinland-Pfalz,49.9658,8.2049,199
+03146,rr,Malk Göhren,Mecklenburg-Vorpommern,53.2141,11.3686,32
+03147,kl,Mallersdorf-Pfaffenberg-Oberlindhart,Bayern,48.7548,12.2118,390
+03153,rr,Mamming-Schneiderberg,Bayern,48.6189,12.6233,449
+03155,kl,Manderscheid-Sonnenhof,Rheinland-Pfalz,50.1015,6.8009,415
+03156,rr,Karstädt-Birkholz,Brandenburg,53.1117,11.6551,25
+03158,kl,Manschnow,Brandenburg,52.5468,14.5453,12
+03164,kl,"Cölbe, Kr. Marburg-Biedenkopf",Hessen,50.8492,8.7745,187
+03166,kl,Marienberg,Sachsen,50.6511,13.1469,639
+03167,kl,"Marienberg, Bad",Rheinland-Pfalz,50.6621,7.9603,547
+03175,rr,Raschau,Sachsen,50.5219,12.8282,504
+03176,rr,Markgröningen,Baden-Württemberg,48.9047,9.0737,283
+03178,rr,Werra-Suhl-Tal-Wünschensuhl,Thüringen,50.9297,10.1591,236
+03179,rr,Markt Bibart,Bayern,49.666,10.3851,320
+03180,rr,Markt Einersheim,Bayern,49.6853,10.2895,292
+03181,kl,Markt Erlbach-Hagenhofen,Bayern,49.4875,10.6277,360
+03182,rr,Markt Erlbach-Wilhelmsgreuth,Bayern,49.4923,10.5417,415
+03183,rr,Markt Taschendorf -Birkach,Bayern,49.6877,10.541,402
+03185,rr,Marktheidenfeld,Bayern,49.8323,9.5827,146
+03188,rr,Marktleuthen-Neudorf,Bayern,50.1141,11.9712,550
+03190,rr,Marktoberdorf-Sulzschneid,Bayern,47.7196,10.6433,790
+03192,rr,Marktschellenberg,Bayern,47.7046,13.0372,506
+03196,kl,Marnitz,Mecklenburg-Vorpommern,53.3221,11.9324,81
+03201,rr,Marsberg-Helminghausen,Nordrhein-Westfalen,51.3742,8.7232,377
+03202,rr,Marsberg-Leitmar,Nordrhein-Westfalen,51.405,8.862,373
+03204,kl,Martinroda,Thüringen,50.7335,10.8815,429
+03205,rr,Oberkrämer-Marwitz (Wasserwerk),Brandenburg,52.6579,13.179,33
+03206,rr,Marxzell-Schielberg,Baden-Württemberg,48.8478,8.4459,401
+03207,rr,Maßbach,Bayern,50.1798,10.272,328
+03211,rr,Mauth-Finsterau,Bayern,48.9359,13.5746,1012
+03215,rr,Medebach-Berge,Nordrhein-Westfalen,51.1683,8.7125,375
+03217,rr,Weesby,Schleswig-Holstein,54.8373,9.1481,22
+03220,rr,Meeder-Ottowind,Bayern,50.3571,10.8832,450
+03226,kl,Aschersleben-Mehringen,Sachsen-Anhalt,51.7259,11.511,108
+03231,kl,Meiningen,Thüringen,50.5611,10.3771,450
+03234,kl,Klipphausen-Garsebach,Sachsen,51.1294,13.4328,158
+03236,rr,Melle,Niedersachsen,52.2147,8.3833,85
+03238,rr,Mellenthin-Dewichow,Mecklenburg-Vorpommern,53.9497,13.9742,3
+03241,rr,Mellrichstadt-Mühlfeld,Bayern,50.4488,10.3437,337
+03244,kl,Memmingen,Bayern,47.9821,10.1384,614
+03247,rr,Mengen-Ennetach,Baden-Württemberg,48.0557,9.3185,559
+03248,rr,Frankenblick-Mengersgereuth-Hämmern,Thüringen,50.3904,11.1324,516
+03249,rr,Mengerskirchen,Hessen,50.5635,8.1618,419
+03251,rr,Mengkofen-Hofdorf,Bayern,48.7085,12.4119,403
+03253,rr,Sankt Blasien-Menzenschwand,Baden-Württemberg,47.8309,8.0698,882
+03254,kl,Meppen,Niedersachsen,52.7155,7.3176,19
+03257,kl,"Mergentheim, Bad",Baden-Württemberg,49.4797,9.7832,278
+03258,rr,Mering (Bauhof),Bayern,48.2707,10.9772,508
+03260,rr,Mertendorf,Thüringen,50.9937,11.7869,332
+03262,rr,Mertingen,Bayern,48.6614,10.7957,407
+03263,rr,Merzig,Saarland,49.4566,6.6266,171
+03264,rr,Meschede,Nordrhein-Westfalen,51.3385,8.2709,348
+03265,rr,Mespelbrunn,Bayern,49.922,9.2872,297
+03266,rr,Messel,Hessen,49.9382,8.7452,165
+03268,kl,Meßstetten-Appental,Baden-Württemberg,48.1694,8.9433,900
+03271,kl,Metten,Bayern,48.8548,12.9189,314
+03278,kl,Metzingen,Baden-Württemberg,48.5377,9.2734,354
+03279,rr,Meuselwitz,Thüringen,51.0452,12.2989,172
+03280,rr,Meyenburg,Brandenburg,53.3083,12.2937,98
+03282,rr,Michelau/Unterfranken-Neuhausen,Bayern,49.9182,10.4677,373
+03284,kl,Michelstadt,Hessen,49.6692,9.0085,240
+03287,kl,Michelstadt-Vielbrunn,Hessen,49.7177,9.0997,453
+03288,rr,Langenneufnach-Unterrothan,Bayern,48.2709,10.6237,577
+03289,kl,Schmieritz-Weltwitz,Thüringen,50.7281,11.7838,356
+03291,rr,Miltenberg,Bayern,49.712,9.2258,129
+03293,rr,Mindelheim,Bayern,48.064,10.4839,590
+03294,rr,Pförring-Ettling,Bayern,48.8189,11.6615,360
+03297,rr,Lärz-Krümmel,Mecklenburg-Vorpommern,53.2681,12.7221,64
+03301,rr,Windsbach,Bayern,49.241,10.8227,396
+03304,rr,Freienbessingen,Thüringen,51.2327,10.7694,294
+03307,kl,Mittenwald-Buckelwiesen,Bayern,47.4814,11.2649,983
+03308,rr,Mittenwalde/Uckermark,Brandenburg,53.1846,13.6545,75
+03316,rr,Möhnesee (Möhnetalsperre),Nordrhein-Westfalen,51.4926,8.0639,234
+03319,kl,Röllbach,Bayern,49.7644,9.253,239
+03321,kl,Mönchengladbach-Hilderath,Nordrhein-Westfalen,51.1313,6.3608,76
+03329,rr,Mörsdorf,Rheinland-Pfalz,50.1041,7.3439,340
+03333,rr,Moisburg,Niedersachsen,53.4073,9.6974,32
+03339,rr,Monschau-Kalterherberg,Nordrhein-Westfalen,50.5202,6.2084,541
+03340,rr,Montabaur,Rheinland-Pfalz,50.4383,7.8061,265
+03341,rr,Moorenweis-Grunertshofen,Bayern,48.1862,11.0888,543
+03342,rr,Moormerland-Neermoor,Niedersachsen,53.311,7.4329,0
+03348,kl,Moringen-Lutterbeck,Niedersachsen,51.7209,9.8351,241
+03350,rr,Morsbach,Nordrhein-Westfalen,50.865,7.7156,227
+03356,rr,Mudau-Schloßau,Baden-Württemberg,49.5436,9.1552,493
+03357,rr,Mücheln/Geiseltal-Stöbnitz,Sachsen-Anhalt,51.3244,11.802,147
+03362,kl,Mühlacker,Baden-Württemberg,48.9721,8.8735,243
+03364,rr,Drei Gleichen-Mühlberg,Thüringen,50.8681,10.8211,286
+03366,kl,Mühldorf,Bayern,48.279,12.5024,406
+03371,rr,Mühlhausen/Oberpfalz-Weihersdorf,Bayern,49.1725,11.4718,420
+03376,kl,Müncheberg,Brandenburg,52.5176,14.1232,64
+03379,kl,München-Stadt,Bayern,48.1632,11.5429,515
+03381,rr,München-Kirchtrudering,Bayern,48.1283,11.6715,526
+03395,rr,Münden-Gimte,Niedersachsen,51.4391,9.6454,122
+03397,rr,"Münder, Bad",Niedersachsen,52.188,9.4597,116
+03399,rr,Münnerstadt-Reichenbach,Bayern,50.2685,10.1532,310
+03402,kl,Münsingen-Apfelstetten,Baden-Württemberg,48.3851,9.4837,755
+03412,rr,Münstertal,Baden-Württemberg,47.869,7.8086,453
+03413,rr,Münzenberg-Gambach,Hessen,50.4522,8.7317,155
+03415,rr,Muldenberg/Zwickauer Mulde,Sachsen,50.4119,12.4065,710
+03416,rr,Mulfingen/Jagst,Baden-Württemberg,49.3423,9.8073,294
+03418,rr,Ehingen-Kirchen,Baden-Württemberg,48.2754,9.6355,594
+03424,rr,Murnau,Bayern,47.6689,11.2238,625
+03426,kl,"Muskau, Bad",Sachsen,51.566,14.7008,127
+03427,rr,Grimma-Cannewitz,Sachsen,51.2727,12.8355,164
+03429,rr,Nabburg (Flussmeisterstelle),Bayern,49.4497,12.1874,366
+03430,rr,Seeland-Nachterstedt,Sachsen-Anhalt,51.8154,11.3242,123
+03435,rr,Nandlstadt,Bayern,48.5235,11.8398,477
+03438,rr,Nassenfels,Bayern,48.8016,11.2181,401
+03440,rr,Nattheim-Fleinheim,Baden-Württemberg,48.7071,10.2997,531
+03442,kl,"Nauheim, Bad",Hessen,50.3574,8.7506,149
+03445,rr,Jessen (Elster)-Naundorf,Sachsen-Anhalt,51.9245,12.8888,100
+03448,rr,Neckargemünd-Kleingemünd,Baden-Württemberg,49.3945,8.8045,117
+03450,rr,Neckarwestheim,Baden-Württemberg,49.0426,9.1954,276
+03451,rr,Zerbst-Nedlitz,Sachsen-Anhalt,52.0719,12.2189,96
+03460,rr,Raitenbuch,Bayern,49.0091,11.1244,559
+03464,rr,Nesselwang,Bayern,47.6348,10.5077,878
+03465,rr,Netphen (Lahnhof),Nordrhein-Westfalen,50.8945,8.2426,613
+03467,rr,Nettelsee,Schleswig-Holstein,54.1733,10.1869,40
+03469,rr,Bernitt,Mecklenburg-Vorpommern,53.9043,11.8863,50
+03473,rr,Neuruppin-Gühlen Glienicke,Brandenburg,53.0528,12.7562,89
+03482,rr,Neuburg-Steinhausen,Mecklenburg-Vorpommern,53.9429,11.6091,38
+03484,kl,Neuburg an der Donau,Bayern,48.7085,11.2147,379
+03485,kl,Neuburg/Kammel-Langenhaslach,Bayern,48.3114,10.3773,487
+03490,kl,"Neuenahr, Bad-Ahrweiler",Rheinland-Pfalz,50.5346,7.0853,111
+03491,rr,Föritztal-Neuenbau,Thüringen,50.441,11.2401,734
+03496,rr,Damme-Greven,Niedersachsen,52.4982,8.143,72
+03497,rr,Ludwigschorgast,Bayern,50.1226,11.5596,336
+03499,rr,Neuenrade-Blintrop,Nordrhein-Westfalen,51.2915,7.853,292
+03500,rr,Neuenstadt/Kocher-Cleversulzbach,Baden-Württemberg,49.2146,9.3566,181
+03501,rr,Neuenstein-Mühlbach,Hessen,50.9303,9.558,342
+03504,rr,Neufahrn,Bayern,48.3083,11.6702,465
+03509,kl,Stechlin-Menz,Brandenburg,53.102,13.0421,78
+03511,rr,Neuhardenberg,Brandenburg,52.5902,14.2387,14
+03513,kl,Neuhaus am Rennweg,Thüringen,50.5003,11.1345,845
+03519,rr,Neuhausen ob Eck-Unterschwandorf,Baden-Württemberg,47.9519,8.9932,663
+03522,rr,"Neuhof, Kreis Fulda",Hessen,50.4539,9.6057,290
+03525,rr,Neukirchen beim Heiligen Blut,Bayern,49.2586,12.9601,460
+03527,kl,Neukirchen-Hauptschwenda,Hessen,50.8923,9.405,500
+03534,kl,Neumarkt-Höhenberg,Bayern,49.2713,11.4881,584
+03535,rr,Neumarkt-Sankt Veit,Bayern,48.3658,12.5211,438
+03536,rr,Neumarkt/Oberpfalz,Bayern,49.2835,11.4525,420
+03540,kl,Neunkirchen-Seelscheid-Krawinkel,Nordrhein-Westfalen,50.8446,7.372,195
+03545,kl,Neunkirchen-Wellesweiler,Saarland,49.344,7.2297,236
+03547,rr,Schwarzach/Baden,Baden-Württemberg,49.3756,8.9764,244
+03549,rr,Neureichenau-Duschlberg,Bayern,48.79,13.7287,880
+03550,rr,Neureichenau-Klafferstraß,Bayern,48.7309,13.8065,669
+03551,rr,Neuried-Ichenheim,Baden-Württemberg,48.4289,7.8093,150
+03558,rr,Neustadt am Rübenberge,Niedersachsen,52.5,9.4941,41
+03560,rr,"Neustadt, Bad",Bayern,50.3039,10.176,230
+03561,rr,"Neustadt, Kreis Marburg-Biedenkopf",Hessen,50.8495,9.1251,257
+03564,rr,Neustadt-Glewe-Friedrichsmoor,Mecklenburg-Vorpommern,53.4571,11.5687,35
+03570,rr,Harztor-Ilfeld-Hufhaus,Thüringen,51.5985,10.8504,528
+03571,kl,Neustadt am Kulm-Filchendorf,Bayern,49.8174,11.8638,452
+03572,rr,Neustadt bei Coburg,Bayern,50.3198,11.1104,330
+03578,rr,Regensburg-Burgweinting,Bayern,48.9831,12.1444,341
+03579,rr,Neutrebbin,Brandenburg,52.6718,14.1857,5
+03580,rr,Wettin-Löbejün-Neutz,Sachsen-Anhalt,51.6089,11.8434,151
+03584,rr,Newel,Rheinland-Pfalz,49.8135,6.5857,365
+03589,rr,Nidderau-Erbstadt,Hessen,50.2741,8.8653,162
+03591,kl,Nideggen-Schmidt,Nordrhein-Westfalen,50.6743,6.424,350
+03593,rr,Niederaula,Hessen,50.7988,9.612,208
+03603,kl,Niederstetten,Baden-Württemberg,49.3895,9.9666,459
+03605,rr,Niederstotzingen,Baden-Württemberg,48.5334,10.2427,451
+03607,rr,Loiching,Bayern,48.6106,12.4143,416
+03610,rr,"Driburg, Bad-Pömbsen",Nordrhein-Westfalen,51.7759,9.0721,294
+03612,kl,Nienburg,Niedersachsen,52.6711,9.2229,25
+03616,rr,Hachenburg/Westerwaldkreis,Rheinland-Pfalz,50.6603,7.805,306
+03617,rr,Nittenau-Harting,Bayern,49.1658,12.2788,431
+03620,rr,Wechselburg-Meusen,Sachsen,51.0002,12.7998,238
+03621,kl,Reimlingen,Bayern,48.8253,10.5066,436
+03623,kl,Nörvenich-Niederbolheim,Nordrhein-Westfalen,50.8294,6.6601,108
+03625,rr,Nohfelden-Gonnesweiler,Saarland,49.5568,7.0716,403
+03631,kl,Norderney,Niedersachsen,53.7123,7.1519,12
+03636,rr,Nordhausen,Thüringen,51.5178,10.7791,193
+03639,kl,Nordholz-Wanhöden,Niedersachsen,53.7647,8.6584,24
+03640,rr,Nordhorn-Blanke,Niedersachsen,52.4123,7.064,25
+03644,rr,Nordstemmen-Mahlerten,Niedersachsen,52.1518,9.7957,95
+03650,rr,Northeim-Imbshausen,Niedersachsen,51.763,10.0416,214
+03651,kl,Northeim-Stöckheim,Niedersachsen,51.7521,9.945,111
+03656,rr,Nottuln,Nordrhein-Westfalen,51.9286,7.334,115
+03660,kl,Nürburg-Barweiler,Rheinland-Pfalz,50.3602,6.8697,485
+03667,kl,Nürnberg-Netzstall,Bayern,49.4258,11.2539,369
+03668,kl,Nürnberg,Bayern,49.503,11.0549,314
+03670,rr,Nürnberg-Krottenbach,Bayern,49.382,11.0095,332
+03677,rr,Oberammergau,Bayern,47.603,11.0607,832
+03679,kl,Kiefersfelden-Gach,Bayern,47.6187,12.1665,518
+03681,rr,Oberaurach-Fatschenbrunn,Bayern,49.9185,10.5963,426
+03682,rr,Oberbergkirchen-Schörging,Bayern,48.3028,12.3697,460
+03683,rr,Bobritzsch-Hilbersdorf-Oberbobritzsch,Sachsen,50.867,13.4606,427
+03685,rr,Oberdachstetten,Bayern,49.4115,10.4335,432
+03687,rr,Nersingen-Oberfahlheim,Bayern,48.4294,10.1473,472
+03689,rr,Untrasried-Maneberg,Bayern,47.8345,10.3683,820
+03690,rr,Oberharmersbach,Baden-Württemberg,48.3862,8.1426,372
+03700,rr,Oberleichtersbach-Modlos,Bayern,50.2661,9.7727,472
+03703,rr,Wörth am Main,Bayern,49.7934,9.1545,132
+03705,rr,Oberndorf/Neckar-Aistaig,Baden-Württemberg,48.3147,8.5735,475
+03710,rr,"Westendorf, Kreis Ostallgäu",Bayern,47.9329,10.717,679
+03711,rr,Oberpframmern,Bayern,48.0184,11.806,606
+03713,rr,Oberreichenbach,Baden-Württemberg,48.7366,8.6561,646
+03714,rr,Oberreute,Bayern,47.5538,9.9406,896
+03722,rr,Oberschleißheim,Bayern,48.2443,11.5528,484
+03723,rr,Wallersdorf-Mattenkofen,Bayern,48.7814,12.7378,332
+03729,rr,Oberstaufen-Thalkirchdorf,Bayern,47.5577,10.0938,748
+03730,kl,Oberstdorf,Bayern,47.3984,10.2759,806
+03731,rr,Oberstdorf-Birgsau,Bayern,47.3388,10.266,941
+03734,kl,Obersulm-Willsbach,Baden-Württemberg,49.128,9.3525,232
+03737,rr,Obertrubach,Bayern,49.695,11.3507,435
+03739,kl,Oberviechtach,Bayern,49.4521,12.4365,596
+03740,rr,Lohmen/Sachsen,Sachsen,50.9933,13.9807,195
+03741,rr,Schwarzatal-Oberweißbach,Thüringen,50.5867,11.1558,588
+03746,rr,Obing-Ilzham,Bayern,48.0036,12.3772,596
+03750,rr,Ochsenhausen,Baden-Württemberg,48.0579,9.948,621
+03761,kl,Öhringen,Baden-Württemberg,49.207,9.5176,276
+03764,rr,Oelsnitz/Vogtland,Sachsen,50.4241,12.1798,435
+03765,rr,Oerlenbach,Bayern,50.1407,10.1347,302
+03767,rr,Oerlinghausen (Nord),Nordrhein-Westfalen,51.9648,8.6583,205
+03770,rr,Zepelin-Oettelin,Mecklenburg-Vorpommern,53.8589,12.0627,23
+03772,rr,Ehingen a. Ries (Schaffhäuser Hof),Bayern,48.9663,10.5749,433
+03780,rr,Luckaitztal-Buchwäldchen,Brandenburg,51.6897,14.0087,86
+03792,rr,Oldenburg in Holstein,Schleswig-Holstein,54.2952,10.8968,8
+03795,rr,Olfen,Nordrhein-Westfalen,51.7066,7.3564,49
+03798,rr,Olsberg-Brunskappel,Nordrhein-Westfalen,51.2827,8.4797,442
+03799,rr,Opfenbach,Bayern,47.6288,9.8355,598
+03804,rr,Oranienbaum,Sachsen-Anhalt,51.8005,12.4106,64
+03810,rr,Ortenburg,Bayern,48.5369,13.2281,387
+03811,kl,Oschatz,Sachsen,51.296,13.0928,151
+03812,rr,Oschersleben/Bode,Sachsen-Anhalt,52.0239,11.2407,80
+03813,rr,Osdorf,Schleswig-Holstein,54.4259,10.0235,22
+03817,rr,Osnabrück-Haste,Niedersachsen,52.3035,8.044,67
+03820,rr,Ostercappeln-Schwagstorf,Niedersachsen,52.3656,8.2011,58
+03821,kl,Osterfeld,Sachsen-Anhalt,51.0872,11.9293,244
+03824,rr,Eisleben-Osterhausen,Sachsen-Anhalt,51.4522,11.5068,165
+03827,rr,Osterholz-Scharmbeck,Niedersachsen,53.233,8.8078,13
+03829,rr,Osterode/Harz,Niedersachsen,51.7371,10.2455,260
+03835,rr,Osterzell,Bayern,47.8796,10.7445,724
+03836,kl,Ostheim v.d. Rhön,Bayern,50.4538,10.2211,314
+03839,rr,Ottbergen,Niedersachsen,52.1506,10.0871,122
+03844,rr,Ottenstein,Niedersachsen,51.9473,9.3998,305
+03848,rr,Ottersberg-Otterstedt,Niedersachsen,53.1403,9.1517,18
+03849,rr,Ottobeuren,Bayern,47.9303,10.31,667
+03850,rr,Ottrau-Immichenhain,Hessen,50.8097,9.3579,340
+03853,rr,Ovelgönne,Niedersachsen,53.3819,8.4493,3
+03855,rr,Owingen,Baden-Württemberg,47.8064,9.1663,528
+03857,kl,Oy-Mittelberg-Petersthal,Bayern,47.6362,10.3892,886
+03867,rr,Papenburg,Niedersachsen,53.0657,7.464,5
+03870,rr,Parchim,Mecklenburg-Vorpommern,53.4319,11.8294,46
+03871,rr,Elbe-Parey,Sachsen-Anhalt,52.378,11.9865,36
+03875,kl,Parsberg/Oberpfalz-Eglwang,Bayern,49.151,11.6897,549
+03878,rr,Passau-Maierhof,Bayern,48.5805,13.4152,329
+03881,rr,Schwedt/Oder-Passow,Brandenburg,53.142,14.1074,12
+03886,rr,Pegnitz,Bayern,49.7408,11.5528,420
+03894,rr,Pellingen,Rheinland-Pfalz,49.674,6.6699,447
+03897,kl,Pelzerhaken,Schleswig-Holstein,54.0893,10.8773,2
+03901,rr,Pentling-Matting,Bayern,48.9633,12.0071,346
+03904,kl,Perl-Nennig,Saarland,49.5354,6.3789,152
+03905,kl,Perl-Sinz-Renglischberg,Saarland,49.5214,6.4476,407
+03906,rr,Perleberg,Brandenburg,53.0952,11.8603,40
+03907,rr,Röhrnbach-Reisersberg,Bayern,48.7789,13.4946,533
+03911,rr,Petersberg-Marbach,Hessen,50.6175,9.725,305
+03913,rr,Petershagen,Nordrhein-Westfalen,52.3817,9.0176,43
+03915,rr,Baruth/Mark-Petkus,Brandenburg,51.9887,13.3633,142
+03919,rr,Pfarrkirchen,Bayern,48.4252,12.9924,381
+03922,rr,Pfofeld-Langlau,Bayern,49.1162,10.8596,438
+03925,kl,Pforzheim-Ispringen,Baden-Württemberg,48.9329,8.6973,332
+03926,rr,Pfronten-Rehbichel,Bayern,47.6063,10.5593,884
+03927,kl,Pfullendorf,Baden-Württemberg,47.9345,9.2869,630
+03930,rr,Philippsreut,Bayern,48.8805,13.6631,922
+03932,rr,Picher,Mecklenburg-Vorpommern,53.3457,11.3527,61
+03934,rr,Pilsach-Laaber,Bayern,49.3159,11.5609,517
+03938,rr,Schenkendöbern-Groß Drewitz,Brandenburg,52.0057,14.5841,89
+03939,kl,Pirmasens,Rheinland-Pfalz,49.1912,7.5879,382
+03945,rr,Plau am See,Mecklenburg-Vorpommern,53.4584,12.2417,66
+03946,kl,Plauen,Sachsen,50.4818,12.13,387
+03948,rr,Plech,Bayern,49.649,11.4685,443
+03950,rr,Pleinfeld-Mandlesmühle,Bayern,49.1248,10.9731,380
+03952,rr,Plettenberg,Nordrhein-Westfalen,51.1956,7.8482,268
+03960,rr,Pocking,Bayern,48.3952,13.3139,323
+03962,rr,Pörnbach-Puch,Bayern,48.6261,11.4723,392
+03965,rr,Süderholz-Neuendorf,Mecklenburg-Vorpommern,54.1034,13.1533,6
+03966,rr,Pohlheim-Hausen,Hessen,50.5461,8.7396,228
+03967,rr,Siehdichum-Pohlitz,Brandenburg,52.1836,14.5748,69
+03969,rr,"Polch, Kr. Mayen-Koblenz",Rheinland-Pfalz,50.3049,7.31,235
+03971,rr,Polle,Niedersachsen,51.8795,9.3951,273
+03972,rr,Polsingen-Döckingen,Bayern,48.9344,10.7585,507
+03975,kl,Pommelsbrunn-Mittelburg,Bayern,49.4777,11.5357,522
+03981,rr,Lützen-Poserna,Sachsen-Anhalt,51.2121,12.0835,120
+03982,rr,Eichigt-Tiefenbrunn,Sachsen,50.3323,12.1071,593
+03987,kl,Potsdam,Brandenburg,52.3812,13.0622,81
+03995,rr,Prenzlau (Ewaldshof),Brandenburg,53.2849,13.9283,57
+03999,rr,Pressath-Mühlberg,Bayern,49.7844,12.0331,597
+04000,rr,Presseck,Bayern,50.2277,11.5486,640
+04009,rr,Wrohm,Schleswig-Holstein,54.2128,9.4177,7
+04013,rr,Pritzwalk,Brandenburg,53.1728,12.1569,83
+04016,rr,Prosselsheim-Seligenstadt,Bayern,49.8526,10.1006,283
+04017,rr,Prüm-Watzerath,Rheinland-Pfalz,50.1807,6.3509,386
+04020,rr,Pulheim,Nordrhein-Westfalen,50.9922,6.7916,61
+04023,rr,Pulsnitz,Sachsen,51.2006,14.0207,270
+04024,kl,Putbus,Mecklenburg-Vorpommern,54.3643,13.4771,40
+04028,rr,"Pyrmont, Bad",Niedersachsen,51.9834,9.2425,104
+04032,kl,Quedlinburg,Sachsen-Anhalt,51.7953,11.132,142
+04036,kl,Querfurt-Mühle Lodersleben,Sachsen-Anhalt,51.3895,11.5412,206
+04039,kl,Quickborn,Schleswig-Holstein,53.7331,9.8776,11
+04042,rr,Wiesenburg/Mark-Klepzig,Brandenburg,52.0185,12.5352,145
+04044,rr,Rabenau-Geilshausen,Hessen,50.646,8.8878,300
+04047,rr,Radeberg-Kleinerkmannsdorf,Sachsen,51.0749,13.9271,276
+04052,rr,Kemberg-Radis,Sachsen-Anhalt,51.7557,12.5104,94
+04053,rr,Radolfzell,Baden-Württemberg,47.7395,8.9812,397
+04057,rr,Ratscher,Thüringen,50.4933,10.7847,394
+04063,kl,Rahden-Kleinendorf,Nordrhein-Westfalen,52.4461,8.5906,41
+04064,rr,Rain am Lech,Bayern,48.692,10.8978,409
+04065,rr,Rain am Lech-Wallerdorf,Bayern,48.6192,11.0059,462
+04071,rr,Ranstadt-Ober-Mockstadt,Hessen,50.3475,8.9672,128
+04077,rr,Rastatt,Baden-Württemberg,48.8471,8.1868,114
+04078,rr,Rastede,Niedersachsen,53.2428,8.2236,18
+04080,rr,Ducherow-Rathebur,Mecklenburg-Vorpommern,53.7409,13.7906,9
+04081,rr,Rathenow,Brandenburg,52.6093,12.3629,29
+04086,rr,Raubling-Pfraundorf,Bayern,47.8109,12.1254,450
+04090,rr,Raunheim,Hessen,50.0056,8.4291,89
+04094,kl,"Weingarten, Kr. Ravensburg",Baden-Württemberg,47.8062,9.6206,441
+04096,rr,Ravenstein-Hüngheim,Baden-Württemberg,49.4114,9.5132,312
+04101,rr,Redefin,Mecklenburg-Vorpommern,53.3469,11.1992,16
+04103,rr,Regen,Bayern,48.9661,13.1427,584
+04104,kl,Regensburg,Bayern,49.0425,12.1019,365
+04106,rr,Regenstauf,Bayern,49.1388,12.1164,345
+04107,rr,Regnitzlosau,Bayern,50.29,12.027,503
+04108,rr,Am Mellensee-Rehagen,Brandenburg,52.161,13.3814,53
+04109,rr,Rehau,Bayern,50.2214,12.0275,586
+04110,rr,Woldegk-Rehberg,Mecklenburg-Vorpommern,53.442,13.4628,101
+04112,rr,Rehburg-Loccum,Niedersachsen,52.4396,9.1335,60
+04121,rr,Reichelsheim/Odenwald,Hessen,49.7086,8.8563,209
+04127,kl,Reichshof-Eckenhagen,Nordrhein-Westfalen,50.9906,7.6958,347
+04128,rr,Lengefeld-Reifland,Sachsen,50.7339,13.2193,450
+04132,rr,Reinhardshagen-Vaake,Hessen,51.4841,9.6121,115
+04134,rr,Otzberg-Habitzheim,Hessen,49.8366,8.8806,172
+04135,rr,Reinholterode,Thüringen,51.4248,10.1898,336
+04149,rr,Marienberg-Reitzenhain,Sachsen,50.5477,13.2239,774
+04150,rr,Reken,Nordrhein-Westfalen,51.8118,7.0907,59
+04155,rr,Remseck/Neckar-Aldingen,Baden-Württemberg,48.8586,9.2482,215
+04159,rr,Tagmersheim-Blossenau,Bayern,48.8104,10.936,523
+04160,kl,Renningen-Ihinger Hof,Baden-Württemberg,48.7425,8.924,478
+04165,rr,Rettenberg-Kranzegg,Bayern,47.5855,10.323,855
+04169,kl,Rheinau-Memprechtshofen,Baden-Württemberg,48.6703,7.9939,131
+04175,kl,Rheinfelden,Baden-Württemberg,47.559,7.7721,283
+04176,rr,Rheinsberg/Mark,Brandenburg,53.1109,12.8951,57
+04177,kl,Rheinstetten,Baden-Württemberg,48.9726,8.3301,116
+04184,rr,Ribnitz-Damgarten,Mecklenburg-Vorpommern,54.2377,12.433,9
+04185,rr,Riedenburg,Bayern,48.9555,11.728,363
+04189,kl,"Altheim, Kreis Biberach",Baden-Württemberg,48.1479,9.4596,534
+04197,rr,Riesa (West),Sachsen,51.3001,13.2506,139
+04212,rr,Ritschenhausen,Thüringen,50.5084,10.4365,309
+04218,rr,Rodach,Bayern,50.3311,10.7918,300
+04219,rr,Rodder,Rheinland-Pfalz,50.3965,6.8568,512
+04224,rr,Roding-Neubäu,Bayern,49.2412,12.4125,388
+04226,rr,Röbel/Müritz,Mecklenburg-Vorpommern,53.3704,12.6174,73
+04230,rr,Rödermark-Ober-Roden,Hessen,49.9832,8.8395,137
+04231,rr,Rödinghausen-Bruchmühlen,Nordrhein-Westfalen,52.2104,8.4722,84
+04232,rr,Rögnitz,Mecklenburg-Vorpommern,53.6092,11.0247,48
+04242,rr,Rötha,Sachsen,51.1931,12.4137,136
+04246,rr,Brunn-Roggenhagen,Mecklenburg-Vorpommern,53.661,13.4119,47
+04248,rr,Rohr/Mittelfranken-Dechendorf,Bayern,49.3082,10.9183,402
+04251,rr,Oberstdorf-Rohrmoos,Bayern,47.4069,10.1676,1067
+04253,rr,Ronneburg-Hüttengesäß,Hessen,50.209,9.0382,145
+04259,rr,Rosenfeld-Leidringen,Baden-Württemberg,48.2646,8.7017,640
+04261,kl,Rosenheim,Bayern,47.8819,12.1249,444
+04265,rr,Roßdorf,Thüringen,50.7041,10.2099,394
+04267,rr,Dessau-Roßlau-Rodleben,Sachsen-Anhalt,51.8983,12.197,76
+04271,kl,Rostock-Warnemünde,Mecklenburg-Vorpommern,54.1803,12.0808,5
+04275,kl,Rotenburg (Wümme),Niedersachsen,53.1289,9.3398,32
+04277,rr,Rotenburg-Braach,Hessen,51.0084,9.6881,190
+04279,kl,Roth bei Prüm,Rheinland-Pfalz,50.3046,6.3863,593
+04280,kl,Roth,Bayern,49.2162,11.1035,386
+04282,rr,Rothemühl,Mecklenburg-Vorpommern,53.5954,13.8121,24
+04284,rr,Rothenbuch,Bayern,49.9685,9.4001,363
+04287,kl,Rothenburg ob der Tauber,Bayern,49.3849,10.1732,415
+04288,rr,"Rothenfelde, Bad",Niedersachsen,52.1038,8.1809,96
+04294,rr,Rottenburg-Kiebingen,Baden-Württemberg,48.4704,8.9687,360
+04297,rr,Rottenburg/Niederbayern-Niedereulenbach,Bayern,48.744,12.0083,419
+04298,rr,Rotthalmünster,Bayern,48.3617,13.1939,388
+04300,kl,Rottweil,Baden-Württemberg,48.1815,8.6356,589
+04301,kl,"Kreuznach, Bad",Rheinland-Pfalz,49.8502,7.871,102
+04308,rr,Rüdesheim-Presberg,Hessen,50.0517,7.8876,403
+04310,rr,Rülzheim,Rheinland-Pfalz,49.1609,8.3009,105
+04312,rr,Haren-Rütenbrock,Niedersachsen,52.8616,7.1035,12
+04313,rr,Rüthen,Nordrhein-Westfalen,51.4966,8.4342,370
+04314,rr,Rüting-Diedrichshagen,Mecklenburg-Vorpommern,53.8049,11.2067,31
+04315,rr,Baiersbronn-Ruhestein,Baden-Württemberg,48.5615,8.2228,914
+04319,rr,Ruhpolding-Seehaus,Bayern,47.711,12.6212,746
+04323,kl,Ruppertsecken,Rheinland-Pfalz,49.6468,7.8837,461
+04336,kl,Saarbrücken-Ensheim,Saarland,49.2128,7.1077,319
+04347,rr,"Sachsa, Bad",Niedersachsen,51.5909,10.5691,293
+04349,kl,Sachsenheim,Baden-Württemberg,48.9571,9.071,251
+04352,rr,Sagard-Vorwerk,Mecklenburg-Vorpommern,54.516,13.5307,5
+04354,kl,Saldenburg-Entschenreuth,Bayern,48.7832,13.3146,457
+04362,rr,Salzgitter-Lichtenberg,Niedersachsen,52.1249,10.2917,155
+04365,rr,"Salzhausen, Kreis Harburg",Niedersachsen,53.2226,10.1751,41
+04368,rr,Salzkotten,Nordrhein-Westfalen,51.7098,8.5796,93
+04371,kl,"Salzuflen, Bad",Nordrhein-Westfalen,52.1042,8.7521,135
+04373,rr,Salzwedel,Sachsen-Anhalt,52.8568,11.1319,29
+04374,rr,Samerberg-Geisenkam,Bayern,47.7774,12.2102,687
+04376,rr,Samtens,Mecklenburg-Vorpommern,54.3555,13.291,6
+04377,kl,Sandberg,Bayern,50.3518,10.0034,518
+04381,rr,Sangerhausen,Sachsen-Anhalt,51.4776,11.3123,179
+04387,rr,Sankt Englmar,Bayern,49.0029,12.8237,805
+04392,rr,Sankt Oswald-Riedlhütte,Bayern,48.8861,13.4261,755
+04393,kl,Sankt Peter-Ording,Schleswig-Holstein,54.3279,8.6031,5
+04400,rr,"Sassendorf, Bad-Beusingsen",Nordrhein-Westfalen,51.5439,8.1808,171
+04403,rr,Saterland-Ramsloh,Niedersachsen,53.1039,7.6504,4
+04405,rr,Satrup,Schleswig-Holstein,54.6854,9.6261,34
+04409,rr,"Saulgau, Bad-Bolstern",Baden-Württemberg,47.9874,9.4583,630
+04411,kl,Schaafheim-Schlierbach,Hessen,49.9195,8.9672,155
+04412,rr,Hohe Börde-Schackensleben,Sachsen-Anhalt,52.198,11.4218,95
+04413,rr,Schäftlarn-Kloster Schäftlarn,Bayern,47.9767,11.4693,555
+04419,rr,Schallstadt-Mengen,Baden-Württemberg,47.9556,7.7133,212
+04432,rr,Altenberg-Schellerhau,Sachsen,50.7799,13.6814,778
+04441,rr,Scheyern,Bayern,48.5025,11.4543,479
+04445,kl,Wernigerode-Schierke,Sachsen-Anhalt,51.7659,10.6533,614
+04448,rr,"Freienwalde (Oder), Bad-Schiffmühle",Brandenburg,52.8107,14.0642,3
+04464,kl,Schleiz,Thüringen,50.5679,11.8041,501
+04466,kl,Schleswig,Schleswig-Holstein,54.5275,9.5487,43
+04469,rr,Schleusingen,Thüringen,50.5071,10.762,399
+04480,kl,Schlüchtern-Herolz,Hessen,50.3447,9.5533,232
+04482,rr,Schlüsselfeld-Hohn am Berg,Bayern,49.7844,10.5407,411
+04488,rr,Schmallenberg-Sellinghausen,Nordrhein-Westfalen,51.2127,8.2672,443
+04490,rr,Schmelz-Hüttersdorf,Saarland,49.4149,6.836,223
+04493,rr,Schmidgaden,Bayern,49.4116,12.076,417
+04494,rr,Schmidmühlen,Bayern,49.2806,11.914,455
+04501,kl,Schmücke,Thüringen,50.6545,10.7696,938
+04508,kl,Schneifelforsthaus,Rheinland-Pfalz,50.2968,6.4194,653
+04515,rr,Schöfweg,Bayern,48.8367,13.2305,754
+04516,rr,Schöllnach-Taiding,Bayern,48.7734,13.1807,417
+04524,rr,Schönbeck,Mecklenburg-Vorpommern,53.5844,13.5732,43
+04528,rr,Schönberg/Niederbayern,Bayern,48.8397,13.34,549
+04538,rr,Nordwestuckermark-Schönermark,Brandenburg,53.3312,13.7327,63
+04546,rr,Schönsee-Dietersdorf,Bayern,49.5273,12.5705,684
+04548,kl,Schönwald/Ofr.-Brunn,Bayern,50.1847,12.0791,608
+04554,rr,Schollbrunn,Bayern,49.8387,9.462,408
+04555,rr,Schollene,Sachsen-Anhalt,52.663,12.1812,29
+04557,rr,Schopfheim-Eichen,Baden-Württemberg,47.6464,7.844,399
+04559,kl,Schorndorf-Knöbling,Bayern,49.1644,12.6175,398
+04567,rr,Schrobenhausen,Bayern,48.5532,11.2844,417
+04575,rr,Schwaan-Bandow,Mecklenburg-Vorpommern,53.9463,12.0052,13
+04579,rr,Schwabmünchen,Bayern,48.2008,10.7293,538
+04582,rr,Schwäbisch Hall-Bibersfeld,Baden-Württemberg,49.0823,9.6892,358
+04585,rr,Schwaigern-Stetten am Heuchelberg,Baden-Württemberg,49.1287,9.0048,197
+04587,rr,"Schwalbach, Bad-Langenseifen",Hessen,50.1219,8.0367,480
+04589,rr,Schwalmstadt-Treysa,Hessen,50.9181,9.1734,212
+04592,kl,Schwandorf,Bayern,49.3278,12.0871,356
+04594,rr,Schwanewede-Neuenkirchen,Niedersachsen,53.2338,8.5115,2
+04599,rr,Wendelstein-Kleinschwarzenlohe,Bayern,49.3425,11.1077,331
+04600,rr,Schwarme,Niedersachsen,52.9081,9.0452,12
+04601,rr,Essel,Niedersachsen,52.6797,9.6524,28
+04602,rr,"Schwartau,Bad -Groß Parin",Schleswig-Holstein,53.9385,10.6983,26
+04603,rr,Schwarzach/Main,Bayern,49.7975,10.2191,188
+04605,kl,Schwarzburg,Thüringen,50.6441,11.1936,277
+04607,rr,Naila-Lippertsgrün,Bayern,50.308,11.643,637
+04609,rr,Schwarzenbach-Götzmannsgrün,Bayern,50.1926,11.8932,522
+04615,rr,Schwarzenbruck,Bayern,49.3577,11.2443,363
+04617,rr,Obere Firstalm/Schlierseer Berge,Bayern,47.6705,11.8539,1373
+04618,rr,Hohenberg-Krusemark-Schwarzholz,Sachsen-Anhalt,52.747,11.9792,30
+04622,rr,Schwendi-Kleinschafhausen,Baden-Württemberg,48.1923,9.9577,536
+04625,kl,Schwerin,Mecklenburg-Vorpommern,53.6424,11.3871,59
+04630,rr,Schwetzingen,Baden-Württemberg,49.3841,8.5753,101
+04632,rr,Moltzow-Schwinkendorf,Mecklenburg-Vorpommern,53.6449,12.6813,64
+04637,rr,Staaken,Brandenburg,52.5404,13.1243,33
+04639,rr,"Seedorf, Kreis Segeberg -Blomnath",Schleswig-Holstein,54.0302,10.475,36
+04641,rr,Seeg (Kläranlage),Bayern,47.6711,10.6271,802
+04642,kl,Seehausen,Sachsen-Anhalt,52.8911,11.7297,22
+04650,rr,Seesbach/Nahe,Rheinland-Pfalz,49.8417,7.5541,344
+04651,kl,Seesen,Niedersachsen,51.904,10.1885,189
+04657,rr,Görwihl-Burg,Baden-Württemberg,47.6587,8.0759,782
+04666,rr,Köhn,Schleswig-Holstein,54.3444,10.4581,40
+04667,rr,Selfkant-Havert,Nordrhein-Westfalen,51.0395,5.9071,46
+04668,rr,Seligenstadt-Waldhof,Hessen,50.0242,8.9604,119
+04671,rr,Selters/Taunus-Niederselters,Hessen,50.3362,8.2228,159
+04672,rr,Selters,Rheinland-Pfalz,50.5218,7.7375,239
+04675,rr,Neu-Ulm-Hausen,Bayern,48.3455,10.0624,514
+04677,rr,Senftenberg,Brandenburg,51.5142,14.0152,102
+04683,rr,Fürstenau,Niedersachsen,52.516,7.6762,48
+04686,rr,Sibbesse,Niedersachsen,52.0541,9.909,187
+04690,rr,Siegbach-Eisemroth,Hessen,50.736,8.4195,347
+04694,rr,Siegenburg,Bayern,48.7629,11.843,380
+04697,rr,Siegsdorf-Maria Eck,Bayern,47.7932,12.6194,838
+04703,kl,Sigmaringen-Laiz,Baden-Württemberg,48.0719,9.1943,581
+04704,kl,Sigmarszell-Zeisertsweiler,Bayern,47.5776,9.7404,508
+04706,kl,Simbach/Inn,Bayern,48.2718,13.0273,358
+04707,rr,Simmelsdorf,Bayern,49.5998,11.3374,385
+04708,rr,Simmerath (Kalltalsperre),Nordrhein-Westfalen,50.6466,6.3121,434
+04709,kl,Simmern-Wahlbach,Rheinland-Pfalz,49.9996,7.5981,445
+04710,rr,Simmersfeld,Baden-Württemberg,48.6191,8.5247,718
+04712,rr,Simonswald-Obersimonswald,Baden-Württemberg,48.0821,8.0919,428
+04713,rr,Sindelfingen,Baden-Württemberg,48.6919,8.9821,425
+04730,rr,"Soden, Bad-Salmünster",Hessen,50.2691,9.3602,145
+04732,rr,Söhren,Schleswig-Holstein,53.9102,10.4307,41
+04741,rr,Solingen-Hohenscheid,Nordrhein-Westfalen,51.14,7.093,152
+04745,kl,Soltau,Niedersachsen,52.9604,9.793,75
+04748,kl,Sondershausen,Thüringen,51.3691,10.88,185
+04754,rr,Sonnefeld-Gestungshausen,Bayern,50.2376,11.1797,335
+04755,rr,Sonnen,Bayern,48.6819,13.7351,847
+04757,rr,Sonnenbühl-Genkingen,Baden-Württemberg,48.4064,9.1891,782
+04759,rr,Sontheim,Bayern,48.0023,10.356,625
+04760,rr,Sonthofen (Flussmeisterstelle),Bayern,47.5219,10.2613,730
+04763,kl,Sontra,Hessen,51.0607,9.9266,265
+04765,rr,"Sooden-Allendorf, Bad",Hessen,51.28,9.9847,199
+04790,rr,Springe,Niedersachsen,52.2054,9.5668,98
+04796,rr,Quitzdorf am See-Sproitz,Sachsen,51.2814,14.7442,160
+04798,rr,Sankt Bernhard,Thüringen,50.4604,10.5947,470
+04800,rr,Stade,Niedersachsen,53.5882,9.4822,18
+04801,rr,Stadelhofen,Bayern,50.007,11.2052,460
+04803,rr,Butjadingen-Inte,Niedersachsen,53.4926,8.3768,1
+04808,rr,Münnerstadt-Seubrigshausen,Bayern,50.2308,10.3201,331
+04810,rr,Stadtlohn,Nordrhein-Westfalen,51.9973,6.9706,60
+04812,rr,Stadtroda,Thüringen,50.8515,11.7165,248
+04813,kl,"Staffelstein, Bad-Stublang",Bayern,50.0806,11.0467,318
+04816,rr,Stallwang,Bayern,49.0568,12.6395,390
+04818,rr,Stammbach-Querenbach,Bayern,50.1531,11.7402,597
+04821,rr,Arnstein-Ulzigerode,Sachsen-Anhalt,51.6794,11.3641,217
+04822,rr,Nordharz-Stapelburg,Sachsen-Anhalt,51.9024,10.6679,223
+04824,rr,Starnberg,Bayern,48,11.3542,585
+04827,rr,Grassau,Bayern,47.7941,12.486,540
+04829,rr,Staufenberg-Treis,Hessen,50.6719,8.7808,225
+04841,kl,"Steinau, Kr. Cuxhaven",Niedersachsen,53.6946,8.8735,0
+04844,rr,Steinau-Ulmbach,Hessen,50.3686,9.4216,379
+04849,rr,Steinfurt-Burgsteinfurt,Nordrhein-Westfalen,52.1173,7.3411,64
+04850,rr,Steingaden-Lauterbach,Bayern,47.7112,10.8758,779
+04852,rr,Steinhagen-Brockhagen,Nordrhein-Westfalen,52.0035,8.3456,82
+04854,rr,Neuhaus-Steinheid,Thüringen,50.4714,11.084,792
+04857,kl,Mittelnkirchen-Hohenfelde,Niedersachsen,53.5534,9.6097,2
+04858,rr,Steinkirchen-Hofstarring,Bayern,48.3773,12.0927,485
+04864,rr,Kyffhäuserland-Steinthaleben,Thüringen,51.3954,11.0728,380
+04865,rr,Steinwiesen,Bayern,50.3046,11.4629,374
+04867,rr,Tanna-Spielmes,Thüringen,50.4638,11.9333,544
+04875,rr,Stetten-Frohnstetten,Baden-Württemberg,48.1417,9.0965,780
+04878,kl,Oberharz am Brocken-Stiege,Sachsen-Anhalt,51.6647,10.881,505
+04880,kl,Stimpfach-Weipertshofen,Baden-Württemberg,49.0878,10.124,450
+04881,rr,Stockach,Baden-Württemberg,47.8591,9.0152,533
+04883,rr,Frankenfeld-Hedern,Niedersachsen,52.7659,9.4046,19
+04887,kl,Stötten,Baden-Württemberg,48.6656,9.8648,734
+04892,rr,Stollberg/Erzgeb.,Sachsen,50.7154,12.8053,430
+04895,rr,Stolpen,Sachsen,51.0413,14.0856,261
+04899,rr,Wittenberg-Straach,Sachsen-Anhalt,51.9505,12.6009,120
+04902,rr,Stralsund,Mecklenburg-Vorpommern,54.2972,13.0975,4
+04904,rr,Strasburg,Mecklenburg-Vorpommern,53.5162,13.7376,67
+04909,rr,Straubenhardt-Schwann,Baden-Württemberg,48.845,8.5449,419
+04911,kl,Straubing,Bayern,48.8275,12.5597,351
+04912,rr,Strausberg,Brandenburg,52.5883,13.9289,82
+04916,rr,Straufhain-Eishausen,Thüringen,50.3743,10.7416,337
+04919,kl,Strucklahnungshörn,Schleswig-Holstein,54.4965,8.8069,7
+04920,rr,Beverstedt,Niedersachsen,53.4252,8.804,4
+04922,rr,Stüdenitz-Schönermark,Brandenburg,52.8881,12.2765,31
+04928,kl,Stuttgart (Schnarrenberg),Baden-Württemberg,48.8281,9.2,314
+04931,kl,Stuttgart-Echterdingen,Baden-Württemberg,48.6883,9.2235,371
+04935,rr,Stuttgart-Weilimdorf,Baden-Württemberg,48.8166,9.105,319
+04941,rr,Wesselburen,Schleswig-Holstein,54.2101,8.919,2
+04943,rr,Bothel-Rahnhorst,Niedersachsen,52.9877,9.3618,54
+04946,rr,Schweitenkirchen-Sünzhausen,Bayern,48.5151,11.6545,500
+04947,kl,Süpplingen,Niedersachsen,52.2317,10.92,129
+04949,rr,Sugenheim,Bayern,49.5991,10.4386,312
+04952,rr,Suhl-Heidersbach,Thüringen,50.6427,10.7183,576
+04953,rr,Sulingen,Niedersachsen,52.683,8.8332,55
+04954,rr,Sulzbach-Rosenberg,Bayern,49.4856,11.7869,415
+04958,rr,Sulzdorf an der Lederhecke,Bayern,50.2417,10.567,333
+04972,rr,Oelsnitz-Göswein,Sachsen,50.4301,12.0974,407
+04975,rr,Tambach-Dietharz/Apfelstädt,Thüringen,50.787,10.6208,476
+04978,kl,Tann/Rhön,Hessen,50.639,10.0228,395
+04982,rr,Tannenberg,Sachsen,50.6074,12.939,528
+04984,rr,Gartz (Oder)-Hohenreinkendorf,Brandenburg,53.2252,14.33,48
+04988,rr,Taucha,Sachsen,51.3825,12.5171,129
+04990,rr,Taufkirchen/Vils-Baum,Bayern,48.3277,12.1711,491
+04997,kl,Starkenberg-Tegkwitz,Thüringen,50.9771,12.3419,196
+05000,rr,Teisendorf,Bayern,47.8526,12.8282,498
+05002,rr,Teisnach,Bayern,49.0426,12.9942,400
+05006,rr,Templin,Brandenburg,53.1296,13.5015,66
+05007,rr,"Tennstedt, Bad",Thüringen,51.1507,10.8362,191
+05009,kl,Teterow,Mecklenburg-Vorpommern,53.761,12.5574,37
+05011,rr,Tettau-Sattelgrund,Bayern,50.4433,11.2636,566
+05013,rr,Teublitz (Kläranlage),Bayern,49.2187,12.0624,350
+05014,kl,Worpswede-Hüttenbusch,Niedersachsen,53.2758,8.9857,7
+05015,rr,Teunz-Wildstein,Bayern,49.5238,12.4175,670
+05017,kl,Teuschnitz,Bayern,50.4002,11.3888,633
+05018,rr,Teutschenthal,Sachsen-Anhalt,51.4561,11.8132,104
+05019,rr,Rosche-Stütensen,Niedersachsen,53.0004,10.7879,57
+05020,rr,"Seebach, Wartburgkreis",Thüringen,50.9181,10.4114,333
+05023,rr,Thalmässing,Bayern,49.0871,11.2236,416
+05024,rr,Möckern-Räckendorf,Sachsen-Anhalt,52.2084,12.0328,67
+05026,rr,Themar-Tachbach,Thüringen,50.5296,10.6167,357
+05029,kl,Tholey,Saarland,49.4737,7.0385,387
+05032,rr,Thüngersheim,Bayern,49.885,9.8469,197
+05034,rr,Thurnau-Tannfeld,Bayern,49.9842,11.4008,513
+05036,rr,Treffelstein-Witzelsmühle,Bayern,49.4038,12.6062,470
+05045,rr,Tirpersdorf,Sachsen,50.4356,12.2574,492
+05046,kl,Tirschenreuth-Lodermühl,Bayern,49.8576,12.3542,501
+05054,rr,Tittling,Bayern,48.7264,13.35,506
+05055,rr,Tittmoning,Bayern,48.0669,12.7634,382
+05057,rr,Haale,Schleswig-Holstein,54.1695,9.5559,28
+05058,rr,Sprenge,Schleswig-Holstein,53.6893,10.3657,56
+05059,rr,Todtmoos,Baden-Württemberg,47.7279,7.9988,781
+05064,kl,Tönisvorst,Nordrhein-Westfalen,51.2897,6.4437,37
+05065,rr,Töpen,Bayern,50.3936,11.8735,536
+05069,rr,Torgelow,Mecklenburg-Vorpommern,53.6376,14.015,10
+05071,rr,Tostedt-Todtglüsingen,Niedersachsen,53.2831,9.7355,58
+05073,rr,Traunreut-Frühling,Bayern,47.9526,12.6265,588
+05078,kl,Travemünde,Schleswig-Holstein,53.9619,10.8892,2
+05084,rr,Südeichsfeld-Wendehausen,Thüringen,51.1594,10.2473,290
+05086,rr,Trendelburg,Hessen,51.5777,9.4337,133
+05092,rr,Treuenbrietzen,Brandenburg,52.1079,12.8736,58
+05097,kl,Tribsees,Mecklenburg-Vorpommern,54.0654,12.7655,10
+05099,kl,Trier-Zewen,Rheinland-Pfalz,49.7326,6.6131,132
+05100,kl,Trier-Petrisberg,Rheinland-Pfalz,49.7479,6.6583,261
+05103,rr,Trippstadt-Neuhof,Rheinland-Pfalz,49.3544,7.7948,348
+05108,rr,Tröbitz,Brandenburg,51.5964,13.4255,101
+05109,kl,Trollenhagen,Mecklenburg-Vorpommern,53.5998,13.3039,68
+05111,kl,Trostberg,Bayern,48.0311,12.5396,560
+05123,rr,Tüßling,Bayern,48.208,12.6296,413
+05128,rr,Tuttlingen-Möhringen-Vorstadt,Baden-Württemberg,47.9682,8.7899,668
+05131,rr,Twist,Niedersachsen,52.6324,7.1105,18
+05132,rr,Twist-Hebelermeer,Niedersachsen,52.743,7.0754,17
+05133,kl,Twistetal-Mühlhausen,Hessen,51.3344,8.9132,287
+05141,rr,Schonungen-Reichmannshausen,Bayern,50.1226,10.3808,347
+05142,kl,Ueckermünde,Mecklenburg-Vorpommern,53.7445,14.0698,1
+05146,kl,Uelzen,Niedersachsen,52.9414,10.5289,50
+05148,rr,Uetze,Niedersachsen,52.4588,10.1888,60
+05149,kl,Gollhofen,Bayern,49.5679,10.1969,318
+05157,rr,Ummanz-Unrow,Mecklenburg-Vorpommern,54.4204,13.2489,4
+05158,kl,Ummendorf,Sachsen-Anhalt,52.1601,11.1759,159
+05160,rr,Unterföhring,Bayern,48.1839,11.6574,504
+05161,rr,Untergriesbach-Glotzing,Bayern,48.5599,13.7495,573
+05162,rr,Untergriesbach-Schaibing,Bayern,48.5995,13.6465,495
+05167,rr,Unterreit-Tausend,Bayern,48.1286,12.2642,485
+05169,rr,Kraftisried,Bayern,47.7674,10.4604,831
+05174,rr,"Urach, Bad",Baden-Württemberg,48.4951,9.4003,471
+05176,rr,Ursensollen-Kotzheim,Bayern,49.421,11.744,494
+05178,rr,Usedom,Mecklenburg-Vorpommern,53.8774,13.9294,4
+05180,rr,Uslar,Niedersachsen,51.6544,9.6481,190
+05186,rr,Uttenweiler-Ahlen,Baden-Württemberg,48.1249,9.6511,612
+05187,rr,Utting-Achselschwang,Bayern,48.0347,11.0527,591
+05195,rr,Groß Plasten-Varchentin,Mecklenburg-Vorpommern,53.5673,12.872,52
+05196,rr,Varel,Niedersachsen,53.3835,8.1332,6
+05198,rr,Peine-Woltorf,Niedersachsen,52.3044,10.3171,75
+05199,rr,Lengede,Niedersachsen,52.2098,10.3212,87
+05200,rr,Vechta,Niedersachsen,52.7562,8.301,41
+05201,rr,Gumtow-Vehlow,Brandenburg,53.0168,12.3177,46
+05209,rr,Verden-Dauelsen,Niedersachsen,52.9586,9.2269,20
+05213,rr,Versmold,Nordrhein-Westfalen,52.0107,8.1602,64
+05216,rr,Viechtach-Bühling,Bayern,49.1098,12.927,662
+05218,rr,Viereth-Trunstadt,Bayern,49.923,10.7875,232
+05225,rr,"Vilbel, Bad-Dortelweil",Hessen,50.2135,8.7453,125
+05227,rr,Vilgertshofen-Pflugdorf,Bayern,47.9692,10.9151,682
+05229,kl,Villingen-Schwenningen,Baden-Württemberg,48.0453,8.4608,719
+05230,rr,Vilsbiburg,Bayern,48.4527,12.3382,462
+05237,rr,Visselhövede,Niedersachsen,53.0048,9.601,54
+05240,rr,Vöhl-Buchenberg,Hessen,51.1598,8.8738,380
+05251,rr,Vohenstrauß,Bayern,49.6323,12.3309,553
+05256,rr,Volkmarsen,Hessen,51.4145,9.1157,180
+05262,rr,Waakirchen-Demmelberg,Bayern,47.7564,11.6928,814
+05263,rr,Wabern-Hebel,Hessen,51.067,9.3821,203
+05271,rr,Wadersloh,Nordrhein-Westfalen,51.7576,8.2637,96
+05275,kl,Waghäusel-Kirrlach,Baden-Württemberg,49.2445,8.5374,105
+05276,rr,Waging am See,Bayern,47.9237,12.7558,476
+05279,kl,Wesertal-Lippoldsberg,Hessen,51.6194,9.5749,167
+05280,kl,Wittenborn,Schleswig-Holstein,53.9224,10.2267,33
+05281,rr,Wasungen-Wahns,Thüringen,50.6309,10.3052,356
+05285,rr,Waidhaus-Pfrentsch,Bayern,49.618,12.4895,501
+05294,rr,Waldbrunn-Lahr,Hessen,50.5121,8.1326,280
+05297,rr,Waldeck-Alraft,Hessen,51.2427,8.9718,300
+05300,kl,Waldems-Reinborn,Hessen,50.2596,8.3607,380
+05302,rr,Waldenburg-Obersteinbach,Baden-Württemberg,49.1514,9.6185,476
+05303,rr,Waldershof-Schafbruck,Bayern,49.936,12.0935,723
+05307,rr,Berge/Prignitz,Brandenburg,53.2402,11.8706,54
+05309,rr,Waldkappel-Schemmern,Hessen,51.1136,9.8156,317
+05318,rr,"Waldsee, Bad-Dinnenried",Baden-Württemberg,47.881,9.7327,597
+05319,kl,"Waldsee, Bad-Reute",Baden-Württemberg,47.9167,9.7076,576
+05326,rr,Walkendorf,Mecklenburg-Vorpommern,53.9699,12.5383,34
+05327,kl,Walldürn,Baden-Württemberg,49.5789,9.3974,404
+05335,kl,Waltershausen,Thüringen,50.8963,10.5483,352
+05336,rr,Pollenfeld-Götzelshard,Bayern,48.9576,11.2658,521
+05342,rr,Wangerland-Minsen,Niedersachsen,53.708,7.9746,2
+05344,rr,Wangerooge,Niedersachsen,53.7865,7.9096,2
+05347,kl,Warburg,Nordrhein-Westfalen,51.5039,9.1118,236
+05349,kl,Waren (Müritz),Mecklenburg-Vorpommern,53.5196,12.6654,73
+05357,rr,Warpe-Helzendorf,Niedersachsen,52.76,9.0713,26
+05360,rr,Warstein-Hirschberg,Nordrhein-Westfalen,51.4319,8.2665,331
+05364,rr,Wartmannsroth-Völkersleier,Bayern,50.1838,9.7789,377
+05370,rr,Wasserburg/Inn-Reisach,Bayern,48.0451,12.1927,482
+05371,kl,Wasserkuppe,Hessen,50.4973,9.9427,920
+05374,rr,Wassertrüdingen (Kläranlage),Bayern,49.034,10.6031,420
+05376,rr,Wattendorf,Bayern,50.0333,11.1243,522
+05381,rr,Hetlingen,Schleswig-Holstein,53.603,9.6249,5
+05382,rr,Wedemark-Elze,Niedersachsen,52.5883,9.7386,39
+05389,rr,Wegscheid,Bayern,48.5964,13.7858,669
+05395,rr,Harth-Pöllnitz Neundorf,Thüringen,50.7676,11.981,340
+05397,kl,Weiden,Bayern,49.6662,12.1844,440
+05399,rr,Weidenberg-Görschnitz,Bayern,49.9578,11.6997,418
+05401,rr,"Weiding, Kreis Cham-Dalking",Bayern,49.2717,12.7451,424
+05404,kl,Weihenstephan-Dürnast,Bayern,48.4024,11.6946,477
+05405,rr,Weihenzell-Grüb,Bayern,49.3376,10.606,474
+05409,rr,Weil im Schönbuch,Baden-Württemberg,48.6274,9.0714,431
+05412,kl,Weilheim-Bierbronnen,Baden-Württemberg,47.6802,8.1964,771
+05416,rr,Weilmünster,Hessen,50.4284,8.3806,183
+05417,rr,Weilrod-Niederlauken,Hessen,50.3468,8.4335,316
+05424,kl,Weimar-Schöndorf,Thüringen,51.0177,11.3544,328
+05426,kl,Weinbiet,Rheinland-Pfalz,49.3758,8.1212,553
+05430,rr,Weinstadt-Endersbach,Baden-Württemberg,48.8018,9.3697,276
+05432,rr,Weisendorf-Oberlindach,Bayern,49.6343,10.8182,305
+05433,kl,Weiskirchen/Saar,Saarland,49.5534,6.812,383
+05435,rr,Weissach,Baden-Württemberg,48.8457,8.9073,455
+05436,rr,Amtsberg-Weißbach,Sachsen,50.7347,13.0256,410
+05440,kl,Weißenburg-Emetzheim,Bayern,49.0115,10.9308,439
+05442,rr,Weißenfels,Sachsen-Anhalt,51.2002,11.9154,109
+05444,rr,Weißenhorn-Oberreichenbach,Bayern,48.3091,10.2049,500
+05445,rr,Weißensee-Ottenhausen,Thüringen,51.212,10.9956,165
+05453,rr,Weisweil-Waldeckhof,Baden-Württemberg,48.188,7.6976,174
+05455,rr,Weiterstadt-Schneppenhausen,Hessen,49.9298,8.5768,103
+05462,rr,Steyerberg,Niedersachsen,52.5653,9.0143,31
+05470,rr,Fahrenzhausen,Bayern,48.3631,11.5635,459
+05475,rr,Werda,Sachsen,50.4478,12.3048,595
+05478,rr,Werder (Havel),Brandenburg,52.3647,12.8955,43
+05480,kl,Werl,Nordrhein-Westfalen,51.5763,7.8879,85
+05482,rr,Werlte-Wehm,Niedersachsen,52.8342,7.6741,35
+05483,rr,Wermelskirchen,Nordrhein-Westfalen,51.1499,7.1871,244
+05484,rr,Ellrich-Werna,Thüringen,51.5835,10.709,240
+05485,rr,Wernberg-Köblitz -Neunaigen,Bayern,49.5213,12.0972,409
+05486,rr,Werne-Wessel,Nordrhein-Westfalen,51.7162,7.6834,93
+05487,rr,Waigolshausen,Bayern,49.966,10.1109,232
+05490,kl,Wernigerode,Sachsen-Anhalt,51.8454,10.7686,233
+05496,rr,Wertach-Bichel,Bayern,47.593,10.4086,974
+05501,rr,Wertingen,Bayern,48.57,10.6985,420
+05502,rr,Wesel-Flüren,Nordrhein-Westfalen,51.6927,6.5854,25
+05504,rr,Wesenberg,Mecklenburg-Vorpommern,53.2945,12.969,78
+05511,rr,Westerheim,Baden-Württemberg,48.5206,9.6187,825
+05512,rr,Westerhever,Schleswig-Holstein,54.3835,8.7092,2
+05513,rr,Westerkappeln,Nordrhein-Westfalen,52.2902,7.8687,92
+05516,kl,Fehmarn,Schleswig-Holstein,54.5283,11.0606,3
+05518,rr,Westerstede,Niedersachsen,53.2504,7.935,6
+05524,rr,Wetter/Hessen-Amönau,Hessen,50.9087,8.6929,227
+05531,rr,Weyhe-Melchiorshausen,Niedersachsen,52.9739,8.8062,12
+05538,kl,Wielenbach (Demollstr.),Bayern,47.8827,11.1576,551
+05541,kl,Wiesbaden-Auringen,Hessen,50.1321,8.3169,263
+05542,rr,Wiesbaden-Biebrich,Hessen,50.0421,8.2331,90
+05546,kl,Wiesenburg,Brandenburg,52.1206,12.4586,187
+05548,rr,Wiesenfelden-Utzenzell,Bayern,49.032,12.5505,680
+05552,rr,Wiesmoor,Niedersachsen,53.4261,7.7382,10
+05555,rr,Trebbin-Thyrow,Brandenburg,52.2534,13.2361,46
+05559,rr,"Wildbad, Bad-Calmbach",Baden-Württemberg,48.7848,8.5764,383
+05562,kl,Neubulach-Oberhaugstett,Baden-Württemberg,48.6516,8.6801,571
+05573,rr,Wilhelmsdorf/Mittelfranken,Bayern,49.5666,10.7407,358
+05574,rr,Wilhelmsfeld,Baden-Württemberg,49.4639,8.7687,347
+05579,rr,Willebadessen-Borlinghausen,Nordrhein-Westfalen,51.5892,9.0296,273
+05589,rr,Wilster,Schleswig-Holstein,53.9271,9.3679,-1
+05593,rr,Mühlhausen/Thüringen-Windeberg,Thüringen,51.2714,10.5127,345
+05594,rr,Windeck-Dattenfeld,Nordrhein-Westfalen,50.8038,7.557,110
+05597,rr,Windischeschenbach-Neuhaus,Bayern,49.7913,12.1679,417
+05599,rr,Windorf-Otterskirchen,Bayern,48.6228,13.2881,395
+05600,rr,"Windsheim, Bad",Bayern,49.5141,10.4231,310
+05608,rr,Winsen/Luhe-Stöckte,Niedersachsen,53.3779,10.19,2
+05609,rr,"Winterbach, Rems-Murr-Kreis",Baden-Württemberg,48.8031,9.4699,241
+05610,rr,Winterberg,Nordrhein-Westfalen,51.1872,8.5079,733
+05615,rr,Babenhausen,Bayern,48.1496,10.2559,566
+05616,rr,Winterspelt,Rheinland-Pfalz,50.2282,6.2071,426
+05619,rr,Wipperfürth-Gardeweg,Nordrhein-Westfalen,51.1637,7.4234,360
+05623,rr,An der Poststraße-Braunsroda,Sachsen-Anhalt,51.1648,11.5231,287
+05624,rr,Wismar,Mecklenburg-Vorpommern,53.9026,11.4254,16
+05629,kl,Wittenberg,Sachsen-Anhalt,51.8891,12.6446,105
+05632,rr,Tangerhütte-Windberge,Sachsen-Anhalt,52.5224,11.7149,48
+05635,rr,Wittlich,Rheinland-Pfalz,49.9617,6.9287,147
+05637,rr,Dettum,Niedersachsen,52.1705,10.6697,97
+05638,rr,Wittmund-Abens,Niedersachsen,53.5976,7.7255,4
+05639,rr,Wittmund-Carolinensiel,Niedersachsen,53.6961,7.8085,2
+05640,kl,Wittmundhafen,Niedersachsen,53.5444,7.6625,7
+05643,kl,Wittstock-Rote Mühle,Brandenburg,53.1864,12.4949,68
+05646,rr,Witzenhausen-Ziegenhagen,Hessen,51.3645,9.7491,220
+05650,rr,"Wörishofen, Bad-Kirchdorf",Bayern,48.0407,10.5706,639
+05658,rr,Wörth/Oberpfalz -Kiefenholz,Bayern,48.996,12.3475,326
+05664,kl,Wolfach,Baden-Württemberg,48.2953,8.2391,296
+05666,rr,Wolfegg (Neckenfurt),Baden-Württemberg,47.8081,9.7907,623
+05668,rr,Wolfenbüttel,Niedersachsen,52.1781,10.5365,80
+05673,rr,Wolfhagen-Wenigenhasungen,Hessen,51.3326,9.2503,302
+05676,rr,Wolfsburg (Südwest),Niedersachsen,52.3962,10.6892,82
+05682,rr,Wolgast,Mecklenburg-Vorpommern,54.0477,13.7676,16
+05684,rr,Wollin,Brandenburg,52.2813,12.4681,40
+05688,kl,Dachsberg-Wolpadingen,Baden-Württemberg,47.7004,8.1057,881
+05692,kl,Worms,Rheinland-Pfalz,49.6051,8.3659,88
+05699,rr,Wünnenberg-Eilern,Nordrhein-Westfalen,51.5427,8.7784,312
+05700,rr,Lengefeld-Neunzehnhain,Sachsen,50.7321,13.1648,422
+05705,kl,Würzburg,Bayern,49.7704,9.9576,268
+05711,rr,Wüstenrot-Oberheimbach,Baden-Württemberg,49.1295,9.4945,390
+05712,rr,Wittstock/Dosse-Wulfersdorf,Brandenburg,53.246,12.4157,79
+05715,kl,Wunstorf,Niedersachsen,52.4626,9.4245,49
+05717,kl,Wuppertal-Buchenhofen,Nordrhein-Westfalen,51.2256,7.1052,134
+05721,rr,Wurmannsquick-Egelsberg,Bayern,48.3569,12.7679,474
+05723,rr,"Wurzach, Bad-Oberschwarzach",Baden-Württemberg,47.9562,9.8802,717
+05724,rr,Rot an der Rot-Buch,Baden-Württemberg,47.9589,10.0139,690
+05729,rr,Oderaue-Wustrow,Brandenburg,52.7606,14.2174,6
+05731,kl,Wutöschingen-Ofteringen,Baden-Württemberg,47.6783,8.3801,395
+05732,rr,Wrixum/Föhr,Schleswig-Holstein,54.6928,8.5271,9
+05733,rr,Xanten,Nordrhein-Westfalen,51.697,6.3974,20
+05745,kl,Zehdenick,Brandenburg,52.9664,13.3268,51
+05746,rr,Diera-Zehren,Sachsen,51.1991,13.4049,105
+05747,rr,Zeil-Bischofsheim,Bayern,50.0327,10.6392,348
+05748,rr,Zeilarn-Gumpersdorf,Bayern,48.2779,12.8714,407
+05750,kl,Zeitz,Sachsen-Anhalt,51.0314,12.1495,264
+05753,rr,Zell/Oberpfalz-Mattenzell,Bayern,49.1133,12.4338,500
+05757,rr,Zemitz,Mecklenburg-Vorpommern,53.9758,13.7518,13
+05758,rr,Zemmer (Forsthaus Mülchen),Rheinland-Pfalz,49.8709,6.7074,293
+05762,rr,Zernien,Niedersachsen,53.0704,10.8831,83
+05763,rr,Freyburg/Unstrut-Zeuchfeld,Sachsen-Anhalt,51.238,11.8295,141
+05767,rr,Heeslingen-Wiersdorf,Niedersachsen,53.2989,9.3351,28
+05777,rr,"Zingst, Ostseeheilbad",Mecklenburg-Vorpommern,54.4317,12.6837,1
+05779,kl,Zinnwald-Georgenfeld,Sachsen,50.7313,13.7516,877
+05780,rr,Zirndorf,Bayern,49.4428,10.9443,311
+05784,rr,Zörbig,Sachsen-Anhalt,51.6241,12.1063,82
+05785,rr,Syrgenstein-Altenberg,Bayern,48.6618,10.3106,549
+05791,rr,Zülpich-Enzen,Nordrhein-Westfalen,50.6575,6.6945,189
+05792,kl,Zugspitze,Bayern,47.421,10.9848,2956
+05793,rr,Zusmarshausen,Bayern,48.424,10.5924,443
+05795,rr,"Zwesten, Bad",Hessen,51.0547,9.1682,250
+05797,kl,Lichtentanne,Sachsen,50.6879,12.4329,349
+05798,rr,Zwiefalten,Baden-Württemberg,48.2198,9.4862,529
+05800,kl,Zwiesel,Bayern,49.028,13.2385,615
+05805,rr,"Zwischenahn, Bad",Niedersachsen,53.2,7.9864,11
+05814,rr,Mansfeld-Annarode,Sachsen-Anhalt,51.5504,11.403,321
+05822,kl,Bassum,Niedersachsen,52.863,8.6989,42
+05825,kl,Nauen-Berge,Brandenburg,52.6198,12.7867,41
+05826,rr,Berge/Niedersachsen,Niedersachsen,52.6077,7.7518,41
+05833,rr,Penkefitz,Niedersachsen,53.1396,11.1165,13
+05839,kl,Emden,Niedersachsen,53.3881,7.2287,0
+05840,rr,Enzklösterle,Baden-Württemberg,48.6663,8.4721,593
+05851,kl,Frankenberg-Geismar,Hessen,51.0806,8.8769,392
+05854,rr,Friedland,Mecklenburg-Vorpommern,53.6557,13.5369,24
+05855,rr,Friedland-Groß Schneen,Niedersachsen,51.4333,9.9315,200
+05856,kl,Fürstenzell,Bayern,48.5451,13.3532,476
+05870,rr,Grünberg-Lehnheim,Hessen,50.6091,8.9909,296
+05871,kl,Hahn,Rheinland-Pfalz,49.9463,7.2645,497
+05875,rr,Heiligenstadt-Neumühle,Bayern,49.8715,11.1662,382
+05877,kl,Putlos,Schleswig-Holstein,54.316,10.8002,5
+05899,rr,"Ludwigsburg, Kr.Uckermark",Brandenburg,53.357,13.9806,44
+05906,kl,Mannheim,Baden-Württemberg,49.5063,8.5584,98
+05912,rr,Malsfeld,Hessen,51.0988,9.538,169
+05927,rr,Oberried/Baden,Baden-Württemberg,47.9327,7.9461,466
+05930,kl,Schönhagen (Ostseebad),Schleswig-Holstein,54.641,10.0238,1
+05941,kl,Reit im Winkl-Groißenbach,Bayern,47.6721,12.4756,680
+05943,rr,Rosenthal-Bielatal,Sachsen,50.8377,14.0719,462
+05959,rr,Steinach,Bayern,48.9572,12.606,331
+05960,rr,Stendal,Sachsen-Anhalt,52.6069,11.88,31
+05983,rr,Zeesen,Brandenburg,52.2616,13.616,43
+05985,rr,"Boll, Bad (Kläranlage)",Baden-Württemberg,48.652,9.6232,386
+05986,rr,Calw-Hirsau,Baden-Württemberg,48.745,8.7301,329
+05987,rr,Hayingen-Anhausen,Baden-Württemberg,48.287,9.4996,591
+05988,rr,Ilshofen,Baden-Württemberg,49.1638,9.9162,415
+05989,rr,Mulfingen,Baden-Württemberg,49.3502,9.7871,262
+05990,rr,Oberstenfeld,Baden-Württemberg,49.0137,9.3153,221
+05991,rr,Oppenau Oberes Renchtal,Baden-Württemberg,48.4997,8.1376,234
+05992,rr,Rudersberg-Michelau,Baden-Württemberg,48.853,9.5365,266
+05993,rr,Vogt,Baden-Württemberg,47.7595,9.7724,653
+05994,rr,Vöhrenbach,Baden-Württemberg,48.0277,8.2896,968
+06091,kl,Spiekeroog (SWN),Niedersachsen,53.7674,7.6721,14
+06093,kl,Wendisch Evern,Niedersachsen,53.2139,10.4704,62
+06096,kl,Altmühlsee,Bayern,49.1423,10.7301,416
+06097,kl,Darßer Ort (SWN),Mecklenburg-Vorpommern,54.4738,12.5014,4
+06099,kl,Gailingen,Baden-Württemberg,47.702,8.7318,449
+06100,rr,Hahnheim,Rheinland-Pfalz,49.8626,8.2311,120
+06101,kl,Bastorf-Kägsdorf (SWN),Mecklenburg-Vorpommern,54.1323,11.6719,51
+06102,kl,Lindau (SWN),Bayern,47.5396,9.6843,397
+06103,kl,Mittenwald/Obb.,Bayern,47.4287,11.2616,923
+06105,kl,Ostenfeld (Rendsburg),Schleswig-Holstein,54.3194,9.8051,15
+06106,kl,Rechlin,Mecklenburg-Vorpommern,53.3311,12.7149,62
+06107,kl,Sipplingen (SWN),Baden-Württemberg,47.8076,9.1035,703
+06108,kl,Ruthenstrom,Niedersachsen,53.7197,9.4192,7
+06109,kl,Grambow-Schwennenz,Mecklenburg-Vorpommern,53.3837,14.3728,51
+06113,rr,Zell am Harmersbach,Baden-Württemberg,48.3443,8.072,243
+06114,rr,Hungen-Rabertshausen,Hessen,50.461,8.9784,181
+06129,kl,Sohland/Spree,Sachsen,51.0594,14.4266,291
+06153,rr,Döbeln,Sachsen,51.106,13.0988,274
+06154,rr,Commerau-Königswartha,Sachsen,51.3272,14.3061,136
+06155,rr,Salbitz,Sachsen,51.2356,13.1712,140
+06156,rr,Wurzen,Sachsen,51.3714,12.7568,127
+06157,kl,Wangerland-Hooksiel,Niedersachsen,53.6411,8.0809,4
+06158,kl,Weidenbach-Weiherschneidbach,Bayern,49.2249,10.6085,454
+06159,kl,Dörpen,Niedersachsen,52.9542,7.3197,8
+06161,rr,Osterhofen-Thundorf,Bayern,48.7577,13.0134,311
+06163,kl,Dörnick,Schleswig-Holstein,54.1654,10.3519,27
+06170,kl,Neißemünde-Coschen,Brandenburg,52.0192,14.7254,39
+06177,rr,Cadenberge,Niedersachsen,53.7596,9.0405,1
+06190,rr,Berchtesgaden,Bayern,47.6392,13.0068,599
+06191,rr,Kirchberg/Niederbayern -Zell,Bayern,48.9023,13.1442,684
+06193,rr,Neuenhagen bei Berlin,Brandenburg,52.5238,13.6918,57
+06195,rr,Scheßlitz-Köttensdorf,Bayern,49.956,11.0189,305
+06196,kl,Selb-Spielberg,Bayern,50.1587,12.0386,611
+06197,kl,Lügde-Paenbruch,Nordrhein-Westfalen,51.8664,9.271,258
+06199,kl,Steinhagen-Negast,Mecklenburg-Vorpommern,54.2484,13.0419,16
+06200,rr,Königsberg/Bayern-Holzhausen,Bayern,50.0785,10.4887,262
+06201,rr,Simmershofen-Adelhofen,Bayern,49.5334,10.1546,339
+06203,rr,Ramsau-Schwarzeck/Schmuck,Bayern,47.6279,12.9015,1088
+06211,kl,Vogtareuth (Kläranlage),Bayern,47.955,12.1735,464
+06214,rr,Ettal-Graswang,Bayern,47.5728,11.0264,867
+06215,rr,Lam-Lambach,Bayern,49.2154,13.0662,689
+06216,rr,Trausnitz-Reisach,Bayern,49.5321,12.2798,464
+06217,kl,Saarbrücken-Burbach,Saarland,49.2406,6.9351,190
+06218,rr,"Sulza, Bad-Eckolstädt",Thüringen,51.0345,11.6411,282
+06249,rr,Rödental-Schönstädt (Speicher),Bayern,50.3485,11.0313,365
+06252,rr,Rothsee bei Allersberg,Bayern,49.2105,11.1843,376
+06253,kl,Brandenburg/Havel,Brandenburg,52.4228,12.5667,31
+06257,rr,Jachenau-Tannern,Bayern,47.6278,11.5154,724
+06258,kl,Friedrichshafen-Unterraderach,Baden-Württemberg,47.6845,9.4409,461
+06259,kl,Großerlach-Mannenweiler,Baden-Württemberg,49.021,9.6033,524
+06260,kl,Ingelfingen-Stachenhausen,Baden-Württemberg,49.3328,9.704,381
+06262,kl,Schwäbisch Gmünd-Weiler,Baden-Württemberg,48.7695,9.8737,412
+06263,kl,Singen,Baden-Württemberg,47.7738,8.8219,445
+06264,kl,Brilon-Thülen,Nordrhein-Westfalen,51.414,8.65,457
+06265,kl,Wusterwitz,Brandenburg,52.3613,12.3867,36
+06266,kl,Huy-Pabstorf,Sachsen-Anhalt,52.0305,10.9626,112
+06268,rr,Uhlstädt-Kirchhasel-Niederkrossen,Thüringen,50.7577,11.5178,173
+06269,rr,Klingenthal-Kamerun,Sachsen,50.3594,12.4836,731
+06270,rr,Römhild-Sülzdorf,Thüringen,50.4099,10.4901,330
+06271,rr,Crossen/Elster-Nickelsdorf,Thüringen,50.9771,12.0044,274
+06272,kl,"Salzungen, Bad-Gräfen-Nitzendorf",Thüringen,50.8426,10.2518,284
+06273,kl,Demker,Sachsen-Anhalt,52.5075,11.8551,36
+06274,rr,Kusterdingen,Baden-Württemberg,48.52,9.12,412
+06275,kl,Notzingen,Baden-Württemberg,48.6705,9.4627,327
+06279,rr,Aßling,Bayern,47.9869,11.9942,500
+06280,rr,Aying (Brauerei),Bayern,47.971,11.7747,600
+06281,rr,Neunburg v. Wald-Eixendorf (Seemeister),Bayern,49.361,12.4477,420
+06282,rr,Altendorf/Oberfranken,Bayern,49.7978,10.9998,250
+06283,rr,Colmberg-Binzwangen,Bayern,49.3826,10.3733,434
+06284,rr,Herrieden,Bayern,49.2289,10.5044,420
+06285,rr,Amorbach-Neudorf,Bayern,49.6546,9.2609,420
+06286,rr,Ampfing,Bayern,48.2612,12.4292,400
+06287,rr,"Gräfendorf,Kr.Main-Spessart",Bayern,50.1141,9.735,160
+06293,rr,Lenggries (Sylvenstein),Bayern,47.5899,11.5504,737
+06294,rr,Weiler-Simmerberg,Bayern,47.5738,9.9033,600
+06295,rr,Miesbach (Kläranlage),Bayern,47.8023,11.8251,650
+06296,rr,"Moos,Kr. Deggendorf-Maxmühle",Bayern,48.7751,12.9578,320
+06297,rr,Pleiskirchen,Bayern,48.3014,12.6025,450
+06298,rr,Plößberg-Liebenstein (Speicher),Bayern,49.8128,12.3287,516
+06299,rr,Ruhpolding (Kläranlage),Bayern,47.7733,12.6441,650
+06300,rr,Schwangau-Horn (LfW),Bayern,47.5768,10.7179,796
+06303,rr,Willingen/Hochsauerland,Hessen,51.2915,8.5981,584
+06305,kl,Mühlhausen/Thüringen-Görmar,Thüringen,51.2061,10.4978,194
+06307,rr,Garmisch-Partenkirchen-Griesen,Bayern,47.4772,10.9403,825
+06310,kl,Karlshagen,Mecklenburg-Vorpommern,54.1049,13.8239,1
+06313,rr,Breckerfeld-Wengeberg,Nordrhein-Westfalen,51.2488,7.4672,440
+06314,kl,Nossen,Sachsen,51.0507,13.3003,306
+06315,rr,Büchelberg,Rheinland-Pfalz,49.0236,8.1788,123
+06316,rr,Bundenthal,Rheinland-Pfalz,49.0905,7.8157,203
+06317,rr,Dannstadt-Schauernheim,Rheinland-Pfalz,49.4371,8.3133,97
+06318,rr,Enkenbach,Rheinland-Pfalz,49.5284,7.8887,261
+06320,rr,Kirchweiler,Rheinland-Pfalz,50.2272,6.7524,560
+06321,rr,Kirf-Beuren,Rheinland-Pfalz,49.5573,6.4541,327
+06322,rr,Kusel/Kuselbach,Rheinland-Pfalz,49.5414,7.4299,215
+06323,rr,Meisburg,Rheinland-Pfalz,50.0971,6.6746,526
+06324,rr,Oberzerf,Rheinland-Pfalz,49.5892,6.6751,369
+06327,rr,Sinzig,Rheinland-Pfalz,50.5539,7.2554,60
+06328,rr,Speicher,Rheinland-Pfalz,49.9285,6.6209,250
+06329,rr,Sprendlingen,Rheinland-Pfalz,49.8559,7.9806,128
+06330,rr,Strohn,Rheinland-Pfalz,50.1153,6.9215,394
+06333,rr,Hüttgeswasen,Rheinland-Pfalz,49.7286,7.1289,650
+06336,kl,Lohr/Main-Halsbach,Bayern,50.0132,9.654,288
+06337,kl,Lüdinghausen-Brochtrup,Nordrhein-Westfalen,51.7663,7.5194,58
+06338,rr,"Steben, Bad",Bayern,50.3618,11.6223,605
+06340,rr,"Kirchberg, Rhein-Hunsrück-Kreis",Rheinland-Pfalz,49.9321,7.388,393
+06341,rr,Dießen/Ammersee-Dettenschwang,Bayern,47.9603,11.0136,658
+06342,rr,Schlehdorf,Bayern,47.6573,11.321,601
+06344,kl,Runkel-Ennerich,Hessen,50.394,8.1423,168
+06346,kl,Maisach-Galgen,Bayern,48.207,11.2035,531
+06347,kl,Schonungen-Mainberg,Bayern,50.0579,10.2972,305
+07075,kl,Elsendorf-Horneck,Bayern,48.702,11.8493,429
+07077,rr,Penzlin-Groß Lukow,Mecklenburg-Vorpommern,53.5255,13.0161,54
+07078,rr,Wittendörp-Dodow,Mecklenburg-Vorpommern,53.5035,11.0014,34
+07079,rr,Schwedt/Oder-Berkholz-Meyenburg,Brandenburg,53.0443,14.2423,14
+07103,rr,Wessobrunn-Puitl,Bayern,47.8533,11.0084,755
+07104,rr,Königheim,Baden-Württemberg,49.6206,9.6036,220
+07105,kl,Siegsdorf-Höll,Bayern,47.835,12.6548,719
+07106,kl,Bielefeld-Deppendorf,Nordrhein-Westfalen,52.0714,8.4565,105
+07136,rr,Vogtsburg-Bischoffingen,Baden-Württemberg,48.1021,7.6275,232
+07138,rr,Burladingen-Hausen,Baden-Württemberg,48.2962,9.0701,686
+07139,rr,Einöllen,Rheinland-Pfalz,49.6112,7.6426,303
+07141,rr,Nürtingen-Reudern,Baden-Württemberg,48.6274,9.3904,369
+07187,kl,Freudenberg/Main-Boxtal,Baden-Württemberg,49.7636,9.4063,194
+07224,rr,Altshausen,Baden-Württemberg,47.9324,9.5512,570
+07226,rr,"Kißlegg, Kr. Ravensburg",Baden-Württemberg,47.7777,9.887,640
+07227,rr,Külsheim/Main-Tauber-Kreis,Baden-Württemberg,49.6789,9.523,280
+07230,rr,Möckmühl/Jagst,Baden-Württemberg,49.3078,9.3606,170
+07233,rr,Rot am See,Baden-Württemberg,49.257,10.0152,415
+07234,rr,Schiltach/ Kinzig,Baden-Württemberg,48.2934,8.3066,310
+07235,rr,Schömberg-Stausee,Baden-Württemberg,48.2109,8.7656,650
+07238,rr,Vaihingen/ Enz,Baden-Württemberg,48.9243,8.9536,200
+07240,rr,Horb-Altheim,Baden-Württemberg,48.4692,8.6304,567
+07241,rr,Welzheim (Kläranlage),Baden-Württemberg,48.8707,9.6442,470
+07242,rr,Wiesensteig,Baden-Württemberg,48.5682,9.6372,565
+07243,rr,Winden,Baden-Württemberg,48.1372,8.0097,303
+07285,rr,Oebisfelde-Weferlingen-Bösdorf,Sachsen-Anhalt,52.4153,11.0758,68
+07287,rr,Berchtesgaden/Jenner,Bayern,47.605,13.0153,980
+07298,kl,Hattstedt,Schleswig-Holstein,54.5268,9.0425,4
+07319,kl,Donauwörth-Osterweiler,Bayern,48.7374,10.7393,435
+07321,kl,Olbersleben,Thüringen,51.1507,11.3321,157
+07322,rr,Malsburg-Marzell,Baden-Württemberg,47.7667,7.7205,716
+07323,rr,Belgershain,Sachsen,51.2359,12.5517,149
+07326,rr,Grimma-Kleinbothen,Sachsen,51.1918,12.7645,135
+07327,rr,Frankenberg-Altenhain,Sachsen,50.8836,13.0425,323
+07328,rr,Ponitz,Thüringen,50.8544,12.4216,219
+07329,kl,Treuen,Sachsen,50.5467,12.2863,465
+07330,kl,Arnsberg-Neheim,Nordrhein-Westfalen,51.4633,7.978,159
+07331,kl,Hermaringen-Allewind,Baden-Württemberg,48.6099,10.2674,467
+07333,rr,Marienberg-Rübenau,Sachsen,50.5803,13.2966,727
+07334,rr,Hirschstein-Heyda,Sachsen,51.2651,13.3588,131
+07335,rr,Großenhain-Strauch,Sachsen,51.3658,13.5801,138
+07337,rr,Dürrhennersdorf,Sachsen,51.0577,14.6128,332
+07341,kl,Offenbach-Wetterpark,Hessen,50.09,8.7862,119
+07343,kl,Deutschneudorf-Brüderwiese,Sachsen,50.62,13.4817,689
+07344,rr,Nettetal-Hülst,Nordrhein-Westfalen,51.2992,6.2013,45
+07350,kl,Prackenbach-Neuhäusl,Bayern,49.1088,12.8231,585
+07351,kl,Feldberg/Mecklenburg,Mecklenburg-Vorpommern,53.3176,13.4175,115
+07353,rr,Borna (Speicher Witznitz),Sachsen,51.131,12.4692,136
+07354,rr,Großbothen-Sermuth,Sachsen,51.1592,12.7983,138
+07355,rr,Großhartmannsdorf (Unterer Großh. Teic,Sachsen,50.8125,13.3441,492
+07356,rr,Sehmatal-Neudorf,Sachsen,50.5057,13.0055,714
+07357,rr,Reichenbach/OL,Sachsen,51.1483,14.796,247
+07358,rr,Bischofswerda (Kläranlage),Sachsen,51.1193,14.168,281
+07360,rr,Hermsdorf/Erzgebirge,Sachsen,50.7598,13.6376,719
+07361,rr,Scharnhorst-Marwede,Niedersachsen,52.7363,10.344,73
+07362,rr,Brandis (Lysimeterstation),Sachsen,51.3268,12.5954,135
+07363,rr,Vöhrenbach-Urach,Baden-Württemberg,48.0028,8.2296,936
+07364,kl,Jeßnitz,Sachsen-Anhalt,51.6818,12.3053,74
+07367,kl,Alfeld,Niedersachsen,51.9643,9.8072,144
+07368,kl,Eisenach,Thüringen,51.0007,10.3621,312
+07369,kl,Feuchtwangen-Heilbronn,Bayern,49.1623,10.3661,475
+07370,kl,Waldmünchen,Bayern,49.391,12.6838,499
+07372,rr,Osterburg (Altmark)-Ballerstedt,Sachsen-Anhalt,52.7321,11.7123,37
+07373,kl,Borkum-Flugplatz,Niedersachsen,53.5984,6.7024,3
+07374,kl,Ahaus,Nordrhein-Westfalen,52.0813,6.9409,46
+07375,rr,Homberg-Schönbornerhof,Rheinland-Pfalz,49.645,7.5003,411
+07378,rr,Bedburg-Weiler Hohenholz,Nordrhein-Westfalen,51.0149,6.5173,101
+07380,rr,Backnang/Murr,Baden-Württemberg,48.9353,9.4009,233
+07381,rr,Gammertingen,Baden-Württemberg,48.2597,9.2295,753
+07382,rr,Wangen/Allgäu-Schwaderberg,Baden-Württemberg,47.7096,9.866,666
+07389,kl,Heckelberg-Brunow,Brandenburg,52.7461,13.8427,83
+07391,kl,Oberzent-Beerfelden-Vogelherd,Hessen,49.5561,8.9669,443
+07392,kl,Aubstadt,Bayern,50.3332,10.4487,304
+07393,kl,Hoyerswerda,Sachsen,51.4492,14.2533,116
+07394,kl,Wunsiedel-Schönbrunn,Bayern,50.0315,11.9745,622
+07395,kl,Gottfrieding,Bayern,48.6595,12.5388,351
+07396,kl,Hoherodskopf/Vogelsberg,Hessen,50.5084,9.2246,740
+07403,kl,Leutkirch-Herlazhofen,Baden-Württemberg,47.7955,10.0325,672
+07410,kl,Neu-Ulrichstein,Hessen,50.7513,9.0224,350
+07412,kl,Neuhütten/Spessart,Bayern,50.0083,9.4238,340
+07416,kl,Birkelbach,Nordrhein-Westfalen,51.0112,8.2733,541
+07418,rr,Sankt Egidien-Kuhschnappel,Sachsen,50.802,12.6366,323
+07419,kl,Langenwetzendorf-Göttendorf,Thüringen,50.661,12.0756,389
+07420,kl,Naumburg/Saale-Kreipitzsch,Sachsen-Anhalt,51.1045,11.7113,246
+07421,rr,Föritztal-Neuhaus-Schierschnitz,Thüringen,50.325,11.2395,388
+07423,rr,Hähnichen-Trebus,Sachsen,51.3445,14.8387,163
+07424,kl,Piding,Bayern,47.7724,12.9073,457
+07425,rr,Rinteln-Volksen,Niedersachsen,52.1384,9.1119,216
+07427,kl,Padenstedt (Pony-Park),Schleswig-Holstein,54.0188,9.9255,17
+07428,kl,Veilsdorf,Thüringen,50.4167,10.8156,397
+07429,rr,Seckach,Baden-Württemberg,49.4249,9.3316,336
+07430,rr,Rentweinsdorf-Treinfeld,Bayern,50.0615,10.8129,258
+07431,kl,Oberhaching-Laufzorn,Bayern,48.013,11.5524,604
+07432,kl,Wittingen-Vorhop,Niedersachsen,52.6423,10.6628,71
+07433,rr,Trier-Irsch,Rheinland-Pfalz,49.726,6.6957,240
+07434,rr,"Herrenalb, Bad/Therme",Baden-Württemberg,48.8042,8.443,351
+07436,rr,Schönwald,Baden-Württemberg,48.1004,8.1973,1025
+07485,rr,Maikammer-Kirrweiler,Rheinland-Pfalz,49.2963,8.1754,129
+07486,rr,Haßloch,Rheinland-Pfalz,49.3528,8.2708,111
+07487,rr,"Saulgau,Bad",Baden-Württemberg,48.0272,9.486,576
+07488,rr,Betzweiler-Wälde,Baden-Württemberg,48.3846,8.4787,538
+07489,rr,Birenbach,Baden-Württemberg,48.7448,9.6484,348
+07490,rr,"Bretten, Kreis Karlsruhe",Baden-Württemberg,49.0334,8.7121,170
+07491,rr,Crailsheim/Jagst,Baden-Württemberg,49.154,10.0635,395
+07492,rr,Creglingen/Tauber,Baden-Württemberg,49.4844,10.019,260
+07493,rr,Forbach,Baden-Württemberg,48.6704,8.3534,304
+07494,rr,"Königsbach-Stein, Enzkreis",Baden-Württemberg,48.9597,8.5905,160
+07495,rr,Krautheim,Baden-Württemberg,49.3786,9.6307,226
+07497,rr,Tennenbronn,Baden-Württemberg,48.1872,8.3667,651
+07498,rr,Zaberfeld (Emetsklinge),Baden-Württemberg,49.058,8.9124,249
+07500,rr,Badewitz bei Zerbst,Sachsen-Anhalt,52.0223,12.1597,82
+10339,rr,Fichtenberg/BW-Michelbächle,Baden-Württemberg,48.9972,9.7395,365
+10510,kl,Winterbach/Remstal,Baden-Württemberg,48.8059,9.5046,244
+13654,rr,Wilsdruff-Mohorn,Sachsen,51.0063,13.471,285
+13669,rr,Ostbevern-Schirlheide,Nordrhein-Westfalen,52.0087,7.8519,55
+13670,kl,Duisburg-Baerl,Nordrhein-Westfalen,51.5088,6.7018,24
+13671,rr,Overath-Böke,Nordrhein-Westfalen,50.9655,7.2753,221
+13674,kl,Waibstadt,Baden-Württemberg,49.2943,8.9053,237
+13675,kl,Hameln-Hastenbeck,Niedersachsen,52.0818,9.4077,75
+13676,kl,Langquaid-Oberschneidhart,Bayern,48.8608,12.0323,378
+13682,rr,Cleeberg,Hessen,50.4522,8.5528,310
+13687,rr,Weddelbrook,Schleswig-Holstein,53.9005,9.8308,18
+13688,rr,Pegau,Sachsen,51.1692,12.2617,129
+13689,rr,Höhr-Grenzhausen,Rheinland-Pfalz,50.4351,7.6657,249
+13691,rr,Nassau,Rheinland-Pfalz,50.316,7.7784,85
+13693,kl,Gütersloh/Ems,Nordrhein-Westfalen,51.9258,8.3111,70
+13694,rr,Teisendorf-Babing,Bayern,47.8317,12.8222,590
+13695,rr,Teisendorf-Neukirchen (Wildberg),Bayern,47.8219,12.7715,780
+13696,kl,Waltrop-Abdinghof,Nordrhein-Westfalen,51.5966,7.4048,60
+13698,rr,Lauchheim (Berghof),Baden-Württemberg,48.8767,10.2413,504
+13699,rr,Lehrte-Sievershausen,Niedersachsen,52.3666,10.1265,66
+13700,kl,Gevelsberg-Oberbröking,Nordrhein-Westfalen,51.3329,7.3412,203
+13701,kl,Eschwege-Eltmannshausen,Hessen,51.1945,9.9885,250
+13709,rr,Weibern/Eifel,Rheinland-Pfalz,50.4068,7.1459,408
+13710,kl,Landshut-Reithof,Bayern,48.5734,12.2576,490
+13711,kl,Krölpa-Rockendorf,Thüringen,50.682,11.515,289
+13712,rr,Münchehofe,Brandenburg,52.1488,13.8359,44
+13713,kl,Meinerzhagen-Redlendorf,Nordrhein-Westfalen,51.0899,7.6289,385
+13714,rr,Linz-Unkel,Rheinland-Pfalz,50.6125,7.2167,61
+13715,rr,Biberach an der Riß-Bergerhausen,Baden-Württemberg,48.1003,9.8058,604
+13716,rr,Blumberg-Randen,Baden-Württemberg,47.819,8.5774,816
+13717,rr,Mannebach/Eifel,Rheinland-Pfalz,50.2832,6.9878,505
+13774,rr,Crimmitschau-Mannichswalde,Sachsen,50.8138,12.2985,328
+13777,kl,Helmstedt-Emmerstedt,Niedersachsen,52.2467,10.9592,109
+13778,rr,Zweibrücken (Kläranlage),Rheinland-Pfalz,49.2531,7.3397,225
+13779,rr,Singhofen/Lahn,Rheinland-Pfalz,50.2696,7.8199,220
+13780,rr,Schallodenbach/Pfalz,Rheinland-Pfalz,49.5419,7.7179,310
+13781,rr,Gerolstein,Rheinland-Pfalz,50.237,6.6609,530
+13782,rr,Seegebiet Mansfelder Land-Röblingen,Sachsen-Anhalt,51.4612,11.6661,102
+13900,kl,"Soden,Bad-Salmünster (Kläranlage)",Hessen,50.2688,9.358,145
+13901,kl,Haltern (Wasserwerk),Nordrhein-Westfalen,51.7343,7.1998,41
+13905,rr,Dietzenbach,Hessen,49.9999,8.7796,160
+13912,rr,Nassau (Kläranlage),Rheinland-Pfalz,50.316,7.7783,85
+13918,rr,Peterslahr (Kläranlage),Rheinland-Pfalz,50.6181,7.478,160
+13932,kl,Rotthalmünster (Landwirtschaftsamt),Bayern,48.3617,13.1938,388
+13933,rr,Schöntal-Weigental,Baden-Württemberg,49.3652,9.448,347
+13952,kl,Arnsberg-Müschede,Nordrhein-Westfalen,51.4089,8.0094,278
+13965,kl,Balingen-Bronnhaupten,Baden-Württemberg,48.2639,8.8134,619
+13967,rr,Peterslahr,Rheinland-Pfalz,50.6181,7.478,166
+13968,rr,Gerolstein/Kyll,Rheinland-Pfalz,50.239,6.66,435
+14006,rr,Mußbach (Neustadt),Rheinland-Pfalz,49.3683,8.1854,145
+14007,rr,Mainz-Marienborn,Rheinland-Pfalz,49.9596,8.236,164
+14008,rr,Rommersheim (Eichenhof),Rheinland-Pfalz,49.8228,8.1044,245
+14009,rr,Schifferstadt,Rheinland-Pfalz,49.401,8.3478,110
+14010,rr,Esch/Swistbach,Rheinland-Pfalz,50.5582,7.0317,274
+14011,rr,Grenzau,Rheinland-Pfalz,50.4528,7.6528,309
+14013,rr,Oppenheim/ Rhein,Rheinland-Pfalz,49.8447,8.3492,92
+14014,rr,Kettenheim (Eichhof),Rheinland-Pfalz,49.7271,8.1168,224
+14015,rr,Gondershausen,Rheinland-Pfalz,50.1587,7.4972,388
+14016,rr,Kleinniedesheim,Rheinland-Pfalz,49.5871,8.3414,98
+14017,rr,Herxheimweyher,Rheinland-Pfalz,49.1582,8.2536,144
+14018,rr,Dackenheim/Pfalz,Rheinland-Pfalz,49.5189,8.1875,180
+14019,rr,Lustadt,Rheinland-Pfalz,49.2449,8.2912,129
+14020,rr,"Münstermaifeld, Kr. Mayen-Koblenz",Rheinland-Pfalz,50.2558,7.3535,195
+14021,rr,Dienheim,Rheinland-Pfalz,49.827,8.332,209
+14022,rr,Dienstweiler,Rheinland-Pfalz,49.6353,7.2105,461
+14023,rr,Strickscheid,Rheinland-Pfalz,50.1419,6.3126,476
+14024,rr,"Wittlich, Kreisstadt",Rheinland-Pfalz,49.9678,6.8593,197
+14025,rr,Dreis-Brück,Rheinland-Pfalz,50.2596,6.802,526
+14026,rr,Isert,Rheinland-Pfalz,50.7316,7.7003,312
+14027,rr,Berghausen,Rheinland-Pfalz,50.2642,8.0073,372
+14028,rr,Martinshöhe,Rheinland-Pfalz,49.3684,7.4688,411
+14029,rr,Wahlbach/Hunsr.,Rheinland-Pfalz,50.0005,7.5927,418
+14030,rr,Morlautern,Rheinland-Pfalz,49.4716,7.762,307
+14031,rr,Merzkirchen,Rheinland-Pfalz,49.5725,6.4647,369
+14032,rr,Heimbach-Weis/Rhein,Rheinland-Pfalz,50.4468,7.5357,91
+14033,rr,Avelsbach,Rheinland-Pfalz,49.7539,6.6933,248
+14034,rr,Riol,Rheinland-Pfalz,49.8004,6.7833,143
+14035,rr,Weierhof,Rheinland-Pfalz,49.6334,8.0278,194
+14036,rr,Steinborn,Rheinland-Pfalz,50.0708,6.6242,529
+14037,rr,Wiersdorf/Stausee Bitburg,Rheinland-Pfalz,50.0069,6.4606,325
+14038,rr,Meddersheim,Rheinland-Pfalz,49.7756,7.6128,169
+14042,rr,Leimersdorf-Nierendorf,Rheinland-Pfalz,50.5849,7.1455,150
+14043,rr,"Mülheim-Kärlich, Kr. Mayen-Koblenz",Rheinland-Pfalz,50.3837,7.5325,155
+14045,rr,Heidenfahrt,Rheinland-Pfalz,50.0069,8.0915,88
+14052,rr,Siebeldingen,Rheinland-Pfalz,49.2165,8.0479,192
+14063,rr,Bingen-Gaulsheim,Rheinland-Pfalz,49.9566,7.9642,88
+14065,rr,Offstein,Rheinland-Pfalz,49.6057,8.2531,115
+14071,rr,Wiesweiler,Rheinland-Pfalz,49.6384,7.5749,180
+14072,rr,Neef,Rheinland-Pfalz,50.0902,7.1401,133
+14081,rr,Hatzenport,Rheinland-Pfalz,50.2286,7.4138,156
+14108,rr,Eich/Rheinhessen,Rheinland-Pfalz,49.7474,8.3839,95
+14109,rr,Körperich-Gaytalpark,Rheinland-Pfalz,49.9357,6.2523,290
+14130,rr,Frohburg-Gnandstein,Sachsen,51.0207,12.5736,207
+14135,rr,Ettenheim-Ettenheimmünster,Baden-Württemberg,48.2436,7.8769,214
+14137,rr,Weitramsdorf-Tambach,Bayern,50.2347,10.8627,296
+14138,kl,Falkenberg (Grenzschichtmessfeld),Brandenburg,52.1655,14.1224,73
+14139,rr,Entenpfuhl,Rheinland-Pfalz,49.8967,7.5869,610
+14157,rr,Birkenau,Hessen,49.5686,8.7013,168
+14300,rr,Obersöchering-Reinthal,Bayern,47.7479,11.2554,672
+14301,rr,Eging am See-Rohrbachholz,Bayern,48.73,13.2741,415
+14303,rr,"Beuren, Kreis Trier-Saarburg",Rheinland-Pfalz,49.7291,6.9174,505
+14305,rr,Bruchweiler,Rheinland-Pfalz,49.7995,7.2274,545
+14308,rr,Eppenrod,Rheinland-Pfalz,50.4072,7.9303,300
+14310,rr,Hachenburg,Rheinland-Pfalz,50.6602,7.8049,322
+14311,rr,Hersdorf-Weißenseifen,Rheinland-Pfalz,50.15,6.5527,530
+14313,rr,Kaltenborn-Hochacht,Rheinland-Pfalz,50.3941,6.9918,568
+14314,rr,Kirchberg/Hunsrück,Rheinland-Pfalz,49.932,7.388,393
+14315,rr,Kleinich-Götzeroth,Rheinland-Pfalz,49.8843,7.1725,508
+14316,rr,Landau/Pfalz-Taubensuhl,Rheinland-Pfalz,49.2844,7.9122,525
+14317,rr,Lingerhahn,Rheinland-Pfalz,50.094,7.5675,482
+14318,rr,Mettenheim,Rheinland-Pfalz,49.7392,8.3293,89
+14320,rr,Polch,Rheinland-Pfalz,50.3049,7.31,235
+14322,rr,Wissen/Sieg-Honigsessen,Rheinland-Pfalz,50.8184,7.7472,320
+14323,rr,Selters/Westerwald,Rheinland-Pfalz,50.5218,7.7374,232
+14350,rr,Finning (Windachspeicher),Bayern,48.0035,11.012,627
+14351,rr,Geretsried (Feuerwehrschule),Bayern,47.8529,11.4999,610
+14667,rr,Haarbach-Wolfakirchen,Bayern,48.5027,13.1063,416
+14670,rr,Kelheim-Thaldorf,Bayern,48.8777,11.8902,385
+15000,kl,Aachen-Orsbach,Nordrhein-Westfalen,50.7983,6.0244,231
+15001,rr,Dorsten-Lembeck,Nordrhein-Westfalen,51.7389,7.0504,51
+15003,rr,Kruckow-Schmarsow,Mecklenburg-Vorpommern,53.8753,13.2101,20
+15009,rr,Abentheuer,Rheinland-Pfalz,49.657,7.1039,460
+15011,rr,Bühlertann,Baden-Württemberg,49.0472,9.9084,375
+15012,rr,"Rappenau, Bad (Kläranlage)",Baden-Württemberg,49.2094,9.1034,196
+15013,rr,Malsch/Baden,Baden-Württemberg,48.8946,8.3379,119
+15014,rr,Titisee-Neustadt-Waldau,Baden-Württemberg,47.9761,8.1751,918
+15015,rr,Gschwend-Frickenhofen,Baden-Württemberg,48.9271,9.7973,509
+15016,rr,Neckartailfingen,Baden-Württemberg,48.6137,9.2947,280
+15039,rr,Elmstein (Kläranlage),Rheinland-Pfalz,49.3452,7.9579,216
+15040,rr,Kell am See,Rheinland-Pfalz,49.6303,6.8131,455
+15041,rr,Lottstetten-Nack,Baden-Württemberg,47.606,8.5805,414
+15044,kl,Neuwied-Feldkirchen-Hüllenberg,Rheinland-Pfalz,50.4517,7.4058,199
+15109,rr,Neresheim,Baden-Württemberg,48.7595,10.3364,536
+15117,rr,Edertal-Bergheim,Hessen,51.1589,9.1468,193
+15120,kl,Haaren,Nordrhein-Westfalen,51.5572,8.7019,379
+15122,kl,Ergersheim-Neuherberg,Bayern,49.52,10.2854,380
+15147,rr,Krummhörn-Woquard,Niedersachsen,53.4309,7.0822,1
+15155,rr,Olmscheid,Rheinland-Pfalz,50.0611,6.1951,340
+15161,rr,Maroth,Rheinland-Pfalz,50.5802,7.69,286
+15170,rr,Donaueschingen-Wolterdingen,Baden-Württemberg,47.9725,8.4157,718
+15171,rr,Höchst/Odenwald-Annelsbach,Hessen,49.7803,8.9587,219
+15180,rr,Waldkirchen-Richardsreut,Bayern,48.7474,13.6142,503
+15185,rr,Eußerthal,Rheinland-Pfalz,49.249,7.9615,200
+15187,rr,Hortenkopf,Rheinland-Pfalz,49.2703,7.8263,606
+15189,kl,Sukow-Levitzow,Mecklenburg-Vorpommern,53.8281,12.5936,12
+15190,kl,Xanten (Wasserwerk),Nordrhein-Westfalen,51.6802,6.4349,18
+15194,kl,Börßum-Achim,Niedersachsen,52.0688,10.6245,129
+15195,rr,Allmersbach im Tal,Baden-Württemberg,48.9115,9.4808,305
+15197,rr,Egling/Paar-Heinrichshofen,Bayern,48.1988,10.9856,538
+15198,rr,Ellern,Rheinland-Pfalz,49.968,7.6329,510
+15200,kl,Wuppertal,Nordrhein-Westfalen,51.2531,7.2157,327
+15201,rr,Elkhausen,Rheinland-Pfalz,50.8153,7.7981,225
+15207,kl,Schauenburg-Elgershausen,Hessen,51.2835,9.359,317
+15209,rr,Bullay (Kläranlage),Rheinland-Pfalz,50.0462,7.1422,93
+15212,rr,Hausen,Rheinland-Pfalz,49.8736,7.3813,297
+15214,kl,Halblech-Bayerniederhofen,Bayern,47.6248,10.8075,808
+15232,rr,Schmücke/Thür.,Thüringen,50.6545,10.7696,937
+15235,rr,Erbach (Alb-Donau-Kreis),Baden-Württemberg,48.3257,9.9066,478
+15244,rr,"Emstal, Bad",Hessen,51.2088,9.254,285
+15247,rr,Emstek,Niedersachsen,52.8285,8.1498,53
+15249,rr,Liebenscheid,Rheinland-Pfalz,50.6936,8.0884,560
+15444,kl,Ulm-Mähringen,Baden-Württemberg,48.4418,9.9216,593
+15448,rr,Baumholder (Kläranlage),Rheinland-Pfalz,49.6185,7.308,411
+15455,rr,Schleiden-Morsbach,Nordrhein-Westfalen,50.5636,6.4483,500
+15477,rr,Calw,Baden-Württemberg,48.7116,8.7486,416
+15478,rr,Dietenheim,Baden-Württemberg,48.2095,10.0654,515
+15490,rr,Eschenburg-Eibelshausen,Hessen,50.8053,8.3382,298
+15499,rr,Wilsum,Niedersachsen,52.5387,6.7888,16
+15512,rr,Rehlingen-Ehlbeck,Niedersachsen,53.0859,10.1611,65
+15514,rr,Heidelberg-Kurpfalzhof,Baden-Württemberg,49.3767,8.6177,106
+15517,rr,Ulmen,Rheinland-Pfalz,50.1966,6.9859,406
+15518,rr,Satow,Mecklenburg-Vorpommern,54.0001,11.8608,66
+15520,kl,Frasdorf-Greimelberg,Bayern,47.819,12.2956,656
+15522,rr,Miltach-Oberndorf,Bayern,49.1519,12.7624,392
+15523,rr,Höheinöd,Rheinland-Pfalz,49.2866,7.5958,405
+15527,rr,Hohenleuben,Thüringen,50.7231,12.0684,309
+15528,rr,Possen,Thüringen,51.3332,10.8671,422
+15529,rr,Breitungen,Thüringen,50.7564,10.3168,258
+15530,rr,Auetal-Poggenhagen,Niedersachsen,52.2231,9.2074,175
+15547,kl,Heilbronn/Neckar,Baden-Württemberg,49.1259,9.1428,214
+15553,rr,Schafstedt,Schleswig-Holstein,54.0862,9.3076,21
+15555,kl,Kaufbeuren-Oberbeuren,Bayern,47.8761,10.5849,815
+15561,rr,Fischbach/Nahe,Rheinland-Pfalz,49.7461,7.3919,247
+15567,rr,Ihlow-Mehlsdorf,Brandenburg,51.837,13.3147,83
+15569,rr,Wöllstein,Rheinland-Pfalz,49.8073,7.9546,155
+15570,rr,Börfink-Brunnen,Rheinland-Pfalz,49.6938,7.0756,590
+15573,rr,Tülau-Fahrenhorst,Niedersachsen,52.578,10.883,76
+15801,kl,Hinterschmiding-Sonndorf,Bayern,48.8257,13.5922,718
+15802,rr,Hartmannsdorf bei Chemnitz,Sachsen,50.8785,12.8105,371
+15803,rr,"Hirschfeld, Krs. Zwickau",Sachsen,50.6306,12.4666,393
+15810,rr,Aulendorf-Blönried,Baden-Württemberg,47.9261,9.5926,567
+15813,kl,Lingen-Baccum,Niedersachsen,52.5126,7.4131,40
+15821,rr,Gauchsberg,Rheinland-Pfalz,49.8703,7.689,387
+15822,rr,Hochspeyer/Pfalz,Rheinland-Pfalz,49.4324,7.9086,369
+15823,rr,Merzalben,Rheinland-Pfalz,49.2752,7.8021,514
+15824,rr,Dannenfels/Donnersberg,Rheinland-Pfalz,49.6331,7.9211,593
+15825,rr,Hermeskeil (Thiergarten),Rheinland-Pfalz,49.6953,7.0288,650
+15828,rr,Holzbach,Rheinland-Pfalz,49.5774,6.774,565
+15829,rr,Schaidt,Rheinland-Pfalz,49.0474,8.086,136
+15831,rr,Diepenau-Lavelsloh,Niedersachsen,52.4197,8.7303,44
+15832,rr,Glentorf (Pegel),Niedersachsen,52.3334,10.803,88
+15833,rr,Harxbüttel (Pegel),Niedersachsen,52.3366,10.4884,65
+15834,rr,Holle,Niedersachsen,52.1014,10.1163,93
+15835,rr,Kirchlinteln/Verden,Niedersachsen,52.9247,9.4068,35
+15836,rr,Müden-Flettmar,Niedersachsen,52.5394,10.3286,48
+15837,rr,Neuenhaus,Niedersachsen,52.5074,6.9655,14
+15838,rr,Neuenkirchen-Vörden,Niedersachsen,52.5023,8.0525,39
+15839,rr,Poppenburg (Pegel),Niedersachsen,52.1356,9.762,75
+15840,rr,Salzgitter-Lebenstedt,Niedersachsen,52.1887,10.3696,77
+15841,rr,Schladen (Pegel),Niedersachsen,52.0321,10.5454,93
+15842,rr,Schneverdingen (Akademie),Niedersachsen,53.097,9.8502,81
+15843,rr,Seboldshausen,Niedersachsen,51.863,10.0662,144
+15844,rr,Steyerberg/Große Aue,Niedersachsen,52.5747,9.0288,28
+15845,rr,Suderburg (Hochschule),Niedersachsen,52.8981,10.4438,68
+15850,rr,Frankelbach,Rheinland-Pfalz,49.5248,7.6431,416
+15906,rr,Aerzen-Posteholz,Niedersachsen,52.0936,9.208,211
+15911,kl,Großpostwitz-Denkwitz,Sachsen,51.1347,14.4344,279
+15918,rr,Neualbenreuth-Egglasgrün,Bayern,49.9523,12.3719,596
+15930,rr,Garmisch-Partenkirchen (Kanker),Bayern,47.4921,11.1747,920
+15931,rr,Börßum-Seinstedt,Niedersachsen,52.0507,10.6362,115
+15936,rr,Suhl-Gehlberg,Thüringen,50.6742,10.7907,737
+15939,rr,Apelern-Kleinhegesdorf,Niedersachsen,52.3196,9.3218,117
+15943,rr,Dietfurt-Mallerstetten,Bayern,49.0497,11.5481,490
+15944,rr,Trochtelfingen-Hausen an der Lauchert,Baden-Württemberg,48.303,9.1974,704
+15945,rr,"Hindelang, Bad-Gailenberg",Bayern,47.5121,10.3555,980
+15953,rr,Heidenheim-Hechlingen,Bayern,48.9818,10.7306,482
+15958,rr,Glees/Laacher See,Rheinland-Pfalz,50.3996,7.2651,287
+15960,rr,Eurasburg/Obb.-Beuerberg,Bayern,47.8352,11.4149,580
+15976,kl,Ober-Olm/Bellem,Rheinland-Pfalz,49.9529,8.2107,216
+15977,rr,Arberg-Gothendorf,Bayern,49.1442,10.6624,437
+15978,kl,Sembach,Rheinland-Pfalz,49.5044,7.8618,316
+15984,rr,Hehlen,Niedersachsen,51.9784,9.4758,133
+15986,rr,Härtlingen,Rheinland-Pfalz,50.5355,7.9192,345
+15988,rr,Neuhäusel,Rheinland-Pfalz,50.4244,7.73,538
+15989,rr,Leisel,Rheinland-Pfalz,49.741,7.1936,649
+15991,rr,Schönenberg-Kübelberg,Rheinland-Pfalz,49.4108,7.3346,253
+15994,rr,Sukow-Zietlitz,Mecklenburg-Vorpommern,53.5696,11.5485,44
+16003,rr,Malschwitz-Baruth,Sachsen,51.2414,14.6046,153
+16009,rr,Dresden-Pillnitz(Vers.),Sachsen,51.0041,13.8806,115
+16010,rr,Hochkirch-Pommritz,Sachsen,51.1595,14.5646,240
+16012,rr,Mügeln-Niedergoseln,Sachsen,51.2341,13.0646,149
+16014,rr,Geithain-Niedergräfenhain,Sachsen,51.0576,12.6342,201
+16015,rr,Arzberg-Köllitsch,Sachsen,51.5029,13.1216,85
+16016,rr,Delitzsch-Spröda,Sachsen,51.5474,12.4334,95
+16019,rr,Pöhl-Christgrün,Sachsen,50.5785,12.2135,432
+16020,rr,Pockau/Sachsen-Forchheim,Sachsen,50.7098,13.2734,568
+16022,rr,Nossen/Sachsen,Sachsen,51.0562,13.2745,250
+16086,rr,Barum-St. Dionys,Niedersachsen,53.3367,10.3905,5
+17444,rr,Berlin-Zehlendorf-Düppel,Berlin,52.432,13.245,40
+17445,rr,Berlin-Schönow,Berlin,52.408,13.266,37
+17446,rr,Berlin-Hubertusbrücke,Berlin,52.404,13.14,33
+17447,rr,Berlin-Colonie Alsen,Berlin,52.421,13.165,35
+17448,rr,Berlin-Lichtenrade (Lockestr.),Berlin,52.389,13.402,43
+17449,rr,Berlin-Wilmersdorf,Berlin,52.494,13.328,35
+17450,rr,Berlin-Grunewald,Berlin,52.48,13.261,41
+17451,rr,Berlin-Charlottenburg (Mollwitzstr.),Berlin,52.521,13.286,34
+17452,rr,Berlin-Wedding,Berlin,52.542,13.337,34
+17453,rr,Berlin-Haselhorst,Berlin,52.539,13.23,34
+17454,rr,Berlin-Hakenfelde,Berlin,52.557,13.199,33
+17455,rr,Berlin-Gatow,Berlin,52.489,13.181,31
+17456,rr,Berlin-Staaken,Berlin,52.532,13.141,33
+17457,rr,Berlin-Reinickendorf,Berlin,52.566,13.347,39
+17458,rr,Berlin-Frohnau (Bifröstweg),Berlin,52.629,13.266,39
+17459,rr,Berlin-Heiligensee,Berlin,52.602,13.237,34
+17460,rr,Berlin-Neukölln,Berlin,52.484,13.442,35
+17461,rr,Berlin-Köllnische Heide,Berlin,52.469,13.466,34
+17462,rr,Berlin-Britz,Berlin,52.452,13.458,34
+17463,rr,Berlin-Rudow (Stubenrauchstr.),Berlin,52.428,13.491,36
+17464,rr,Berlin-Johannisthal (Winckelmannstr.),Berlin,52.442,13.504,35
+17465,rr,Berlin-Grünau,Berlin,52.416,13.577,35
+17466,rr,Berlin-Schmöckwitz/Dahme,Berlin,52.377,13.642,35
+17467,rr,Berlin-Köpenick/Spree,Berlin,52.444,13.583,36
+17468,rr,Berlin-Friedrichshagen-Hirschgarten,Berlin,52.45,13.62,36
+17469,rr,Berlin-Köpenick-Müggelheim,Berlin,52.414,13.671,35
+17470,rr,Berlin-Rummelsburg,Berlin,52.498,13.488,36
+17471,rr,Berlin-Biesdorf,Berlin,52.502,13.554,37
+17472,rr,Berlin-Oberschöneweide,Berlin,52.463,13.512,34
+17473,rr,Berlin-Friedrichshain/Spree,Berlin,52.51,13.427,35
+17474,rr,Berlin-Pankow-Prenzlauer Berg,Berlin,52.545,13.439,47
+17475,rr,Berlin-Gesundbrunnen,Berlin,52.553,13.384,41
+17476,rr,Berlin-Marzahn-Bürknersfelde,Berlin,52.545,13.537,50
+17477,rr,Berlin-Lichtenberg-Malchow,Berlin,52.567,13.491,51
+17478,rr,Berlin-Hohenschönhausen,Berlin,52.545,13.493,56
+17479,rr,Berlin-Karow,Berlin,52.612,13.453,49
+17480,rr,Berlin-Hessenwinkel,Berlin,52.429,13.718,37
+17481,rr,Berlin-Marienfelde (Grillostr.),Berlin,52.413,13.376,43
+17482,rr,Berlin/Biesdorfer Baggersee,Berlin,52.504,13.547,36
+17483,rr,Berlin-Mitte/Südpanke,Berlin,52.535,13.375,36
+17484,rr,Berlin-Borsigwalde,Berlin,52.58,13.308,37
+17485,rr,Berlin-Lichterfelde,Berlin,52.44,13.327,40
+17486,rr,Berlin-Wilhelmstadt,Berlin,52.52,13.202,33
+17487,rr,Berlin-Kreuzberg,Berlin,52.497,13.398,36
+17488,rr,Berlin-Waidmannslust,Berlin,52.611,13.316,36
+17489,rr,Berlin-Heinersdorf,Berlin,52.578,13.436,46
+17490,rr,Berlin-Pankow-Rosenthal,Berlin,52.589,13.381,44
+17491,rr,Berlin-Blankenfelde,Berlin,52.617,13.384,53
+19032,rr,Dahlen,Sachsen,51.3575,12.9862,156
+19033,rr,Neustadt a. Rbg.-Dudensen,Niedersachsen,52.5971,9.4404,41
+19039,rr,Trossingen-Schura,Baden-Württemberg,48.0559,8.6447,731
+19041,rr,Zinnwald,Sachsen,50.7313,13.7529,871
+19100,rr,Neuwied-Torney,Rheinland-Pfalz,50.4563,7.4962,97
+19123,rr,Altkalen-Granzow,Mecklenburg-Vorpommern,53.9327,12.681,26
+19125,rr,Recke,Nordrhein-Westfalen,52.3815,7.6725,44
+19126,rr,Hildesheim Flugplatz,Niedersachsen,52.1803,9.9535,88
+19127,rr,Deiningen,Bayern,48.8653,10.5704,423
+19128,rr,Traunreut-Stein,Bayern,47.98,12.5479,506
+19130,rr,Hummelshain-Trockenborn,Thüringen,50.7917,11.6614,353
+19131,rr,Gräfinau-Angstedt,Thüringen,50.7036,11.0181,408
+19133,rr,Sondershausen/Kyffhäuserkreis,Thüringen,51.3708,10.8475,224
+19134,rr,Gerstungen/Werra,Thüringen,50.9614,10.0714,210
+19135,rr,Nordhausen-Salza,Thüringen,51.5061,10.7714,191
+19137,rr,Frohndorf bei Sömmerda,Thüringen,51.145,11.2075,155
+19138,rr,Zeulenroda/Greiz,Thüringen,50.6683,11.9778,358
+19140,rr,Gotha,Thüringen,50.9657,10.6988,278
+19171,kl,Hasenkrug-Hardebek,Schleswig-Holstein,54.0039,9.8555,13
+19172,kl,Wacken,Schleswig-Holstein,54.0246,9.388,48
+19193,rr,Neu Benthen,Mecklenburg-Vorpommern,53.5286,11.9905,72
+19207,kl,Gülzow-Prüzen,Mecklenburg-Vorpommern,53.8178,12.0645,16
+19208,rr,Utzenfeld,Baden-Württemberg,47.821,7.8969,670
+19209,rr,Udler,Rheinland-Pfalz,50.1346,6.853,472
+19225,rr,Fladungen-Leubach,Bayern,50.5352,10.0966,560
+19227,rr,Ditfurt,Sachsen-Anhalt,51.8335,11.209,106
+19238,rr,Simbach am Inn-Grub,Bayern,48.2981,12.9586,460
+19243,kl,Föhr,Schleswig-Holstein,54.6831,8.4721,8
+19244,rr,Hornbach/Südwestpfalz,Rheinland-Pfalz,49.1939,7.3714,300
+19270,rr,Bleßberg,Thüringen,50.4465,11.006,865
+19271,rr,"Brückenau, Bad-Staatsbad",Bayern,50.2996,9.7436,280
+19275,rr,Nordhalben-Mauthaus,Bayern,50.3636,11.4917,455
+19279,rr,Hessisch Lichtenau-Velmeden,Hessen,51.2139,9.7929,378
+19289,rr,Hannover (Kleingartenverein Farrelheide),Niedersachsen,52.4295,9.8227,54
+19299,rr,Speichersdorf,Bayern,49.8713,11.7883,463
+19302,rr,Pyrbaum-Rengersricht,Bayern,49.2754,11.305,426
+19305,rr,Schönthal-Öd,Bayern,49.3218,12.5873,562
+19306,rr,Dörentrup-Humfeld,Nordrhein-Westfalen,52.0249,9.0454,138
+19309,rr,Kevelaer-Kervenheim,Nordrhein-Westfalen,51.6369,6.2865,20
+19319,rr,Anschau,Rheinland-Pfalz,50.2891,7.0888,340
+19323,rr,Zettlitz-Methau,Sachsen,51.0826,12.8519,276
+19324,rr,Crimmitschau-Blankenhain,Sachsen,50.8025,12.2864,352
+19325,rr,Sankt Goar-Biebernheim,Rheinland-Pfalz,50.1482,7.7045,220
+19326,rr,Boxberg-Reichwalde,Sachsen,51.3766,14.6557,136
+19327,rr,Klipphausen-Reichenbach,Sachsen,51.1221,13.4975,222
+19328,rr,Elsterheide-Bergen,Sachsen,51.4625,14.2317,116
+19329,rr,Salzwedel-Tylsen,Sachsen-Anhalt,52.8192,11.0274,30
+19332,rr,Fichtenau-Großenhub,Baden-Württemberg,49.088,10.1691,512
+19361,rr,Frankenblick-Rauenstein,Thüringen,50.4159,11.0437,540
+19362,rr,Neuhaus-Steinheid (Thür.),Thüringen,50.4602,11.0858,720
+19363,rr,Treuchtlingen,Bayern,48.9532,10.9135,409
+19366,rr,Annweiler am Trifels-Stein,Rheinland-Pfalz,49.1505,7.9174,242
+19367,rr,Annweiler am Trifels/Pfalz,Rheinland-Pfalz,49.2133,7.98,174
+19407,rr,Lenggries-Vorderriss,Bayern,47.559,11.4368,781
+19411,rr,Jachenau/Tölzer Land,Bayern,47.6075,11.4205,825
+19414,rr,Ochtrup (Süd),Nordrhein-Westfalen,52.189,7.1962,51
+19415,rr,Ochtrup (West),Nordrhein-Westfalen,52.1948,7.1056,43
+19424,rr,Eschweiler-Kinzweiler,Nordrhein-Westfalen,50.8478,6.2234,163
+19426,rr,Mittenwald/Isartal,Bayern,47.4433,11.2708,910
+19434,rr,Boppard-Oppenhausen,Rheinland-Pfalz,50.2028,7.4835,325
+19436,rr,"Brambach, Bad-Hohendorf",Sachsen,50.2073,12.3003,631
+19492,rr,Mainleus-Veitlahm,Bayern,50.1185,11.3912,408
+19503,rr,Eisenschmitt/Salm,Rheinland-Pfalz,50.082,6.6985,375
+19524,rr,Wershofen (Flugplatz),Rheinland-Pfalz,50.4508,6.7825,480
+19542,rr,Kelberg/Eifel,Rheinland-Pfalz,50.291,6.9128,495
+19574,rr,Daxweiler,Rheinland-Pfalz,49.9799,7.7683,472
+19575,rr,Dümpelfeld,Rheinland-Pfalz,50.4411,6.9261,318
+19578,rr,Pölchow,Mecklenburg-Vorpommern,54.0081,12.0971,42
+19603,rr,Offenbach an der Queich,Rheinland-Pfalz,49.2064,8.2149,126
+19636,rr,Wandlitz-Schönwalde,Brandenburg,52.6728,13.4396,56
+19723,rr,Weilerbach,Rheinland-Pfalz,49.4966,7.658,220
+19751,rr,Oy-Mittelberg/Grüntensee,Bayern,47.6203,10.4601,869
+19768,rr,Kirchheimbolanden/Pfalz,Rheinland-Pfalz,49.6672,8.0228,235
+19777,rr,Gerolstein-Üxheim,Rheinland-Pfalz,50.3397,6.7611,420
+19782,rr,Vordereifel-Virneburg,Rheinland-Pfalz,50.3489,7.0778,429
+19797,rr,Dahn,Rheinland-Pfalz,49.1421,7.7803,203
+19806,rr,Ormont,Rheinland-Pfalz,50.3289,6.4402,549
+19816,rr,Göllheim/Pfalz,Rheinland-Pfalz,49.5989,8.0367,223
+19817,rr,Obermoschel,Rheinland-Pfalz,49.7264,7.7761,206
+19833,rr,Neuss (Am Blankenwasser),Nordrhein-Westfalen,51.1539,6.759,40
+19834,rr,Neuss (Kläranlage Ost),Nordrhein-Westfalen,51.205,6.7193,41
+19835,rr,Neuss (Kläranlage Süd),Nordrhein-Westfalen,51.1664,6.7075,39
+19836,rr,Neuss (Mühlenbachstraße),Nordrhein-Westfalen,51.2284,6.6573,39
+19837,rr,Neuss (Raiffeisenstraße),Nordrhein-Westfalen,51.132,6.7348,40
+19838,rr,Neuss (Sportplatz Holzheim),Nordrhein-Westfalen,51.1592,6.6767,45
+19839,rr,Neuss (Steinhausstraße),Nordrhein-Westfalen,51.2054,6.6668,38
+19849,rr,Schönborn,Rheinland-Pfalz,50.3036,7.9923,320
+19851,rr,Hohenleimbach,Rheinland-Pfalz,50.4111,7.043,576
+19852,rr,Mainz (Lennebergwald),Rheinland-Pfalz,50.008,8.154,106
+19856,kl,Schönau am Königssee,Bayern,47.6134,12.9819,625
+19897,rr,Berlin-Friedrichshain-Nord,Berlin,52.504,13.455,37
+19898,rr,Berlin-Halensee,Berlin,52.497,13.282,39
+19912,kl,Bichl,Bayern,47.7147,11.4166,630
+19995,rr,Süsel-Kesdorf,Schleswig-Holstein,54.0659,10.6502,40
+20003,rr,Beuron-Langenbrunn,Baden-Württemberg,48.0764,9.0221,607
+20040,rr,Wendelsheim,Rheinland-Pfalz,49.7649,8,166
+20041,rr,Hagen-Altenhagen,Nordrhein-Westfalen,51.3784,7.47,137
+20042,rr,Hagen-Bathey,Nordrhein-Westfalen,51.4121,7.4736,104
+20043,rr,Hagen-Bölling,Nordrhein-Westfalen,51.2926,7.5687,436
+20044,rr,Hagen-Delstern,Nordrhein-Westfalen,51.3469,7.5107,150
+20045,rr,Hagen Hof-Wahl (Flugplatz),Nordrhein-Westfalen,51.3077,7.4284,397
+20046,rr,Hagen-Geweke,Nordrhein-Westfalen,51.3631,7.419,231
+20047,rr,Hagen-Haspe/Ennepe,Nordrhein-Westfalen,51.3444,7.4118,127
+20048,rr,Hagen-Hengstey,Nordrhein-Westfalen,51.3951,7.451,94
+20049,rr,Hagen-Nahmer,Nordrhein-Westfalen,51.3403,7.5732,140
+20051,rr,Hagen-Rummenohl/Volmetal,Nordrhein-Westfalen,51.2819,7.5309,176
+20052,rr,Hagen-Werdringen,Nordrhein-Westfalen,51.3869,7.4119,96
+20074,rr,Hamm-Pelkum,Nordrhein-Westfalen,51.6266,7.759,69
+20075,rr,Ense-Bittingen,Nordrhein-Westfalen,51.5061,8.0266,235
+20076,rr,Baudenbach,Bayern,49.6263,10.5369,302
+20098,kl,Seebach (Nationalpark Schwarzwald),Baden-Württemberg,48.5651,8.2284,1019
+20107,rr,Wittlich-Bergweiler,Rheinland-Pfalz,49.9687,6.8272,311
+20108,rr,Mönchengladbach-Schelsen,Nordrhein-Westfalen,51.1543,6.5049,56
+20189,rr,Reit im Winkl (Kaiserweg),Bayern,47.6759,12.47,687
+20191,rr,Sebnitz-Hinterhermsdorf,Sachsen,50.9238,14.357,375
+20278,kl,Zugspitze_Plattform,Bayern,47.421,10.9848,2956
+20323,rr,Bechhofen/Pfalz,Rheinland-Pfalz,49.3508,7.4082,288

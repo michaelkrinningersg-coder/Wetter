@@ -14,6 +14,7 @@ import {
   gaugeSummary,
   refreshAll,
 } from './gauges.js'
+import { archiveRange, availableDates, superlatives } from './germany.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -272,6 +273,40 @@ app.get(
 app.post(
   '/api/gauges/refresh',
   handler(async (_req, res) => res.json({ results: await refreshAll({ force: true }) })),
+)
+
+/* -------------------------------------------------------------------------- */
+/* Germany-wide superlatives                                                  */
+/* -------------------------------------------------------------------------- */
+
+app.get(
+  '/api/germany',
+  handler((req, res) => {
+    const range = archiveRange()
+    if (!range.last) {
+      return res.json({
+        range,
+        dates: [],
+        day: null,
+        // A clone that has never run the collector has an empty archive; the
+        // view says so instead of rendering eight empty cards.
+        hint: 'Noch keine Deutschlandwerte im Archiv. Einmal `npm run fetch:germany -- --backfill` ausführen.',
+      })
+    }
+
+    const requested = req.query.date
+    if (requested !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(String(requested))) {
+      return res.status(400).json({ error: `Ungültiges Datum "${requested}".` })
+    }
+
+    const date = String(requested ?? range.last)
+    const day = superlatives(date)
+    if (!day) {
+      return res.status(404).json({ error: `Für den ${date} liegen keine Werte vor.` })
+    }
+
+    res.json({ range, dates: availableDates(), day })
+  }),
 )
 
 /* -------------------------------------------------------------------------- */
