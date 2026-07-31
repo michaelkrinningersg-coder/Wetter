@@ -38,15 +38,16 @@ npm start          # liefert dist/ und die API auf Port 3001
 ## Analysebereiche
 
 **Messwerte** — Monatsübersicht (Tageswerte, Tagesverlauf, Jahresverlauf) ·
-Jahresübersicht (Kenndaten und Schwellenwerttage je Kalenderjahr)
+Jahresübersicht (Kenndaten und Schwellenwerttage je Kalenderjahr) ·
+Dieser Tag in der Geschichte
 
 **Trends** — Temperaturtrend · Niederschlagstrend · Jahresmittelwerte,
-Anomalien und Warming Stripes · Mitteltemperatur Year-to-Date ·
-Vegetationsperiode und Wachstumsgradtage
+Anomalien und Warming Stripes · Mitteltemperatur Year-to-Date · Jahreszeiten ·
+Vegetationsperiode und Wachstumsgradtage · Starkregenanteil
 
 **Rekorde** — Monats-Heatmap · Spitzenwerte (Top-50-Tage) ·
 Spitzenmonate (Top-50-Monate) · Perioden & Serien (längste Hitze-, Trocken-,
-Frost- und Niederschlagsperioden)
+Frost- und Niederschlagsperioden) · Rekordbilanz
 
 **Klimatologie** — Klimadiagramm nach Walter & Lieth · Referenzperioden ·
 Jahresprognose
@@ -99,6 +100,13 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
 - **Homogenität.** Die DWD-Reihen sind Rohdaten und nicht homogenisiert;
   Stationsverlegungen und Gerätewechsel sind nicht korrigiert. Jede
   Langzeitansicht blendet dazu die tatsächliche Datenabdeckung ein.
+- **Jahreszeiten.** Meteorologische Jahreszeiten zu je drei vollen Monaten; der
+  Winter läuft über den Jahreswechsel und wird nach beiden Jahren benannt.
+- **Rekordbilanz.** Gezählt werden nur die heute noch stehenden Tagesrekorde —
+  je einer pro Kalendertag und Richtung. Eine Zählung nach „wärmer als alles
+  bisher Gesehene" wäre zu frühen Jahrzehnten hin verzerrt.
+- **Starkregen.** Zwei Indizes: Anteil aus Tagen ab 20 mm sowie der WMO-Index
+  R95p, dessen Schwelle aus dem 95. Perzentil der Regentage 1961–1990 stammt.
 - **Extremmonate** benötigen mindestens 25 gültige Messtage.
 - **Heatmap.** Jeder Monat wird gegen dieselben Kalendermonate aller anderen
   Jahre eingefärbt; die Skala läuft je Monat vom 20. bis zum 80. Perzentil.

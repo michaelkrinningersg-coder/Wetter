@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   BarChart3,
   CalendarDays,
+  CalendarHeart,
   CalendarRange,
   CloudRain,
   Flame,
@@ -10,6 +11,9 @@ import {
   LineChart,
   Layers,
   Leaf,
+  Scale,
+  Snowflake,
+  Umbrella,
   ListOrdered,
   Sparkles,
   Table2,
@@ -34,6 +38,10 @@ import { AnnualOverview } from './components/AnnualOverview'
 import { Forecast } from './components/Forecast'
 import { Spells } from './components/Spells'
 import { Vegetation } from './components/Vegetation'
+import { Seasons } from './components/Seasons'
+import { RecordBalance } from './components/RecordBalance'
+import { PrecipIntensity } from './components/PrecipIntensity'
+import { DayInHistory } from './components/DayInHistory'
 
 const FALLBACK_STATIONS: Station[] = [
   { id: '01691', name: 'Göttingen', altitude: 167 },
@@ -56,6 +64,10 @@ type TabId =
   | 'forecast'
   | 'spells'
   | 'vegetation'
+  | 'seasons'
+  | 'record-balance'
+  | 'precip-intensity'
+  | 'day-in-history'
 
 interface TabDef {
   id: TabId
@@ -67,15 +79,19 @@ interface TabDef {
 const TABS: TabDef[] = [
   { id: 'overview', label: 'Monatsübersicht', icon: CalendarDays, group: 'Messwerte' },
   { id: 'annual-overview', label: 'Jahresübersicht', icon: Table2, group: 'Messwerte' },
+  { id: 'day-in-history', label: 'Dieser Tag', icon: CalendarHeart, group: 'Messwerte' },
   { id: 'temp-trend', label: 'Temperaturtrend', icon: TrendingUp, group: 'Trends' },
   { id: 'precip-trend', label: 'Niederschlagstrend', icon: CloudRain, group: 'Trends' },
   { id: 'annual-means', label: 'Jahresmittelwerte', icon: LineChart, group: 'Trends' },
   { id: 'ytd-temp', label: 'Mitteltemp. YTD', icon: Gauge, group: 'Trends' },
+  { id: 'seasons', label: 'Jahreszeiten', icon: Snowflake, group: 'Trends' },
   { id: 'vegetation', label: 'Vegetationsperiode', icon: Leaf, group: 'Trends' },
+  { id: 'precip-intensity', label: 'Starkregenanteil', icon: Umbrella, group: 'Trends' },
   { id: 'heatmap', label: 'Monats-Heatmap', icon: Grid3x3, group: 'Rekorde' },
   { id: 'extremes', label: 'Spitzenwerte', icon: Flame, group: 'Rekorde' },
   { id: 'extreme-months', label: 'Spitzenmonate', icon: ListOrdered, group: 'Rekorde' },
   { id: 'spells', label: 'Perioden & Serien', icon: CalendarRange, group: 'Rekorde' },
+  { id: 'record-balance', label: 'Rekordbilanz', icon: Scale, group: 'Rekorde' },
   { id: 'climate', label: 'Klimadiagramm', icon: BarChart3, group: 'Klimatologie' },
   { id: 'comparison', label: 'Referenzperioden', icon: Layers, group: 'Klimatologie' },
   { id: 'forecast', label: 'Prognose', icon: Sparkles, group: 'Klimatologie' },
@@ -315,6 +331,18 @@ export default function App() {
             )}
             {tab === 'ytd-temp' && <YtdTemp stationId={stationId} />}
             {tab === 'annual-overview' && <AnnualOverview stationId={stationId} />}
+            {tab === 'day-in-history' && (
+              <DayInHistory stationId={stationId} stationName={stationName} />
+            )}
+            {tab === 'seasons' && (
+              <Seasons stationId={stationId} stationName={stationName} />
+            )}
+            {tab === 'precip-intensity' && (
+              <PrecipIntensity stationId={stationId} stationName={stationName} />
+            )}
+            {tab === 'record-balance' && (
+              <RecordBalance stationId={stationId} stationName={stationName} />
+            )}
             {tab === 'vegetation' && (
               <Vegetation stationId={stationId} stationName={stationName} />
             )}

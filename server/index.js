@@ -110,6 +110,9 @@ const simple = {
   '/api/weather/annual-overview': api.annualOverview,
   '/api/weather/vegetation': api.vegetation,
   '/api/weather/coverage': api.coverage,
+  '/api/weather/seasons': api.seasons,
+  '/api/weather/records-balance': api.recordBalance,
+  '/api/weather/precip-intensity': api.precipIntensity,
 }
 
 for (const [path, query] of Object.entries(simple)) {
@@ -155,6 +158,26 @@ app.get(
     }
 
     res.json(api.monthlyDetail(station.id, year, month))
+  }),
+)
+
+app.get(
+  '/api/weather/day-in-history',
+  handler((req, res) => {
+    const station = resolveStation(req, res)
+    if (!station) return
+
+    const now = new Date()
+    const month = Number(req.query.month ?? now.getMonth() + 1)
+    const day = Number(req.query.day ?? now.getDate())
+    if (!Number.isInteger(month) || month < 1 || month > 12) {
+      return res.status(400).json({ error: 'Ungültiger Monat.' })
+    }
+    if (!Number.isInteger(day) || day < 1 || day > 31) {
+      return res.status(400).json({ error: 'Ungültiger Tag.' })
+    }
+
+    res.json(api.dayInHistory(station.id, month, day))
   }),
 )
 

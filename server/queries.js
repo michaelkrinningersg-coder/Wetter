@@ -898,6 +898,295 @@ export function buildForecast(stationId) {
 }
 
 /* -------------------------------------------------------------------------- */
+/* Meteorological seasons                                                     */
+/* -------------------------------------------------------------------------- */
+
+export const SEASONS = [
+  { key: 'DJF', label: 'Winter', months: [12, 1, 2] },
+  { key: 'MAM', label: 'Frühling', months: [3, 4, 5] },
+  { key: 'JJA', label: 'Sommer', months: [6, 7, 8] },
+  { key: 'SON', label: 'Herbst', months: [9, 10, 11] },
+]
+
+const seasonStmt = db.prepare(`
+  SELECT
+    -- Meteorological winter spans the turn of the year: December belongs to
+    -- the winter that ends in the following January.
+    CASE WHEN month = 12 THEN year + 1 ELSE year END AS seasonYear,
+    CASE
+      WHEN month IN (12, 1, 2) THEN 'DJF'
+      WHEN month IN (3, 4, 5)  THEN 'MAM'
+      WHEN month IN (6, 7, 8)  THEN 'JJA'
+      ELSE 'SON'
+    END AS season,
+    AVG(temp_mean)     AS avg_temp,
+    SUM(precipitation) AS precip_sum,
+    SUM(CASE WHEN temp_mean IS NOT NULL THEN 1 END) AS valid_days,
+    COUNT(*)                                        AS total_days
+  FROM daily
+  WHERE station_id = ?
+  GROUP BY seasonYear, season
+  ORDER BY seasonYear
+`)
+
+export function seasons(stationId) {
+  const rows = seasonStmt.all(stationId)
+
+  const bySeason = {}
+  for (const spec of SEASONS) bySeason[spec.key] = []
+
+  for (const row of rows) {
+    if (row.avg_temp === null) continue
+    // A season is ~90 days; the same 90 % rule as everywhere else. Winters at
+    // the very start and end of the record are inevitably truncated.
+    if (row.total_days < 88 || row.valid_days / row.total_days < COVERAGE) continue
+
+    bySeason[row.season].push({
+      year: row.seasonYear,
+      label:
+        row.season === 'DJF'
+          ? `${row.seasonYear - 1}/${String(row.seasonYear).slice(2)}`
+          : String(row.seasonYear),
+      avg_temp: row.avg_temp,
+      precip_sum: row.precip_sum,
+      valid_days: row.valid_days,
+      total_days: row.total_days,
+    })
+  }
+
+  return {
+    seasons: SEASONS.map((spec) => ({
+      ...spec,
+      records: bySeason[spec.key],
+    })),
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Record balance — warm against cold daily records                           */
+/* -------------------------------------------------------------------------- */
+
+const recordDaysStmt = db.prepare(`
+  SELECT year, month, day, temp_max, temp_min
+  FROM daily
+  WHERE station_id = ? AND (temp_max IS NOT NULL OR temp_min IS NOT NULL)
+  ORDER BY year
+`)
+
+/**
+ * Which decade holds today's record for each calendar day?
+ *
+ * Counting "was this warmer than anything before it" is heavily biased towards
+ * the start of a series, because early on almost every value is a record. This
+ * instead looks only at the record that still stands: exactly one warm and one
+ * cold record per calendar day, attributed to the decade that set it. In a
+ * stable climate both would spread evenly across the decades.
+ *
+ * Ties go to the earlier year — the later occurrence merely equalled the record,
+ * it did not set it.
+ */
+export function recordBalance(stationId) {
+  const rows = recordDaysStmt.all(stationId)
+
+  const warm = new Map()
+  const cold = new Map()
+  const observedYears = new Map()
+
+  for (const row of rows) {
+    const key = row.month * 100 + row.day
+    observedYears.set(key, (observedYears.get(key) ?? 0) + 1)
+
+    if (row.temp_max !== null) {
+      const held = warm.get(key)
+      if (!held || row.temp_max > held.value) {
+        warm.set(key, { value: row.temp_max, year: row.year, month: row.month, day: row.day })
+      }
+    }
+    if (row.temp_min !== null) {
+      const held = cold.get(key)
+      if (!held || row.temp_min < held.value) {
+        cold.set(key, { value: row.temp_min, year: row.year, month: row.month, day: row.day })
+      }
+    }
+  }
+
+  const decades = new Map()
+  const bump = (year, field) => {
+    const decade = Math.floor(year / 10) * 10
+    if (!decades.has(decade)) decades.set(decade, { decade, warm: 0, cold: 0 })
+    decades.get(decade)[field] += 1
+  }
+  for (const r of warm.values()) bump(r.year, 'warm')
+  for (const r of cold.values()) bump(r.year, 'cold')
+
+  const byDecade = [...decades.values()].sort((a, b) => a.decade - b.decade)
+
+  /** How many calendar days a decade would hold if records fell evenly. */
+  const measuredYears = new Set(rows.map((r) => r.year)).size
+  const expectedPerYear = warm.size / Math.max(1, measuredYears)
+
+  const toList = (map, direction) =>
+    [...map.values()]
+      .sort((a, b) => (direction === 'warm' ? b.value - a.value : a.value - b.value))
+      .slice(0, 10)
+
+  return {
+    warmRecordCount: warm.size,
+    coldRecordCount: cold.size,
+    measuredYears,
+    /** Days a decade is expected to hold under a stable climate. */
+    expectedPerDecade: Number((expectedPerYear * 10).toFixed(1)),
+    byDecade,
+    /** The most extreme standing records, for context. */
+    topWarm: toList(warm, 'warm'),
+    topCold: toList(cold, 'cold'),
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Precipitation intensity                                                    */
+/* -------------------------------------------------------------------------- */
+
+/** ETCCDI reference period for R95p. */
+const R95_FROM = 1961
+const R95_TO = 1990
+/** A "wet day" in the ETCCDI definition. */
+const WET_DAY = 1
+/** Fixed threshold for the plainly readable index. */
+const HEAVY_DAY = 20
+
+const precipDaysStmt = db.prepare(`
+  SELECT year, precipitation AS p
+  FROM daily
+  WHERE station_id = ? AND precipitation IS NOT NULL
+  ORDER BY year
+`)
+
+const precipCoverageStmt = db.prepare(`
+  SELECT year, SUM(CASE WHEN precipitation IS NOT NULL THEN 1 END) AS valid_days
+  FROM daily WHERE station_id = ? GROUP BY year
+`)
+
+export function precipIntensity(stationId) {
+  const rows = precipDaysStmt.all(stationId)
+  const coverage = new Map(
+    precipCoverageStmt.all(stationId).map((r) => [r.year, r.valid_days ?? 0]),
+  )
+
+  // R95p threshold: 95th percentile of wet-day totals in the reference period.
+  const referenceWetDays = rows
+    .filter((r) => r.year >= R95_FROM && r.year <= R95_TO && r.p >= WET_DAY)
+    .map((r) => r.p)
+    .sort((a, b) => a - b)
+  const r95Threshold = pct(referenceWetDays, 0.95)
+
+  const byYear = new Map()
+  for (const row of rows) {
+    if (!byYear.has(row.year)) {
+      byYear.set(row.year, { year: row.year, total: 0, heavy: 0, r95: 0, heavyDays: 0, wetDays: 0 })
+    }
+    const y = byYear.get(row.year)
+    y.total += row.p
+    if (row.p >= WET_DAY) y.wetDays += 1
+    if (row.p >= HEAVY_DAY) {
+      y.heavy += row.p
+      y.heavyDays += 1
+    }
+    if (r95Threshold !== null && row.p > r95Threshold && row.p >= WET_DAY) {
+      y.r95 += row.p
+    }
+  }
+
+  const records = [...byYear.values()]
+    .filter((y) => {
+      const valid = coverage.get(y.year) ?? 0
+      return valid / daysInYear(y.year) >= COVERAGE && y.total > 0
+    })
+    .map((y) => ({
+      year: y.year,
+      total: Number(y.total.toFixed(1)),
+      heavyShare: Number(((y.heavy / y.total) * 100).toFixed(2)),
+      r95Share: Number(((y.r95 / y.total) * 100).toFixed(2)),
+      heavyDays: y.heavyDays,
+      wetDays: y.wetDays,
+    }))
+    .sort((a, b) => a.year - b.year)
+
+  return {
+    heavyThreshold: HEAVY_DAY,
+    r95Threshold: r95Threshold === null ? null : Number(r95Threshold.toFixed(1)),
+    r95From: R95_FROM,
+    r95To: R95_TO,
+    records,
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* This day in history                                                        */
+/* -------------------------------------------------------------------------- */
+
+const dayHistoryStmt = db.prepare(`
+  SELECT year, date, temp_mean, temp_max, temp_min, precipitation, wind_max
+  FROM daily
+  WHERE station_id = ? AND month = ? AND day = ?
+  ORDER BY year DESC
+`)
+
+/**
+ * Every year's measurement for one calendar day, with the years that still
+ * hold a record for that day marked.
+ */
+export function dayInHistory(stationId, month, day) {
+  const rows = dayHistoryStmt.all(stationId, month, day)
+  if (rows.length === 0) {
+    return { month, day, records: [], holders: {}, count: 0 }
+  }
+
+  const holder = (field, direction) => {
+    let best = null
+    for (const row of rows) {
+      const value = row[field]
+      if (value === null) continue
+      if (
+        !best ||
+        (direction === 'max' ? value > best.value : value < best.value) ||
+        // Ties go to the earlier year, which actually set the record.
+        (value === best.value && row.year < best.year)
+      ) {
+        best = { year: row.year, value }
+      }
+    }
+    return best
+  }
+
+  const holders = {
+    warmest: holder('temp_max', 'max'),
+    coldest: holder('temp_min', 'min'),
+    wettest: holder('precipitation', 'max'),
+    windiest: holder('wind_max', 'max'),
+    warmestMean: holder('temp_mean', 'max'),
+    coldestMean: holder('temp_mean', 'min'),
+  }
+
+  const values = rows.map((r) => r.temp_mean).filter((v) => v !== null)
+
+  return {
+    month,
+    day,
+    count: rows.length,
+    firstYear: rows[rows.length - 1].year,
+    lastYear: rows[0].year,
+    meanOfDay: values.length > 0 ? mean(values) : null,
+    holders,
+    records: rows,
+  }
+}
+
+function mean(values) {
+  return values.reduce((a, b) => a + b, 0) / values.length
+}
+
+/* -------------------------------------------------------------------------- */
 /* Vegetation period and growing degree days                                  */
 /* -------------------------------------------------------------------------- */
 

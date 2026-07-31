@@ -203,6 +203,84 @@ export interface CoverageResponse {
   byDecade: { decade: number; tempShare: number; precipShare: number }[]
 }
 
+export interface SeasonRecord {
+  year: number
+  label: string
+  avg_temp: number
+  precip_sum: number | null
+  valid_days: number
+  total_days: number
+}
+
+export interface SeasonsResponse {
+  seasons: {
+    key: string
+    label: string
+    months: number[]
+    records: SeasonRecord[]
+  }[]
+}
+
+export interface RecordHolder {
+  year: number
+  month: number
+  day: number
+  value: number
+}
+
+export interface RecordBalanceResponse {
+  warmRecordCount: number
+  coldRecordCount: number
+  measuredYears: number
+  expectedPerDecade: number
+  byDecade: { decade: number; warm: number; cold: number }[]
+  topWarm: RecordHolder[]
+  topCold: RecordHolder[]
+}
+
+export interface PrecipIntensityRecord {
+  year: number
+  total: number
+  heavyShare: number
+  r95Share: number
+  heavyDays: number
+  wetDays: number
+}
+
+export interface PrecipIntensityResponse {
+  heavyThreshold: number
+  r95Threshold: number | null
+  r95From: number
+  r95To: number
+  records: PrecipIntensityRecord[]
+}
+
+export interface DayHistoryRow {
+  year: number
+  date: string
+  temp_mean: number | null
+  temp_max: number | null
+  temp_min: number | null
+  precipitation: number | null
+  wind_max: number | null
+}
+
+export interface DayInHistoryResponse {
+  month: number
+  day: number
+  count: number
+  firstYear?: number
+  lastYear?: number
+  meanOfDay?: number | null
+  holders: Partial<
+    Record<
+      'warmest' | 'coldest' | 'wettest' | 'windiest' | 'warmestMean' | 'coldestMean',
+      { year: number; value: number } | null
+    >
+  >
+  records: DayHistoryRow[]
+}
+
 export interface Spell {
   start: string
   end: string

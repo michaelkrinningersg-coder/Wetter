@@ -407,6 +407,8 @@ export const CHART = {
     cool: 'oklch(76% 0.13 235)',
     cold: 'oklch(68% 0.15 255)',
     wet: 'oklch(78% 0.12 205)',
+    dry: 'oklch(78% 0.13 75)',
+    good: 'oklch(76% 0.17 150)',
     neutral: 'oklch(62% 0.008 260)',
     accent: 'oklch(74% 0.17 340)',
   },
