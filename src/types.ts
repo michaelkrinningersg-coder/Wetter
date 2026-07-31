@@ -245,6 +245,10 @@ export interface PrecipIntensityRecord {
   r95Share: number
   heavyDays: number
   wetDays: number
+  /** Highest total over five consecutive days (ETCCDI RX5day). */
+  rx5day: number | null
+  rx5Start: string | null
+  rx5End: string | null
 }
 
 export interface PrecipIntensityResponse {
@@ -252,6 +256,7 @@ export interface PrecipIntensityResponse {
   r95Threshold: number | null
   r95From: number
   r95To: number
+  rxWindow: number
   records: PrecipIntensityRecord[]
 }
 

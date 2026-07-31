@@ -105,8 +105,10 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
 - **Rekordbilanz.** Gezählt werden nur die heute noch stehenden Tagesrekorde —
   je einer pro Kalendertag und Richtung. Eine Zählung nach „wärmer als alles
   bisher Gesehene" wäre zu frühen Jahrzehnten hin verzerrt.
-- **Starkregen.** Zwei Indizes: Anteil aus Tagen ab 20 mm sowie der WMO-Index
-  R95p, dessen Schwelle aus dem 95. Perzentil der Regentage 1961–1990 stammt.
+- **Starkregen.** Drei Indizes: Anteil aus Tagen ab 20 mm, der WMO-Index R95p
+  (Schwelle aus dem 95. Perzentil der Regentage 1961–1990) sowie RX5day, die
+  höchste Summe über fünf aufeinanderfolgende Tage. Ein RX5day-Fenster zählt nur
+  bei lückenlosen, calendarisch aufeinanderfolgenden Tagen.
 - **Extremmonate** benötigen mindestens 25 gültige Messtage.
 - **Heatmap.** Jeder Monat wird gegen dieselben Kalendermonate aller anderen
   Jahre eingefärbt; die Skala läuft je Monat vom 20. bis zum 80. Perzentil.

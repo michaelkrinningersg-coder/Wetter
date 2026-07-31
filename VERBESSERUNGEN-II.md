@@ -234,8 +234,17 @@ von **10,5 auf 14,4 %**, der R95p-Anteil von **18,0 auf 23,9 %**. Die
 Jahressumme wächst dabei nur um 5,8 mm je Jahrzehnt. Es regnet also nicht
 wesentlich mehr, sondern konzentrierter.
 
-**Weiterhin offen:** die maximale 5-Tages-Summe je Jahr als zusätzliches
-Hochwassermaß — auf Zuruf nachrüstbar.
+**Nachgereicht: die maximale 5-Tages-Summe (RX5day).** Höchster Niederschlag
+über fünf aufeinanderfolgende Tage eines Jahres — keine Anteilsgröße, sondern
+eine Menge, und damit das übliche Maß für Hochwasserrelevanz. Ein Fenster zählt
+nur, wenn alle fünf Tage lückenlos vorliegen und calendarisch aufeinanderfolgen;
+über eine Datenlücke hinweg zu summieren würde einen Starkregen erfinden, den es
+nicht gab. Die Fenster bleiben innerhalb des Kalenderjahres.
+
+Ergebnis für Göttingen: im Mittel **48 mm (1858–1887) → 58 mm (1996–2025)**,
+Trend **+0,7 mm je Jahrzehnt, signifikant**. Der Rekord der Messreihe sind
+**134,8 mm vom 22. bis 26. Juli 2017** — mehr als ein Fünftel einer
+durchschnittlichen Jahressumme in fünf Tagen.
 
 ---
 

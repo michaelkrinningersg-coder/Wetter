@@ -1056,11 +1056,52 @@ const WET_DAY = 1
 const HEAVY_DAY = 20
 
 const precipDaysStmt = db.prepare(`
-  SELECT year, precipitation AS p
+  SELECT year, month, day, precipitation AS p
   FROM daily
   WHERE station_id = ? AND precipitation IS NOT NULL
-  ORDER BY year
+  ORDER BY year, month, day
 `)
+
+/** Length of the sliding window for RX5day. */
+const RX_WINDOW = 5
+
+/**
+ * RX5day — the highest total over five consecutive days in a year.
+ *
+ * A window only counts when all five days are actually present and follow each
+ * other without a gap. Summing across a hole in the record would invent a
+ * downpour out of missing data, which is exactly the kind of artefact that
+ * makes a heavy-rain statistic worthless.
+ *
+ * Windows stay inside the calendar year, so each year's value is attributable
+ * to that year alone.
+ */
+function maxWindowSum(days) {
+  let best = null
+
+  for (let end = RX_WINDOW - 1; end < days.length; end++) {
+    const start = end - (RX_WINDOW - 1)
+
+    // Reject the window unless the five days are calendar-consecutive.
+    let contiguous = true
+    for (let i = start; i < end; i++) {
+      if (!isNextDay(days[i].iso, days[i + 1].iso)) {
+        contiguous = false
+        break
+      }
+    }
+    if (!contiguous) continue
+
+    let sum = 0
+    for (let i = start; i <= end; i++) sum += days[i].p
+
+    if (!best || sum > best.sum) {
+      best = { sum, start: days[start].iso, end: days[end].iso }
+    }
+  }
+
+  return best
+}
 
 const precipCoverageStmt = db.prepare(`
   SELECT year, SUM(CASE WHEN precipitation IS NOT NULL THEN 1 END) AS valid_days
@@ -1083,10 +1124,22 @@ export function precipIntensity(stationId) {
   const byYear = new Map()
   for (const row of rows) {
     if (!byYear.has(row.year)) {
-      byYear.set(row.year, { year: row.year, total: 0, heavy: 0, r95: 0, heavyDays: 0, wetDays: 0 })
+      byYear.set(row.year, {
+        year: row.year,
+        total: 0,
+        heavy: 0,
+        r95: 0,
+        heavyDays: 0,
+        wetDays: 0,
+        days: [],
+      })
     }
     const y = byYear.get(row.year)
     y.total += row.p
+    y.days.push({
+      iso: `${row.year}-${String(row.month).padStart(2, '0')}-${String(row.day).padStart(2, '0')}`,
+      p: row.p,
+    })
     if (row.p >= WET_DAY) y.wetDays += 1
     if (row.p >= HEAVY_DAY) {
       y.heavy += row.p
@@ -1102,14 +1155,20 @@ export function precipIntensity(stationId) {
       const valid = coverage.get(y.year) ?? 0
       return valid / daysInYear(y.year) >= COVERAGE && y.total > 0
     })
-    .map((y) => ({
-      year: y.year,
-      total: Number(y.total.toFixed(1)),
-      heavyShare: Number(((y.heavy / y.total) * 100).toFixed(2)),
-      r95Share: Number(((y.r95 / y.total) * 100).toFixed(2)),
-      heavyDays: y.heavyDays,
-      wetDays: y.wetDays,
-    }))
+    .map((y) => {
+      const rx5 = maxWindowSum(y.days)
+      return {
+        year: y.year,
+        total: Number(y.total.toFixed(1)),
+        heavyShare: Number(((y.heavy / y.total) * 100).toFixed(2)),
+        r95Share: Number(((y.r95 / y.total) * 100).toFixed(2)),
+        heavyDays: y.heavyDays,
+        wetDays: y.wetDays,
+        rx5day: rx5 ? Number(rx5.sum.toFixed(1)) : null,
+        rx5Start: rx5?.start ?? null,
+        rx5End: rx5?.end ?? null,
+      }
+    })
     .sort((a, b) => a.year - b.year)
 
   return {
@@ -1117,6 +1176,7 @@ export function precipIntensity(stationId) {
     r95Threshold: r95Threshold === null ? null : Number(r95Threshold.toFixed(1)),
     r95From: R95_FROM,
     r95To: R95_TO,
+    rxWindow: RX_WINDOW,
     records,
   }
 }
