@@ -7,6 +7,10 @@ Alle Zahlen sind an der Station Göttingen (01691) gegen die Datenbank
 gerechnet, nicht geschätzt. Wo ich einen Wert nicht belegen kann, steht das
 ausdrücklich dabei.
 
+> **Stand:** Die Punkte **12, 13, 17 und 20** sind ausgewählt, entschieden
+> und umgesetzt — erkennbar am Vermerk ✅ **Umgesetzt**. Die übrigen sechs
+> sind weiterhin offen.
+
 **Jeder Vorschlag endet mit „Offene Entscheidungen".** Das sind Punkte, bei
 denen es mehrere fachlich vertretbare Antworten gibt und die Wahl das Ergebnis
 verändert — die entscheidest du, bevor ich etwas umsetze.
@@ -48,7 +52,7 @@ Nachbarstationen oder die DWD-Stationshistorie.
 
 ---
 
-## 12. Trends nach meteorologischen Jahreszeiten [M]
+## 12. Trends nach meteorologischen Jahreszeiten [M] · ✅ Umgesetzt
 
 **Was.** Winter (Dez–Feb), Frühling (Mär–Mai), Sommer (Jun–Aug), Herbst
 (Sep–Nov) als vier eigene Trendreihen.
@@ -66,23 +70,37 @@ Für Göttingen, 1900–1929 gegenüber 1996–2025:
 Der Herbst erwärmt sich **mehr als doppelt so stark wie der Frühling** — das
 steht in keiner der bestehenden Ansichten.
 
-**Offene Entscheidungen**
-1. Der meteorologische Winter läuft über den Jahreswechsel. Ich rechne ihn
-   üblicherweise dem Jahr des Januars zu (Dez 2025 + Jan/Feb 2026 = „Winter
-   2026"). Soll es so sein, oder lieber „Winter 2025/26" ausgeschrieben?
-2. Eigener Bereich in der Navigation, oder als Umschalter **innerhalb** des
-   Temperaturtrends (Ganzjahr / Winter / Frühling / Sommer / Herbst)?
+**Entschieden und umgesetzt**
+- Winter ausgeschrieben als **„2025/26"**, eigener Bereich *Jahreszeiten* unter
+  Trends, alle vier Jahreszeiten nebeneinander.
+- Je Jahreszeit: Trend pro Jahrzehnt mit R² und Signifikanz, Vergleich der
+  ersten und letzten 30 Jahre, gemeinsames Diagramm der gleitenden Mittel und
+  eine Rangliste der zehn wärmsten Ausprägungen.
+
+**Wichtige Einordnung zum Ergebnis.** Welche Jahreszeit sich am stärksten
+erwärmt, hängt vom gewählten Bezugszeitraum ab:
+
+| Bezug | stärkste Erwärmung | schwächste |
+|---|---|---|
+| 1900–1929 → 1996–2025 | Herbst (+1,46 K) | Frühling (+0,68 K) |
+| gesamte Messreihe, je Jahrzehnt | Winter (+0,13 K) | Sommer / Frühling (+0,07 K) |
+
+Beides ist korrekt gerechnet. Der Unterschied entsteht durch die sehr kalten
+Winter der 1860er bis 1880er, die im langen Bezug mitzählen. Die Kacheln zeigen
+deshalb **beides**: den Trend je Jahrzehnt über die volle Reihe und die beiden
+30-Jahres-Fenster im direkten Vergleich.
 
 ---
 
-## 13. Rekordbilanz: Wärme- gegen Kälterekorde [M]
+## 13. Rekordbilanz: Wärme- gegen Kälterekorde [M] · ✅ Umgesetzt
 
 **Was.** Für jeden Kalendertag zählen, wann der Wärme- und wann der Kälterekord
 für diesen Tag aufgestellt wurde, und das je Jahrzehnt gegenüberstellen.
 
 **Warum.** In einem stabilen Klima wäre das Verhältnis etwa ausgeglichen. Die
-Schieflage ist ein sehr direkt lesbares Signal. Erste Rechnung für Göttingen
-(Wärme : Kälte):
+Schieflage ist ein sehr direkt lesbares Signal. Erste, **naive** Rechnung für
+Göttingen (Wärme : Kälte) — die Zahlen dieser Tabelle sind durch die Zählweise
+verzerrt und wurden für die Umsetzung verworfen:
 
 | Jahrzehnt | Verhältnis |
 |---|---|
@@ -98,15 +116,27 @@ Schieflage ist ein sehr direkt lesbares Signal. Erste Rechnung für Göttingen
 frühen Jahrzehnten hin verzerrt, weil am Anfang jeder Wert ein Rekord ist. Für
 eine belastbare Darstellung braucht es eine andere Zählweise.
 
-**Offene Entscheidungen**
-1. Welche Zählweise?
-   **(a)** *Heute noch stehende Rekorde* — in welchem Jahrzehnt wurde der aktuell
-   gültige Tagesrekord aufgestellt? Unverzerrt und leicht erklärbar.
-   **(b)** *Rekorde relativ zur Erwartung* — pro Jahrzehnt gegen die Zahl, die
-   bei stabilem Klima zu erwarten wäre. Statistisch sauberer, erklärungsbedürftig.
-   **(c)** Beides nebeneinander.
-2. Sollen nur Kalendertage mit einer Mindestzahl an Messjahren (z. B. 100)
-   zählen, um Zufallsrekorde aus dünn belegten Tagen auszuschließen?
+**Entschieden und umgesetzt: Zählweise (a), heute noch stehende Rekorde.**
+Für jeden der 366 Kalendertage gibt es genau einen gültigen Wärme- und einen
+Kälterekord; gezählt wird, welches Jahrzehnt ihn hält. Bei Gleichstand zählt das
+frühere Jahr, das den Rekord aufgestellt hat. Die Erwartung bei gleichmäßiger
+Verteilung (24,2 je Jahrzehnt und Kategorie) ist als gestrichelte Linie
+eingezeichnet — damit ist auch der Gedanke aus Variante (b) sichtbar, ohne eine
+zweite Darstellung zu brauchen.
+
+Ergebnis für Göttingen — Wärmerekorde nach oben, Kälterekorde nach unten:
+
+| Jahrzehnt | warm | kalt |
+|---|---:|---:|
+| 1940er | 24 | 42 |
+| 1950er | 18 | 63 |
+| 1960er | 14 | 49 |
+| 2000er | 36 | 19 |
+| 2010er | **63** | 16 |
+| 2020er (unvollständig) | 45 | 7 |
+
+Über die drei jüngsten vollständigen Jahrzehnte steht es **2,3 : 1** zugunsten
+der Wärmerekorde.
 
 ---
 
@@ -179,7 +209,7 @@ Wahl verändert die Zahlen deutlich.** Ich lege mich nicht selbst fest:
 
 ---
 
-## 17. Starkregenanteil am Jahresniederschlag [M]
+## 17. Starkregenanteil am Jahresniederschlag [M] · ✅ Umgesetzt
 
 **Was.** Welcher Anteil der Jahressumme fällt an wenigen intensiven Tagen?
 
@@ -195,13 +225,17 @@ mindestens 20 mm:
 Der Niederschlag konzentriert sich also stärker auf wenige Tage, obwohl die
 Gesamtmenge kaum steigt. Genau diese Aussage fehlt der App bisher.
 
-**Offene Entscheidungen**
-1. Welcher Index? **(a)** Anteil aus Tagen ≥ 20 mm (einfach, wie oben gerechnet),
-   **(b)** der WMO-Index R95p (Anteil aus Tagen über dem 95. Perzentil der
-   Referenzperiode — fachlich sauberer, aber erklärungsbedürftig), oder **(c)**
-   beide?
-2. Zusätzlich die **maximale 5-Tages-Summe** je Jahr ausweisen (ein Standardmaß
-   für Hochwasserrelevanz)?
+**Entschieden und umgesetzt: beide Indizes**, umschaltbar im Diagramm und
+nebeneinander in den Kacheln. R95p verwendet die ETCCDI-Standardreferenz
+**1961–1990**; die Schwelle liegt in Göttingen bei 14,6 mm.
+
+Ergebnis (erste 30 Jahre gegenüber 1996–2025): Anteil aus Tagen ab 20 mm steigt
+von **10,5 auf 14,4 %**, der R95p-Anteil von **18,0 auf 23,9 %**. Die
+Jahressumme wächst dabei nur um 5,8 mm je Jahrzehnt. Es regnet also nicht
+wesentlich mehr, sondern konzentrierter.
+
+**Weiterhin offen:** die maximale 5-Tages-Summe je Jahr als zusätzliches
+Hochwassermaß — auf Zuruf nachrüstbar.
 
 ---
 
@@ -254,7 +288,7 @@ belastbare Aussagen ohne Verteilungsannahme.
 
 ---
 
-## 20. „Dieser Tag in der Geschichte" [S]
+## 20. „Dieser Tag in der Geschichte" [S] · ✅ Umgesetzt
 
 **Was.** Eine kleine Ansicht für das heutige Datum: wärmster, kältester,
 nassester 31. Juli der Messgeschichte, dazu die Einordnung des aktuellen Jahres.
@@ -263,12 +297,19 @@ nassester 31. Juli der Messgeschichte, dazu die Einordnung des aktuellen Jahres.
 zielt statt auf einmalige Analyse — ein Grund, die App auch ohne konkrete Frage
 zu öffnen. Aufwand gering, alle Daten liegen vor.
 
-**Offene Entscheidungen**
-1. Bezugstag: das **heutige Kalenderdatum** (dann zeigt die Ansicht bei
-   veraltetem Datenbestand einen Tag ohne Messwert) oder der **letzte Tag mit
-   Daten**? Ich neige zum letzten Datentag, will das aber nicht stillschweigend
-   entscheiden.
-2. Nur Einzeltag, oder ein Fenster von ±3 Tagen (robuster, mehr Vergleichswerte)?
+**Entschieden und umgesetzt:** heutiges Kalenderdatum, und als „besonders"
+gelten die Jahre, die für diesen Tag **bis heute einen Rekord halten** —
+höchstes Maximum, tiefstes Minimum, höchste Regenmenge, stärkste Böe sowie
+höchstes und tiefstes Tagesmittel. Bei Gleichstand zählt das frühere Jahr.
+Der Tag lässt sich frei wechseln, mit Pfeiltasten, Auswahlfeldern und einer
+Schaltfläche zurück auf heute.
+
+Beispiel 31. Juli, 163 Messjahre: wärmster 2018 (36,3 °C), kältester 1915
+(5,7 °C), nassester 1967 (64,5 mm), stürmischster 1989 (18,4 m/s). Der
+Kälterekord von 1915 steht seit 110 Jahren, das tiefste Tagesmittel von 1863
+seit 162 Jahren.
+
+**Weiterhin offen:** ein Fenster von ±3 Tagen statt des Einzeltags.
 
 ---
 
