@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react'
 import {
   ArrowUpDown,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
   CloudRain,
   Flame,
   Map,
@@ -74,6 +76,71 @@ function place(rank: GermanyRank): string {
   return parts.join(' · ')
 }
 
+/** One numbered row of a full ranking. */
+function RankRow({
+  rank,
+  position,
+  category,
+  lowlandLimit,
+}: {
+  rank: GermanyRank
+  position: number
+  category: GermanyCategory
+  lowlandLimit: number
+}) {
+  const mountain = rank.elevation !== null && rank.elevation >= lowlandLimit
+  return (
+    <li className="flex items-baseline gap-2 py-0.5 text-[11px]">
+      <span className="w-5 shrink-0 text-right text-ink-faint">{position}.</span>
+      <span className="numeric w-16 shrink-0 text-ink-muted">
+        {num(rank.value, category.decimals)} {category.unit}
+      </span>
+      <span className="min-w-0 flex-1 truncate text-ink" title={rank.name}>
+        {rank.name}
+        {/* Marks why the two rankings diverge without needing a legend. */}
+        {mountain && (
+          <Mountain
+            className="ml-1 inline size-3 -translate-y-px text-ink-faint"
+            aria-label={`über ${num(lowlandLimit, 0)} m`}
+          />
+        )}
+      </span>
+      <span className="hidden shrink-0 text-ink-faint sm:inline">{place(rank)}</span>
+    </li>
+  )
+}
+
+function RankList({
+  title,
+  scope,
+  category,
+  lowlandLimit,
+}: {
+  title: string
+  scope: GermanyCategory['all']
+  category: GermanyCategory
+  lowlandLimit: number
+}) {
+  return (
+    <div className="min-w-0">
+      <p className="label mb-1.5">
+        {title} <span className="text-ink-faint">· {num(scope.count, 0)} Stationen</span>
+      </p>
+      <ol className="divide-y divide-line/60">
+        {scope.top.map((rank, i) => (
+          <RankRow
+            key={rank.station_id}
+            rank={rank}
+            position={i + 1}
+            category={category}
+            lowlandLimit={lowlandLimit}
+          />
+        ))}
+      </ol>
+    </div>
+  )
+}
+
 /* -------------------------------------------------------------------------- */
 /* Category card                                                              */
 /* -------------------------------------------------------------------------- */
@@ -85,10 +152,12 @@ function CategoryCard({
   category: GermanyCategory
   lowlandLimit: number
 }) {
+  const [expanded, setExpanded] = useState(false)
   const { icon: Icon, accent } = STYLE[category.key] ?? FALLBACK
   const winner = category.all.top[0]
   const lowland = category.lowland.top[0]
   const chasers = category.all.top.slice(1, 4)
+  const depth = category.all.top.length
 
   if (!winner) {
     return (
@@ -107,7 +176,13 @@ function CategoryCard({
   const value = `${num(winner.value, category.decimals)} ${category.unit}`
 
   return (
-    <Card className="relative overflow-hidden" padded={false}>
+    <Card
+      // Expanding in a four-column grid would stretch the whole row and leave
+      // its neighbours half empty. Taking the full width instead keeps the
+      // layout dense and gives the two rankings room to sit side by side.
+      className={`relative overflow-hidden ${expanded ? 'md:col-span-2 xl:col-span-4' : ''}`}
+      padded={false}
+    >
       <span className={`absolute inset-y-0 left-0 w-0.5 ${ACCENT_BAR[accent]}`} aria-hidden />
       <div className="p-5">
         <div className="flex items-start justify-between gap-2">
@@ -141,25 +216,59 @@ function CategoryCard({
           </div>
         )}
 
-        {chasers.length > 0 && (
-          <ol className="mt-3 space-y-1 border-t border-line pt-3">
-            {chasers.map((rank, i) => (
-              <li key={rank.station_id} className="flex items-baseline gap-2 text-[11px]">
-                <span className="w-3 shrink-0 text-ink-faint">{i + 2}.</span>
-                <span className="numeric w-16 shrink-0 text-ink-muted">
-                  {num(rank.value, category.decimals)} {category.unit}
-                </span>
-                <span className="truncate text-ink-faint" title={rank.name}>
-                  {rank.name}
-                </span>
-              </li>
-            ))}
-          </ol>
+        {expanded ? (
+          <div className="mt-4 grid grid-cols-1 gap-x-8 gap-y-5 border-t border-line pt-4 lg:grid-cols-2">
+            <RankList
+              title="Ganz Deutschland"
+              scope={category.all}
+              category={category}
+              lowlandLimit={lowlandLimit}
+            />
+            <RankList
+              title={`Unter ${num(lowlandLimit, 0)} m`}
+              scope={category.lowland}
+              category={category}
+              lowlandLimit={lowlandLimit}
+            />
+          </div>
+        ) : (
+          chasers.length > 0 && (
+            <ol className="mt-3 space-y-1 border-t border-line pt-3">
+              {chasers.map((rank, i) => (
+                <li key={rank.station_id} className="flex items-baseline gap-2 text-[11px]">
+                  <span className="w-3 shrink-0 text-ink-faint">{i + 2}.</span>
+                  <span className="numeric w-16 shrink-0 text-ink-muted">
+                    {num(rank.value, category.decimals)} {category.unit}
+                  </span>
+                  <span className="truncate text-ink-faint" title={rank.name}>
+                    {rank.name}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          )
         )}
 
-        <p className="mt-3 text-[10px] text-ink-faint">
-          aus {num(category.all.count, 0)} Stationen
-        </p>
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <p className="text-[10px] text-ink-faint">
+            aus {num(category.all.count, 0)} Stationen
+          </p>
+          {depth > chasers.length + 1 && (
+            <button
+              type="button"
+              onClick={() => setExpanded((open) => !open)}
+              aria-expanded={expanded}
+              className="flex cursor-pointer items-center gap-1 rounded-md border border-line bg-raised px-2 py-1 text-[11px] font-medium text-ink-muted transition-colors hover:border-line-strong hover:text-ink"
+            >
+              {expanded ? 'Einklappen' : `Top ${depth}`}
+              {expanded ? (
+                <ChevronUp className="size-3" aria-hidden />
+              ) : (
+                <ChevronDown className="size-3" aria-hidden />
+              )}
+            </button>
+          )}
+        </div>
       </div>
     </Card>
   )
