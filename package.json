@@ -14,7 +14,8 @@
     "typecheck": "tsc -b --noEmit",
     "lint": "eslint .",
     "fetch:gauges": "node scripts/fetch-gauges.js",
-    "fetch:germany": "node scripts/fetch-germany.js"
+    "fetch:germany": "node scripts/fetch-germany.js",
+    "fetch:records": "node scripts/fetch-records.js"
   },
   "dependencies": {
     "better-sqlite3": "^11.7.0",

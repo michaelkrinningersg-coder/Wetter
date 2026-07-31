@@ -13,6 +13,7 @@ import {
   Thermometer,
   ThermometerSnowflake,
   ThermometerSun,
+  Trophy,
   Wind,
   type LucideProps,
 } from 'lucide-react'
@@ -414,6 +415,23 @@ export function Germany() {
             </div>
           }
         />
+
+        {/* Without this line the record page would never be found: the day it
+            matters is exactly the day nobody thinks to look. */}
+        {(data.records ?? 0) > 0 && (
+          <div className="mb-4 flex items-start gap-2.5 rounded-card border border-hot/40 bg-hot/5 px-4 py-3">
+            <Trophy className="mt-0.5 size-4 shrink-0 text-hot" aria-hidden />
+            <p className="text-xs leading-relaxed text-ink">
+              An diesem Tag {data.records === 1 ? 'fiel' : 'fielen'}{' '}
+              <span className="font-semibold">{num(data.records ?? 0, 0)}</span>{' '}
+              {data.records === 1 ? 'Allzeitrekord' : 'Allzeitrekorde'} an
+              DWD-Stationen.{' '}
+              <span className="text-ink-muted">
+                Die Liste steht unter „Allzeitrekorde“.
+              </span>
+            </p>
+          </div>
+        )}
 
         <StatGrid>
           <StatTile

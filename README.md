@@ -58,7 +58,8 @@ Jahresprognose
 **Deutschland** — Spitzenreiter aller DWD-Stationen für einen einzelnen Tag:
 wärmste und kälteste Station im Mittel und absolut, stärkste Bö, windigste
 Station im Mittel, nasseste Station und größte Tagesspanne — jeweils für ganz
-Deutschland und für alles unterhalb 1000 m
+Deutschland und für alles unterhalb 1000 m · Allzeitrekorde: welche Station an
+welchem Tag ihren eigenen Höchst- oder Tiefstwert gebrochen hat
 
 ## Aufbau
 
@@ -85,6 +86,9 @@ server/
   germany-sources.js   bundesweiter Abruf beider DWD-Stationsnetze
   germany-csv.js       Tagesarchiv, eine CSV je Tag
   germany.js           Superlative je Tag und Höhenwertung
+  records-kinds.js     Rekordkategorien
+  records-csv.js       Allzeit-Basislinie je Station
+  records.js           Nachspielen des Archivs, Rekordereignisse
 ```
 
 Die Datenbank liegt unter `data/weather.sqlite` (per `.gitignore`
@@ -143,6 +147,14 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   Stationen, ein zu grobes Netz für den Titel „sonnigste Station Deutschlands".
   Stationen außerhalb Deutschlands — das Niederschlagsnetz enthält vier in
   Tirol — bleiben außen vor, ebenso Tage mit weniger als 100 Stationen.
+- **Allzeitrekorde.** Jede Station wird ausschließlich gegen ihre eigene
+  Geschichte geprüft, nie gegen andere Stationen. Ausgewiesen sind stets der
+  alte Rekord mit Datum und die Länge der Messreihe — eine Station mit
+  neunzehn Jahren bricht ihren Rekord leichter als eine mit 201. Die
+  Jahresangabe zählt Tage mit gültigem Messwert je Parameter, nicht die Spanne:
+  Leipzig-Holzhausen misst seit 1759, hat aber 192 Jahre Messwerte. Sortiert
+  wird nach Reihenlänge. Stationen ohne Historie vor dem Stichtag setzen keinen
+  Rekord, sie beginnen eine Reihe.
 - **Flusspegel.** Alle Werte in Zentimeter über Pegelnullpunkt. Die Achse des
   Verlaufs ist auf die Messwerte skaliert, weil die täglichen Schwankungen im
   Zentimeterbereich die eigentliche Information sind; Kennwerte und Meldestufen
@@ -210,6 +222,28 @@ npm run fetch:germany -- --backfill   # alles, was die Archive hergeben
 ein Lauf füllt also rund anderthalb Jahre auf einmal. Wie beim Pegelarchiv
 braucht der Workflow kein `npm ci` — die ZIPs werden über `node:zlib` entpackt
 (`server/zip.js`), geprüft byte-identisch gegen `unzipper`.
+
+### Allzeitrekorde
+
+Für die Rekorde reichen die 500 Tage nicht; dafür stehen die vollständigen
+Reihen in `daily/kl/historical/` — 1285 Archive, 360 MB. Der Abruf ist trotzdem
+einmalig:
+
+```bash
+npm run fetch:records
+```
+
+Der Lauf liest alle Archive (rund 140 Sekunden) und behält davon nur je Station
+und Kategorie den Extremwert, sein Datum und die Reihenlänge:
+`data/germany/records-baseline.csv`, 6213 Zeilen, 308 KB. Stichtag ist der
+erste Tag des Tagesarchivs; historische und rollierende Archive überlappen sich
+um elf Monate, die Reihe hat also keine Lücke.
+
+Alles nach dem Stichtag spielt der Server beim Start aus dem Tagesarchiv nach —
+Tag für Tag, in der richtigen Reihenfolge, sodass ein Wert nur zählt, wenn er
+schlägt, was **vor** ihm stand. Damit liegen die Rekordmeldungen rückwirkend
+für den gesamten Archivzeitraum vor und nicht erst ab Inbetriebnahme. Der
+tägliche Workflow braucht dafür keinen Zusatzschritt.
 
 **Flusspegel:** zwei Quellen, weil die Pegel an unterschiedlichen Gewässern
 liegen.

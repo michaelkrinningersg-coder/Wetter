@@ -21,6 +21,7 @@ import {
   Table2,
   Thermometer,
   TrendingUp,
+  Trophy,
 } from 'lucide-react'
 
 import { apiGet } from './lib/api'
@@ -46,6 +47,7 @@ import { PrecipIntensity } from './components/PrecipIntensity'
 import { DayInHistory } from './components/DayInHistory'
 import { Gauges } from './components/Gauges'
 import { Germany } from './components/Germany'
+import { Records } from './components/Records'
 
 const FALLBACK_STATIONS: Station[] = [
   { id: '01691', name: 'Göttingen', altitude: 167 },
@@ -74,6 +76,7 @@ type TabId =
   | 'day-in-history'
   | 'gauges'
   | 'germany'
+  | 'records'
 
 interface TabDef {
   id: TabId
@@ -103,6 +106,7 @@ const TABS: TabDef[] = [
   { id: 'forecast', label: 'Prognose', icon: Sparkles, group: 'Klimatologie' },
   { id: 'gauges', label: 'Flusspegel', icon: Waves, group: 'Gewässer' },
   { id: 'germany', label: 'Deutschland gestern', icon: Map, group: 'Deutschland' },
+  { id: 'records', label: 'Allzeitrekorde', icon: Trophy, group: 'Deutschland' },
 ]
 
 const GROUPS = [
@@ -368,6 +372,8 @@ export default function App() {
             {tab === 'gauges' && <Gauges />}
 
             {tab === 'germany' && <Germany />}
+
+            {tab === 'records' && <Records />}
           </main>
         </div>
 

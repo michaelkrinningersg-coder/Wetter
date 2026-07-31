@@ -485,5 +485,43 @@ export interface GermanyResponse {
   range: { days: number; first: string | null; last: string | null }
   dates: string[]
   day: GermanyDay | null
+  /** All-time station records broken on the shown day. */
+  records?: number
+  hint?: string
+}
+
+/* -------------------------------------------------------------------------- */
+/* All-time station records                                                   */
+/* -------------------------------------------------------------------------- */
+
+export interface RecordEvent {
+  station_id: string
+  name: string
+  state: string
+  elevation: number | null
+  kind: string
+  label: string
+  unit: string
+  decimals: number
+  direction: 'max' | 'min'
+  value: number
+  previous: number
+  previousDate: string
+  since: string
+  /** Days with a valid reading for this parameter, at the time of the event. */
+  days: number
+  years: number
+}
+
+export interface RecordsResponse {
+  range: {
+    events: number
+    stations: number
+    first: string | null
+    last: string | null
+    cutoff: string | null
+  }
+  days: { date: string; count: number }[]
+  day: { date: string; events: RecordEvent[] } | null
   hint?: string
 }

@@ -15,6 +15,7 @@ import {
   refreshAll,
 } from './gauges.js'
 import { archiveRange, availableDates, superlatives } from './germany.js'
+import { recordCount, recordDays, recordRange, recordsForDate } from './records.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -305,7 +306,42 @@ app.get(
       return res.status(404).json({ error: `Für den ${date} liegen keine Werte vor.` })
     }
 
-    res.json({ range, dates: availableDates(), day })
+    // The count travels with the day so the view can flag a record without a
+    // second request; the list itself lives on its own page.
+    res.json({ range, dates: availableDates(), day, records: recordCount(date) })
+  }),
+)
+
+/* -------------------------------------------------------------------------- */
+/* All-time station records                                                   */
+/* -------------------------------------------------------------------------- */
+
+app.get(
+  '/api/records',
+  handler((req, res) => {
+    const range = recordRange()
+    const days = recordDays()
+
+    if (days.length === 0) {
+      return res.json({
+        range,
+        days: [],
+        day: null,
+        hint:
+          'Noch keine Rekordbasis. Einmal `npm run fetch:records` ausführen —' +
+          ' das liest die historischen DWD-Archive und legt die Allzeitwerte an.',
+      })
+    }
+
+    const requested = req.query.date
+    if (requested !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(String(requested))) {
+      return res.status(400).json({ error: `Ungültiges Datum "${requested}".` })
+    }
+
+    // Without a date the newest day that actually saw a record is shown —
+    // landing on an empty page would be the common case otherwise.
+    const date = String(requested ?? days[0].date)
+    res.json({ range, days, day: { date, events: recordsForDate(date) } })
   }),
 )
 

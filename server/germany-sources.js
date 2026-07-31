@@ -35,6 +35,8 @@ export const NETWORKS = {
     id: 'kl',
     label: 'Klimastationen',
     dir: `${CDC}/kl/recent/`,
+    historicalDir: `${CDC}/kl/historical/`,
+    historicalPattern: /tageswerte_KL_(\d+)_(\d{8})_(\d{8})_hist\.zip/g,
     metaFile: 'KL_Tageswerte_Beschreibung_Stationen.txt',
     filePattern: /tageswerte_KL_(\d+)_akt\.zip/g,
     fileName: (id) => `tageswerte_KL_${id}_akt.zip`,
@@ -63,6 +65,8 @@ export const NETWORKS = {
     dir: `${CDC}/more_precip/recent/`,
     metaFile: 'RR_Tageswerte_Beschreibung_Stationen.txt',
     filePattern: /tageswerte_RR_(\d+)_akt\.zip/g,
+    historicalDir: `${CDC}/more_precip/historical/`,
+    historicalPattern: /tageswerte_RR_(\d+)_(\d{8})_(\d{8})_hist\.zip/g,
     fileName: (id) => `tageswerte_RR_${id}_akt.zip`,
     product: /(^|\/)produkt_.*\.txt$/i,
     columns: {
@@ -269,6 +273,46 @@ export async function fetchStationDays(network, id, { since = null } = {}) {
 
   const rows = parseProduct(text, network)
   return since ? rows.filter((r) => r.date >= since) : rows
+}
+
+/* -------------------------------------------------------------------------- */
+/* Historical archives                                                        */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * List the historical archives of a network.
+ *
+ * These hold the full record of each station, which the rolling `recent`
+ * archives do not — those reach back about 500 days. The two overlap rather
+ * than abut: for the climate network 561 archives run to 31 December 2025
+ * while `recent` starts in January 2025, so the union has no gap.
+ *
+ * The directory listing names every archive twice, once in the href and once
+ * as the link text; without deduplication every station is counted double.
+ */
+export async function listHistorical(network) {
+  const net = NETWORKS[network]
+  const html = await fetchText(net.historicalDir)
+  const found = new Map()
+  for (const m of html.matchAll(net.historicalPattern)) {
+    const id = m[1].padStart(5, '0')
+    // A station can have several archives; the one ending latest wins.
+    const entry = { id, file: m[0], from: m[2], to: m[3] }
+    const prev = found.get(id)
+    if (!prev || entry.to > prev.to) found.set(id, entry)
+  }
+  return [...found.values()].sort((a, b) => a.id.localeCompare(b.id))
+}
+
+/** Download and parse one historical archive. */
+export async function fetchHistoricalDays(network, entry, { before = null } = {}) {
+  const net = NETWORKS[network]
+  const buffer = await fetchBuffer(net.historicalDir + entry.file)
+  const text = readMatchingText(buffer, net.product)
+  if (text === null) throw new Error(`Produktdatei fehlt in ${entry.file}`)
+
+  const rows = parseProduct(text, network)
+  return before ? rows.filter((r) => r.date < before) : rows
 }
 
 /**
