@@ -31,8 +31,10 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
+# Job-Bezeichner dürfen nur ASCII enthalten; die Anzeigenamen stehen in `name`.
 jobs:
-  bauen:
+  build:
+    name: Bauen
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -69,8 +71,9 @@ jobs:
         with:
           path: dist
 
-  veröffentlichen:
-    needs: bauen
+  deploy:
+    name: Veröffentlichen
+    needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
