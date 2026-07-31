@@ -100,6 +100,9 @@ Alle Endpunkte wurden gegen die Originalantworten gegengeprüft. Die Befunde und
 Abweichungen sind in **[ANALYSE.md](ANALYSE.md)** dokumentiert — darunter ein
 Fehler in der Jahresprognose, der das Vorzeichen der Kernaussage umkehrte.
 
+Vorschläge für den weiteren Ausbau stehen in
+**[VERBESSERUNGEN.md](VERBESSERUNGEN.md)**.
+
 ## Daten
 
 Quelle: [DWD Climate Data Center](https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/daily/kl/),
