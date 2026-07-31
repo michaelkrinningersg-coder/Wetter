@@ -122,7 +122,9 @@ Abweichungen sind in **[ANALYSE.md](ANALYSE.md)** dokumentiert — darunter ein
 Fehler in der Jahresprognose, der das Vorzeichen der Kernaussage umkehrte.
 
 Vorschläge für den weiteren Ausbau stehen in
-**[VERBESSERUNGEN.md](VERBESSERUNGEN.md)**.
+**[VERBESSERUNGEN.md](VERBESSERUNGEN.md)** (30 Punkte, Abschnitt A umgesetzt)
+und **[VERBESSERUNGEN-II.md](VERBESSERUNGEN-II.md)** (10 weitere, zur
+Entscheidung offen).
 
 ## Daten
 
