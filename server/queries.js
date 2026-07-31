@@ -444,18 +444,38 @@ const overviewStmt = db.prepare(`
          AVG(temp_mean)     AS avg_temp,
          SUM(precipitation) AS precip_sum,
          SUM(CASE WHEN temp_mean IS NOT NULL THEN 1 END) AS valid_days,
-         SUM(CASE WHEN temp_max  > 30 THEN 1 ELSE 0 END) AS days_max_above_30,
-         SUM(CASE WHEN temp_max  > 25 THEN 1 ELSE 0 END) AS days_max_above_25,
-         SUM(CASE WHEN temp_max  > 20 THEN 1 ELSE 0 END) AS days_max_above_20,
-         SUM(CASE WHEN temp_max  > 15 THEN 1 ELSE 0 END) AS days_max_above_15,
-         SUM(CASE WHEN temp_min  <  0 THEN 1 ELSE 0 END) AS days_min_below_0,
-         SUM(CASE WHEN temp_mean <  0 THEN 1 ELSE 0 END) AS days_mean_below_0,
-         SUM(CASE WHEN temp_mean > 20 THEN 1 ELSE 0 END) AS days_mean_above_20
+         -- DWD-Kenntage. The thresholds are inclusive ("ein heißer Tag ist ein
+         -- Tag mit Tmax >= 30,0 °C"); a strict > drops every day that lands
+         -- exactly on the threshold — 40 hot days and 144 summer days in
+         -- Göttingen alone.
+         SUM(CASE WHEN temp_max  >= 30 THEN 1 ELSE 0 END) AS days_hot,
+         SUM(CASE WHEN temp_max  >= 25 THEN 1 ELSE 0 END) AS days_summer,
+         SUM(CASE WHEN temp_min  >= 20 THEN 1 ELSE 0 END) AS days_tropical_night,
+         SUM(CASE WHEN temp_min  <   0 THEN 1 ELSE 0 END) AS days_frost,
+         SUM(CASE WHEN temp_max  <   0 THEN 1 ELSE 0 END) AS days_ice,
+         -- Additional thresholds the app already showed; not DWD Kenntage.
+         SUM(CASE WHEN temp_max  >= 20 THEN 1 ELSE 0 END) AS days_max_above_20,
+         SUM(CASE WHEN temp_max  >= 15 THEN 1 ELSE 0 END) AS days_max_above_15,
+         SUM(CASE WHEN temp_mean <   0 THEN 1 ELSE 0 END) AS days_mean_below_0,
+         SUM(CASE WHEN temp_mean >= 20 THEN 1 ELSE 0 END) AS days_mean_above_20
   FROM daily
   WHERE station_id = ?
   GROUP BY year
   ORDER BY year DESC
 `)
+
+/** Field pairs used to project the running year from the climatology. */
+const COUNT_FIELDS = [
+  ['days_hot', 'hot'],
+  ['days_summer', 'summer'],
+  ['days_tropical_night', 'tropicalNight'],
+  ['days_frost', 'frost'],
+  ['days_ice', 'ice'],
+  ['days_max_above_20', 'max20'],
+  ['days_max_above_15', 'max15'],
+  ['days_mean_below_0', 'mean0'],
+  ['days_mean_above_20', 'mean20'],
+]
 
 export function annualOverview(stationId) {
   const cutOff = getCutOff(stationId)
@@ -482,7 +502,7 @@ export function annualOverview(stationId) {
     const projectedTempSum = remaining.reduce((s, d) => s + d.temp, 0)
     const totalDays = (row.valid_days ?? 0) + remaining.length
 
-    return {
+    const projected = {
       ...base,
       forecast_min_temp: Math.min(
         row.min_temp ?? Infinity,
@@ -505,21 +525,14 @@ export function annualOverview(stationId) {
         : null,
       forecast_precip_sum:
         (row.precip_sum ?? 0) + remaining.reduce((s, d) => s + d.precip, 0),
-      forecast_days_max_above_30:
-        row.days_max_above_30 + remaining.reduce((s, d) => s + d.share.max30, 0),
-      forecast_days_max_above_25:
-        row.days_max_above_25 + remaining.reduce((s, d) => s + d.share.max25, 0),
-      forecast_days_max_above_20:
-        row.days_max_above_20 + remaining.reduce((s, d) => s + d.share.max20, 0),
-      forecast_days_max_above_15:
-        row.days_max_above_15 + remaining.reduce((s, d) => s + d.share.max15, 0),
-      forecast_days_min_below_0:
-        row.days_min_below_0 + remaining.reduce((s, d) => s + d.share.min0, 0),
-      forecast_days_mean_below_0:
-        row.days_mean_below_0 + remaining.reduce((s, d) => s + d.share.mean0, 0),
-      forecast_days_mean_above_20:
-        row.days_mean_above_20 + remaining.reduce((s, d) => s + d.share.mean20, 0),
     }
+
+    for (const [field, share] of COUNT_FIELDS) {
+      projected[`forecast_${field}`] =
+        row[field] + remaining.reduce((s, d) => s + d.share[share], 0)
+    }
+
+    return projected
   })
 }
 
@@ -533,13 +546,15 @@ const climatologyStmt = db.prepare(`
          AVG(temp_max)      AS tempMax,
          AVG(temp_min)      AS tempMin,
          AVG(precipitation) AS precip,
-         AVG(CASE WHEN temp_max  > 30 THEN 1.0 ELSE 0.0 END) AS max30,
-         AVG(CASE WHEN temp_max  > 25 THEN 1.0 ELSE 0.0 END) AS max25,
-         AVG(CASE WHEN temp_max  > 20 THEN 1.0 ELSE 0.0 END) AS max20,
-         AVG(CASE WHEN temp_max  > 15 THEN 1.0 ELSE 0.0 END) AS max15,
-         AVG(CASE WHEN temp_min  <  0 THEN 1.0 ELSE 0.0 END) AS min0,
-         AVG(CASE WHEN temp_mean <  0 THEN 1.0 ELSE 0.0 END) AS mean0,
-         AVG(CASE WHEN temp_mean > 20 THEN 1.0 ELSE 0.0 END) AS mean20
+         AVG(CASE WHEN temp_max  >= 30 THEN 1.0 ELSE 0.0 END) AS hot,
+         AVG(CASE WHEN temp_max  >= 25 THEN 1.0 ELSE 0.0 END) AS summer,
+         AVG(CASE WHEN temp_min  >= 20 THEN 1.0 ELSE 0.0 END) AS tropicalNight,
+         AVG(CASE WHEN temp_min  <   0 THEN 1.0 ELSE 0.0 END) AS frost,
+         AVG(CASE WHEN temp_max  <   0 THEN 1.0 ELSE 0.0 END) AS ice,
+         AVG(CASE WHEN temp_max  >= 20 THEN 1.0 ELSE 0.0 END) AS max20,
+         AVG(CASE WHEN temp_max  >= 15 THEN 1.0 ELSE 0.0 END) AS max15,
+         AVG(CASE WHEN temp_mean <   0 THEN 1.0 ELSE 0.0 END) AS mean0,
+         AVG(CASE WHEN temp_mean >= 20 THEN 1.0 ELSE 0.0 END) AS mean20
   FROM daily
   WHERE station_id = @station AND year BETWEEN @from AND @to
     AND temp_mean IS NOT NULL
@@ -573,8 +588,14 @@ function dailyClimatology(stationId, runningYear) {
       tempMin: r.tempMin ?? r.temp,
       precip: r.precip ?? 0,
       share: {
-        max30: r.max30 ?? 0, max25: r.max25 ?? 0, max20: r.max20 ?? 0,
-        max15: r.max15 ?? 0, min0: r.min0 ?? 0, mean0: r.mean0 ?? 0,
+        hot: r.hot ?? 0,
+        summer: r.summer ?? 0,
+        tropicalNight: r.tropicalNight ?? 0,
+        frost: r.frost ?? 0,
+        ice: r.ice ?? 0,
+        max20: r.max20 ?? 0,
+        max15: r.max15 ?? 0,
+        mean0: r.mean0 ?? 0,
         mean20: r.mean20 ?? 0,
       },
     })),
@@ -588,21 +609,22 @@ const observedDaysStmt = db.prepare(`
   ORDER BY month, day
 `)
 
-const extremeYearStmt = db.prepare(`
-  SELECT year, AVG(temp_mean) AS temp
+const baselineDaysStmt = db.prepare(`
+  SELECT year, month, day, temp_mean AS temp, precipitation AS precip
   FROM daily
   WHERE station_id = @station AND year BETWEEN @from AND @to
-  GROUP BY year
-  HAVING SUM(CASE WHEN temp_mean IS NOT NULL THEN 1 END) >= 330
-  ORDER BY temp DESC
+  ORDER BY year, month, day
 `)
 
-const singleYearDaysStmt = db.prepare(`
-  SELECT month, day, temp_mean AS temp
-  FROM daily
-  WHERE station_id = ? AND year = ? AND temp_mean IS NOT NULL
-  ORDER BY month, day
-`)
+/** Percentile over an ascending array, linearly interpolated. */
+function pct(sorted, p) {
+  if (sorted.length === 0) return null
+  if (sorted.length === 1) return sorted[0]
+  const pos = (sorted.length - 1) * p
+  const lo = Math.floor(pos)
+  const hi = Math.ceil(pos)
+  return sorted[lo] * (1 - (pos - lo)) + sorted[hi] * (pos - lo)
+}
 
 const period1968Stmt = db.prepare(`
   SELECT month, day, AVG(temp_mean) AS temp
@@ -669,42 +691,79 @@ export function buildForecast(stationId) {
   const baselineTempAvg = avg(series, 'baselineTemp')
   const baselinePrecipSum = sum(series, 'baselinePrecip')
 
-  /* ---- extreme scenarios: warmest / coldest single year of the baseline --- */
-  const rankedYears = extremeYearStmt.all({
-    station: stationId,
-    from: climatology.from,
-    to: climatology.to,
-  })
-  const hottestYear = rankedYears[0]?.year ?? null
-  const coldestYear = rankedYears.at(-1)?.year ?? null
-
-  const scenarioDays = (year) => {
-    if (year === null) return new Map()
-    return new Map(
-      singleYearDaysStmt.all(stationId, year).map((d) => [key(d.month, d.day), d.temp]),
-    )
-  }
-  const hottest = scenarioDays(hottestYear)
-  const coldest = scenarioDays(coldestYear)
   const base1968 = new Map(
     period1968Stmt.all(stationId).map((d) => [key(d.month, d.day), d.temp]),
   )
+
+  /* ---- ensemble ------------------------------------------------------------
+   * Instead of a single point value, the rest of the year is replayed once per
+   * baseline year: "what would this year end at if the remainder went like
+   * 1998? like 2003? like 2010?". That yields 30 possible outcomes, and their
+   * spread is a defensible uncertainty range — unlike a headline number quoted
+   * to two decimals, which suggests a precision the method does not have.
+   */
+  const memberYears = []
+  const memberDays = new Map()
+  for (const row of baselineDaysStmt.all({
+    station: stationId,
+    from: climatology.from,
+    to: climatology.to,
+  })) {
+    let year = memberDays.get(row.year)
+    if (!year) {
+      year = new Map()
+      memberDays.set(row.year, year)
+      memberYears.push(row.year)
+    }
+    year.set(key(row.month, row.day), row)
+  }
+
+  /** Per member: the full-year daily temperature/precipitation it implies. */
+  const members = memberYears.map((year) => {
+    const days = memberDays.get(year)
+    const temp = new Array(series.length)
+    const precip = new Array(series.length)
+    series.forEach((d, i) => {
+      const alt = days.get(key(d.month, d.day))
+      temp[i] = d.isObserved ? d.temp : (alt?.temp ?? d.baselineTemp)
+      precip[i] = d.isObserved ? d.precip : (alt?.precip ?? d.baselinePrecip)
+    })
+    return { year, temp, precip }
+  })
+
+  /** Running YTD mean per member, so the band widens as the year progresses. */
+  const memberYtd = members.map((m) => {
+    const out = new Array(series.length)
+    let acc = 0
+    for (let i = 0; i < series.length; i++) {
+      acc += m.temp[i]
+      out[i] = acc / (i + 1)
+    }
+    return out
+  })
+
+  const spreadAt = (index) => {
+    const values = memberYtd.map((m) => m[index]).sort((a, b) => a - b)
+    return {
+      p10: pct(values, 0.1),
+      p50: pct(values, 0.5),
+      p90: pct(values, 0.9),
+      min: values[0],
+      max: values[values.length - 1],
+    }
+  }
 
   /* ---- cumulative YTD trajectories ---------------------------------------- */
   const trajectory = []
   let runSum = 0
   let base30Sum = 0
   let base1968Sum = 0
-  let hotSum = 0
-  let coldSum = 0
   let base1968Count = 0
 
   series.forEach((d, index) => {
     const k = key(d.month, d.day)
     runSum += d.temp
     base30Sum += d.baselineTemp
-    hotSum += d.isObserved ? d.temp : (hottest.get(k) ?? d.baselineTemp)
-    coldSum += d.isObserved ? d.temp : (coldest.get(k) ?? d.baselineTemp)
     const b1968 = base1968.get(k)
     if (b1968 !== undefined) {
       base1968Sum += b1968
@@ -714,7 +773,8 @@ export function buildForecast(stationId) {
     const n = index + 1
     if (n % 10 !== 0) return
 
-    const r3 = (v) => Number(v.toFixed(3))
+    const r3 = (v) => (v === null ? null : Number(v.toFixed(3)))
+    const spread = spreadAt(index)
     trajectory.push({
       dateLabel: `${d.day}. ${MONTHS[d.month - 1].slice(0, 3)}`,
       month: d.month,
@@ -722,8 +782,10 @@ export function buildForecast(stationId) {
       runningYtdTemp: r3(runSum / n),
       baseline30YrYtdTemp: r3(base30Sum / n),
       baseline1968YtdTemp: r3(base1968Count > 0 ? base1968Sum / base1968Count : 0),
-      hottestYtdTemp: r3(hotSum / n),
-      coldestYtdTemp: r3(coldSum / n),
+      ytdTempP10: r3(spread.p10),
+      ytdTempP90: r3(spread.p90),
+      ytdTempMin: r3(spread.min),
+      ytdTempMax: r3(spread.max),
       isForecast: !d.isObserved,
     })
   })
@@ -757,30 +819,28 @@ export function buildForecast(stationId) {
       ytdTempRunning: r(monthEnd.running),
       ytdTemp30Yr: r(monthEnd.baseline30),
       ytdTemp1968_1997: r(monthEnd.baseline1968),
-      ytdTempHottest: r(monthEnd.hottest),
-      ytdTempColdest: r(monthEnd.coldest),
+      ytdTempP10: r(monthEnd.p10),
+      ytdTempP90: r(monthEnd.p90),
     })
   }
 
   function cumulativeAt(allDays, throughMonth) {
-    let run = 0, b30 = 0, b68 = 0, b68n = 0, hot = 0, cold = 0, n = 0
+    let run = 0, b30 = 0, b68 = 0, b68n = 0, n = 0
     for (const d of allDays) {
       if (d.month > throughMonth) break
-      const k = key(d.month, d.day)
       run += d.temp
       b30 += d.baselineTemp
-      hot += d.isObserved ? d.temp : (hottest.get(k) ?? d.baselineTemp)
-      cold += d.isObserved ? d.temp : (coldest.get(k) ?? d.baselineTemp)
-      const v = base1968.get(k)
+      const v = base1968.get(key(d.month, d.day))
       if (v !== undefined) { b68 += v; b68n += 1 }
       n += 1
     }
+    const spread = n > 0 ? spreadAt(n - 1) : null
     return {
       running: n > 0 ? run / n : 0,
       baseline30: n > 0 ? b30 / n : 0,
       baseline1968: b68n > 0 ? b68 / b68n : 0,
-      hottest: n > 0 ? hot / n : 0,
-      coldest: n > 0 ? cold / n : 0,
+      p10: spread?.p10 ?? 0,
+      p90: spread?.p90 ?? 0,
     }
   }
 
@@ -792,6 +852,12 @@ export function buildForecast(stationId) {
 
   const round = (v, digits = 2) =>
     v === null || v === undefined ? null : Number(v.toFixed(digits))
+
+  /* ---- headline uncertainty from the ensemble ----------------------------- */
+  const tempSpread = spreadAt(series.length - 1)
+  const precipOutcomes = members
+    .map((m) => m.precip.reduce((s, v) => s + v, 0))
+    .sort((a, b) => a - b)
 
   return {
     runningYear,
@@ -817,7 +883,163 @@ export function buildForecast(stationId) {
             1,
           )
         : 0,
+    ensembleSize: members.length,
+    ensembleFrom: climatology.from,
+    ensembleTo: climatology.to,
+    forecastTempP10: round(tempSpread.p10),
+    forecastTempP50: round(tempSpread.p50),
+    forecastTempP90: round(tempSpread.p90),
+    forecastPrecipP10: round(pct(precipOutcomes, 0.1), 1),
+    forecastPrecipP50: round(pct(precipOutcomes, 0.5), 1),
+    forecastPrecipP90: round(pct(precipOutcomes, 0.9), 1),
     monthlyData,
     ytdTrajectoryData: trajectory,
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Spells — heat waves, dry periods, frost periods                            */
+/* -------------------------------------------------------------------------- */
+
+const allDaysStmt = db.prepare(`
+  SELECT date, year, month, day, temp_mean, temp_max, temp_min, precipitation
+  FROM daily
+  WHERE station_id = ?
+  ORDER BY date
+`)
+
+/** A calendar day difference, without going through Date arithmetic twice. */
+function isNextDay(previousIso, currentIso) {
+  const prev = Date.parse(`${previousIso}T00:00:00Z`)
+  const cur = Date.parse(`${currentIso}T00:00:00Z`)
+  return cur - prev === 86_400_000
+}
+
+/**
+ * Categories of consecutive-day runs.
+ *
+ * `test` returns null when the day carries no usable measurement — such a day
+ * breaks the run rather than silently extending it, so a data gap in 1902
+ * cannot be reported as a 40-day heat wave.
+ */
+const SPELL_KINDS = {
+  heat: {
+    label: 'Hitzeperioden',
+    description: 'Aufeinanderfolgende Tage mit einem Maximum von mindestens 30 °C.',
+    minDays: 3,
+    unit: '°C',
+    test: (d) => (d.temp_max === null ? null : d.temp_max >= 30),
+    summarise: (days) => Math.max(...days.map((d) => d.temp_max)),
+    summaryLabel: 'Höchstwert',
+  },
+  summer: {
+    label: 'Sommerperioden',
+    description: 'Aufeinanderfolgende Sommertage mit einem Maximum von mindestens 25 °C.',
+    minDays: 5,
+    unit: '°C',
+    test: (d) => (d.temp_max === null ? null : d.temp_max >= 25),
+    summarise: (days) => Math.max(...days.map((d) => d.temp_max)),
+    summaryLabel: 'Höchstwert',
+  },
+  dry: {
+    label: 'Trockenperioden',
+    description:
+      'Aufeinanderfolgende Tage mit weniger als 1 mm Niederschlag — die meteorologische Definition eines niederschlagsfreien Tages.',
+    minDays: 10,
+    unit: 'mm',
+    test: (d) => (d.precipitation === null ? null : d.precipitation < 1),
+    summarise: (days) => days.reduce((s, d) => s + d.precipitation, 0),
+    summaryLabel: 'Summe',
+  },
+  wet: {
+    label: 'Niederschlagsperioden',
+    description: 'Aufeinanderfolgende Tage mit mindestens 1 mm Niederschlag.',
+    minDays: 7,
+    unit: 'mm',
+    test: (d) => (d.precipitation === null ? null : d.precipitation >= 1),
+    summarise: (days) => days.reduce((s, d) => s + d.precipitation, 0),
+    summaryLabel: 'Summe',
+  },
+  frost: {
+    label: 'Frostperioden',
+    description: 'Aufeinanderfolgende Frosttage mit einem Minimum unter 0 °C.',
+    minDays: 10,
+    unit: '°C',
+    test: (d) => (d.temp_min === null ? null : d.temp_min < 0),
+    summarise: (days) => Math.min(...days.map((d) => d.temp_min)),
+    summaryLabel: 'Tiefstwert',
+  },
+  ice: {
+    label: 'Eisperioden',
+    description: 'Aufeinanderfolgende Eistage, an denen das Maximum unter 0 °C bleibt.',
+    minDays: 5,
+    unit: '°C',
+    test: (d) => (d.temp_max === null ? null : d.temp_max < 0),
+    summarise: (days) => Math.min(...days.map((d) => d.temp_max)),
+    summaryLabel: 'Tiefstwert',
+  },
+}
+
+export const SPELL_KEYS = Object.keys(SPELL_KINDS)
+
+export function spells(stationId, kind, limit = 25) {
+  const spec = SPELL_KINDS[kind]
+  if (!spec) return null
+
+  const rows = allDaysStmt.all(stationId)
+  const found = []
+  let current = []
+
+  const close = () => {
+    if (current.length >= spec.minDays) {
+      const first = current[0]
+      const last = current[current.length - 1]
+      found.push({
+        start: first.date,
+        end: last.date,
+        days: current.length,
+        year: first.year,
+        month: first.month,
+        value: spec.summarise(current),
+      })
+    }
+    current = []
+  }
+
+  for (const row of rows) {
+    const passes = spec.test(row)
+    const previous = current[current.length - 1]
+    // A missing measurement or a gap in the date sequence ends the run.
+    if (passes === null || (previous && !isNextDay(previous.date, row.date))) {
+      close()
+      if (passes === true) current = [row]
+      continue
+    }
+    if (passes) current.push(row)
+    else close()
+  }
+  close()
+
+  found.sort((a, b) => b.days - a.days || Date.parse(a.start) - Date.parse(b.start))
+
+  return {
+    kind,
+    label: spec.label,
+    description: spec.description,
+    minDays: spec.minDays,
+    unit: spec.unit,
+    summaryLabel: spec.summaryLabel,
+    totalCount: found.length,
+    /** All spells by decade, so the trend over time stays visible. */
+    byDecade: Object.entries(
+      found.reduce((acc, s) => {
+        const decade = Math.floor(s.year / 10) * 10
+        acc[decade] = (acc[decade] ?? 0) + 1
+        return acc
+      }, {}),
+    )
+      .map(([decade, count]) => ({ decade: Number(decade), count }))
+      .sort((a, b) => a.decade - b.decade),
+    records: found.slice(0, limit),
   }
 }

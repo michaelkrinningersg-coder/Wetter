@@ -83,46 +83,66 @@ const COLUMNS: Column[] = [
     className: 'text-wet font-semibold',
     emphasis: true,
   },
+  // DWD-Kenntage. The thresholds are inclusive by definition.
   {
-    key: 'days_max_above_30',
-    label: 'Max > 30 °C',
-    title: 'Heiße Tage — Tagesmaximum über 30 °C',
-    observed: 'days_max_above_30',
-    forecast: 'forecast_days_max_above_30',
+    key: 'days_hot',
+    label: 'Heiße Tage',
+    title: 'Heißer Tag — Tagesmaximum ≥ 30,0 °C (DWD-Kenntag)',
+    observed: 'days_hot',
+    forecast: 'forecast_days_hot',
     render: count,
     className: 'text-warm',
   },
   {
-    key: 'days_max_above_25',
-    label: 'Max > 25 °C',
-    title: 'Sommertage — Tagesmaximum über 25 °C',
-    observed: 'days_max_above_25',
-    forecast: 'forecast_days_max_above_25',
+    key: 'days_summer',
+    label: 'Sommertage',
+    title: 'Sommertag — Tagesmaximum ≥ 25,0 °C (DWD-Kenntag)',
+    observed: 'days_summer',
+    forecast: 'forecast_days_summer',
     render: count,
     className: 'text-hot',
   },
   {
+    key: 'days_tropical_night',
+    label: 'Tropennächte',
+    title: 'Tropennacht — Tagesminimum ≥ 20,0 °C (DWD-Kenntag)',
+    observed: 'days_tropical_night',
+    forecast: 'forecast_days_tropical_night',
+    render: count,
+    className: 'text-hot',
+  },
+  {
+    key: 'days_frost',
+    label: 'Frosttage',
+    title: 'Frosttag — Tagesminimum < 0,0 °C (DWD-Kenntag)',
+    observed: 'days_frost',
+    forecast: 'forecast_days_frost',
+    render: count,
+    className: 'text-cool',
+  },
+  {
+    key: 'days_ice',
+    label: 'Eistage',
+    title: 'Eistag — Tagesmaximum < 0,0 °C (DWD-Kenntag)',
+    observed: 'days_ice',
+    forecast: 'forecast_days_ice',
+    render: count,
+    className: 'text-cold',
+  },
+  // Weitere Schwellenwerte, keine DWD-Kenntage.
+  {
     key: 'days_max_above_20',
-    label: 'Max > 20 °C',
+    label: 'Max ≥ 20 °C',
     observed: 'days_max_above_20',
     forecast: 'forecast_days_max_above_20',
     render: count,
   },
   {
     key: 'days_max_above_15',
-    label: 'Max > 15 °C',
+    label: 'Max ≥ 15 °C',
     observed: 'days_max_above_15',
     forecast: 'forecast_days_max_above_15',
     render: count,
-  },
-  {
-    key: 'days_min_below_0',
-    label: 'Min < 0 °C',
-    title: 'Frosttage — Tagesminimum unter 0 °C',
-    observed: 'days_min_below_0',
-    forecast: 'forecast_days_min_below_0',
-    render: count,
-    className: 'text-cool',
   },
   {
     key: 'days_mean_below_0',
@@ -134,7 +154,7 @@ const COLUMNS: Column[] = [
   },
   {
     key: 'days_mean_above_20',
-    label: 'Mittel > 20 °C',
+    label: 'Mittel ≥ 20 °C',
     observed: 'days_mean_above_20',
     forecast: 'forecast_days_mean_above_20',
     render: count,
@@ -199,9 +219,11 @@ export function AnnualOverview({ stationId }: { stationId: string }) {
   return (
     <>
       <InfoPanel icon={Table2} title="Klimatologische Jahresübersicht">
-        Kenndaten für jedes Kalenderjahr im Datenbestand: Extremtemperaturen,
-        Jahresmittel, Niederschlagssumme sowie die Anzahl der Schwellenwerttage
-        (heiße Tage, Sommertage, Frosttage). Spaltenköpfe sind sortierbar.
+        Kenndaten für jedes Kalenderjahr im Datenbestand. Die Kenntage folgen den
+        Definitionen des DWD und verwenden{' '}
+        <strong>einschließende Schwellen</strong>: heißer Tag ≥ 30,0 °C,
+        Sommertag ≥ 25,0 °C, Tropennacht ≥ 20,0 °C, Frosttag &lt; 0,0 °C
+        (Minimum), Eistag &lt; 0,0 °C (Maximum). Spaltenköpfe sind sortierbar.
       </InfoPanel>
 
       <Card padded={false}>

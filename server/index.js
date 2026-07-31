@@ -157,6 +157,21 @@ app.get(
 )
 
 app.get(
+  '/api/weather/spells',
+  handler((req, res) => {
+    const station = resolveStation(req, res)
+    if (!station) return
+    const result = api.spells(station.id, String(req.query.kind ?? ''))
+    if (result === null) {
+      return res.status(400).json({
+        error: `Unbekannte Periodenart "${req.query.kind ?? ''}". Erlaubt: ${api.SPELL_KEYS.join(', ')}.`,
+      })
+    }
+    res.json(result)
+  }),
+)
+
+app.get(
   '/api/weather/extremes',
   handler((req, res) => {
     const station = resolveStation(req, res)

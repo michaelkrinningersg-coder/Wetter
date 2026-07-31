@@ -12,7 +12,7 @@ import {
 import { Filter, Snowflake, Sun, TrendingUp } from 'lucide-react'
 
 import { useApi } from '../lib/api'
-import { extremeBy, linearFit, mean } from '../lib/stats'
+import { centeredMovingAverage, extremeBy, linearFit, mean } from '../lib/stats'
 import { coverage, signed, temp } from '../lib/format'
 import type { TempTrendRecord } from '../types'
 import {
@@ -47,7 +47,10 @@ interface Point {
   validDays: number
   totalDays: number
   trend: number | null
+  smooth: number | null
 }
+
+const SMOOTH_WINDOW = 30
 
 export function TempTrend({
   stationId,
@@ -86,6 +89,7 @@ export function TempTrend({
           validDays: r.valid_days,
           totalDays: r.total_days,
           trend: null,
+          smooth: null,
         }
       })
 
@@ -97,12 +101,27 @@ export function TempTrend({
       if (previous) previous.incompleteTemp = previous.temp
     }
 
-    const fit = linearFit(
-      rows.filter((r) => !r.isIncomplete).map((r) => ({ x: r.year, y: r.temp })),
-    )
-    if (!fit) return rows
+    const complete = rows
+      .filter((r) => !r.isIncomplete)
+      .map((r) => ({ x: r.year, y: r.temp }))
 
-    return rows.map((r) => ({ ...r, trend: Number(fit.at(r.year).toFixed(2)) }))
+    // The running mean is computed over the *unfiltered* series so the curve
+    // does not lose its first and last 15 years every time the period filter
+    // narrows the view.
+    const smoothed = centeredMovingAverage(
+      records
+        .filter((r) => !r.isIncomplete)
+        .map((r) => ({ x: r.year, y: r.avg_temp })),
+      SMOOTH_WINDOW,
+    )
+
+    const fit = linearFit(complete)
+
+    return rows.map((r) => ({
+      ...r,
+      trend: fit ? Number(fit.at(r.year).toFixed(2)) : null,
+      smooth: smoothed.has(r.year) ? Number(smoothed.get(r.year)!.toFixed(2)) : null,
+    }))
   }, [records, period])
 
   const summary = useMemo(() => {
@@ -187,7 +206,7 @@ export function TempTrend({
           <Card>
             <SectionHeading
               title={`Jahresmitteltemperatur ${stationName}`}
-              hint="Graue Linie: gemessene Jahresmittel. Gestrichelt: laufendes Jahr inklusive Klimaprognose. Gelb: lineare Trendgerade."
+              hint={`Rot: gleitendes ${SMOOTH_WINDOW}-Jahres-Mittel — die Darstellung, die Klimadienste verwenden, weil die Erwärmung nicht linear verläuft. Es ist zentriert und endet daher bewusst ${SMOOTH_WINDOW / 2} Jahre vor dem Reihenende. Gestrichelt gelb: lineare Trendgerade zum Vergleich.`}
             />
             <ChartFrame height={400}>
               <ResponsiveContainer width="100%" height="100%">
@@ -198,7 +217,12 @@ export function TempTrend({
                     stroke={CHART.axis}
                     tick={CHART.tick}
                     tickLine={false}
-                    domain={['dataMin - 0.5', 'dataMax + 0.5']}
+                    // Recharts 3 no longer resolves relative string domains
+                    // ('dataMin - 0.5'); they render as broken tick labels.
+                    domain={[
+                      (min: number) => Math.floor(min - 0.5),
+                      (max: number) => Math.ceil(max + 0.5),
+                    ]}
                     unit=" °C"
                   />
                   <Tooltip content={<TrendTooltip />} />
@@ -229,8 +253,18 @@ export function TempTrend({
                     type="monotone"
                     dataKey="trend"
                     stroke={CHART.colors.brand}
-                    strokeWidth={2.5}
+                    strokeWidth={1.5}
+                    strokeDasharray="6 4"
                     dot={false}
+                  />
+                  <Line
+                    name={`Gleitendes ${SMOOTH_WINDOW}-Jahres-Mittel`}
+                    type="monotone"
+                    dataKey="smooth"
+                    stroke={CHART.colors.warm}
+                    strokeWidth={3}
+                    dot={false}
+                    connectNulls={false}
                   />
                 </ComposedChart>
               </ResponsiveContainer>
@@ -311,7 +345,16 @@ function TrendTooltip({
           value: temp(point.temp, 2),
           className: point.isIncomplete ? 'text-[oklch(74%_0.17_340)]' : 'text-ink',
         },
-        { label: 'Trendwert', value: temp(point.trend, 2), className: 'text-brand' },
+        { label: 'Trendwert (linear)', value: temp(point.trend, 2), className: 'text-brand' },
+        ...(point.smooth !== null
+          ? [
+              {
+                label: `${SMOOTH_WINDOW}-Jahres-Mittel`,
+                value: temp(point.smooth, 2),
+                className: 'text-warm',
+              },
+            ]
+          : []),
       ]}
       footer={`Datenabdeckung ${coverage(point.validDays, point.totalDays)}`}
     />

@@ -44,7 +44,8 @@ Jahresübersicht (Kenndaten und Schwellenwerttage je Kalenderjahr)
 Anomalien · Mitteltemperatur Year-to-Date
 
 **Rekorde** — Monats-Heatmap · Spitzenwerte (Top-50-Tage) ·
-Spitzenmonate (Top-50-Monate)
+Spitzenmonate (Top-50-Monate) · Perioden & Serien (längste Hitze-, Trocken-,
+Frost- und Niederschlagsperioden)
 
 **Klimatologie** — Klimadiagramm nach Walter & Lieth · Referenzperioden ·
 Jahresprognose
@@ -79,13 +80,23 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
 - **90-%-Regel.** Jahresmittel und Jahressummen werden nur für Jahre
   ausgewiesen, in denen mindestens 90 % der Tage einen geprüften Messwert
   tragen. Das laufende Jahr wird stets getrennt gekennzeichnet.
+- **Kenntage nach DWD**, mit einschließenden Schwellen: heißer Tag ≥ 30,0 °C,
+  Sommertag ≥ 25,0 °C, Tropennacht ≥ 20,0 °C, Frosttag < 0,0 °C (Minimum),
+  Eistag < 0,0 °C (Maximum).
+- **Perioden.** Gezählt wird jede ununterbrochene Serie von Tagen, die dasselbe
+  Kriterium erfüllen. Ein fehlender Messwert oder eine Lücke im Datenbestand
+  beendet eine Serie, statt sie zu verlängern.
+- **Gleitendes 30-Jahres-Mittel.** Zentriert, endet daher 15 Jahre vor dem
+  Reihenende. Es zeigt den tatsächlichen Verlauf der Erwärmung, den eine
+  einzelne Regressionsgerade über 168 Jahre als linear unterstellt.
 - **Extremmonate** benötigen mindestens 25 gültige Messtage.
 - **Heatmap.** Jeder Monat wird gegen dieselben Kalendermonate aller anderen
   Jahre eingefärbt; die Skala läuft je Monat vom 20. bis zum 80. Perzentil.
-- **Prognose.** Gemessene Tage bis zum letzten Datenbanktag, danach das
-  tagesgenaue Mittel der letzten 30 vollständigen Kalenderjahre. Das ist eine
-  Klimatologie-Fortschreibung, **keine Wettervorhersage**: Sie zeigt, wo das
-  Jahr bei durchschnittlichem Restverlauf landen würde.
+- **Prognose.** Gemessene Tage bis zum letzten Datenbanktag; das Restjahr wird
+  30-mal zu Ende gerechnet — je einmal so, wie es in jedem Jahr der
+  Referenzperiode tatsächlich verlaufen ist. Ausgewiesen sind der Median dieser
+  30 Ergebnisse und der Bereich vom 10. bis 90. Perzentil. Das ist eine
+  Klimatologie-Fortschreibung, **keine Wettervorhersage**.
 - **Klimadiagramm.** Temperatur- und Niederschlagsachse stehen im Verhältnis
   1 °C : 2 mm, damit die Walter-&-Lieth-Leseregel gilt.
 

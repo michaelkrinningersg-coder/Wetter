@@ -13,7 +13,7 @@ import {
 import { CloudRain, Droplets, Filter, Sun } from 'lucide-react'
 
 import { useApi } from '../lib/api'
-import { extremeBy, linearFit, mean } from '../lib/stats'
+import { centeredMovingAverage, extremeBy, linearFit, mean } from '../lib/stats'
 import { coverage, mm, signed } from '../lib/format'
 import type { PrecipTrendRecord } from '../types'
 import {
@@ -48,7 +48,10 @@ interface Point {
   validDays: number
   totalDays: number
   trend: number | null
+  smooth: number | null
 }
+
+const SMOOTH_WINDOW = 30
 
 export function PrecipTrend({
   stationId,
@@ -83,15 +86,28 @@ export function PrecipTrend({
           validDays: r.valid_days,
           totalDays: r.total_days,
           trend: null,
+          smooth: null,
         }
       })
 
     const fit = linearFit(
       rows.filter((r) => !r.isIncomplete).map((r) => ({ x: r.year, y: r.precip })),
     )
-    if (!fit) return rows
 
-    return rows.map((r) => ({ ...r, trend: Number(fit.at(r.year).toFixed(1)) }))
+    // Computed over the unfiltered series so narrowing the period does not
+    // eat the first and last 15 years of the curve.
+    const smoothed = centeredMovingAverage(
+      records
+        .filter((r) => !r.isIncomplete)
+        .map((r) => ({ x: r.year, y: r.sum_precipitation })),
+      SMOOTH_WINDOW,
+    )
+
+    return rows.map((r) => ({
+      ...r,
+      trend: fit ? Number(fit.at(r.year).toFixed(1)) : null,
+      smooth: smoothed.has(r.year) ? Number(smoothed.get(r.year)!.toFixed(1)) : null,
+    }))
   }, [records, period])
 
   const summary = useMemo(() => {
@@ -168,7 +184,10 @@ export function PrecipTrend({
           )}
 
           <Card>
-            <SectionHeading title={`Jährliche Niederschlagssumme ${stationName}`} />
+            <SectionHeading
+              title={`Jährliche Niederschlagssumme ${stationName}`}
+              hint={`Die durchgezogene Linie ist das gleitende ${SMOOTH_WINDOW}-Jahres-Mittel. Es ist zentriert und endet daher ${SMOOTH_WINDOW / 2} Jahre vor dem Reihenende. Niederschlag schwankt von Jahr zu Jahr stark — erst die Glättung macht sichtbar, ob sich überhaupt etwas verschiebt.`}
+            />
             <ChartFrame height={400}>
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={points} margin={{ top: 8, right: 8, left: -12, bottom: 4 }}>
@@ -178,7 +197,10 @@ export function PrecipTrend({
                     stroke={CHART.axis}
                     tick={CHART.tick}
                     tickLine={false}
-                    domain={['dataMin - 50', 'dataMax + 50']}
+                    domain={[
+                      (min: number) => Math.max(0, Math.floor((min - 50) / 50) * 50),
+                      (max: number) => Math.ceil((max + 50) / 50) * 50,
+                    ]}
                     unit=" mm"
                   />
                   <Tooltip content={<PrecipTooltip />} cursor={{ fill: 'oklch(100% 0 0 / 0.03)' }} />
@@ -204,8 +226,18 @@ export function PrecipTrend({
                     type="monotone"
                     dataKey="trend"
                     stroke={CHART.colors.brand}
-                    strokeWidth={2.5}
+                    strokeWidth={1.5}
+                    strokeDasharray="6 4"
                     dot={false}
+                  />
+                  <Line
+                    name={`Gleitendes ${SMOOTH_WINDOW}-Jahres-Mittel`}
+                    type="monotone"
+                    dataKey="smooth"
+                    stroke={CHART.colors.brand}
+                    strokeWidth={3}
+                    dot={false}
+                    connectNulls={false}
                   />
                 </ComposedChart>
               </ResponsiveContainer>
@@ -277,7 +309,16 @@ function PrecipTooltip({
       subtitle={point.isIncomplete ? 'Laufendes Jahr — unvollständig' : undefined}
       rows={[
         { label: 'Jahressumme', value: mm(point.precip), className: 'text-wet' },
-        { label: 'Trendwert', value: mm(point.trend), className: 'text-brand' },
+        { label: 'Trendwert (linear)', value: mm(point.trend), className: 'text-brand' },
+        ...(point.smooth !== null
+          ? [
+              {
+                label: `${SMOOTH_WINDOW}-Jahres-Mittel`,
+                value: mm(point.smooth),
+                className: 'text-brand',
+              },
+            ]
+          : []),
       ]}
       footer={`Datenabdeckung ${coverage(point.validDays, point.totalDays)}`}
     />

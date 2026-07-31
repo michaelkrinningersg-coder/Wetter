@@ -145,11 +145,15 @@ export interface AnnualOverviewRecord {
   precip_sum: number | null
   valid_days: number
   is_running_year: boolean
-  days_max_above_30: number
-  days_max_above_25: number
+  /** DWD-Kenntage (inclusive thresholds). */
+  days_hot: number
+  days_summer: number
+  days_tropical_night: number
+  days_frost: number
+  days_ice: number
+  /** Additional thresholds, not part of the DWD Kenntag definitions. */
   days_max_above_20: number
   days_max_above_15: number
-  days_min_below_0: number
   days_mean_below_0: number
   days_mean_above_20: number
   forecast_min_temp?: number | null
@@ -158,13 +162,36 @@ export interface AnnualOverviewRecord {
   forecast_coldest_day_mean?: number | null
   forecast_avg_temp?: number | null
   forecast_precip_sum?: number | null
-  forecast_days_max_above_30?: number
-  forecast_days_max_above_25?: number
+  forecast_days_hot?: number
+  forecast_days_summer?: number
+  forecast_days_tropical_night?: number
+  forecast_days_frost?: number
+  forecast_days_ice?: number
   forecast_days_max_above_20?: number
   forecast_days_max_above_15?: number
-  forecast_days_min_below_0?: number
   forecast_days_mean_below_0?: number
   forecast_days_mean_above_20?: number
+}
+
+export interface Spell {
+  start: string
+  end: string
+  days: number
+  year: number
+  month: number
+  value: number
+}
+
+export interface SpellsResponse {
+  kind: string
+  label: string
+  description: string
+  minDays: number
+  unit: string
+  summaryLabel: string
+  totalCount: number
+  byDecade: { decade: number; count: number }[]
+  records: Spell[]
 }
 
 export interface ForecastMonth {
@@ -182,8 +209,8 @@ export interface ForecastMonth {
   ytdTempRunning: number
   ytdTemp30Yr: number
   ytdTemp1968_1997: number
-  ytdTempHottest: number
-  ytdTempColdest: number
+  ytdTempP10: number
+  ytdTempP90: number
 }
 
 export interface YtdTrajectoryPoint {
@@ -193,8 +220,11 @@ export interface YtdTrajectoryPoint {
   runningYtdTemp: number
   baseline30YrYtdTemp: number
   baseline1968YtdTemp: number
-  hottestYtdTemp: number
-  coldestYtdTemp: number
+  /** Ensemble spread: 10th/90th percentile and the full envelope. */
+  ytdTempP10: number
+  ytdTempP90: number
+  ytdTempMin: number
+  ytdTempMax: number
   isForecast: boolean
 }
 
@@ -216,6 +246,16 @@ export interface ForecastResponse {
   tempDifference: number
   precipDifference: number
   precipDifferencePercent: number
+  /** Number of baseline years replayed to build the uncertainty range. */
+  ensembleSize: number
+  ensembleFrom: number
+  ensembleTo: number
+  forecastTempP10: number
+  forecastTempP50: number
+  forecastTempP90: number
+  forecastPrecipP10: number
+  forecastPrecipP50: number
+  forecastPrecipP90: number
   monthlyData: ForecastMonth[]
   ytdTrajectoryData: YtdTrajectoryPoint[]
 }

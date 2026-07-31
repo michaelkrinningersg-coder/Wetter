@@ -47,6 +47,44 @@ export function percentile(sorted: number[], p: number): number | null {
   return sorted[lo]! * (1 - frac) + sorted[hi]! * frac
 }
 
+/**
+ * Centered moving average over an x-axis that may have gaps.
+ *
+ * Used for the 30-year climate mean: a single regression line over 160+ years
+ * asserts that the warming is linear, which it is not — very little happens
+ * before ~1980 and then it steepens. A centered running mean shows that shape
+ * instead of averaging it away.
+ *
+ * The window is centered, so the curve deliberately stops half a window short
+ * of both ends: there is no honest 30-year mean centered on the last year.
+ * `minCoverage` allows for missing years inside the window (early measurement
+ * series have gaps) without inventing values for them.
+ */
+export function centeredMovingAverage(
+  points: { x: number; y: number }[],
+  window: number,
+  minCoverage = 0.8,
+): Map<number, number> {
+  const byX = new Map(points.map((p) => [p.x, p.y]))
+  const half = Math.floor(window / 2)
+  const required = Math.ceil(window * minCoverage)
+  const result = new Map<number, number>()
+
+  for (const { x } of points) {
+    let sum = 0
+    let count = 0
+    for (let offset = -half; offset <= half; offset++) {
+      const value = byX.get(x + offset)
+      if (value !== undefined) {
+        sum += value
+        count += 1
+      }
+    }
+    if (count >= required) result.set(x, sum / count)
+  }
+  return result
+}
+
 export function mean(values: number[]): number | null {
   if (values.length === 0) return null
   return values.reduce((a, b) => a + b, 0) / values.length

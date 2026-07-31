@@ -128,7 +128,10 @@ export function Comparison({
                 stroke={CHART.axis}
                 tick={CHART.tick}
                 tickLine={false}
-                domain={['dataMin - 1', 'dataMax + 0.5']}
+                domain={[
+                  (min: number) => Math.floor(min - 1),
+                  (max: number) => Math.ceil(max + 0.5),
+                ]}
                 unit=" °C"
               />
               <Tooltip

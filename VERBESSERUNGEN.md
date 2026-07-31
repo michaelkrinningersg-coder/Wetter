@@ -5,11 +5,15 @@ der Station Göttingen (01691, 59.901 Messtage, 1858–2026) nachgerechnet.
 
 **Aufwand:** S = unter einem Tag · M = ein bis drei Tage · L = mehr
 
+> **Stand:** Die Punkte **1, 2, 3, 5, 7 und 8** sind inzwischen umgesetzt und im
+> Repository enthalten — erkennbar am Vermerk ✅ **Umgesetzt** beim jeweiligen
+> Punkt. Die übrigen 24 sind weiterhin offene Vorschläge.
+
 ---
 
 ## A · Inhalt und Fachlichkeit
 
-### 1. Kenntage auf die DWD-Definition umstellen — `>` statt `≥` [S]
+### 1. Kenntage auf die DWD-Definition umstellen — `>` statt `≥` [S] · ✅ Umgesetzt
 
 Die Schwellenwerttage werden mit `temp_max > 30` gezählt. Der DWD definiert
 einen heißen Tag als **Tmax ≥ 30,0 °C**. Ein Tag mit exakt 30,0 °C fällt
@@ -20,23 +24,27 @@ derzeit heraus:
 | Heiße Tage | 772 | 812 | **+40** |
 | Sommertage | 4.242 | 4.386 | **+144** |
 
-Bei Frost- und Eistagen (`<  0`) ist die Definition dagegen korrekt. Die
-Beschriftung („Max > 30 °C") ist in sich stimmig — aber die App beruft sich im
-Einleitungstext auf „die meteorologischen Richtlinien", und die sagen etwas
-anderes. Nicht stillschweigend geändert, weil sich damit alle Zahlen der
-Jahresübersicht verschieben.
+Bei Frost- und Eistagen (`<  0`) ist die Definition dagegen korrekt.
 
-### 2. Tropennächte ergänzen (Tmin ≥ 20 °C) [S]
+*Umgesetzt:* Alle Schwellen sind auf die DWD-Definition umgestellt; die
+Jahresübersicht heißt die Spalten jetzt nach den Kenntagen („Heiße Tage",
+„Sommertage") statt nach der Rechenvorschrift.
+
+### 2. Tropennächte ergänzen (Tmin ≥ 20 °C) [S] · ✅ Umgesetzt
 
 Fehlt vollständig, obwohl die Kategorie in den Spitzenwerten schon
 „Wärmste Nächte (Tropennacht)" heißt. In 168 Jahren gibt es in Göttingen
-**genau drei** — eine bemerkenswert klare Aussage, die die App gerade
-verschenkt.
+**genau drei** — eine bemerkenswert klare Aussage, die die App bislang
+verschenkte.
 
-### 3. Eistage als eigene Spalte (Tmax < 0 °C) [S]
+*Umgesetzt:* eigene Spalte in der Jahresübersicht.
 
-**2.487 Tage** im Bestand. Die Jahresübersicht zeigt „Mittel < 0 °C", was
+### 3. Eistage als eigene Spalte (Tmax < 0 °C) [S] · ✅ Umgesetzt
+
+**2.487 Tage** im Bestand. Die Jahresübersicht zeigte „Mittel < 0 °C", was
 etwas anderes ist. Eistage sind die etablierte Kenngröße für Winterstrenge.
+
+*Umgesetzt:* eigene Spalte; „Mittel < 0 °C" bleibt zusätzlich erhalten.
 
 ### 4. Warming Stripes [S]
 
@@ -45,12 +53,19 @@ Klimavisualisierung überhaupt. Die Daten liegen mit `annual-means` bereits
 fertig vor (`anomaly` je Jahr), die Farbskala existiert in der Heatmap. Größter
 Eindruck pro Zeile Code im ganzen Projekt.
 
-### 5. Gleitendes 30-Jahres-Mittel statt nur Regressionsgerade [M]
+### 5. Gleitendes 30-Jahres-Mittel statt nur Regressionsgerade [M] · ✅ Umgesetzt
 
 Eine einzige Gerade über 168 Jahre unterstellt lineare Erwärmung. Die ist aber
 nicht linear: Bis etwa 1980 passiert wenig, danach wird es steil. Ein
 gleitendes 30-Jahres-Mittel zeigt genau das — und ist die Darstellung, die
 Klimadienste tatsächlich verwenden.
+
+*Umgesetzt:* in Temperatur- und Niederschlagstrend als kräftige Kurve; die
+Regressionsgerade bleibt gestrichelt zum Vergleich. Das Mittel ist zentriert
+und endet daher bewusst 15 Jahre vor dem Reihenende — für den letzten Wert
+gibt es kein ehrliches zentriertes 30-Jahres-Fenster. Berechnet wird es über
+die **ungefilterte** Reihe, damit der Zeitraumfilter die Kurve nicht an beiden
+Enden abschneidet.
 
 ### 6. Trendstärke beziffern statt nur zeichnen [M]
 
@@ -60,19 +75,34 @@ R² und ein Konfidenzband. Ohne das lädt die Kachel „Klimaerwärmung +1,84 °
 zu Überinterpretation ein — je nach gewähltem Fenster fällt sie deutlich anders
 aus.
 
-### 7. Hitzewellen und Trockenperioden [M]
+### 7. Hitzewellen und Trockenperioden [M] · ✅ Umgesetzt
 
 Längste Serie ohne messbaren Niederschlag, längste Serie über 30 °C, längste
 Frostperiode. Das ist die Frage, die Menschen an eine Klimadatenbank
-tatsächlich stellen — und sie ist mit Fensterfunktionen in SQLite direkt
-lösbar. Bislang gibt es nur Einzeltage, keine Serien.
+tatsächlich stellen. Bislang gab es nur Einzeltage, keine Serien.
 
-### 8. Prognose als Unsicherheitsband statt Punktwert [M]
+*Umgesetzt:* neuer Bereich **Perioden & Serien** mit sechs Kategorien (Hitze,
+Sommer, Trockenheit, Niederschlag, Frost, Dauerfrost), Rangliste der längsten
+Serien und Häufigkeit je Jahrzehnt. Ein fehlender Messwert oder eine Lücke im
+Datenbestand beendet eine Serie, statt sie zu verlängern.
 
-Der Prognose-Tab nennt einen einzelnen Wert auf zwei Nachkommastellen. Das
-Extremszenario-Band existiert bereits in der Verlaufsansicht, wird aber für die
-Kernaussage nicht genutzt. Besser: das 10./50./90.-Perzentil über die 30
-Vergleichsjahre — „10,0 °C, wahrscheinlicher Bereich 9,4 – 10,7 °C".
+Erste Ergebnisse für Göttingen: längste Hitzeperiode **13 Tage
+(1.–13. August 2003)**, gefolgt von 12 Tagen 2018. Hitzeperioden je Jahrzehnt:
+**6 in den 1900ern gegenüber 13 in den 2010ern**. Längste Trockenperiode:
+**66 Tage (16. August – 20. Oktober 1959)**.
+
+### 8. Prognose als Unsicherheitsband statt Punktwert [M] · ✅ Umgesetzt
+
+Der Prognose-Tab nannte einen einzelnen Wert auf zwei Nachkommastellen — eine
+Genauigkeit, die die Methode nicht hergibt.
+
+*Umgesetzt:* Das Restjahr wird **30-mal zu Ende gerechnet** — je einmal so, wie
+es in jedem Jahr der Referenzperiode tatsächlich verlaufen ist. Angegeben ist
+der Median dieser 30 Ergebnisse, dazu der wahrscheinliche Bereich vom 10. bis
+90. Perzentil. Für Göttingen 2026: **10,0 °C, Bereich 9,5 – 10,5 °C**
+(Niederschlag 580 mm, Bereich 525 – 677 mm). Im Verlaufsdiagramm ersetzt das
+Perzentilband die beiden Extremjahre; es ist während des gemessenen Zeitraums
+null breit und öffnet sich erst im Prognoseteil.
 
 ### 9. Vegetationsperiode und Wachstumsgradtage [M]
 

@@ -70,12 +70,14 @@ export function Forecast({ stationId }: { stationId: string }) {
   return (
     <>
       <InfoPanel icon={Sparkles} title={`Klimatologische Jahresprognose ${data.runningYear}`}>
-        Die gemessenen DWD-Werte bis zum <strong>{data.cutOffDateStr}</strong> (
-        {data.observedDaysCount} Tage) werden für die verbleibenden{' '}
-        {data.remainingDaysCount} Tage mit dem tagesgenauen Mittel der letzten 30
-        vollständigen Kalenderjahre ({data.runningYear - 30}–{data.runningYear - 1})
-        fortgeschrieben. Das ist eine Klimatologie-Fortschreibung, keine Wettervorhersage —
-        sie zeigt, wo das Jahr bei durchschnittlichem Rest landen würde.
+        Gemessen sind die DWD-Werte bis zum <strong>{data.cutOffDateStr}</strong> (
+        {data.observedDaysCount} Tage). Für die verbleibenden{' '}
+        {data.remainingDaysCount} Tage wird das Jahr{' '}
+        <strong>{data.ensembleSize}-mal zu Ende gerechnet</strong> — je einmal so, wie
+        der Rest des Jahres in jedem Jahr von {data.ensembleFrom} bis {data.ensembleTo}
+        {' '}tatsächlich verlaufen ist. Angegeben ist der Median dieser{' '}
+        {data.ensembleSize} Ergebnisse; der wahrscheinliche Bereich umfasst das 10. bis
+        90. Perzentil. Das ist eine Klimatologie-Fortschreibung, keine Wettervorhersage.
       </InfoPanel>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -88,7 +90,7 @@ export function Forecast({ stationId }: { stationId: string }) {
               </p>
               <div className="mt-1.5 flex items-baseline gap-2.5">
                 <span className="numeric text-3xl font-semibold tracking-tight text-ink">
-                  {temp(data.forecastTempAvg, 2)}
+                  {temp(data.forecastTempP50, 1)}
                 </span>
                 <span
                   className={`numeric flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-semibold ${
@@ -105,6 +107,21 @@ export function Forecast({ stationId }: { stationId: string }) {
               </div>
             </div>
           </div>
+
+          <p className="numeric mt-1.5 text-[11px] text-ink-muted">
+            Wahrscheinlicher Bereich{' '}
+            <span className="font-semibold text-ink">
+              {temp(data.forecastTempP10, 1)} – {temp(data.forecastTempP90, 1)}
+            </span>
+          </p>
+          <Spread
+            p10={data.forecastTempP10}
+            p50={data.forecastTempP50}
+            p90={data.forecastTempP90}
+            reference={data.baselineTempAvg}
+            format={(v) => temp(v, 1)}
+            accent="bg-warm"
+          />
 
           <div className="mt-4 grid grid-cols-2 gap-4 border-t border-line pt-3 text-xs">
             <div>
@@ -139,7 +156,7 @@ export function Forecast({ stationId }: { stationId: string }) {
             </p>
             <div className="mt-1.5 flex flex-wrap items-baseline gap-2.5">
               <span className="numeric text-3xl font-semibold tracking-tight text-ink">
-                {mm(data.forecastPrecipSum)}
+                {mm(data.forecastPrecipP50, 0)}
               </span>
               <span
                 className={`numeric flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-semibold ${
@@ -156,6 +173,21 @@ export function Forecast({ stationId }: { stationId: string }) {
               </span>
             </div>
           </div>
+
+          <p className="numeric mt-1.5 text-[11px] text-ink-muted">
+            Wahrscheinlicher Bereich{' '}
+            <span className="font-semibold text-ink">
+              {mm(data.forecastPrecipP10, 0)} – {mm(data.forecastPrecipP90, 0)}
+            </span>
+          </p>
+          <Spread
+            p10={data.forecastPrecipP10}
+            p50={data.forecastPrecipP50}
+            p90={data.forecastPrecipP90}
+            reference={data.baselinePrecipSum}
+            format={(v) => mm(v, 0)}
+            accent="bg-wet"
+          />
 
           <div className="mt-4 grid grid-cols-2 gap-4 border-t border-line pt-3 text-xs">
             <div>
@@ -226,14 +258,22 @@ export function Forecast({ stationId }: { stationId: string }) {
               {view === 'ytd' && (
                 <>
                   <Area
-                    name="Unsicherheitsband (Extremszenarien)"
+                    name="Bandbreite aller 30 Szenarien"
                     type="monotone"
                     // Range area: Recharts accepts a [low, high] key pair at
                     // runtime, but its types only declare the scalar form.
-                    dataKey={['coldestYtdTemp', 'hottestYtdTemp'] as unknown as string}
+                    dataKey={['ytdTempMin', 'ytdTempMax'] as unknown as string}
                     stroke="none"
                     fill={CHART.colors.warm}
-                    fillOpacity={0.1}
+                    fillOpacity={0.07}
+                  />
+                  <Area
+                    name="Wahrscheinlicher Bereich (10.–90. Perzentil)"
+                    type="monotone"
+                    dataKey={['ytdTempP10', 'ytdTempP90'] as unknown as string}
+                    stroke="none"
+                    fill={CHART.colors.warm}
+                    fillOpacity={0.18}
                   />
                   <Line
                     name="Mittel 1968–1997"
@@ -345,6 +385,70 @@ export function Forecast({ stationId }: { stationId: string }) {
   )
 }
 
+/**
+ * Ensemble spread: the 10–90 % band, the median marker and where the 30-year
+ * climate reference falls inside it. Communicates at a glance whether the year
+ * is clearly off-normal or whether normal is still well within reach.
+ */
+function Spread({
+  p10,
+  p50,
+  p90,
+  reference,
+  format,
+  accent,
+}: {
+  p10: number
+  p50: number
+  p90: number
+  reference: number
+  format: (value: number) => string
+  accent: string
+}) {
+  const lo = Math.min(p10, reference)
+  const hi = Math.max(p90, reference)
+  const span = hi - lo || 1
+  const at = (value: number) => ((value - lo) / span) * 100
+
+  return (
+    <div className="mt-3">
+      <div className="relative h-5">
+        <div className="absolute inset-x-0 top-2 h-1 rounded-full bg-inset" />
+        <div
+          className={`absolute top-2 h-1 rounded-full ${accent} opacity-40`}
+          style={{ left: `${at(p10)}%`, width: `${at(p90) - at(p10)}%` }}
+        />
+        <div
+          className={`absolute top-0.5 size-3 -translate-x-1/2 rounded-full ${accent}`}
+          style={{ left: `${at(p50)}%` }}
+          title={`Median ${format(p50)}`}
+        />
+        <div
+          className="absolute top-0 h-5 w-px -translate-x-1/2 bg-ink"
+          style={{ left: `${at(reference)}%` }}
+          title={`Klimareferenz ${format(reference)}`}
+        />
+      </div>
+      {/* The reference caption sits under its own tick, not centred, so the
+          label always points at the mark it describes. */}
+      <div className="relative mt-0.5 h-3.5">
+        <span className="numeric absolute left-0 text-[10px] text-ink-faint">
+          {format(p10)}
+        </span>
+        <span
+          className="absolute -translate-x-1/2 whitespace-nowrap text-[10px] text-ink-muted"
+          style={{ left: `${Math.min(88, Math.max(12, at(reference)))}%` }}
+        >
+          Referenz
+        </span>
+        <span className="numeric absolute right-0 text-[10px] text-ink-faint">
+          {format(p90)}
+        </span>
+      </div>
+    </div>
+  )
+}
+
 function Progress({
   observed,
   remaining,
@@ -406,7 +510,7 @@ function ForecastTooltip({
         ]}
         footer={
           p.isForecast
-            ? `Szenarien: ${temp(p.coldestYtdTemp, 2)} bis ${temp(p.hottestYtdTemp, 2)}`
+            ? `Wahrscheinlicher Bereich ${temp(p.ytdTempP10, 2)} – ${temp(p.ytdTempP90, 2)} · gesamte Spanne ${temp(p.ytdTempMin, 2)} – ${temp(p.ytdTempMax, 2)}`
             : undefined
         }
       />

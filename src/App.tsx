@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   BarChart3,
   CalendarDays,
+  CalendarRange,
   CloudRain,
   Flame,
   Gauge,
@@ -30,6 +31,7 @@ import { Comparison } from './components/Comparison'
 import { YtdTemp } from './components/YtdTemp'
 import { AnnualOverview } from './components/AnnualOverview'
 import { Forecast } from './components/Forecast'
+import { Spells } from './components/Spells'
 
 const FALLBACK_STATIONS: Station[] = [
   { id: '01691', name: 'Göttingen', altitude: 167 },
@@ -50,6 +52,7 @@ type TabId =
   | 'ytd-temp'
   | 'annual-overview'
   | 'forecast'
+  | 'spells'
 
 interface TabDef {
   id: TabId
@@ -68,6 +71,7 @@ const TABS: TabDef[] = [
   { id: 'heatmap', label: 'Monats-Heatmap', icon: Grid3x3, group: 'Rekorde' },
   { id: 'extremes', label: 'Spitzenwerte', icon: Flame, group: 'Rekorde' },
   { id: 'extreme-months', label: 'Spitzenmonate', icon: ListOrdered, group: 'Rekorde' },
+  { id: 'spells', label: 'Perioden & Serien', icon: CalendarRange, group: 'Rekorde' },
   { id: 'climate', label: 'Klimadiagramm', icon: BarChart3, group: 'Klimatologie' },
   { id: 'comparison', label: 'Referenzperioden', icon: Layers, group: 'Klimatologie' },
   { id: 'forecast', label: 'Prognose', icon: Sparkles, group: 'Klimatologie' },
@@ -307,6 +311,9 @@ export default function App() {
             )}
             {tab === 'ytd-temp' && <YtdTemp stationId={stationId} />}
             {tab === 'annual-overview' && <AnnualOverview stationId={stationId} />}
+            {tab === 'spells' && (
+              <Spells stationId={stationId} stationName={stationName} />
+            )}
             {tab === 'forecast' && <Forecast stationId={stationId} />}
           </main>
         </div>
