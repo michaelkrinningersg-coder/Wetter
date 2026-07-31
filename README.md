@@ -35,6 +35,38 @@ npm run build
 npm start          # liefert dist/ und die API auf Port 3001
 ```
 
+### GitHub Pages
+
+Pages liefert Dateien aus, keine Query-Strings. `npm run build:static` baut
+deshalb das Frontend im statischen Modus **und** schreibt jede API-Antwort als
+JSON-Datei:
+
+```bash
+npm run import:stations   # Datenbank füllen (die drei Stationen vom DWD)
+npm run build:static      # dist/ mit 6.845 Dateien, 107 MB
+```
+
+Wohin welche Antwort geschrieben wird, entscheidet `src/lib/static-path.js` —
+und dieselbe Funktion benutzt das Frontend, um zu lesen. Eine zweite
+Implementierung würde auseinanderlaufen, und der Fehler wäre ein 404 im
+Browser statt ein Übersetzungsfehler.
+
+| Gruppe | Dateien | Größe |
+|---|---:|---:|
+| Deutschland (550 Tage à Top 50) | 551 | 57,8 MB |
+| Monatsansicht | 5.017 | 30,3 MB |
+| Dieser Tag | 1.116 | 17,3 MB |
+| übrige | 161 | 1,7 MB |
+
+Der Workflow `.github/workflows/pages.yml` veröffentlicht nach jedem Datenlauf.
+Damit er greifen kann, muss in den Repository-Einstellungen unter **Pages** als
+Quelle **GitHub Actions** eingestellt sein.
+
+Zwei Dinge kann eine statische Auslieferung nicht, und sie täuscht es auch
+nicht vor: den DWD-Import auf Knopfdruck und das Nachladen der Pegel beim
+Aufruf. Beide Schalter sind ausgeblendet; die Daten sind so frisch wie der
+letzte Deploy.
+
 ## Analysebereiche
 
 **Messwerte** — Monatsübersicht (Tageswerte, Tagesverlauf, Jahresverlauf) ·

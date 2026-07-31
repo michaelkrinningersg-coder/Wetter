@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 
+import { staticPath } from './static-path'
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -11,12 +13,25 @@ export class ApiError extends Error {
 }
 
 /**
+ * True for a build meant for static hosting, where there is no API to talk to
+ * and every answer was written to a file at build time.
+ */
+export const STATIC = import.meta.env.VITE_STATIC === '1'
+
+/** Where a request actually goes. */
+export function resolve(path: string): string {
+  if (!STATIC) return path
+  // BASE_URL carries the repository subpath a Pages site lives under.
+  return `${import.meta.env.BASE_URL}${staticPath(path)}`
+}
+
+/**
  * Every endpoint in the original app used the same `fetch(...); if (!res.ok)
  * throw` boilerplate but only ever surfaced a generic German message — the
  * server's own error text was discarded. This keeps it.
  */
 export async function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> {
-  const res = await fetch(path, { signal, headers: { Accept: 'application/json' } })
+  const res = await fetch(resolve(path), { signal, headers: { Accept: 'application/json' } })
 
   if (!res.ok) {
     let detail = ''

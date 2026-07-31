@@ -1,0 +1,80 @@
+name: GitHub Pages
+
+# Pages liefert Dateien aus, keine Query-Strings. Dieser Lauf baut das Frontend
+# im statischen Modus und schreibt zusätzlich jede API-Antwort als JSON-Datei —
+# rund 6800 Dateien, gut 100 MB, deutlich unter dem 1-GB-Rahmen von Pages.
+#
+# Zwei Dinge kann eine statische Auslieferung nicht, und sie täuscht es auch
+# nicht vor: den DWD-Import auf Knopfdruck und das Nachladen der Pegel beim
+# Aufruf. Beide Schalter sind im statischen Modus ausgeblendet; die Daten sind
+# so frisch wie der letzte Deploy.
+
+on:
+  # Nach jedem Datenlauf neu veröffentlichen, damit die Seite dem Archiv folgt.
+  workflow_run:
+    workflows: ['Deutschlandwerte sammeln', 'Pegelstände sammeln']
+    types: [completed]
+  push:
+    branches: [claude/wetter-station-github-analysis-257mst]
+    paths-ignore:
+      - '**.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Ein laufender Deploy darf nicht abgebrochen werden, sonst bleibt die Seite
+# auf halbem Stand; ein wartender wird durch den neueren ersetzt.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  bauen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      # Die Datenbank liegt bewusst nicht im Repository. Die drei Stationsreihen
+      # kommen direkt vom DWD (rund zehn Sekunden), Deutschlandarchiv und
+      # Rekordbasis liest der Server beim Start aus den committeten CSV-Dateien.
+      - name: Stationen importieren
+        run: npm run import:stations
+
+      - name: Statisch bauen
+        env:
+          # Eine Pages-Seite liegt unter /<repo>/; ohne das Präfix zeigen alle
+          # Asset- und JSON-Pfade ins Leere.
+          BASE_PATH: /${{ github.event.repository.name }}/
+        run: npm run build:static
+
+      - name: Umfang melden
+        run: |
+          echo "Dateien: $(find dist -type f | wc -l)"
+          echo "Größe:   $(du -sh dist | cut -f1)"
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  veröffentlichen:
+    needs: bauen
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

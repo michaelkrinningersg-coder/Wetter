@@ -15,7 +15,10 @@
     "lint": "eslint .",
     "fetch:gauges": "node scripts/fetch-gauges.js",
     "fetch:germany": "node scripts/fetch-germany.js",
-    "fetch:records": "node scripts/fetch-records.js"
+    "fetch:records": "node scripts/fetch-records.js",
+    "import:stations": "node scripts/import-stations.js",
+    "prerender": "node scripts/prerender.js",
+    "build:static": "VITE_STATIC=1 npm run build && npm run prerender"
   },
   "dependencies": {
     "better-sqlite3": "^11.7.0",

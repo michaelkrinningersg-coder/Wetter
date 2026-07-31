@@ -222,8 +222,14 @@ export function archiveRange() {
   return { days: r?.days ?? 0, first: r?.first ?? null, last: r?.last ?? null }
 }
 
-/** Every archived date, newest first — the view offers these for selection. */
-export function availableDates(limit = 400) {
+/**
+ * Every archived date, newest first — the view offers these for selection.
+ *
+ * The default covers several years so nothing is silently withheld; the static
+ * build materialises one file per date, and a cap here would quietly shorten
+ * the date picker rather than fail visibly.
+ */
+export function availableDates(limit = 5000) {
   return db
     .prepare('SELECT DISTINCT date FROM germany_daily ORDER BY date DESC LIMIT ?')
     .all(limit)

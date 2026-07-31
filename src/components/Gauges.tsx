@@ -20,7 +20,7 @@ import {
   Waves,
 } from 'lucide-react'
 
-import { useApi } from '../lib/api'
+import { STATIC, useApi } from '../lib/api'
 import { isoToGerman, num } from '../lib/format'
 import type { GaugeSeriesResponse, GaugeSummary, GaugesResponse } from '../types'
 import {
@@ -199,15 +199,17 @@ export function Gauges() {
                   onChange={setRange}
                   size="sm"
                 />
-                <button
-                  type="button"
-                  onClick={refreshNow}
-                  disabled={refreshing}
-                  className="flex cursor-pointer items-center gap-1.5 rounded-md border border-line bg-raised px-2.5 py-1 text-[11px] text-ink-muted transition-colors hover:border-brand hover:text-brand disabled:cursor-wait"
-                >
-                  <RefreshCw className={`size-3 ${refreshing ? 'animate-spin' : ''}`} aria-hidden />
-                  Aktualisieren
-                </button>
+                {!STATIC && (
+                  <button
+                    type="button"
+                    onClick={refreshNow}
+                    disabled={refreshing}
+                    className="flex cursor-pointer items-center gap-1.5 rounded-md border border-line bg-raised px-2.5 py-1 text-[11px] text-ink-muted transition-colors hover:border-brand hover:text-brand disabled:cursor-wait"
+                  >
+                    <RefreshCw className={`size-3 ${refreshing ? 'animate-spin' : ''}`} aria-hidden />
+                    Aktualisieren
+                  </button>
+                )}
               </div>
             }
           />

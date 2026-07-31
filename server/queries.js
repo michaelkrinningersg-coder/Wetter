@@ -319,6 +319,8 @@ export function extremeDays(stationId, category, limit = 50) {
   return stmt.all(stationId, limit)
 }
 
+export const DAY_CATEGORY_KEYS = Object.keys(DAY_CATEGORIES)
+
 const MONTH_CATEGORIES = {
   temp_mean_max: ['AVG(temp_mean)', 'temp_mean', 'DESC'],
   temp_mean_min: ['AVG(temp_mean)', 'temp_mean', 'ASC'],
@@ -327,6 +329,8 @@ const MONTH_CATEGORIES = {
   wind_mean_max: ['AVG(wind_mean)', 'wind_mean', 'DESC'],
   wind_mean_min: ['AVG(wind_mean)', 'wind_mean', 'ASC'],
 }
+
+export const MONTH_CATEGORY_KEYS = Object.keys(MONTH_CATEGORIES)
 
 export function extremeMonths(stationId, category, limit = 50) {
   const spec = MONTH_CATEGORIES[category]
