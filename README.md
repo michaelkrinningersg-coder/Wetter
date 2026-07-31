@@ -52,6 +52,9 @@ Frost- und Niederschlagsperioden) · Rekordbilanz
 **Klimatologie** — Klimadiagramm nach Walter & Lieth · Referenzperioden ·
 Jahresprognose
 
+**Gewässer** — Flusspegel Leine (Göttingen), Rhume (Northeim) und Weser
+(Wahmbeck) mit Verlauf, Meldestufen und langjährigen Kennwerten
+
 ## Aufbau
 
 ```
@@ -72,6 +75,7 @@ server/
   dwd.js               Download und Parser der DWD-Archive
   queries.js           sämtliche Aggregationen
   stations.js          Stationsverzeichnis
+  gauges.js            Flusspegel: Abruf, Parser, eigene Zeitreihe
 ```
 
 Die Datenbank liegt unter `data/weather.sqlite` (per `.gitignore`
@@ -119,6 +123,11 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   Klimatologie-Fortschreibung, **keine Wettervorhersage**.
 - **Klimadiagramm.** Temperatur- und Niederschlagsachse stehen im Verhältnis
   1 °C : 2 mm, damit die Walter-&-Lieth-Leseregel gilt.
+- **Flusspegel.** Alle Werte in Zentimeter über Pegelnullpunkt. Die Achse des
+  Verlaufs ist auf die Messwerte skaliert, weil die täglichen Schwankungen im
+  Zentimeterbereich die eigentliche Information sind; Kennwerte und Meldestufen
+  außerhalb dieses Bereichs werden mit ihrem Abstand ausgewiesen statt die
+  Kurve flachzudrücken.
 
 ## Herkunft
 
@@ -138,5 +147,27 @@ Entscheidung offen).
 
 ## Daten
 
-Quelle: [DWD Climate Data Center](https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/daily/kl/),
+**Klimadaten:** [DWD Climate Data Center](https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/daily/kl/),
 Tageswerte (`kl`). Frei verwendbar nach GeoNutzV; Quellenangabe erforderlich.
+
+**Flusspegel:** zwei Quellen, weil die Pegel an unterschiedlichen Gewässern
+liegen.
+
+| Pegel | Gewässer | Quelle | Verfügbarkeit |
+|---|---|---|---|
+| Wahmbeck | Weser | [PEGELONLINE der WSV](https://pegelonline.wsv.de/webservice/dokuRestapi) | offene REST-Schnittstelle, rollierend 30 Tage im 15-Minuten-Takt |
+| Göttingen | Leine | [NLWKN Pegelonline](https://www.pegelonline.nlwkn.niedersachsen.de/Pegel/Binnenpegel/ID/280) | nur aktueller Wert, keine Zeitreihe |
+| Northeim | Rhume | [NLWKN Pegelonline](https://www.pegelonline.nlwkn.niedersachsen.de/Pegel/Binnenpegel/ID/454) | nur aktueller Wert, keine Zeitreihe |
+
+Die Weser ist Bundeswasserstraße und deshalb bei der WSV geführt; Leine und
+Rhume sind Landesgewässer. Das NLWKN-Portal rendert serverseitig, weshalb der
+aktuelle Wert samt Meldestufen und Kennwerten aus der Seite gelesen wird — eine
+dokumentierte Schnittstelle gibt es dort nicht. **Für diese beiden Pegel legt
+die App jeden Abruf in der Datenbank ab und baut ihre Zeitreihe damit selbst
+auf.** Meldestufen, Hauptwerte und Extremwerte stammen für alle drei Pegel vom
+NLWKN.
+
+Historische Pegelzeitreihen sind online nirgends frei abrufbar. Die Daten
+existieren (Leine ab 1958, Weser ab 1973, Rhume ab 1993), werden aber nur auf
+Anfrage bei der NLWKN-Daten-Servicestelle abgegeben. Alle Pegelangaben ohne
+Gewähr.

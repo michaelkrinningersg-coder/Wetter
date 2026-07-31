@@ -372,3 +372,65 @@ export interface ForecastResponse {
   monthlyData: ForecastMonth[]
   ytdTrajectoryData: YtdTrajectoryPoint[]
 }
+
+/* -------------------------------------------------------------------------- */
+/* River gauges                                                               */
+/* -------------------------------------------------------------------------- */
+
+export interface GaugeLevel {
+  cm: number
+  mNN: number | null
+}
+
+export interface GaugeNamedLevel extends GaugeLevel {
+  date: string | null
+  label?: string
+}
+
+export interface GaugeSummary {
+  id: string
+  name: string
+  water: string
+  catchment: number
+  source: 'nlwkn' | 'pegelonline'
+  fetchedAt: string | null
+  latest: { ts: string; value: number } | null
+  window: {
+    days: number
+    count: number
+    first: string | null
+    last: string | null
+    min: number | null
+    max: number | null
+    mean: number | null
+  }
+  gaugeDatum?: number | null
+  current?: { cm: number; mNN: number | null; measuredAt: string | null } | null
+  trend?: string | null
+  change?: number | null
+  currentLevel?: number | null
+  thresholds?: { level: number; cm: number; mNN: number | null }[]
+  characteristic?: {
+    period: string | null
+    lowest: GaugeNamedLevel | null
+    meanLow: GaugeNamedLevel | null
+    mean: GaugeNamedLevel | null
+    meanHigh: GaugeNamedLevel | null
+    highest: GaugeNamedLevel | null
+  }
+  extremes?: { period: string | null; records: GaugeNamedLevel[] }
+  floodScenarios?: { label: string; cm: number; mNN: number | null }[]
+  operator?: string | null
+  sourceUrl?: string
+}
+
+export interface GaugesResponse {
+  days: number
+  gauges: GaugeSummary[]
+}
+
+export interface GaugeSeriesResponse {
+  id: string
+  days: number
+  readings: { ts: string; value: number }[]
+}

@@ -7,6 +7,13 @@ import * as api from './queries.js'
 import { getImportState, isImporting } from './db.js'
 import { importStation } from './dwd.js'
 import { STATIONS, findStation, recentUrl } from './stations.js'
+import {
+  GAUGES,
+  findGauge,
+  gaugeSeries,
+  gaugeSummary,
+  refreshAll,
+} from './gauges.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -224,6 +231,47 @@ app.get(
     }
     res.json(rows)
   }),
+)
+
+/* -------------------------------------------------------------------------- */
+/* River gauges                                                               */
+/* -------------------------------------------------------------------------- */
+
+/** Days of history the gauge views may request. */
+function gaugeDays(req) {
+  const days = Number(req.query.days ?? 30)
+  return Number.isFinite(days) ? Math.min(365, Math.max(1, Math.round(days))) : 30
+}
+
+app.get(
+  '/api/gauges',
+  handler(async (req, res) => {
+    // Readings come from two remote sources; refreshing on read keeps the view
+    // current without a scheduler, and the ten-minute cache in gauges.js stops
+    // a reload from hammering either of them.
+    if (req.query.refresh !== 'false') {
+      await refreshAll({ force: req.query.refresh === 'force' })
+    }
+    const days = gaugeDays(req)
+    res.json({ days, gauges: GAUGES.map((g) => gaugeSummary(g, days)) })
+  }),
+)
+
+app.get(
+  '/api/gauges/:id/series',
+  handler((req, res) => {
+    const gauge = findGauge(req.params.id)
+    if (!gauge) {
+      return res.status(400).json({ error: `Unbekannter Pegel "${req.params.id}".` })
+    }
+    const days = gaugeDays(req)
+    res.json({ id: gauge.id, days, readings: gaugeSeries(gauge, days) })
+  }),
+)
+
+app.post(
+  '/api/gauges/refresh',
+  handler(async (_req, res) => res.json({ results: await refreshAll({ force: true }) })),
 )
 
 /* -------------------------------------------------------------------------- */

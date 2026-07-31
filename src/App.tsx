@@ -14,6 +14,7 @@ import {
   Scale,
   Snowflake,
   Umbrella,
+  Waves,
   ListOrdered,
   Sparkles,
   Table2,
@@ -42,6 +43,7 @@ import { Seasons } from './components/Seasons'
 import { RecordBalance } from './components/RecordBalance'
 import { PrecipIntensity } from './components/PrecipIntensity'
 import { DayInHistory } from './components/DayInHistory'
+import { Gauges } from './components/Gauges'
 
 const FALLBACK_STATIONS: Station[] = [
   { id: '01691', name: 'Göttingen', altitude: 167 },
@@ -68,12 +70,13 @@ type TabId =
   | 'record-balance'
   | 'precip-intensity'
   | 'day-in-history'
+  | 'gauges'
 
 interface TabDef {
   id: TabId
   label: string
   icon: typeof Thermometer
-  group: 'Messwerte' | 'Trends' | 'Rekorde' | 'Klimatologie'
+  group: 'Messwerte' | 'Trends' | 'Rekorde' | 'Klimatologie' | 'Gewässer'
 }
 
 const TABS: TabDef[] = [
@@ -95,9 +98,10 @@ const TABS: TabDef[] = [
   { id: 'climate', label: 'Klimadiagramm', icon: BarChart3, group: 'Klimatologie' },
   { id: 'comparison', label: 'Referenzperioden', icon: Layers, group: 'Klimatologie' },
   { id: 'forecast', label: 'Prognose', icon: Sparkles, group: 'Klimatologie' },
+  { id: 'gauges', label: 'Flusspegel', icon: Waves, group: 'Gewässer' },
 ]
 
-const GROUPS = ['Messwerte', 'Trends', 'Rekorde', 'Klimatologie'] as const
+const GROUPS = ['Messwerte', 'Trends', 'Rekorde', 'Klimatologie', 'Gewässer'] as const
 
 const STORAGE_KEY = 'selected_station_id'
 
@@ -350,6 +354,7 @@ export default function App() {
               <Spells stationId={stationId} stationName={stationName} />
             )}
             {tab === 'forecast' && <Forecast stationId={stationId} />}
+            {tab === 'gauges' && <Gauges />}
           </main>
         </div>
 
