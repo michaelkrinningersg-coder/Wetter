@@ -40,8 +40,9 @@ npm start          # liefert dist/ und die API auf Port 3001
 **Messwerte** — Monatsübersicht (Tageswerte, Tagesverlauf, Jahresverlauf) ·
 Jahresübersicht (Kenndaten und Schwellenwerttage je Kalenderjahr)
 
-**Trends** — Temperaturtrend · Niederschlagstrend · Jahresmittelwerte und
-Anomalien · Mitteltemperatur Year-to-Date
+**Trends** — Temperaturtrend · Niederschlagstrend · Jahresmittelwerte,
+Anomalien und Warming Stripes · Mitteltemperatur Year-to-Date ·
+Vegetationsperiode und Wachstumsgradtage
 
 **Rekorde** — Monats-Heatmap · Spitzenwerte (Top-50-Tage) ·
 Spitzenmonate (Top-50-Monate) · Perioden & Serien (längste Hitze-, Trocken-,
@@ -89,6 +90,15 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
 - **Gleitendes 30-Jahres-Mittel.** Zentriert, endet daher 15 Jahre vor dem
   Reihenende. Es zeigt den tatsächlichen Verlauf der Erwärmung, den eine
   einzelne Regressionsgerade über 168 Jahre als linear unterstellt.
+- **Trendstärke.** Angegeben werden der Trend je Jahrzehnt, sein Standardfehler,
+  das Bestimmtheitsmaß und ob er auf dem 95-%-Niveau signifikant ist; im
+  Diagramm liegt das Konfidenzband um die Gerade.
+- **Vegetationsperiode.** Beginn: erster Tag einer Serie von sechs Tagen mit
+  einem Tagesmittel ab 5 °C. Ende: Tag vor der ersten solchen Serie darunter
+  nach dem 1. Juli. Wachstumsgradtage summieren max(0, Tmittel − 5 °C).
+- **Homogenität.** Die DWD-Reihen sind Rohdaten und nicht homogenisiert;
+  Stationsverlegungen und Gerätewechsel sind nicht korrigiert. Jede
+  Langzeitansicht blendet dazu die tatsächliche Datenabdeckung ein.
 - **Extremmonate** benötigen mindestens 25 gültige Messtage.
 - **Heatmap.** Jeder Monat wird gegen dieselben Kalendermonate aller anderen
   Jahre eingefärbt; die Skala läuft je Monat vom 20. bis zum 80. Perzentil.

@@ -5,9 +5,9 @@ der Station Göttingen (01691, 59.901 Messtage, 1858–2026) nachgerechnet.
 
 **Aufwand:** S = unter einem Tag · M = ein bis drei Tage · L = mehr
 
-> **Stand:** Die Punkte **1, 2, 3, 5, 7 und 8** sind inzwischen umgesetzt und im
-> Repository enthalten — erkennbar am Vermerk ✅ **Umgesetzt** beim jeweiligen
-> Punkt. Die übrigen 24 sind weiterhin offene Vorschläge.
+> **Stand:** Abschnitt A ist **vollständig umgesetzt** (Punkte 1–10), erkennbar
+> am Vermerk ✅ **Umgesetzt**. Die 20 Punkte der Abschnitte B–E sind weiterhin
+> offene Vorschläge.
 
 ---
 
@@ -46,12 +46,16 @@ etwas anderes ist. Eistage sind die etablierte Kenngröße für Winterstrenge.
 
 *Umgesetzt:* eigene Spalte; „Mittel < 0 °C" bleibt zusätzlich erhalten.
 
-### 4. Warming Stripes [S]
+### 4. Warming Stripes [S] · ✅ Umgesetzt
 
 Ein Streifen je Jahr, eingefärbt nach Anomalie — die bekannteste
-Klimavisualisierung überhaupt. Die Daten liegen mit `annual-means` bereits
-fertig vor (`anomaly` je Jahr), die Farbskala existiert in der Heatmap. Größter
-Eindruck pro Zeile Code im ganzen Projekt.
+Klimavisualisierung überhaupt.
+
+*Umgesetzt:* im Bereich Jahresmittelwerte, ohne Achsen und Gitter, weil es um
+den Gesamteindruck geht und nicht um Einzeljahre. Die Farbskala ist bei ±1,5 °C
+gekappt, damit einzelne Ausreißer nicht alles andere in denselben Ton drücken,
+und folgt derselben Regel wie die Heatmap (fester Farbton je Hälfte, Sättigung
+trägt den Betrag) — beide lesen sich dadurch als ein System.
 
 ### 5. Gleitendes 30-Jahres-Mittel statt nur Regressionsgerade [M] · ✅ Umgesetzt
 
@@ -67,13 +71,17 @@ gibt es kein ehrliches zentriertes 30-Jahres-Fenster. Berechnet wird es über
 die **ungefilterte** Reihe, damit der Zeitraumfilter die Kurve nicht an beiden
 Enden abschneidet.
 
-### 6. Trendstärke beziffern statt nur zeichnen [M]
+### 6. Trendstärke beziffern statt nur zeichnen [M] · ✅ Umgesetzt
 
-Aktuell steht eine Gerade im Chart, ohne Aussage, wie belastbar sie ist.
-Ergänzen: **Trend in °C pro Dekade** (die zitierfähige Größe), Bestimmtheitsmaß
-R² und ein Konfidenzband. Ohne das lädt die Kachel „Klimaerwärmung +1,84 °C"
-zu Überinterpretation ein — je nach gewähltem Fenster fällt sie deutlich anders
-aus.
+Es stand eine Gerade im Chart, ohne Aussage, wie belastbar sie ist. Die Kachel
+„Klimaerwärmung +1,84 °C" lud damit zur Überinterpretation ein — je nach
+gewähltem Fenster fiel sie deutlich anders aus.
+
+*Umgesetzt:* Die Kachel nennt jetzt den **Trend je Jahrzehnt** — die
+zitierfähige Größe — mit Standardfehler, Bestimmtheitsmaß und einer expliziten
+Signifikanzaussage. Im Diagramm liegt ein 95-%-Konfidenzband um die Gerade, das
+zur Mitte hin schmal und an den Rändern breit ist. Für Göttingen, letzte 100
+Jahre: **+0,18 °C je Jahrzehnt, ± 0,03, R² 0,33, statistisch signifikant**.
 
 ### 7. Hitzewellen und Trockenperioden [M] · ✅ Umgesetzt
 
@@ -104,19 +112,35 @@ der Median dieser 30 Ergebnisse, dazu der wahrscheinliche Bereich vom 10. bis
 Perzentilband die beiden Extremjahre; es ist während des gemessenen Zeitraums
 null breit und öffnet sich erst im Prognoseteil.
 
-### 9. Vegetationsperiode und Wachstumsgradtage [M]
+### 9. Vegetationsperiode und Wachstumsgradtage [M] · ✅ Umgesetzt
 
-Beginn/Ende der Vegetationsperiode (erste bzw. letzte Fünftagesreihe über
-5 °C) und die Gradtagsumme. Für Garten, Landwirtschaft und Imkerei die
-praktisch relevanteste Auswertung — und über 168 Jahre eine der deutlichsten
-Trendreihen überhaupt.
+Beginn und Ende der thermischen Vegetationsperiode und die Gradtagsumme. Für
+Garten, Landwirtschaft und Imkerei die praktisch relevanteste Auswertung.
 
-### 10. Homogenitätshinweis für lange Reihen [S]
+*Umgesetzt:* neuer Bereich **Vegetationsperiode**. Beginn ist der erste Tag
+einer Serie von sechs Tagen mit einem Tagesmittel ab 5 °C, Ende der Tag vor der
+ersten solchen Serie darunter nach dem 1. Juli (die Juli-Sperre verhindert, dass
+ein Kälteeinbruch im Mai die Saison schließt). Wachstumsgradtage summieren
+max(0, Tmittel − 5 °C) über das Jahr.
+
+Ergebnis für Göttingen (1996–2025 gegenüber 1859–1888): Die Periode ist
+**38 Tage länger** (276 statt 238), beginnt **22 Tage früher** (17. Februar) und
+endet **16 Tage später** (19. November); die Wachstumsgradtage steigen um
+**328 Kd auf 2.120**.
+
+### 10. Homogenitätshinweis für lange Reihen [S] · ✅ Umgesetzt
 
 Messstationen werden verlegt, Messgeräte und Ablesezeiten ändern sich. Eine
 Reihe ab 1858 ungebrochen zu zeigen, suggeriert eine Vergleichbarkeit, die so
-nicht gegeben ist. Ein kurzer Hinweis (oder Marker bekannter Brüche) macht die
-Auswertung wissenschaftlich redlich, ohne sie zu entwerten.
+nicht gegeben ist.
+
+*Umgesetzt:* ausklappbarer Hinweis in allen Langzeitansichten. Statt eines
+allgemeinen Haftungssatzes zieht er die Zahlen aus der Datenbank (neuer
+Endpunkt `/api/weather/coverage`) — ab wann welche Größe gemessen wurde und
+welche Jahrzehnte unter 90 % Abdeckung liegen. Für Göttingen macht das
+konkret sichtbar: Temperatur und Niederschlag ab 1858, **Tagesminimum erst ab
+1871, Tagesmaximum ab 1885, Wind erst ab 1969** (34,8 % der Reihe). Damit wird
+aus „Vorsicht bei alten Daten" etwas Nachprüfbares.
 
 ---
 

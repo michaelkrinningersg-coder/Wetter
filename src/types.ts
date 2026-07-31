@@ -173,6 +173,36 @@ export interface AnnualOverviewRecord {
   forecast_days_mean_above_20?: number
 }
 
+export interface VegetationRecord {
+  year: number
+  startDate: string
+  startDayOfYear: number
+  endDate: string
+  endDayOfYear: number
+  lengthDays: number
+  growingDegreeDays: number
+  seasonClosed: boolean
+}
+
+export interface VegetationResponse {
+  base: number
+  runLength: number
+  records: VegetationRecord[]
+}
+
+export interface CoverageResponse {
+  totalDays: number
+  variables: {
+    column: string
+    label: string
+    present: number
+    share: number
+    firstYear: number | null
+    lastYear: number | null
+  }[]
+  byDecade: { decade: number; tempShare: number; precipShare: number }[]
+}
+
 export interface Spell {
   start: string
   end: string

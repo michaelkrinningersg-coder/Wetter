@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import {
+  Area,
   CartesianGrid,
   ComposedChart,
   Legend,
@@ -13,7 +14,7 @@ import { Filter, Snowflake, Sun, TrendingUp } from 'lucide-react'
 
 import { useApi } from '../lib/api'
 import { centeredMovingAverage, extremeBy, linearFit, mean } from '../lib/stats'
-import { coverage, signed, temp } from '../lib/format'
+import { coverage, num, signed, temp } from '../lib/format'
 import type { TempTrendRecord } from '../types'
 import {
   Card,
@@ -28,6 +29,7 @@ import {
   StatGrid,
   StatTile,
 } from './ui'
+import { DataQuality } from './DataQuality'
 
 const PERIODS = [
   { value: '30', label: 'Letzte 30 Jahre' },
@@ -47,6 +49,7 @@ interface Point {
   validDays: number
   totalDays: number
   trend: number | null
+  trendBand: [number, number] | null
   smooth: number | null
 }
 
@@ -89,6 +92,7 @@ export function TempTrend({
           validDays: r.valid_days,
           totalDays: r.total_days,
           trend: null,
+          trendBand: null,
           smooth: null,
         }
       })
@@ -117,12 +121,39 @@ export function TempTrend({
 
     const fit = linearFit(complete)
 
-    return rows.map((r) => ({
-      ...r,
-      trend: fit ? Number(fit.at(r.year).toFixed(2)) : null,
-      smooth: smoothed.has(r.year) ? Number(smoothed.get(r.year)!.toFixed(2)) : null,
-    }))
+    return rows.map((r) => {
+      const centre = fit ? fit.at(r.year) : null
+      const halfWidth = fit ? fit.confidenceAt(r.year) : 0
+      return {
+        ...r,
+        trend: centre === null ? null : Number(centre.toFixed(2)),
+        trendBand:
+          centre === null
+            ? null
+            : ([
+                Number((centre - halfWidth).toFixed(2)),
+                Number((centre + halfWidth).toFixed(2)),
+              ] as [number, number]),
+        smooth: smoothed.has(r.year) ? Number(smoothed.get(r.year)!.toFixed(2)) : null,
+      }
+    })
   }, [records, period])
+
+  /** Trend strength, so the line comes with a statement about its reliability. */
+  const fitStats = useMemo(() => {
+    const complete = points
+      .filter((p) => !p.isIncomplete)
+      .map((p) => ({ x: p.year, y: p.temp }))
+    const fit = linearFit(complete)
+    if (!fit) return null
+    return {
+      perDecade: fit.slope * 10,
+      perDecadeError: fit.slopeError * 10,
+      r2: fit.r2,
+      isSignificant: fit.isSignificant,
+      n: fit.n,
+    }
+  }, [points])
 
   const summary = useMemo(() => {
     const complete = points.filter((p) => !p.isIncomplete)
@@ -194,10 +225,20 @@ export function TempTrend({
                 icon={Snowflake}
               />
               <StatTile
-                label="Erwärmung im Zeitraum"
-                value={signed(summary.warming, 2, '°C')}
-                caption="Anstieg der linearen Trendgeraden"
-                accent={summary.warming !== null && summary.warming >= 0 ? 'warm' : 'cold'}
+                label="Trend je Jahrzehnt"
+                value={signed(fitStats?.perDecade, 2, '°C')}
+                caption={
+                  fitStats
+                    ? `± ${num(fitStats.perDecadeError, 2)} · R² ${num(fitStats.r2, 2)} · ${
+                        fitStats.isSignificant
+                          ? 'statistisch signifikant (95 %)'
+                          : 'nicht signifikant (95 %)'
+                      }`
+                    : undefined
+                }
+                accent={
+                  fitStats && fitStats.perDecade >= 0 ? 'warm' : 'cold'
+                }
                 icon={TrendingUp}
               />
             </StatGrid>
@@ -248,6 +289,14 @@ export function TempTrend({
                     dot={false}
                     activeDot={{ r: 5 }}
                   />
+                  <Area
+                    name="95 %-Konfidenzband des Trends"
+                    type="monotone"
+                    dataKey="trendBand"
+                    stroke="none"
+                    fill={CHART.colors.brand}
+                    fillOpacity={0.14}
+                  />
                   <Line
                     name="Trend (linear)"
                     type="monotone"
@@ -270,6 +319,8 @@ export function TempTrend({
               </ResponsiveContainer>
             </ChartFrame>
           </Card>
+
+          <DataQuality stationId={stationId} />
 
           <Card>
             <SectionHeading

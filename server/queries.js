@@ -898,6 +898,162 @@ export function buildForecast(stationId) {
 }
 
 /* -------------------------------------------------------------------------- */
+/* Vegetation period and growing degree days                                  */
+/* -------------------------------------------------------------------------- */
+
+const VEGETATION_BASE = 5
+/** Days that must hold above/below the threshold before the season flips. */
+const VEGETATION_RUN = 6
+
+const vegetationStmt = db.prepare(`
+  SELECT year, month, day, temp_mean AS temp
+  FROM daily
+  WHERE station_id = ?
+  ORDER BY year, month, day
+`)
+
+/**
+ * Thermal growing season after the common German convention:
+ *
+ *  - it begins on the first day of the first run of six consecutive days with
+ *    a daily mean at or above 5 °C;
+ *  - it ends on the day before the first such run *below* 5 °C that starts
+ *    after 1 July (the July guard stops a cold snap in May from closing the
+ *    season).
+ *
+ * Growing degree days accumulate max(0, Tmean − 5) over the whole year.
+ */
+export function vegetation(stationId) {
+  const rows = vegetationStmt.all(stationId)
+
+  const byYear = new Map()
+  for (const row of rows) {
+    if (!byYear.has(row.year)) byYear.set(row.year, [])
+    byYear.get(row.year).push(row)
+  }
+
+  const records = []
+
+  for (const [year, days] of byYear) {
+    const measured = days.filter((d) => d.temp !== null)
+    // Too sparse to locate a season boundary reliably.
+    if (measured.length / daysInYear(year) < COVERAGE) continue
+
+    const doy = (d) => dayOfYearOf(d.month, d.day, year)
+
+    const findRun = (predicate, fromDoy) => {
+      let run = 0
+      for (const d of days) {
+        if (d.temp === null) {
+          run = 0
+          continue
+        }
+        if (doy(d) < fromDoy) {
+          run = predicate(d.temp) ? run + 1 : 0
+          continue
+        }
+        run = predicate(d.temp) ? run + 1 : 0
+        if (run >= VEGETATION_RUN) {
+          // Step back to the first day of the run.
+          const endIndex = days.indexOf(d)
+          return days[endIndex - (VEGETATION_RUN - 1)] ?? d
+        }
+      }
+      return null
+    }
+
+    const startDay = findRun((t) => t >= VEGETATION_BASE, 1)
+    if (!startDay) continue
+
+    const julyFirst = dayOfYearOf(7, 1, year)
+    const closingDay = findRun((t) => t < VEGETATION_BASE, julyFirst)
+
+    const startDoy = doy(startDay)
+    const endDoy = closingDay ? doy(closingDay) - 1 : daysInYear(year)
+    if (endDoy <= startDoy) continue
+
+    const gdd = measured.reduce(
+      (sum, d) => sum + Math.max(0, d.temp - VEGETATION_BASE),
+      0,
+    )
+
+    records.push({
+      year,
+      startDate: `${year}-${String(startDay.month).padStart(2, '0')}-${String(startDay.day).padStart(2, '0')}`,
+      startDayOfYear: startDoy,
+      endDate: closingDay
+        ? `${year}-${String(closingDay.month).padStart(2, '0')}-${String(closingDay.day).padStart(2, '0')}`
+        : `${year}-12-31`,
+      endDayOfYear: endDoy,
+      lengthDays: endDoy - startDoy + 1,
+      growingDegreeDays: Number(gdd.toFixed(1)),
+      /** False when the season never closed before the year ended. */
+      seasonClosed: closingDay !== null,
+    })
+  }
+
+  records.sort((a, b) => a.year - b.year)
+  return { base: VEGETATION_BASE, runLength: VEGETATION_RUN, records }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Data coverage — the basis for the homogeneity caveat                       */
+/* -------------------------------------------------------------------------- */
+
+const VARIABLES = [
+  ['temp_mean', 'Tagesmitteltemperatur'],
+  ['temp_max', 'Tagesmaximum'],
+  ['temp_min', 'Tagesminimum'],
+  ['precipitation', 'Niederschlag'],
+  ['pressure', 'Luftdruck'],
+  ['wind_mean', 'Mittelwind'],
+  ['wind_max', 'Windspitze'],
+]
+
+export function coverage(stationId) {
+  const total = db
+    .prepare('SELECT COUNT(*) AS n FROM daily WHERE station_id = ?')
+    .get(stationId).n
+
+  const variables = VARIABLES.map(([column, label]) => {
+    const row = db
+      .prepare(
+        `SELECT COUNT(${column}) AS present,
+                MIN(CASE WHEN ${column} IS NOT NULL THEN year END) AS firstYear,
+                MAX(CASE WHEN ${column} IS NOT NULL THEN year END) AS lastYear
+         FROM daily WHERE station_id = ?`,
+      )
+      .get(stationId)
+    return {
+      column,
+      label,
+      present: row.present ?? 0,
+      share: total > 0 ? (row.present ?? 0) / total : 0,
+      firstYear: row.firstYear ?? null,
+      lastYear: row.lastYear ?? null,
+    }
+  })
+
+  const byDecade = db
+    .prepare(
+      `SELECT (year / 10) * 10 AS decade,
+              COUNT(*) AS days,
+              COUNT(temp_mean) AS temp,
+              COUNT(precipitation) AS precip
+       FROM daily WHERE station_id = ?
+       GROUP BY decade ORDER BY decade`,
+    )
+    .all(stationId)
+    .map((r) => ({
+      decade: r.decade,
+      tempShare: r.days > 0 ? r.temp / r.days : 0,
+      precipShare: r.days > 0 ? r.precip / r.days : 0,
+    }))
+
+  return { totalDays: total, variables, byDecade }
+}
+
+/* -------------------------------------------------------------------------- */
 /* Spells — heat waves, dry periods, frost periods                            */
 /* -------------------------------------------------------------------------- */
 

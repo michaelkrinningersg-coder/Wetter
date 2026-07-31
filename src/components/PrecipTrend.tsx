@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import {
+  Area,
   Bar,
   CartesianGrid,
   ComposedChart,
@@ -14,7 +15,7 @@ import { CloudRain, Droplets, Filter, Sun } from 'lucide-react'
 
 import { useApi } from '../lib/api'
 import { centeredMovingAverage, extremeBy, linearFit, mean } from '../lib/stats'
-import { coverage, mm, signed } from '../lib/format'
+import { coverage, mm, num, signed } from '../lib/format'
 import type { PrecipTrendRecord } from '../types'
 import {
   Card,
@@ -29,6 +30,7 @@ import {
   StatGrid,
   StatTile,
 } from './ui'
+import { DataQuality } from './DataQuality'
 
 const PERIODS = [
   { value: '30', label: 'Letzte 30 Jahre' },
@@ -48,6 +50,7 @@ interface Point {
   validDays: number
   totalDays: number
   trend: number | null
+  trendBand: [number, number] | null
   smooth: number | null
 }
 
@@ -86,6 +89,7 @@ export function PrecipTrend({
           validDays: r.valid_days,
           totalDays: r.total_days,
           trend: null,
+          trendBand: null,
           smooth: null,
         }
       })
@@ -103,12 +107,37 @@ export function PrecipTrend({
       SMOOTH_WINDOW,
     )
 
-    return rows.map((r) => ({
-      ...r,
-      trend: fit ? Number(fit.at(r.year).toFixed(1)) : null,
-      smooth: smoothed.has(r.year) ? Number(smoothed.get(r.year)!.toFixed(1)) : null,
-    }))
+    return rows.map((r) => {
+      const centre = fit ? fit.at(r.year) : null
+      const halfWidth = fit ? fit.confidenceAt(r.year) : 0
+      return {
+        ...r,
+        trend: centre === null ? null : Number(centre.toFixed(1)),
+        trendBand:
+          centre === null
+            ? null
+            : ([
+                Number((centre - halfWidth).toFixed(1)),
+                Number((centre + halfWidth).toFixed(1)),
+              ] as [number, number]),
+        smooth: smoothed.has(r.year) ? Number(smoothed.get(r.year)!.toFixed(1)) : null,
+      }
+    })
   }, [records, period])
+
+  const fitStats = useMemo(() => {
+    const complete = points
+      .filter((p) => !p.isIncomplete)
+      .map((p) => ({ x: p.year, y: p.precip }))
+    const fit = linearFit(complete)
+    if (!fit) return null
+    return {
+      perDecade: fit.slope * 10,
+      perDecadeError: fit.slopeError * 10,
+      r2: fit.r2,
+      isSignificant: fit.isSignificant,
+    }
+  }, [points])
 
   const summary = useMemo(() => {
     const complete = points.filter((p) => !p.isIncomplete)
@@ -174,10 +203,18 @@ export function PrecipTrend({
                 icon={Sun}
               />
               <StatTile
-                label="Trendänderung"
-                value={signed(summary.trendDiff, 1, 'mm')}
-                caption="Differenz der Trendgeraden über den Zeitraum"
-                accent={summary.trendDiff !== null && summary.trendDiff >= 0 ? 'wet' : 'dry'}
+                label="Trend je Jahrzehnt"
+                value={signed(fitStats?.perDecade, 1, 'mm')}
+                caption={
+                  fitStats
+                    ? `± ${num(fitStats.perDecadeError, 1)} · R² ${num(fitStats.r2, 2)} · ${
+                        fitStats.isSignificant
+                          ? 'statistisch signifikant (95 %)'
+                          : 'nicht signifikant (95 %)'
+                      }`
+                    : undefined
+                }
+                accent={fitStats && fitStats.perDecade >= 0 ? 'wet' : 'dry'}
                 icon={CloudRain}
               />
             </StatGrid>
@@ -221,6 +258,14 @@ export function PrecipTrend({
                     radius={[2, 2, 0, 0]}
                     maxBarSize={40}
                   />
+                  <Area
+                    name="95 %-Konfidenzband des Trends"
+                    type="monotone"
+                    dataKey="trendBand"
+                    stroke="none"
+                    fill={CHART.colors.brand}
+                    fillOpacity={0.14}
+                  />
                   <Line
                     name="Trend (linear)"
                     type="monotone"
@@ -243,6 +288,8 @@ export function PrecipTrend({
               </ResponsiveContainer>
             </ChartFrame>
           </Card>
+
+          <DataQuality stationId={stationId} />
 
           <Card>
             <SectionHeading title={`Jahressummen (${points.length} Jahre)`} />

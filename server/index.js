@@ -108,6 +108,8 @@ const simple = {
   '/api/weather/comparisons': api.comparisons,
   '/api/weather/ytd-temp': api.ytdTemperatures,
   '/api/weather/annual-overview': api.annualOverview,
+  '/api/weather/vegetation': api.vegetation,
+  '/api/weather/coverage': api.coverage,
 }
 
 for (const [path, query] of Object.entries(simple)) {

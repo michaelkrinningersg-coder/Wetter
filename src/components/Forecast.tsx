@@ -58,6 +58,16 @@ export function Forecast({ stationId }: { stationId: string }) {
     [data],
   )
 
+  const trajectory = useMemo(
+    () =>
+      (data?.ytdTrajectoryData ?? []).map((t) => ({
+        ...t,
+        envelope: [t.ytdTempMin, t.ytdTempMax] as [number, number],
+        likely: [t.ytdTempP10, t.ytdTempP90] as [number, number],
+      })),
+    [data],
+  )
+
   if (loading) return <Loading message="Berechne Prognose-Modelle…" />
   if (error) return <ErrorState message={error} onRetry={reload} />
   if (!data) return <ErrorState message="Keine Prognosedaten verfügbar." onRetry={reload} />
@@ -230,9 +240,10 @@ export function Forecast({ stationId }: { stationId: string }) {
               // Two different row shapes share one chart; Recharts' generic
               // data prop cannot express that union.
               data={
-                (view === 'ytd'
-                  ? data.ytdTrajectoryData
-                  : monthly) as unknown as Record<string, unknown>[]
+                (view === 'ytd' ? trajectory : monthly) as unknown as Record<
+                  string,
+                  unknown
+                >[]
               }
               margin={{ top: 8, right: 8, left: -18, bottom: 4 }}
             >
@@ -262,7 +273,7 @@ export function Forecast({ stationId }: { stationId: string }) {
                     type="monotone"
                     // Range area: Recharts accepts a [low, high] key pair at
                     // runtime, but its types only declare the scalar form.
-                    dataKey={['ytdTempMin', 'ytdTempMax'] as unknown as string}
+                    dataKey="envelope"
                     stroke="none"
                     fill={CHART.colors.warm}
                     fillOpacity={0.07}
@@ -270,7 +281,7 @@ export function Forecast({ stationId }: { stationId: string }) {
                   <Area
                     name="Wahrscheinlicher Bereich (10.–90. Perzentil)"
                     type="monotone"
-                    dataKey={['ytdTempP10', 'ytdTempP90'] as unknown as string}
+                    dataKey="likely"
                     stroke="none"
                     fill={CHART.colors.warm}
                     fillOpacity={0.18}

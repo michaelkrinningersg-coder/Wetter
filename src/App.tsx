@@ -9,6 +9,7 @@ import {
   Grid3x3,
   LineChart,
   Layers,
+  Leaf,
   ListOrdered,
   Sparkles,
   Table2,
@@ -32,6 +33,7 @@ import { YtdTemp } from './components/YtdTemp'
 import { AnnualOverview } from './components/AnnualOverview'
 import { Forecast } from './components/Forecast'
 import { Spells } from './components/Spells'
+import { Vegetation } from './components/Vegetation'
 
 const FALLBACK_STATIONS: Station[] = [
   { id: '01691', name: 'Göttingen', altitude: 167 },
@@ -53,6 +55,7 @@ type TabId =
   | 'annual-overview'
   | 'forecast'
   | 'spells'
+  | 'vegetation'
 
 interface TabDef {
   id: TabId
@@ -68,6 +71,7 @@ const TABS: TabDef[] = [
   { id: 'precip-trend', label: 'Niederschlagstrend', icon: CloudRain, group: 'Trends' },
   { id: 'annual-means', label: 'Jahresmittelwerte', icon: LineChart, group: 'Trends' },
   { id: 'ytd-temp', label: 'Mitteltemp. YTD', icon: Gauge, group: 'Trends' },
+  { id: 'vegetation', label: 'Vegetationsperiode', icon: Leaf, group: 'Trends' },
   { id: 'heatmap', label: 'Monats-Heatmap', icon: Grid3x3, group: 'Rekorde' },
   { id: 'extremes', label: 'Spitzenwerte', icon: Flame, group: 'Rekorde' },
   { id: 'extreme-months', label: 'Spitzenmonate', icon: ListOrdered, group: 'Rekorde' },
@@ -311,6 +315,9 @@ export default function App() {
             )}
             {tab === 'ytd-temp' && <YtdTemp stationId={stationId} />}
             {tab === 'annual-overview' && <AnnualOverview stationId={stationId} />}
+            {tab === 'vegetation' && (
+              <Vegetation stationId={stationId} stationName={stationName} />
+            )}
             {tab === 'spells' && (
               <Spells stationId={stationId} stationName={stationName} />
             )}

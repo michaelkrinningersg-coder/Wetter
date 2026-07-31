@@ -31,6 +31,8 @@ import {
   StatGrid,
   StatTile,
 } from './ui'
+import { WarmingStripes } from './WarmingStripes'
+import { DataQuality } from './DataQuality'
 
 type SortKey = 'year' | 'temp' | 'anomaly'
 
@@ -96,6 +98,14 @@ export function AnnualMeans({
         Gesamtmittelwert aller validierten Jahre ab {records[0]?.year} (
         {temp(overallAvg, 2)}).
       </InfoPanel>
+
+      <Card>
+        <SectionHeading
+          title="Warming Stripes"
+          hint="Jedes Jahr der Messreihe als ein Streifen, eingefärbt nach seiner Abweichung vom Gesamtmittel — bewusst ohne Achsen, weil es um den Gesamteindruck geht, nicht um Einzeljahre."
+        />
+        <WarmingStripes records={records} />
+      </Card>
 
       <StatGrid>
         <StatTile
@@ -164,6 +174,8 @@ export function AnnualMeans({
           </ResponsiveContainer>
         </ChartFrame>
       </Card>
+
+      <DataQuality stationId={stationId} />
 
       <Card>
         <SectionHeading title={`Jahreswerte (${records.length} validierte Jahre)`} />
