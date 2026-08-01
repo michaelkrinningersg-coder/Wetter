@@ -14,7 +14,13 @@ import {
   gaugeSummary,
   refreshAll,
 } from './gauges.js'
-import { archiveRange, availableDates, superlatives } from './germany.js'
+import {
+  archiveRange,
+  availableDates,
+  germanyMap,
+  germanyStationRegister,
+  superlatives,
+} from './germany.js'
 import { recordCount, recordDays, recordRange, recordsForDate } from './records.js'
 import { regionalMeta, regionalSeries } from './regional.js'
 
@@ -310,6 +316,30 @@ app.get(
     // The count travels with the day so the view can flag a record without a
     // second request; the list itself lives on its own page.
     res.json({ range, dates: availableDates(), day, records: recordCount(date) })
+  }),
+)
+
+app.get(
+  '/api/germany/stations',
+  handler((_req, res) => res.json(germanyStationRegister())),
+)
+
+app.get(
+  '/api/germany/map',
+  handler((req, res) => {
+    const range = archiveRange()
+    if (!range.last) return res.json({ range, dates: [], day: null })
+
+    const requested = req.query.date
+    if (requested !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(String(requested))) {
+      return res.status(400).json({ error: `Ungültiges Datum "${requested}".` })
+    }
+
+    const date = String(requested ?? range.last)
+    const day = germanyMap(date)
+    if (!day) return res.status(404).json({ error: `Für den ${date} liegen keine Werte vor.` })
+
+    res.json({ range, dates: availableDates(), day })
   }),
 )
 

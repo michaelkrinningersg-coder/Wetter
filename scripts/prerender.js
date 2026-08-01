@@ -24,7 +24,13 @@ import * as api from '../server/queries.js'
 import { STATIONS } from '../server/stations.js'
 import { db, getImportState } from '../server/db.js'
 import { GAUGES, gaugeSeries, gaugeSummary } from '../server/gauges.js'
-import { archiveRange, availableDates, superlatives } from '../server/germany.js'
+import {
+  archiveRange,
+  availableDates,
+  germanyMap,
+  germanyStationRegister,
+  superlatives,
+} from '../server/germany.js'
 import { recordCount, recordDays, recordRange, recordsForDate } from '../server/records.js'
 import { regionalMeta, regionalPairs, regionalSeries } from '../server/regional.js'
 import { staticPath } from '../src/lib/static-path.js'
@@ -139,7 +145,17 @@ for (const station of STATIONS) {
     emit(`/api/weather/spells?kind=${kind}&stationId=${id}`, api.spells(id, kind), 'Perioden')
   }
 
-  for (const { year, month } of monthsStmt.all(id)) {
+  // Every month on record, plus the current calendar month even when it holds
+  // nothing yet. The view opens on today's month, and on 1 August with data
+  // ending 31 July that request has no file behind it — live the server just
+  // computes an empty month, statically it is a 404.
+  const months = monthsStmt.all(id)
+  const now = new Date()
+  const wanted = new Map(months.map((m) => [`${m.year}-${m.month}`, m]))
+  const current = { year: now.getUTCFullYear(), month: now.getUTCMonth() + 1 }
+  wanted.set(`${current.year}-${current.month}`, current)
+
+  for (const { year, month } of wanted.values()) {
     emit(
       `/api/weather/monthly?year=${year}&month=${month}&stationId=${id}`,
       api.monthlyDetail(id, year, month),
@@ -205,6 +221,18 @@ if (range.last) {
     emit(`/api/germany?date=${date}`, payload, 'Deutschland')
     // The view's first request carries no date at all.
     if (date === range.last) emit('/api/germany', payload, 'Deutschland')
+  }
+}
+
+// The station register: one file for every day, joined in the browser by id.
+// Repeating 2400 coordinates in each daily payload would cost more than the
+// readings themselves.
+if (range.last) {
+  emit('/api/germany/stations', germanyStationRegister(), 'Karte')
+  for (const date of dates) {
+    const payload = { range, dates, day: germanyMap(date) }
+    emit(`/api/germany/map?date=${date}`, payload, 'Karte')
+    if (date === range.last) emit('/api/germany/map', payload, 'Karte')
   }
 }
 

@@ -319,3 +319,81 @@ export function superlatives(date, { limit = 50 } = {}) {
     categories,
   }
 }
+
+/* -------------------------------------------------------------------------- */
+/* Map                                                                        */
+/* -------------------------------------------------------------------------- */
+
+/** Parameters the map can colour, in the order the view offers them. */
+export const MAP_FIELDS = [
+  { key: 'temp_max', label: 'Höchsttemperatur', unit: '°C', decimals: 1, scale: 'diverging' },
+  { key: 'temp_mean', label: 'Tagesmittel', unit: '°C', decimals: 1, scale: 'diverging' },
+  { key: 'temp_min', label: 'Tiefsttemperatur', unit: '°C', decimals: 1, scale: 'diverging' },
+  { key: 'precipitation', label: 'Niederschlag', unit: 'mm', decimals: 1, scale: 'sequential' },
+  { key: 'wind_max', label: 'Windböe', unit: 'm/s', decimals: 1, scale: 'sequential' },
+]
+
+const stationRegisterStmt = db.prepare(`
+  SELECT id, name, state, lat, lon, elevation
+  FROM germany_stations
+  WHERE lat IS NOT NULL AND lon IS NOT NULL
+  ORDER BY id
+`)
+
+/**
+ * The station register, without any readings.
+ *
+ * Sent once and cached by the browser: coordinates and names do not change
+ * from day to day, and repeating 2400 of them in every daily payload would
+ * several times over outweigh the values themselves. The map joins this
+ * against a day's readings by id.
+ */
+export function germanyStationRegister() {
+  const stations = stationRegisterStmt.all()
+  const lats = stations.map((s) => s.lat)
+  const lons = stations.map((s) => s.lon)
+
+  return {
+    count: stations.length,
+    bounds: {
+      minLat: Math.min(...lats),
+      maxLat: Math.max(...lats),
+      minLon: Math.min(...lons),
+      maxLon: Math.max(...lons),
+    },
+    fields: MAP_FIELDS,
+    // Tuples rather than objects: this is the largest single file the static
+    // build ships, and repeated keys would be most of it.
+    stations: stations.map((s) => [s.id, s.name, s.state, s.lat, s.lon, s.elevation]),
+  }
+}
+
+const mapStmt = db.prepare(`
+  SELECT station_id, ${MAP_FIELDS.map((f) => f.key).join(', ')}
+  FROM germany_daily WHERE date = ?
+  ORDER BY station_id
+`)
+
+/**
+ * One day's readings for every station, grouped by parameter.
+ *
+ * Grouped rather than one row per station because the map draws one parameter
+ * at a time, and a station that never measures wind should not cost an entry
+ * in the wind list at all.
+ */
+export function germanyMap(date) {
+  const rows = mapStmt.all(date)
+  if (rows.length === 0) return null
+
+  const values = {}
+  for (const field of MAP_FIELDS) {
+    const pairs = []
+    for (const row of rows) {
+      const value = row[field.key]
+      if (value !== null && value !== undefined) pairs.push([row.station_id, value])
+    }
+    values[field.key] = pairs
+  }
+
+  return { date, stations: rows.length, values }
+}

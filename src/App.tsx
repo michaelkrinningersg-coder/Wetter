@@ -13,6 +13,7 @@ import {
   Layers,
   Leaf,
   Map,
+  MapPin,
   Scale,
   Snowflake,
   Umbrella,
@@ -48,6 +49,7 @@ import { PrecipIntensity } from './components/PrecipIntensity'
 import { DayInHistory } from './components/DayInHistory'
 import { Gauges } from './components/Gauges'
 import { Germany } from './components/Germany'
+import { GermanyMap } from './components/GermanyMap'
 import { Records } from './components/Records'
 import { Regional } from './components/Regional'
 
@@ -78,6 +80,7 @@ type TabId =
   | 'day-in-history'
   | 'gauges'
   | 'germany'
+  | 'germany-map'
   | 'records'
   | 'regional'
 
@@ -109,6 +112,7 @@ const TABS: TabDef[] = [
   { id: 'forecast', label: 'Prognose', icon: Sparkles, group: 'Klimatologie' },
   { id: 'gauges', label: 'Flusspegel', icon: Waves, group: 'Gewässer' },
   { id: 'germany', label: 'Deutschland gestern', icon: Map, group: 'Deutschland' },
+  { id: 'germany-map', label: 'Karte', icon: MapPin, group: 'Deutschland' },
   { id: 'records', label: 'Allzeitrekorde', icon: Trophy, group: 'Deutschland' },
   { id: 'regional', label: 'Bundesländer', icon: Landmark, group: 'Deutschland' },
 ]
@@ -376,6 +380,8 @@ export default function App() {
             {tab === 'gauges' && <Gauges />}
 
             {tab === 'germany' && <Germany />}
+
+            {tab === 'germany-map' && <GermanyMap />}
 
             {tab === 'records' && <Records />}
 

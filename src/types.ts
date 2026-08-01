@@ -567,3 +567,34 @@ export interface RegionalResponse {
   } | null
   hint?: string
 }
+
+/* -------------------------------------------------------------------------- */
+/* Germany map                                                                */
+/* -------------------------------------------------------------------------- */
+
+export interface GermanyMapField {
+  key: string
+  label: string
+  unit: string
+  decimals: number
+  scale: 'diverging' | 'sequential'
+}
+
+export interface GermanyStationRegister {
+  count: number
+  bounds: { minLat: number; maxLat: number; minLon: number; maxLon: number }
+  fields: GermanyMapField[]
+  /** [id, name, state, lat, lon, elevation] — tuples keep the largest file small. */
+  stations: [string, string, string, number, number, number][]
+}
+
+export interface GermanyMapResponse {
+  range: { days: number; first: string | null; last: string | null }
+  dates: string[]
+  day: {
+    date: string
+    stations: number
+    /** parameter -> [stationId, value] for every station that measured it. */
+    values: Record<string, [string, number][]>
+  } | null
+}

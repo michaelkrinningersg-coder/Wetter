@@ -43,7 +43,7 @@ JSON-Datei:
 
 ```bash
 npm run import:stations   # Datenbank füllen (die drei Stationen vom DWD)
-npm run build:static      # dist/ mit 6.845 Dateien, 107 MB
+npm run build:static      # dist/ mit 7.463 Dateien, 143 MB
 ```
 
 Wohin welche Antwort geschrieben wird, entscheidet `src/lib/static-path.js` —
@@ -53,10 +53,12 @@ Browser statt ein Übersetzungsfehler.
 
 | Gruppe | Dateien | Größe |
 |---|---:|---:|
-| Deutschland (550 Tage à Top 50) | 551 | 57,8 MB |
-| Monatsansicht | 5.017 | 30,3 MB |
+| Deutschland (Top 50 je Tag) | 552 | 57,9 MB |
+| Karte (Register + ein Tag je Datei) | 553 | 32,1 MB |
+| Monatsansicht | 5.020 | 30,3 MB |
 | Dieser Tag | 1.116 | 17,3 MB |
-| übrige | 161 | 1,7 MB |
+| Gebietsmittel | 60 | 3,3 MB |
+| übrige | 162 | 1,9 MB |
 
 Der Workflow `.github/workflows/pages.yml` veröffentlicht nach jedem Datenlauf.
 Damit er greifen kann, muss in den Repository-Einstellungen unter **Pages** als
@@ -88,7 +90,8 @@ Jahresprognose
 (Wahmbeck) mit Verlauf, Meldestufen und langjährigen Kennwerten
 
 **Deutschland** — Gebietsmittel für Deutschland und die Bundesländer seit 1881
-(Trend je Jahrzehnt, Rangliste, zehn Größen) · Spitzenreiter aller DWD-Stationen für einen einzelnen Tag:
+(Trend je Jahrzehnt, Rangliste, zehn Größen) · Karte aller Stationen mit den
+Tageswerten · Spitzenreiter aller DWD-Stationen für einen einzelnen Tag:
 wärmste und kälteste Station im Mittel und absolut, stärkste Bö, windigste
 Station im Mittel, nasseste Station und größte Tagesspanne — jeweils für ganz
 Deutschland und für alles unterhalb 1000 m · Allzeitrekorde: welche Station an
@@ -118,7 +121,7 @@ server/
   gauges.js            Flusspegel: Abruf, Parser, eigene Zeitreihe
   germany-sources.js   bundesweiter Abruf beider DWD-Stationsnetze
   germany-csv.js       Tagesarchiv, eine CSV je Tag
-  germany.js           Superlative je Tag und Höhenwertung
+  germany.js           Superlative, Stationsregister und Kartendaten
   regional-sources.js  amtliche DWD-Gebietsmittel
   regional.js          Gebietsmittel: Reihen und Ranglisten
   records-kinds.js     Rekordkategorien
@@ -186,6 +189,13 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   Stationen, ein zu grobes Netz für den Titel „sonnigste Station Deutschlands".
   Stationen außerhalb Deutschlands — das Niederschlagsnetz enthält vier in
   Tirol — bleiben außen vor, ebenso Tage mit weniger als 100 Stationen.
+- **Karte.** Punktkarte ohne Hintergrund: bei rund 2400 Stationen zeichnet die
+  Wolke den Umriss selbst, eine Kartenquelle mehr wäre eine Quelle mehr, die
+  niemand geprüft hat. Projektion äquidistant zylindrisch mit cos-φ-Stauchung
+  der Längenachse — auf acht Breitengraden ist der Unterschied zu einer echten
+  Kegelprojektion nicht sichtbar. Die Farbskala läuft vom 2. bis zum 98.
+  Perzentil des Tages; beim Niederschlag beginnt sie bei null, und trockene
+  Stationen bekommen einen offenen Punkt statt der blassesten Farbe.
 - **Gebietsmittel.** Für Deutschland und die Bundesländer stammen die Zahlen
   aus dem DWD-Produkt `regional_averages_DE` und werden **nicht** aus den
   Stationen dieser App gerechnet — dahinter steht eine räumliche Interpolation
