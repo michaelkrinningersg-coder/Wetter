@@ -16,6 +16,7 @@ import {
 } from './gauges.js'
 import { archiveRange, availableDates, superlatives } from './germany.js'
 import { recordCount, recordDays, recordRange, recordsForDate } from './records.js'
+import { regionalMeta, regionalSeries } from './regional.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -342,6 +343,45 @@ app.get(
     // landing on an empty page would be the common case otherwise.
     const date = String(requested ?? days[0].date)
     res.json({ range, days, day: { date, events: recordsForDate(date) } })
+  }),
+)
+
+/* -------------------------------------------------------------------------- */
+/* Areal means for Germany and the federal states                             */
+/* -------------------------------------------------------------------------- */
+
+app.get(
+  '/api/regional',
+  handler((req, res) => {
+    const meta = regionalMeta()
+    if (meta.parameters.length === 0) {
+      return res.json({
+        ...meta,
+        series: null,
+        hint:
+          'Noch keine Gebietsmittel im Archiv. Einmal `npm run fetch:regional` ausführen.',
+      })
+    }
+
+    const first = meta.parameters[0]
+    const parameter = String(req.query.parameter ?? first.key)
+    const known = meta.parameters.find((p) => p.key === parameter)
+    if (!known) {
+      return res.status(400).json({ error: `Unbekannte Größe "${parameter}".` })
+    }
+
+    // 'year' where a parameter has it, otherwise its first available period —
+    // the day-count parameters exist annually only.
+    const period = String(
+      req.query.period ?? (known.periods.includes('year') ? 'year' : known.periods[0]),
+    )
+    if (!known.periods.includes(period)) {
+      return res.status(400).json({
+        error: `Größe "${parameter}" gibt es nicht für "${period}". Verfügbar: ${known.periods.join(', ')}.`,
+      })
+    }
+
+    res.json({ ...meta, series: regionalSeries(parameter, period) })
   }),
 )
 

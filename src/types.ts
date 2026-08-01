@@ -525,3 +525,40 @@ export interface RecordsResponse {
   day: { date: string; events: RecordEvent[] } | null
   hint?: string
 }
+
+/* -------------------------------------------------------------------------- */
+/* Areal means for Germany and the federal states                             */
+/* -------------------------------------------------------------------------- */
+
+export type RegionKind = 'state' | 'combination' | 'national'
+
+export interface RegionalParameter {
+  key: string
+  label: string
+  unit: string
+  decimals: number
+  direction: 'warm' | 'cold' | 'wet'
+  /** 'year', '01'…'12', 'winter'…'autumn' — only those the DWD publishes. */
+  periods: string[]
+  first: number
+  last: number
+}
+
+export interface RegionalRegion {
+  name: string
+  kind: RegionKind
+  first: number
+  last: number
+  points: { year: number; value: number }[]
+}
+
+export interface RegionalResponse {
+  parameters: RegionalParameter[]
+  regions: { name: string; kind: RegionKind }[]
+  series: {
+    parameter: Omit<RegionalParameter, 'periods' | 'first' | 'last'>
+    period: string
+    regions: RegionalRegion[]
+  } | null
+  hint?: string
+}

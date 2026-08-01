@@ -87,7 +87,8 @@ Jahresprognose
 **Gewässer** — Flusspegel Leine (Göttingen), Rhume (Northeim) und Weser
 (Wahmbeck) mit Verlauf, Meldestufen und langjährigen Kennwerten
 
-**Deutschland** — Spitzenreiter aller DWD-Stationen für einen einzelnen Tag:
+**Deutschland** — Gebietsmittel für Deutschland und die Bundesländer seit 1881
+(Trend je Jahrzehnt, Rangliste, zehn Größen) · Spitzenreiter aller DWD-Stationen für einen einzelnen Tag:
 wärmste und kälteste Station im Mittel und absolut, stärkste Bö, windigste
 Station im Mittel, nasseste Station und größte Tagesspanne — jeweils für ganz
 Deutschland und für alles unterhalb 1000 m · Allzeitrekorde: welche Station an
@@ -118,6 +119,8 @@ server/
   germany-sources.js   bundesweiter Abruf beider DWD-Stationsnetze
   germany-csv.js       Tagesarchiv, eine CSV je Tag
   germany.js           Superlative je Tag und Höhenwertung
+  regional-sources.js  amtliche DWD-Gebietsmittel
+  regional.js          Gebietsmittel: Reihen und Ranglisten
   records-kinds.js     Rekordkategorien
   records-csv.js       Allzeit-Basislinie je Station
   records.js           Nachspielen des Archivs, Rekordereignisse
@@ -179,6 +182,15 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   Stationen, ein zu grobes Netz für den Titel „sonnigste Station Deutschlands".
   Stationen außerhalb Deutschlands — das Niederschlagsnetz enthält vier in
   Tirol — bleiben außen vor, ebenso Tage mit weniger als 100 Stationen.
+- **Gebietsmittel.** Für Deutschland und die Bundesländer stammen die Zahlen
+  aus dem DWD-Produkt `regional_averages_DE` und werden **nicht** aus den
+  Stationen dieser App gerechnet — dahinter steht eine räumliche Interpolation
+  über das vollständige Messnetz. Der DWD führt dabei nicht alle sechzehn
+  Länder einzeln: Berlin, Hamburg und Bremen erscheinen nur in den
+  Kombinationen Brandenburg/Berlin und Niedersachsen/Hamburg/Bremen,
+  Thüringen/Sachsen-Anhalt überlappt zwei einzeln geführte Länder. Die
+  Kombinationen sind gekennzeichnet und dürfen nicht addiert werden. Temperatur
+  und Niederschlag reichen bis 1881, Sonnenscheindauer und Kenntage bis 1951.
 - **Allzeitrekorde.** Jede Station wird ausschließlich gegen ihre eigene
   Geschichte geprüft, nie gegen andere Stationen. Ausgewiesen sind stets der
   alte Rekord mit Datum und die Länge der Messreihe — eine Station mit
@@ -254,6 +266,18 @@ npm run fetch:germany -- --backfill   # alles, was die Archive hergeben
 ein Lauf füllt also rund anderthalb Jahre auf einmal. Wie beim Pegelarchiv
 braucht der Workflow kein `npm ci` — die ZIPs werden über `node:zlib` entpackt
 (`server/zip.js`), geprüft byte-identisch gegen `unzipper`.
+
+### Gebietsmittel
+
+```bash
+npm run fetch:regional
+```
+
+58 Dateien, 115.000 Werte, 38 Sekunden. Abgelegt als `data/regional/annual.csv`,
+`monthly.csv` und `seasonal.csv` — eine Zeile je Gebiet, Größe, Zeitraum und
+Jahr. Der tägliche Workflow ruft sie mit ab: der DWD korrigiert auch
+zurückliegende Jahre, wenn sich Messnetz oder Interpolation ändern, weshalb ein
+reines „schon vorhanden" nicht genügt.
 
 ### Allzeitrekorde
 

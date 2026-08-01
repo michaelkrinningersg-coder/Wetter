@@ -9,6 +9,7 @@ import {
   Gauge,
   Grid3x3,
   LineChart,
+  Landmark,
   Layers,
   Leaf,
   Map,
@@ -48,6 +49,7 @@ import { DayInHistory } from './components/DayInHistory'
 import { Gauges } from './components/Gauges'
 import { Germany } from './components/Germany'
 import { Records } from './components/Records'
+import { Regional } from './components/Regional'
 
 const FALLBACK_STATIONS: Station[] = [
   { id: '01691', name: 'Göttingen', altitude: 167 },
@@ -77,6 +79,7 @@ type TabId =
   | 'gauges'
   | 'germany'
   | 'records'
+  | 'regional'
 
 interface TabDef {
   id: TabId
@@ -107,6 +110,7 @@ const TABS: TabDef[] = [
   { id: 'gauges', label: 'Flusspegel', icon: Waves, group: 'Gewässer' },
   { id: 'germany', label: 'Deutschland gestern', icon: Map, group: 'Deutschland' },
   { id: 'records', label: 'Allzeitrekorde', icon: Trophy, group: 'Deutschland' },
+  { id: 'regional', label: 'Bundesländer', icon: Landmark, group: 'Deutschland' },
 ]
 
 const GROUPS = [
@@ -374,6 +378,8 @@ export default function App() {
             {tab === 'germany' && <Germany />}
 
             {tab === 'records' && <Records />}
+
+            {tab === 'regional' && <Regional />}
           </main>
         </div>
 

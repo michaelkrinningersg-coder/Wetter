@@ -26,6 +26,7 @@ import { db, getImportState } from '../server/db.js'
 import { GAUGES, gaugeSeries, gaugeSummary } from '../server/gauges.js'
 import { archiveRange, availableDates, superlatives } from '../server/germany.js'
 import { recordCount, recordDays, recordRange, recordsForDate } from '../server/records.js'
+import { regionalMeta, regionalPairs, regionalSeries } from '../server/regional.js'
 import { staticPath } from '../src/lib/static-path.js'
 
 const outDir = process.argv[2] ?? 'dist'
@@ -215,6 +216,26 @@ if (recDays.length > 0) {
     const payload = { range: recRange, days: recDays, day: { date, events: recordsForDate(date) } }
     emit(`/api/records?date=${date}`, payload, 'Rekorde')
     if (date === recDays[0].date) emit('/api/records', payload, 'Rekorde')
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Areal means                                                                */
+/* -------------------------------------------------------------------------- */
+
+const meta = regionalMeta()
+if (meta.parameters.length > 0) {
+  const firstParam = meta.parameters[0]
+  const defaultPeriod = firstParam.periods.includes('year') ? 'year' : firstParam.periods[0]
+
+  for (const { parameter, period } of regionalPairs()) {
+    const payload = { ...meta, series: regionalSeries(parameter, period) }
+    emit(`/api/regional?parameter=${parameter}&period=${period}`, payload, 'Gebietsmittel')
+    // The view's first request names neither.
+    if (parameter === firstParam.key && period === defaultPeriod) {
+      emit('/api/regional', payload, 'Gebietsmittel')
+      emit(`/api/regional?parameter=${parameter}`, payload, 'Gebietsmittel')
+    }
   }
 }
 
