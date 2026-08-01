@@ -87,13 +87,18 @@ export interface HeatmapRecord {
   year: number
   month: number
   avg_temp: number | null
-  rank: number
-  total_years_for_month: number
+  /** Days carrying a mean temperature; below the minimum the month is unranked. */
+  validDays: number
+  days: number
+  rated: boolean
+  rank: number | null
+  total_years_for_month: number | null
 }
 
 export interface HeatmapResponse {
   records: HeatmapRecord[]
   monthMinMax: Record<string, { min: number; max: number }>
+  minMonthDays: number
 }
 
 export interface ClimateDiagramRecord {

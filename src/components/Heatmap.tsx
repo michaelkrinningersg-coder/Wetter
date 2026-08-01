@@ -68,13 +68,14 @@ export function Heatmap({ stationId }: { stationId: string }) {
   )
 
   const records = useMemo(() => data?.records ?? [], [data])
+  const minMonthDays = data?.minMonthDays ?? 25
 
   /** Per-month 20/80 percentiles, so January is coloured against Januarys. */
   const scales = useMemo(() => {
     const result: Record<number, Scale> = {}
     for (let month = 1; month <= 12; month++) {
       const values = records
-        .filter((r) => r.month === month && r.avg_temp !== null)
+        .filter((r) => r.month === month && r.rated && r.avg_temp !== null)
         .map((r) => r.avg_temp as number)
         .sort((a, b) => a - b)
       const p20 = percentile(values, 0.2)
@@ -118,7 +119,10 @@ export function Heatmap({ stationId }: { stationId: string }) {
         also gegen Januar. Die Farbskala läuft je Monat vom{' '}
         <strong>20. bis zum 80. Perzentil</strong>, damit einzelne Ausreißer die
         Skalierung nicht dominieren. <strong>R</strong> ist der Wärmerang des Monats in
-        der gesamten Messreihe (R 1 = wärmster je gemessener Monat dieses Namens).
+        der gesamten Messreihe (R 1 = wärmster je gemessener Monat dieses Namens).{' '}
+        <strong>Schraffierte Felder</strong> sind Monate, die zwar gemessen wurden,
+        aber weniger als {minMonthDays} gültige Tage haben — ihr Mittel steht da,
+        ein Rang wäre nicht vergleichbar. Sie zählen auch nicht in die Skala.
       </InfoPanel>
 
       <Card>
@@ -183,24 +187,47 @@ export function Heatmap({ stationId }: { stationId: string }) {
                         const month = i + 1
                         const cell = row?.get(month)
                         const value = cell?.avg_temp ?? null
+                        // A month that was measured but is too sparse to place
+                        // gets its own look: hatched, value shown, no rank. The
+                        // previous version left it blank, which read as "never
+                        // measured" when the truth is "measured, with gaps".
+                        const sparse = Boolean(cell) && !cell!.rated
+
                         return (
                           <div
                             key={month}
-                            style={{ backgroundColor: tileColor(value, scales[month]) }}
+                            style={
+                              sparse
+                                ? {
+                                    backgroundImage:
+                                      'repeating-linear-gradient(135deg, oklch(38% 0.01 260) 0 4px, oklch(28% 0.008 260) 4px 8px)',
+                                  }
+                                : { backgroundColor: tileColor(value, scales[month]) }
+                            }
                             className="grid h-12 place-content-center rounded border border-canvas/40 text-center"
                             title={
-                              value !== null && cell
-                                ? `${monthName(month)} ${year}: ${temp(value, 2)} — Rang ${cell.rank} von ${cell.total_years_for_month}`
-                                : `${monthName(month)} ${year}: keine Daten`
+                              cell && sparse
+                                ? `${monthName(month)} ${year}: ${temp(value, 2)} aus ${cell.validDays} von ${cell.days} Tagen — für eine Einordnung sind ${minMonthDays} nötig, deshalb ohne Rang`
+                                : value !== null && cell
+                                  ? `${monthName(month)} ${year}: ${temp(value, 2)} — Rang ${cell.rank} von ${cell.total_years_for_month}`
+                                  : `${monthName(month)} ${year}: keine Daten`
                             }
                           >
                             {value !== null && cell ? (
                               <>
-                                <span className="numeric text-[11px] font-bold text-white drop-shadow">
+                                <span
+                                  className={`numeric text-[11px] font-bold drop-shadow ${
+                                    sparse ? 'text-ink-muted' : 'text-white'
+                                  }`}
+                                >
                                   {value.toFixed(1)}°
                                 </span>
-                                <span className="numeric text-[9px] font-semibold text-white/85">
-                                  R {cell.rank}
+                                <span
+                                  className={`numeric text-[9px] font-semibold ${
+                                    sparse ? 'text-ink-faint' : 'text-white/85'
+                                  }`}
+                                >
+                                  {sparse ? `${cell.validDays}/${cell.days} d` : `R ${cell.rank}`}
                                 </span>
                               </>
                             ) : (

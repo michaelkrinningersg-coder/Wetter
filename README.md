@@ -164,6 +164,10 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
 - **Extremmonate** benötigen mindestens 25 gültige Messtage.
 - **Heatmap.** Jeder Monat wird gegen dieselben Kalendermonate aller anderen
   Jahre eingefärbt; die Skala läuft je Monat vom 20. bis zum 80. Perzentil.
+  Monate mit weniger als 25 gültigen Tagen erhalten keinen Rang und gehen nicht
+  in die Skala ein — sie werden aber schraffiert mit Wert und Abdeckung
+  ausgewiesen, statt als leeres Feld zu erscheinen. Im Bestand betrifft das 32
+  Monate, zuletzt Juli 2026 in Göttingen nach neun Tagen Stationsausfall.
 - **Prognose.** Gemessene Tage bis zum letzten Datenbanktag; das Restjahr wird
   30-mal zu Ende gerechnet — je einmal so, wie es in jedem Jahr der
   Referenzperiode tatsächlich verlaufen ist. Ausgewiesen sind der Median dieser

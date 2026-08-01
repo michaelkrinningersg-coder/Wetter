@@ -168,28 +168,38 @@ export function annualMeans(stationId) {
 const monthlyMeansStmt = db.prepare(`
   SELECT year, month,
          AVG(temp_mean)                                  AS avg_temp,
-         SUM(CASE WHEN temp_mean IS NOT NULL THEN 1 END) AS valid_days
+         SUM(CASE WHEN temp_mean IS NOT NULL THEN 1 END) AS valid_days,
+         COUNT(*)                                        AS days
   FROM daily
   WHERE station_id = ?
   GROUP BY year, month
-  HAVING valid_days >= ?
   ORDER BY year, month
 `)
 
+/**
+ * Monthly means, ranked against the same calendar month in other years.
+ *
+ * Months with fewer than `MIN_MONTH_DAYS` valid readings are reported but not
+ * ranked: a mean over twenty-one days is not comparable with one over
+ * thirty-one, and letting it into the ranking would move every other month's
+ * position. Reporting it anyway matters because the alternative is what this
+ * view used to do — drop the month silently, leaving a blank cell that reads
+ * as "no data" when the truth is "measured, but too sparse to place". Göttingen
+ * lost nine days to a station outage in July 2026; across the whole database
+ * thirty-two months are in that state.
+ */
 export function heatmap(stationId) {
-  const rows = monthlyMeansStmt
-    .all(stationId, MIN_MONTH_DAYS)
-    .filter((r) => r.avg_temp !== null)
+  const all = monthlyMeansStmt.all(stationId).filter((r) => r.avg_temp !== null)
+  const rated = all.filter((r) => r.valid_days >= MIN_MONTH_DAYS)
 
-  // Rank each month against the same calendar month in every other year.
   const byMonth = new Map()
-  for (const row of rows) {
+  for (const row of rated) {
     if (!byMonth.has(row.month)) byMonth.set(row.month, [])
     byMonth.get(row.month).push(row)
   }
 
   const monthMinMax = {}
-  const ranked = []
+  const ranks = new Map()
 
   for (const [month, group] of byMonth) {
     const sorted = [...group].sort((a, b) => b.avg_temp - a.avg_temp)
@@ -199,18 +209,30 @@ export function heatmap(stationId) {
       max: sorted[0].avg_temp,
     }
     sorted.forEach((row, index) => {
-      ranked.push({
-        year: row.year,
-        month,
-        avg_temp: row.avg_temp,
-        rank: index + 1,
-        total_years_for_month: total,
-      })
+      ranks.set(`${row.year}-${month}`, { rank: index + 1, total })
     })
   }
 
-  ranked.sort((a, b) => a.year - b.year || a.month - b.month)
-  return { records: ranked, monthMinMax }
+  const records = all
+    .map((row) => {
+      const placed = ranks.get(`${row.year}-${row.month}`)
+      return {
+        year: row.year,
+        month: row.month,
+        avg_temp: row.avg_temp,
+        validDays: row.valid_days,
+        // The calendar length, not the number of imported rows: for the month
+        // in progress those differ, and "21 of 30" for a 31-day July would be
+        // its own small untruth.
+        days: new Date(Date.UTC(row.year, row.month, 0)).getUTCDate(),
+        rated: Boolean(placed),
+        rank: placed?.rank ?? null,
+        total_years_for_month: placed?.total ?? null,
+      }
+    })
+    .sort((a, b) => a.year - b.year || a.month - b.month)
+
+  return { records, monthMinMax, minMonthDays: MIN_MONTH_DAYS }
 }
 
 /* -------------------------------------------------------------------------- */
