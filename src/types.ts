@@ -598,3 +598,24 @@ export interface GermanyMapResponse {
     values: Record<string, [string, number][]>
   } | null
 }
+
+/* -------------------------------------------------------------------------- */
+/* Further indices                                                            */
+/* -------------------------------------------------------------------------- */
+
+export interface ExtraIndexMeta {
+  key: string
+  label: string
+  unit: string
+  decimals: number
+  /** The threshold or aggregation in words, shown so it can be checked. */
+  note: string
+  first: number
+  last: number
+  years: number
+}
+
+export interface ExtraIndicesResponse {
+  indices: ExtraIndexMeta[]
+  series: Record<string, { year: number; value: number; validDays: number }[]>
+}

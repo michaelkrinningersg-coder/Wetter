@@ -129,6 +129,7 @@ const simple = {
   '/api/weather/seasons': api.seasons,
   '/api/weather/records-balance': api.recordBalance,
   '/api/weather/precip-intensity': api.precipIntensity,
+  '/api/weather/indices': api.extraIndices,
 }
 
 for (const [path, query] of Object.entries(simple)) {

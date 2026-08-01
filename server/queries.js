@@ -1574,3 +1574,159 @@ export function spells(stationId, kind, limit = 25) {
     records: found.slice(0, limit),
   }
 }
+
+/* -------------------------------------------------------------------------- */
+/* Further indices — the columns the archive used to discard                   */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Annual indices derived from snow depth, cloud cover, humidity, vapour
+ * pressure, sunshine and ground minimum temperature.
+ *
+ * These columns sat unread in the DWD archives this project has been
+ * downloading all along. For Göttingen they are not marginal: cloud cover
+ * reaches back to 1860 and snow depth to 1858, which makes a snow-cover series
+ * a century longer than most.
+ *
+ * The thresholds are stated in the view rather than hidden here, because two
+ * of them are conventions rather than physics:
+ *
+ *   Schneedeckentag    snow depth of at least 1 cm
+ *   Heiterer Tag       mean cloud cover at most 1.6 eighths
+ *   Trüber Tag         mean cloud cover at least 6.4 eighths
+ *   Schwüler Tag       mean vapour pressure at least 18.8 hPa
+ *   Bodenfrosttag      minimum below 0 °C five centimetres above ground
+ */
+export const EXTRA_INDICES = [
+  {
+    key: 'snow_days',
+    label: 'Schneedeckentage',
+    column: 'snow',
+    expression: 'SUM(CASE WHEN snow >= 1 THEN 1 ELSE 0 END)',
+    unit: 'd',
+    decimals: 0,
+    note: 'Tage mit einer Schneedecke von mindestens 1 cm',
+  },
+  {
+    key: 'snow_max',
+    label: 'Höchste Schneehöhe',
+    column: 'snow',
+    expression: 'MAX(snow)',
+    unit: 'cm',
+    decimals: 0,
+    note: 'größte im Kalenderjahr gemessene Schneehöhe',
+  },
+  {
+    key: 'clear_days',
+    label: 'Heitere Tage',
+    column: 'cloud',
+    expression: 'SUM(CASE WHEN cloud <= 1.6 THEN 1 ELSE 0 END)',
+    unit: 'd',
+    decimals: 0,
+    note: 'Bedeckungsgrad im Tagesmittel höchstens 1,6 Achtel',
+  },
+  {
+    key: 'overcast_days',
+    label: 'Trübe Tage',
+    column: 'cloud',
+    expression: 'SUM(CASE WHEN cloud >= 6.4 THEN 1 ELSE 0 END)',
+    unit: 'd',
+    decimals: 0,
+    note: 'Bedeckungsgrad im Tagesmittel mindestens 6,4 Achtel',
+  },
+  {
+    key: 'cloud_mean',
+    label: 'Mittlere Bewölkung',
+    column: 'cloud',
+    expression: 'AVG(cloud)',
+    unit: '/8',
+    decimals: 2,
+    note: 'Jahresmittel des Bedeckungsgrads in Achteln',
+  },
+  {
+    key: 'sunshine_hours',
+    label: 'Sonnenscheindauer',
+    column: 'sunshine',
+    expression: 'SUM(sunshine)',
+    unit: 'h',
+    decimals: 0,
+    note: 'Summe der Sonnenscheinstunden im Jahr',
+  },
+  {
+    key: 'humidity_mean',
+    label: 'Mittlere Luftfeuchte',
+    column: 'humidity',
+    expression: 'AVG(humidity)',
+    unit: '%',
+    decimals: 1,
+    note: 'Jahresmittel der relativen Feuchte',
+  },
+  {
+    key: 'sultry_days',
+    label: 'Schwüle Tage',
+    column: 'vapour_pressure',
+    expression: 'SUM(CASE WHEN vapour_pressure >= 18.8 THEN 1 ELSE 0 END)',
+    unit: 'd',
+    decimals: 0,
+    note: 'Dampfdruck im Tagesmittel mindestens 18,8 hPa',
+  },
+  {
+    key: 'ground_frost_days',
+    label: 'Bodenfrosttage',
+    column: 'temp_ground_min',
+    expression: 'SUM(CASE WHEN temp_ground_min < 0 THEN 1 ELSE 0 END)',
+    unit: 'd',
+    decimals: 0,
+    note: 'Minimum 5 cm über dem Erdboden unter 0 °C',
+  },
+]
+
+export const EXTRA_INDEX_KEYS = EXTRA_INDICES.map((i) => i.key)
+
+/**
+ * One station's annual series for every index it has data for.
+ *
+ * The 90 % rule applies per column, not per station: Göttingen measures cloud
+ * cover from 1860 and sunshine only from 1927, and a year with two hundred
+ * cloud readings would show far too few clear days if it were counted anyway.
+ */
+export function extraIndices(stationId) {
+  const series = {}
+  const available = []
+
+  for (const index of EXTRA_INDICES) {
+    const rows = db
+      .prepare(
+        `SELECT year,
+                ${index.expression} AS value,
+                COUNT(${index.column}) AS valid_days
+         FROM daily
+         WHERE station_id = ? AND ${index.column} IS NOT NULL
+         GROUP BY year
+         HAVING valid_days >= 365 * ?
+         ORDER BY year`,
+      )
+      .all(stationId, COVERAGE)
+      .filter((r) => r.value !== null)
+
+    if (rows.length === 0) continue
+
+    available.push({
+      key: index.key,
+      label: index.label,
+      unit: index.unit,
+      decimals: index.decimals,
+      note: index.note,
+      first: rows[0].year,
+      last: rows.at(-1).year,
+      years: rows.length,
+    })
+    series[index.key] = rows.map((r) => ({
+      year: r.year,
+      value: r.value,
+      validDays: r.valid_days,
+    }))
+  }
+
+  return { indices: available, series }
+}

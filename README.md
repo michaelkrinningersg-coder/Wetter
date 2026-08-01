@@ -6,7 +6,8 @@ SQLite-Datenbank und wertet sie in zwölf Analysebereichen aus — von der
 Monatsübersicht über Temperatur- und Niederschlagstrends bis zu Extremwerten
 und einer klimatologischen Jahresprognose.
 
-Für Göttingen reicht die Reihe bis **1858** zurück (rund 60.000 Messtage).
+Für Göttingen reicht die Reihe bis **1858** zurück (rund 60.000 Messtage) —
+einschließlich Luftfeuchte und Schneehöhe ab 1858 und Bewölkung ab 1860.
 
 | Station | ID | Höhe |
 |---|---|---|
@@ -77,7 +78,9 @@ Dieser Tag in der Geschichte
 
 **Trends** — Temperaturtrend · Niederschlagstrend · Jahresmittelwerte,
 Anomalien und Warming Stripes · Mitteltemperatur Year-to-Date · Jahreszeiten ·
-Vegetationsperiode und Wachstumsgradtage · Starkregenanteil
+Vegetationsperiode und Wachstumsgradtage · Starkregenanteil · Weitere
+Kenngrößen (Schneedeckentage, heitere und trübe Tage, Sonnenscheindauer,
+Luftfeuchte, schwüle Tage, Bodenfrosttage)
 
 **Rekorde** — Monats-Heatmap · Spitzenwerte (Top-50-Tage) ·
 Spitzenmonate (Top-50-Monate) · Perioden & Serien (längste Hitze-, Trocken-,
@@ -164,6 +167,12 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   (Schwelle aus dem 95. Perzentil der Regentage 1961–1990) sowie RX5day, die
   höchste Summe über fünf aufeinanderfolgende Tage. Ein RX5day-Fenster zählt nur
   bei lückenlosen, calendarisch aufeinanderfolgenden Tagen.
+- **Weitere Kenngrößen.** Aus den DWD-Spalten, die dieses Projekt lange
+  überlesen hat. Schwellen: Schneedeckentag ab 1 cm, heiterer Tag bis 1,6
+  Achtel Bedeckung, trüber Tag ab 6,4 Achteln, schwüler Tag ab 18,8 hPa
+  Dampfdruck, Bodenfrosttag unter 0 °C fünf Zentimeter über Grund. Die
+  90-%-Regel gilt hier **je Spalte**, nicht je Station: Göttingen misst die
+  Bewölkung seit 1860, die Sonnenscheindauer erst seit 1927.
 - **Extremmonate** benötigen mindestens 25 gültige Messtage.
 - **Heatmap.** Jeder Monat wird gegen dieselben Kalendermonate aller anderen
   Jahre eingefärbt; die Skala läuft je Monat vom 20. bis zum 80. Perzentil.

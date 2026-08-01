@@ -93,6 +93,7 @@ const SIMPLE = [
   ['coverage', api.coverage],
   ['forecast', api.buildForecast],
   ['heatmap', api.heatmap],
+  ['indices', api.extraIndices],
   ['precip-intensity', api.precipIntensity],
   ['records-balance', api.recordBalance],
   ['seasons', api.seasons],

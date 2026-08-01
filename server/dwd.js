@@ -14,6 +14,17 @@ const MISSING = -999
  *   RSK         daily precipitation total, mm
  *   PM          daily mean air pressure, hPa
  *   TMK/TXK/TNK daily mean / max / min air temperature, °C
+ *   SDK         sunshine duration, h
+ *   NM          mean cloud cover, eighths
+ *   UPM         mean relative humidity, %
+ *   VPM         mean vapour pressure, hPa
+ *   SHK_TAG     snow depth, cm
+ *   TGK         minimum temperature 5 cm above ground, °C
+ *
+ * The last six were read past for a long time. For Göttingen they are not a
+ * footnote: cloud cover starts in 1860, humidity, vapour pressure and snow
+ * depth in 1858 — a century and a half of measurements that the archive was
+ * already downloading and throwing away.
  */
 const COLUMNS = {
   date: 'MESS_DATUM',
@@ -24,6 +35,12 @@ const COLUMNS = {
   temp_mean: 'TMK',
   temp_max: 'TXK',
   temp_min: 'TNK',
+  sunshine: 'SDK',
+  cloud: 'NM',
+  humidity: 'UPM',
+  vapour_pressure: 'VPM',
+  snow: 'SHK_TAG',
+  temp_ground_min: 'TGK',
 }
 
 function parseValue(raw) {
@@ -76,6 +93,12 @@ export function parseProductFile(text, stationId) {
       wind_max: parseValue(cells[indexOf.wind_max]),
       wind_mean: parseValue(cells[indexOf.wind_mean]),
       pressure: parseValue(cells[indexOf.pressure]),
+      sunshine: parseValue(cells[indexOf.sunshine]),
+      cloud: parseValue(cells[indexOf.cloud]),
+      humidity: parseValue(cells[indexOf.humidity]),
+      vapour_pressure: parseValue(cells[indexOf.vapour_pressure]),
+      snow: parseValue(cells[indexOf.snow]),
+      temp_ground_min: parseValue(cells[indexOf.temp_ground_min]),
     })
   }
   return rows
@@ -134,19 +157,27 @@ async function resolveHistoricalUrl(stationId) {
 const upsert = db.prepare(`
   INSERT INTO daily (
     station_id, date, year, month, day,
-    temp_mean, temp_max, temp_min, precipitation, wind_max, wind_mean, pressure
+    temp_mean, temp_max, temp_min, precipitation, wind_max, wind_mean, pressure,
+    sunshine, cloud, humidity, vapour_pressure, snow, temp_ground_min
   ) VALUES (
     @station_id, @date, @year, @month, @day,
-    @temp_mean, @temp_max, @temp_min, @precipitation, @wind_max, @wind_mean, @pressure
+    @temp_mean, @temp_max, @temp_min, @precipitation, @wind_max, @wind_mean, @pressure,
+    @sunshine, @cloud, @humidity, @vapour_pressure, @snow, @temp_ground_min
   )
   ON CONFLICT (station_id, date) DO UPDATE SET
-    temp_mean     = excluded.temp_mean,
-    temp_max      = excluded.temp_max,
-    temp_min      = excluded.temp_min,
-    precipitation = excluded.precipitation,
-    wind_max      = excluded.wind_max,
-    wind_mean     = excluded.wind_mean,
-    pressure      = excluded.pressure
+    temp_mean       = excluded.temp_mean,
+    temp_max        = excluded.temp_max,
+    temp_min        = excluded.temp_min,
+    precipitation   = excluded.precipitation,
+    wind_max        = excluded.wind_max,
+    wind_mean       = excluded.wind_mean,
+    pressure        = excluded.pressure,
+    sunshine        = excluded.sunshine,
+    cloud           = excluded.cloud,
+    humidity        = excluded.humidity,
+    vapour_pressure = excluded.vapour_pressure,
+    snow            = excluded.snow,
+    temp_ground_min = excluded.temp_ground_min
 `)
 
 const insertMany = db.transaction((rows) => {
@@ -161,7 +192,7 @@ const countStmt = db.prepare(
  * Download the historical archive (only when the station has no rows yet) plus
  * the rolling "recent" archive, and upsert everything.
  */
-export async function importStation(stationId) {
+export async function importStation(stationId, { force = false } = {}) {
   setImportState(stationId, { importInProgress: true, lastError: null })
 
   try {
@@ -169,7 +200,10 @@ export async function importStation(stationId) {
     const previousMaxDate = before.maxDate ?? null
 
     const urls = []
-    if (before.c === 0) {
+    // `force` exists for schema changes: when a new column is added, the rows
+    // already in the table carry nothing for it, and only the historical
+    // archive can fill them.
+    if (before.c === 0 || force) {
       const historical = await resolveHistoricalUrl(stationId)
       if (historical) urls.push(historical)
     }

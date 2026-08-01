@@ -56,3 +56,25 @@ export function setImportState(stationId, patch) {
 export function isImporting(stationId) {
   return getImportState(stationId).importInProgress === true
 }
+
+/**
+ * Columns added after the table already existed.
+ *
+ * SQLite has no `ADD COLUMN IF NOT EXISTS`, so each is attempted and a
+ * "duplicate column" error is the expected outcome on every run but the first.
+ * Any other failure is real and must not be swallowed.
+ */
+for (const column of [
+  'sunshine REAL',
+  'cloud REAL',
+  'humidity REAL',
+  'vapour_pressure REAL',
+  'snow REAL',
+  'temp_ground_min REAL',
+]) {
+  try {
+    db.exec(`ALTER TABLE daily ADD COLUMN ${column}`)
+  } catch (error) {
+    if (!/duplicate column name/i.test(String(error?.message))) throw error
+  }
+}

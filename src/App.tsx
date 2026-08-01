@@ -50,6 +50,7 @@ import { DayInHistory } from './components/DayInHistory'
 import { Gauges } from './components/Gauges'
 import { Germany } from './components/Germany'
 import { GermanyMap } from './components/GermanyMap'
+import { Indices } from './components/Indices'
 import { Records } from './components/Records'
 import { Regional } from './components/Regional'
 
@@ -77,6 +78,7 @@ type TabId =
   | 'seasons'
   | 'record-balance'
   | 'precip-intensity'
+  | 'indices'
   | 'day-in-history'
   | 'gauges'
   | 'germany'
@@ -102,6 +104,7 @@ const TABS: TabDef[] = [
   { id: 'seasons', label: 'Jahreszeiten', icon: Snowflake, group: 'Trends' },
   { id: 'vegetation', label: 'Vegetationsperiode', icon: Leaf, group: 'Trends' },
   { id: 'precip-intensity', label: 'Starkregenanteil', icon: Umbrella, group: 'Trends' },
+  { id: 'indices', label: 'Weitere Kenngrößen', icon: Snowflake, group: 'Trends' },
   { id: 'heatmap', label: 'Monats-Heatmap', icon: Grid3x3, group: 'Rekorde' },
   { id: 'extremes', label: 'Spitzenwerte', icon: Flame, group: 'Rekorde' },
   { id: 'extreme-months', label: 'Spitzenmonate', icon: ListOrdered, group: 'Rekorde' },
@@ -377,6 +380,8 @@ export default function App() {
               <Spells stationId={stationId} stationName={stationName} />
             )}
             {tab === 'forecast' && <Forecast stationId={stationId} />}
+            {tab === 'indices' && <Indices stationId={stationId} />}
+
             {tab === 'gauges' && <Gauges />}
 
             {tab === 'germany' && <Germany />}
