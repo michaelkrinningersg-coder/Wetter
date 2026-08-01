@@ -397,3 +397,198 @@ export function germanyMap(date) {
 
   return { date, stations: rows.length, values }
 }
+
+/* -------------------------------------------------------------------------- */
+/* Notable days                                                               */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The ways a day can stand out across the whole country.
+ *
+ * Deliberately a mix of aggregates: the hottest day is decided by a single
+ * station, the wettest by the national mean, the widest-spread by the gap
+ * between the warmest and coldest station on the same day. Ranking every
+ * category by its maximum alone would return the same handful of heatwave days
+ * five times over.
+ */
+export const NOTABLE_KINDS = [
+  {
+    key: 'hottest',
+    label: 'Heißeste Tage',
+    note: 'höchste an einer Station gemessene Temperatur',
+    expression: 'MAX(temp_max)',
+    order: 'DESC',
+    unit: '°C',
+    decimals: 1,
+    field: 'temp_max',
+  },
+  {
+    key: 'coldest',
+    label: 'Kälteste Tage',
+    note: 'tiefste an einer Station gemessene Temperatur',
+    expression: 'MIN(temp_min)',
+    order: 'ASC',
+    unit: '°C',
+    decimals: 1,
+    field: 'temp_min',
+  },
+  {
+    key: 'warmest_mean',
+    label: 'Wärmste Tage im Landesmittel',
+    note: 'Mittel aller Stationen mit Tagesmittel',
+    expression: 'AVG(temp_mean)',
+    order: 'DESC',
+    unit: '°C',
+    decimals: 1,
+    field: 'temp_mean',
+  },
+  {
+    key: 'coldest_mean',
+    label: 'Kälteste Tage im Landesmittel',
+    note: 'Mittel aller Stationen mit Tagesmittel',
+    expression: 'AVG(temp_mean)',
+    order: 'ASC',
+    unit: '°C',
+    decimals: 1,
+    field: 'temp_mean',
+  },
+  {
+    key: 'wettest',
+    label: 'Nasseste Tage im Landesmittel',
+    note: 'Mittel über alle Stationen mit Niederschlagsmessung',
+    expression: 'AVG(precipitation)',
+    order: 'DESC',
+    unit: 'mm',
+    decimals: 2,
+    field: 'precipitation',
+  },
+  {
+    key: 'wettest_station',
+    label: 'Größte Tagessumme an einer Station',
+    note: 'höchster an einer einzelnen Station gemessener Tagesniederschlag',
+    expression: 'MAX(precipitation)',
+    order: 'DESC',
+    unit: 'mm',
+    decimals: 1,
+    field: 'precipitation',
+  },
+  {
+    key: 'windiest',
+    label: 'Stürmischste Tage',
+    note: 'stärkste an einer Station gemessene Bö',
+    expression: 'MAX(wind_max)',
+    order: 'DESC',
+    unit: 'm/s',
+    decimals: 1,
+    field: 'wind_max',
+  },
+  {
+    key: 'widest_spread',
+    label: 'Größte Spanne im Land',
+    note: 'Abstand zwischen wärmster und kältester Station am selben Tag',
+    expression: 'MAX(temp_max) - MIN(temp_max)',
+    order: 'DESC',
+    unit: 'K',
+    decimals: 1,
+    field: 'temp_max',
+  },
+  {
+    key: 'snowiest',
+    label: 'Tage mit der größten Schneedecke',
+    note: 'Anteil der Stationen mit mindestens 1 cm Schnee',
+    expression:
+      'CAST(SUM(CASE WHEN snow >= 1 THEN 1 ELSE 0 END) AS REAL) * 100 / NULLIF(COUNT(snow), 0)',
+    order: 'DESC',
+    unit: '%',
+    decimals: 0,
+    field: 'snow',
+  },
+]
+
+export const NOTABLE_KEYS = NOTABLE_KINDS.map((k) => k.key)
+
+/**
+ * A day only enters a ranking once enough stations reported the parameter.
+ *
+ * Without this a day on which forty stations happened to send data could take
+ * the national mean, and the archive does contain such days at its edges.
+ */
+const MIN_STATIONS_FOR_RANKING = 200
+
+const notableStmt = new Map(
+  NOTABLE_KINDS.map((kind) => [
+    kind.key,
+    db.prepare(`
+      SELECT date,
+             ${kind.expression} AS value,
+             COUNT(${kind.field}) AS stations
+      FROM germany_daily
+      WHERE ${kind.field} IS NOT NULL
+      GROUP BY date
+      HAVING stations >= ?
+      ORDER BY value ${kind.order}
+      LIMIT ?
+    `),
+  ]),
+)
+
+export function notableDays(kindKey, limit = 15) {
+  const kind = NOTABLE_KINDS.find((k) => k.key === kindKey)
+  if (!kind) return null
+
+  const rows = notableStmt.get(kind.key).all(MIN_STATIONS_FOR_RANKING, limit)
+
+  return {
+    kind: {
+      key: kind.key,
+      label: kind.label,
+      note: kind.note,
+      unit: kind.unit,
+      decimals: kind.decimals,
+    },
+    minStations: MIN_STATIONS_FOR_RANKING,
+    days: rows.map((r) => ({ date: r.date, value: r.value, stations: r.stations })),
+  }
+}
+
+/**
+ * Days with the most all-time station records — the archive's loudest days.
+ *
+ * Its own category rather than a column on the others: a record-rich day is
+ * not necessarily the hottest, and the two rankings answer different questions.
+ */
+export function recordRichDays(limit = 15) {
+  return db
+    .prepare(
+      `SELECT date, COUNT(*) AS n, COUNT(DISTINCT station_id) AS stations
+       FROM record_events GROUP BY date ORDER BY n DESC LIMIT ?`,
+    )
+    .all(limit)
+    .map((r) => ({ date: r.date, value: r.n, stations: r.stations, records: r.n }))
+}
+
+/**
+ * Every notable-day ranking in one answer.
+ *
+ * Nine categories of fifteen days is a few hundred rows — small enough that
+ * splitting it per category would cost a request per click and gain nothing.
+ */
+export function notableOverview(limit = 15) {
+  const categories = NOTABLE_KEYS.map((key) => notableDays(key, limit)).filter(Boolean)
+
+  return {
+    range: archiveRange(),
+    minStations: MIN_STATIONS_FOR_RANKING,
+    categories,
+    records: {
+      kind: {
+        key: 'record_rich',
+        label: 'Tage mit den meisten Allzeitrekorden',
+        note: 'gebrochene Stationsrekorde an diesem Tag',
+        unit: '',
+        decimals: 0,
+      },
+      days: recordRichDays(limit),
+    },
+  }
+}

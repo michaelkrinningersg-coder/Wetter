@@ -44,7 +44,7 @@ JSON-Datei:
 
 ```bash
 npm run import:stations   # Datenbank füllen (die drei Stationen vom DWD)
-npm run build:static      # dist/ mit 7.463 Dateien, 143 MB
+npm run build:static      # dist/ mit 7.467 Dateien, 143 MB
 ```
 
 Wohin welche Antwort geschrieben wird, entscheidet `src/lib/static-path.js` —
@@ -98,7 +98,8 @@ Tageswerten · Spitzenreiter aller DWD-Stationen für einen einzelnen Tag:
 wärmste und kälteste Station im Mittel und absolut, stärkste Bö, windigste
 Station im Mittel, nasseste Station und größte Tagesspanne — jeweils für ganz
 Deutschland und für alles unterhalb 1000 m · Allzeitrekorde: welche Station an
-welchem Tag ihren eigenen Höchst- oder Tiefstwert gebrochen hat
+welchem Tag ihren eigenen Höchst- oder Tiefstwert gebrochen hat · Markante Tage
+des Archivs in zehn Kategorien
 
 ## Aufbau
 
@@ -214,6 +215,13 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   Thüringen/Sachsen-Anhalt überlappt zwei einzeln geführte Länder. Die
   Kombinationen sind gekennzeichnet und dürfen nicht addiert werden. Temperatur
   und Niederschlag reichen bis 1881, Sonnenscheindauer und Kenntage bis 1951.
+- **Markante Tage.** Zehn Kategorien mit absichtlich verschiedenen Maßstäben:
+  der heißeste Tag entscheidet sich an einer einzelnen Station, der nasseste am
+  Landesmittel, der mit der größten Spanne am Abstand zwischen wärmster und
+  kältester Station. Über ein Maß sortiert käme zehnmal dieselbe Hitzewelle
+  heraus. Ein Tag zählt erst ab 200 meldenden Stationen für die jeweilige
+  Größe — an den Rändern des Archivs gibt es Tage mit wenigen Dutzend, und ein
+  Landesmittel daraus wäre keins.
 - **Allzeitrekorde.** Jede Station wird ausschließlich gegen ihre eigene
   Geschichte geprüft, nie gegen andere Stationen. Ausgewiesen sind stets der
   alte Rekord mit Datum und die Länge der Messreihe — eine Station mit

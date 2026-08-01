@@ -51,6 +51,7 @@ import { Gauges } from './components/Gauges'
 import { Germany } from './components/Germany'
 import { GermanyMap } from './components/GermanyMap'
 import { Indices } from './components/Indices'
+import { Notable } from './components/Notable'
 import { Records } from './components/Records'
 import { Regional } from './components/Regional'
 
@@ -84,6 +85,7 @@ type TabId =
   | 'germany'
   | 'germany-map'
   | 'records'
+  | 'notable'
   | 'regional'
 
 interface TabDef {
@@ -117,6 +119,7 @@ const TABS: TabDef[] = [
   { id: 'germany', label: 'Deutschland gestern', icon: Map, group: 'Deutschland' },
   { id: 'germany-map', label: 'Karte', icon: MapPin, group: 'Deutschland' },
   { id: 'records', label: 'Allzeitrekorde', icon: Trophy, group: 'Deutschland' },
+  { id: 'notable', label: 'Markante Tage', icon: Sparkles, group: 'Deutschland' },
   { id: 'regional', label: 'Bundesländer', icon: Landmark, group: 'Deutschland' },
 ]
 
@@ -389,6 +392,8 @@ export default function App() {
             {tab === 'germany-map' && <GermanyMap />}
 
             {tab === 'records' && <Records />}
+
+            {tab === 'notable' && <Notable />}
 
             {tab === 'regional' && <Regional />}
           </main>

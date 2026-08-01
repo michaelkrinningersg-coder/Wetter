@@ -29,6 +29,7 @@ import {
   availableDates,
   germanyMap,
   germanyStationRegister,
+  notableOverview,
   superlatives,
 } from '../server/germany.js'
 import { recordCount, recordDays, recordRange, recordsForDate } from '../server/records.js'
@@ -229,6 +230,7 @@ if (range.last) {
 // Repeating 2400 coordinates in each daily payload would cost more than the
 // readings themselves.
 if (range.last) {
+  emit('/api/germany/notable', notableOverview(), 'Markante Tage')
   emit('/api/germany/stations', germanyStationRegister(), 'Karte')
   for (const date of dates) {
     const payload = { range, dates, day: germanyMap(date) }

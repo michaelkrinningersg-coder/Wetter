@@ -19,6 +19,7 @@ import {
   availableDates,
   germanyMap,
   germanyStationRegister,
+  notableOverview,
   superlatives,
 } from './germany.js'
 import { recordCount, recordDays, recordRange, recordsForDate } from './records.js'
@@ -318,6 +319,11 @@ app.get(
     // second request; the list itself lives on its own page.
     res.json({ range, dates: availableDates(), day, records: recordCount(date) })
   }),
+)
+
+app.get(
+  '/api/germany/notable',
+  handler((_req, res) => res.json(notableOverview())),
 )
 
 app.get(

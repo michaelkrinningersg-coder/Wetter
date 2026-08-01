@@ -619,3 +619,28 @@ export interface ExtraIndicesResponse {
   indices: ExtraIndexMeta[]
   series: Record<string, { year: number; value: number; validDays: number }[]>
 }
+
+/* -------------------------------------------------------------------------- */
+/* Notable days                                                               */
+/* -------------------------------------------------------------------------- */
+
+export interface NotableKind {
+  key: string
+  label: string
+  note: string
+  unit: string
+  decimals: number
+}
+
+export interface NotableCategory {
+  kind: NotableKind
+  minStations?: number
+  days: { date: string; value: number; stations: number }[]
+}
+
+export interface NotableResponse {
+  range: { days: number; first: string | null; last: string | null }
+  minStations: number
+  categories: NotableCategory[]
+  records: NotableCategory
+}
