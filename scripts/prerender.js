@@ -52,6 +52,7 @@ import { comboSeries, phenoComboKeys, phenoOverview } from '../server/pheno.js'
 import { dashboard } from '../server/dashboard.js'
 import { TWIN_SETS, weatherTwins } from '../server/twins.js'
 import { yearbook, yearbookYears } from '../server/yearbook.js'
+import { curiosities } from '../server/curiosities.js'
 import { NATIONAL_FIELD_KEYS, nationalField, nationalOverview } from '../server/national.js'
 import { pressureAnalysis } from '../server/pressure.js'
 import { frostRiskAll } from '../server/frost.js'
@@ -135,6 +136,7 @@ const SIMPLE = [
   ['precip-intensity', api.precipIntensity],
   ['pressure', pressureAnalysis],
   ['distribution', distributionOverview],
+  ['curiosities', curiosities],
   ['record-ages', recordAges],
   ['record-calendar', recordCalendar],
   ['record-vintages', recordVintages],

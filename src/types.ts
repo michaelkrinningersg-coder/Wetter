@@ -2000,3 +2000,39 @@ export interface YearbookResponse {
   days: YearbookDay[]
   runnersUp?: YearbookDay[]
 }
+
+/* -------------------------------------------------------------------------- */
+/* Curiosities                                                                */
+/* -------------------------------------------------------------------------- */
+
+export interface CuriosityDay {
+  date: string
+  label: string
+  value: number
+  /** The second line: the context that turns a number into a small story. */
+  detail: string
+}
+
+export interface CuriositySection {
+  key: string
+  title: string
+  note: string
+  unit: string
+  decimals: number
+  accent: string
+  direction: 'max' | 'min'
+  /** True where the sign carries half the statement — jumps, anomalies, falls. */
+  signed: boolean
+  /** How many days in the whole record could answer this question at all. */
+  found: number
+  days: CuriosityDay[]
+}
+
+export interface CuriositiesResponse {
+  station: string
+  range: { first: string; last: string; days: number }
+  limit: number
+  minYearsForMean: number
+  minMonthRain: number
+  sections: CuriositySection[]
+}

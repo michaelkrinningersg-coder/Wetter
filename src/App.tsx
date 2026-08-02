@@ -101,7 +101,7 @@ const LOAD = {
   RecordHistory: () =>
     import('./components/RecordHistory').then((m) => ({ default: m.RecordHistory })),
   Twins: () => import('./components/Twins').then((m) => ({ default: m.Twins })),
-  Yearbook: () => import('./components/Yearbook').then((m) => ({ default: m.Yearbook })),
+  Retrospect: () => import('./components/Retrospect').then((m) => ({ default: m.Retrospect })),
   National: () =>
     import('./components/National').then((m) => ({ default: m.National })),
 }
@@ -142,7 +142,7 @@ const Distribution = lazy(LOAD.Distribution)
 const Nationwide = lazy(LOAD.Nationwide)
 const RecordHistory = lazy(LOAD.RecordHistory)
 const Twins = lazy(LOAD.Twins)
-const Yearbook = lazy(LOAD.Yearbook)
+const Retrospect = lazy(LOAD.Retrospect)
 
 /**
  * Which module a tab renders.
@@ -171,7 +171,9 @@ const TAB_MODULE: Record<string, string> = {
   'nationwide': 'Nationwide',
   'record-history': 'RecordHistory',
   'twins': 'Twins',
-  'yearbook': 'Yearbook',
+  // The tab id predates the sub-navigation that now sits inside it; renaming it
+  // would break every link that was shared while it was the yearbook alone.
+  'yearbook': 'Retrospect',
   'heatmap': 'Heatmap',
   'extremes': 'Extremes',
   'extreme-months': 'ExtremeMonths',
@@ -265,7 +267,7 @@ const TABS: TabDef[] = [
   { id: 'annual-overview', label: 'Jahresübersicht', icon: Table2, group: 'Messwerte' },
   { id: 'day-in-history', label: 'Dieser Tag', icon: CalendarHeart, group: 'Messwerte' },
   { id: 'twins', label: 'Wetterzwillinge', icon: Fingerprint, group: 'Messwerte' },
-  { id: 'yearbook', label: 'Jahresrückblick', icon: Sparkles, group: 'Messwerte' },
+  { id: 'yearbook', label: 'Rückblick & Kurioses', icon: Sparkles, group: 'Messwerte' },
   { id: 'temp-trend', label: 'Temperaturtrend', icon: TrendingUp, group: 'Trends' },
   { id: 'precip-trend', label: 'Niederschlagstrend', icon: CloudRain, group: 'Trends' },
   { id: 'annual-means', label: 'Jahresmittelwerte', icon: LineChart, group: 'Trends' },
@@ -621,7 +623,7 @@ export default function App() {
             {tab === 'twins' && <Twins stationId={stationId} stationName={stationName} />}
 
             {tab === 'yearbook' && (
-              <Yearbook stationId={stationId} stationName={stationName} />
+              <Retrospect stationId={stationId} stationName={stationName} />
             )}
 
             {tab === 'record-history' && (

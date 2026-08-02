@@ -117,8 +117,9 @@ Pegel. Jede Kachel verlinkt in die Ansicht, aus der ihre Zahl stammt.
 **Messwerte** — Monatsübersicht (Tageswerte, Tagesverlauf, Jahresverlauf) ·
 Jahresübersicht (Kenndaten und Schwellenwerttage je Kalenderjahr) ·
 Dieser Tag in der Geschichte · Wetterzwillinge: der Tag im Archiv, der einem
-gegebenen am ähnlichsten ist · Jahresrückblick: zehn Tage, die ein Jahr
-beschreiben, für jedes der 167 Jahre
+gegebenen am ähnlichsten ist · Rückblick & Kurioses: zehn Tage, die ein Jahr
+beschreiben, für jedes der 167 Jahre, und zwölf Fragen, die in keiner Rangliste
+vorkommen
 
 **Trends** — Temperaturtrend · Niederschlagstrend · Jahresmittelwerte,
 Anomalien und Warming Stripes · Mitteltemperatur Year-to-Date · Jahreszeiten ·
@@ -200,6 +201,7 @@ server/
   calendar-records.js  Rekorde je Kalendertag und ihre Wechsel
   twins.js             nächster Nachbar eines Tages über sieben bis neun Größen
   yearbook.js          zehn markante Tage je Jahr, gegen den Kalendertag gerankt
+  curiosities.js       zwölf Fragen abseits der üblichen Ranglisten
   distribution.js      Verteilungen dreier Referenzperioden, Kenntage
   nationwide-shape.js  die Form eines Tages über Deutschland, reine Rechnung
   nationwide-csv.js    Jahresarchiv dieser Tagesformen plus Stationsregister
@@ -490,6 +492,22 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   wäre — die erste Fassung meldete tatsächlich „höchste Schneedecke" unter einem
   Wert von null. Gleichstände halb zu zählen setzt ihn auf 0,50 statt 1,00, und
   eine Untergrenze von 0,90 hält solche Tage aus der Liste.
+- **Kuriositätenkabinett.** Jede andere Rangliste hier fragt nach dem größten
+  oder dem kleinsten Wert und bekommt zuverlässig dieselben zwanzig Tage zurück.
+  Diese zwölf Fragen an 59.902 Messtage bekommen andere Antworten: der wärmste
+  Wintertag (26.02.1900, 22,3 °C), der kälteste Sommertag, der größte Tagesgang
+  (13.09.1911, 3,0 → 30,7 °C), der Tag, der 15,8 K über dem Vortag lag
+  (16.01.1960), und der Tag, an dem 83 % des Monatsniederschlags fielen
+  (20.07.1947, 60,5 von 73,1 mm). Zwei Fragen sind so selten, dass die Antwort
+  keine Rangliste mehr ist, sondern eine vollständige Aufzählung: **Frost im
+  Sommer gab es an 6 Tagen** seit 1858 (kältester: 03.06.1962 mit −1,9 °C),
+  **Schnee zwischen Mai und September an 2** (09.05.1938 mit 8 cm). Die Zeile
+  unter jeder Liste sagt deshalb, ob zehn von vielen oder alle gezeigt werden.
+  Sprünge und Druckänderungen entstehen nur über echte Nachbartage — über eine
+  Archivlücke hinweg wäre die Differenz erfunden. Der Monatsanteil zählt erst ab
+  20 mm Monatssumme, sonst gewänne ein Nieselregen in einem sonst regenlosen
+  Februar mit 100 %; die Abweichungen brauchen 30 Jahre Kalendertagsmittel,
+  darunter wäre der Bezugswert Rauschen und jeder Tag sähe außergewöhnlich aus.
 - **Verteilungsverschiebung.** Jeder andere Trend hier gibt einen Mittelwert
   an. Ein Mittelwert kann steigen, weil der kalte Rand kürzer wurde, weil der
   warme Rand wuchs oder weil sich alles gemeinsam verschob — drei verschiedene

@@ -49,19 +49,13 @@ Ideen zurückgestellt wurden (siehe unten).
 | 10 | Fast-Rekorde | `daily` | **fertig** |
 | 14 | Wetterzwillinge (Aussage auch ins Dashboard) | `daily` | **fertig** |
 | 15 | Jahres-Wrapped: zehn markante Tage je Jahr | `daily` | **fertig** |
-| 16 | Kuriositätenkabinett | `daily` | offen |
+| 16 | Kuriositätenkabinett | `daily` | **fertig** |
 | 17 | Episoden statt Tage | `daily` | offen |
 | 18 | Serien-Ticker | `daily` | offen |
 | 19 | Monatsbilanz live | `daily` | offen |
 | 20 | Newsroom: automatische Meldungen | alle | offen |
 
 ### Was die einzelnen Punkte vorhaben
-
-**16 — Kuriositätenkabinett.** Systematisch gesuchte Merkwürdigkeiten statt
-reiner Extremwerte: größter Tagesgang, größter Sprung zum Vortag, wärmster
-Wintertag, kältester Sommertag, nassester Tag im trockensten Monat, größter
-Abstand zum Kalendermittel. Jede Zeile eine kleine Geschichte, keine davon in
-einer normalen Rekordliste.
 
 **17 — Episoden statt Tage.** Markante Tage sind Einzeltage; das Gedächtnis
 arbeitet in Ereignissen. Zusammenhängende Hitze-, Kälte-, Trocken- und
