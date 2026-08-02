@@ -227,7 +227,7 @@ export function MonthlyOverview({
                     tickLine={false}
                     unit=" mm"
                   />
-                  <Tooltip content={<DayTooltip />} cursor={{ fill: 'oklch(100% 0 0 / 0.03)' }} />
+                  <Tooltip content={<DayTooltip />} cursor={{ fill: CHART.cursorSoft }} />
                   <Legend verticalAlign="top" height={32} wrapperStyle={{ fontSize: 11 }} />
                   <Bar
                     yAxisId="precip"
@@ -284,7 +284,7 @@ export function MonthlyOverview({
                   <XAxis dataKey="label" stroke={CHART.axis} tick={CHART.tick} tickLine={false} />
                   <YAxis yAxisId="temp" stroke={CHART.axis} tick={CHART.tick} tickLine={false} unit=" °C" />
                   <YAxis yAxisId="precip" orientation="right" stroke={CHART.axis} tick={CHART.tick} tickLine={false} unit=" mm" />
-                  <Tooltip content={<MonthTooltip />} cursor={{ fill: 'oklch(100% 0 0 / 0.03)' }} />
+                  <Tooltip content={<MonthTooltip />} cursor={{ fill: CHART.cursorSoft }} />
                   <Bar
                     yAxisId="precip"
                     name="Niederschlag"

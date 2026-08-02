@@ -212,7 +212,7 @@ export function Vegetation({
                     tickLine={false}
                     unit=" d"
                   />
-                  <Tooltip content={<SeasonTooltip />} cursor={{ fill: 'oklch(100% 0 0 / 0.03)' }} />
+                  <Tooltip content={<SeasonTooltip />} cursor={{ fill: CHART.cursorSoft }} />
                   <Legend verticalAlign="top" height={32} wrapperStyle={{ fontSize: 11 }} />
                   <Area
                     yAxisId="doy"
@@ -258,7 +258,7 @@ export function Vegetation({
                     unit=" Kd"
                     width={62}
                   />
-                  <Tooltip content={<GddTooltip />} cursor={{ fill: 'oklch(100% 0 0 / 0.03)' }} />
+                  <Tooltip content={<GddTooltip />} cursor={{ fill: CHART.cursorSoft }} />
                   <Legend verticalAlign="top" height={32} wrapperStyle={{ fontSize: 11 }} />
                   <Line
                     name="Wachstumsgradtage"

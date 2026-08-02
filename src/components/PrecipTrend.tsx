@@ -241,7 +241,7 @@ export function PrecipTrend({
                     ]}
                     unit=" mm"
                   />
-                  <Tooltip content={<PrecipTooltip />} cursor={{ fill: 'oklch(100% 0 0 / 0.03)' }} />
+                  <Tooltip content={<PrecipTooltip />} cursor={{ fill: CHART.cursorSoft }} />
                   <Legend verticalAlign="top" height={32} iconType="square" wrapperStyle={{ fontSize: 11 }} />
                   <Bar
                     name="Jahressumme (vollständig)"

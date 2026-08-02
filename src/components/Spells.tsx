@@ -187,7 +187,7 @@ export function Spells({
                   <YAxis stroke={CHART.axis} tick={CHART.tick} tickLine={false} allowDecimals={false} />
                   <Tooltip
                     content={<DecadeTooltip />}
-                    cursor={{ fill: 'oklch(100% 0 0 / 0.03)' }}
+                    cursor={{ fill: CHART.cursorSoft }}
                   />
                   <Bar
                     dataKey="count"

@@ -396,21 +396,33 @@ export function EmptyState({ message }: { message: string }) {
 /* -------------------------------------------------------------------------- */
 
 /** Shared visual language for every Recharts surface. */
+/**
+ * Chart furniture and data colours.
+ *
+ * Every value is a CSS variable rather than a literal, so the two themes are
+ * one stylesheet apart. Recharts writes these straight into SVG presentation
+ * attributes, where `var()` resolves like any other CSS value — checked in the
+ * browser rather than assumed, because a silently unresolved paint would show
+ * as an invisible line, not an error.
+ */
 export const CHART = {
-  grid: 'oklch(28% 0.008 260)',
-  axis: 'oklch(56% 0.008 260)',
-  tick: { fill: 'oklch(72% 0.008 260)', fontSize: 11 },
+  grid: 'var(--color-chart-grid)',
+  axis: 'var(--color-chart-axis)',
+  tick: { fill: 'var(--color-chart-tick)', fontSize: 11 },
+  /** Hover backdrops: the solid one behind bars, the soft one under lines. */
+  cursor: 'var(--color-chart-cursor)',
+  cursorSoft: 'var(--color-chart-cursor-soft)',
   colors: {
-    brand: 'oklch(84% 0.17 92)',
-    warm: 'oklch(70% 0.19 25)',
-    hot: 'oklch(75% 0.17 55)',
-    cool: 'oklch(76% 0.13 235)',
-    cold: 'oklch(68% 0.15 255)',
-    wet: 'oklch(78% 0.12 205)',
-    dry: 'oklch(78% 0.13 75)',
-    good: 'oklch(76% 0.17 150)',
-    neutral: 'oklch(62% 0.008 260)',
-    accent: 'oklch(74% 0.17 340)',
+    brand: 'var(--color-brand)',
+    warm: 'var(--color-warm)',
+    hot: 'var(--color-hot)',
+    cool: 'var(--color-cool)',
+    cold: 'var(--color-cold)',
+    wet: 'var(--color-wet)',
+    dry: 'var(--color-dry)',
+    good: 'var(--color-good)',
+    neutral: 'var(--color-chart-axis)',
+    accent: 'var(--color-accent)',
   },
 } as const
 

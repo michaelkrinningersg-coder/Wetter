@@ -259,7 +259,7 @@ function Profiles({ componentKey }: { componentKey: string }) {
                   <XAxis dataKey="label" stroke={CHART.axis} tick={CHART.tick} />
                   <YAxis stroke={CHART.axis} tick={CHART.tick} width={44} />
                   <Tooltip
-                    cursor={{ fill: 'oklch(28% 0.008 260 / 0.4)' }}
+                    cursor={{ fill: CHART.cursor }}
                     content={({ active, payload, label }) =>
                       active && payload?.length ? (
                         <ChartTooltip
@@ -548,7 +548,7 @@ function Exceedances({ data, componentKey }: { data: AirOverviewResponse; compon
                           />
                         )}
                         <Tooltip
-                          cursor={{ fill: 'oklch(28% 0.008 260 / 0.4)' }}
+                          cursor={{ fill: CHART.cursor }}
                           content={({ active, payload, label }) =>
                             active && payload?.length ? (
                               <ChartTooltip
@@ -674,7 +674,7 @@ function OzoneHeat({ data }: { data: AirOverviewResponse }) {
                 />
               )}
               <Tooltip
-                cursor={{ fill: 'oklch(28% 0.008 260 / 0.4)' }}
+                cursor={{ fill: CHART.cursor }}
                 content={({ active, payload, label }) => {
                   if (!active || !payload?.length) return null
                   const row = payload[0]!.payload as (typeof rows)[number]

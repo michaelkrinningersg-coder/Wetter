@@ -47,7 +47,7 @@ const WARM_HUE = 25
  * category rather than the middle of a scale.
  */
 function tileColor(value: number | null, scale: Scale | undefined): string {
-  if (value === null || !scale) return 'oklch(22% 0.006 260)'
+  if (value === null || !scale) return 'var(--color-tile-empty)'
 
   const span = scale.p80 - scale.p20
   const t = span === 0 ? 0.5 : Math.max(0, Math.min(1, (value - scale.p20) / span))
@@ -201,7 +201,7 @@ export function Heatmap({ stationId }: { stationId: string }) {
                               sparse
                                 ? {
                                     backgroundImage:
-                                      'repeating-linear-gradient(135deg, oklch(38% 0.01 260) 0 4px, oklch(28% 0.008 260) 4px 8px)',
+                                      'repeating-linear-gradient(135deg, var(--color-tile-hatch-a) 0 4px, var(--color-tile-hatch-b) 4px 8px)',
                                   }
                                 : { backgroundColor: tileColor(value, scales[month]) }
                             }

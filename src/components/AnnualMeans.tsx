@@ -141,7 +141,7 @@ export function AnnualMeans({
               <CartesianGrid stroke={CHART.grid} strokeDasharray="3 3" />
               <XAxis dataKey="year" stroke={CHART.axis} tick={CHART.tick} tickLine={false} />
               <YAxis stroke={CHART.axis} tick={CHART.tick} tickLine={false} unit=" °C" />
-              <Tooltip content={<MeansTooltip />} cursor={{ fill: 'oklch(100% 0 0 / 0.03)' }} />
+              <Tooltip content={<MeansTooltip />} cursor={{ fill: CHART.cursorSoft }} />
               <Legend verticalAlign="top" height={32} wrapperStyle={{ fontSize: 11 }} />
               {overallAvg !== null && (
                 <ReferenceLine
@@ -150,7 +150,7 @@ export function AnnualMeans({
                   strokeDasharray="5 5"
                   label={{
                     value: `Mittel ${temp(overallAvg, 2)}`,
-                    fill: 'oklch(72% 0.008 260)',
+                    fill: CHART.tick.fill,
                     position: 'insideTopLeft',
                     fontSize: 10,
                   }}

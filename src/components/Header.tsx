@@ -4,12 +4,44 @@ import {
   CheckCircle2,
   CloudSun,
   Database,
+  Moon,
   RefreshCw,
+  Sun,
 } from 'lucide-react'
 
 import type { ImportResult, ImportStatus, Station } from '../types'
 import { STATIC } from '../lib/api'
 import { isoToGerman } from '../lib/format'
+import { useTheme } from '../lib/theme'
+
+/**
+ * Light or dark, by hand.
+ *
+ * Dark is the default and stays it — this app was designed dark. The switch
+ * exists for the visitor who opens the link outdoors, and the choice is
+ * remembered. Rendered as a two-state button rather than a checkbox so the
+ * icon can say what pressing it will do.
+ */
+function ThemeToggle() {
+  const [theme, setTheme] = useTheme()
+  const next = theme === 'dark' ? 'light' : 'dark'
+
+  return (
+    <button
+      type="button"
+      onClick={() => setTheme(next)}
+      title={next === 'light' ? 'Helle Darstellung' : 'Dunkle Darstellung'}
+      aria-label={next === 'light' ? 'Zu heller Darstellung wechseln' : 'Zu dunkler Darstellung wechseln'}
+      className="flex size-9 cursor-pointer items-center justify-center rounded-md border border-line bg-raised text-ink-muted transition-colors hover:border-line-strong hover:text-ink"
+    >
+      {theme === 'dark' ? (
+        <Sun className="size-4" aria-hidden />
+      ) : (
+        <Moon className="size-4" aria-hidden />
+      )}
+    </button>
+  )
+}
 
 export function Header({
   status,
@@ -120,9 +152,12 @@ export function Header({
           {/* A static build has no server to import into; the button would
               only ever produce a 405. The data is as fresh as the last deploy,
               which the date range above already states. */}
+          <div className="hidden h-8 w-px bg-line sm:block" aria-hidden />
+
+          <ThemeToggle />
+
           {!STATIC && (
             <>
-              <div className="hidden h-8 w-px bg-line sm:block" aria-hidden />
 
               <button
                 type="button"

@@ -395,7 +395,7 @@ function TrendTooltip({
         {
           label: 'Ø Temperatur',
           value: temp(point.temp, 2),
-          className: point.isIncomplete ? 'text-[oklch(74%_0.17_340)]' : 'text-ink',
+          className: point.isIncomplete ? 'text-accent' : 'text-ink',
         },
         { label: 'Trendwert (linear)', value: temp(point.trend, 2), className: 'text-brand' },
         ...(point.smooth !== null

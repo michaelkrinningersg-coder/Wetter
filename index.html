@@ -3,12 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="color-scheme" content="dark light" />
     <meta
       name="description"
       content="Klimadaten-Analyse auf Basis der offenen Tageswerte des Deutschen Wetterdienstes (DWD) — Trends, Extremwerte und Prognosen seit 1858."
     />
     <title>Wetterstation — DWD Klimadaten-Analyse</title>
+
+    <!--
+      Set the theme before the first paint.
+
+      Doing this from React would render one frame in the default theme before
+      the stored choice lands, and that flash is the whole reason people
+      dislike theme switches. Deliberately inline, deliberately blocking: it is
+      four lines and it has to run before the body is painted.
+    -->
+    <script>
+      try {
+        if (localStorage.getItem('theme') === 'light') {
+          document.documentElement.setAttribute('data-theme', 'light')
+        }
+      } catch (e) {
+        /* storage unavailable — the default theme applies */
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

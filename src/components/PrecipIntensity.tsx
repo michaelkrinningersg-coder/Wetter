@@ -299,7 +299,7 @@ export function PrecipIntensity({
                     window={data?.rxWindow ?? 5}
                   />
                 }
-                cursor={{ fill: 'oklch(100% 0 0 / 0.03)' }}
+                cursor={{ fill: CHART.cursorSoft }}
               />
               <Legend verticalAlign="top" height={32} wrapperStyle={{ fontSize: 11 }} />
               <Bar

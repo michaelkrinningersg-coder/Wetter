@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react'
 
 import { useApi } from '../lib/api'
+import { useTheme } from '../lib/theme'
 import { useUrlState } from '../lib/url-state'
 import { isoToGerman, num } from '../lib/format'
 import { percentile } from '../lib/stats'
@@ -51,8 +52,20 @@ function makeProjection(bounds: GermanyStationRegister['bounds'], width: number,
 /* Colour                                                                     */
 /* -------------------------------------------------------------------------- */
 
+/*
+ * The map ramps are the one set of colours that could not become CSS
+ * variables: they are picked by index from an array, and thirteen variables to
+ * express two gradients would be worse than two arrays.
+ *
+ * The light versions are not the dark ones adjusted. The dark diverging ramp
+ * passes through 86 % lightness in its middle, which is a legible "near
+ * average" on near black and an invisible dot on near white — so the light
+ * ramp runs darker throughout and puts its neutral at 78 %, still clearly
+ * lighter than either extreme without vanishing into the page.
+ */
+
 /** Cold to warm, through a desaturated middle so the extremes carry the eye. */
-const DIVERGING = [
+const DIVERGING_DARK = [
   'oklch(55% 0.16 255)',
   'oklch(70% 0.12 235)',
   'oklch(82% 0.05 220)',
@@ -62,8 +75,18 @@ const DIVERGING = [
   'oklch(56% 0.20 25)',
 ]
 
+const DIVERGING_LIGHT = [
+  'oklch(42% 0.17 255)',
+  'oklch(58% 0.14 235)',
+  'oklch(72% 0.07 220)',
+  'oklch(78% 0.05 90)',
+  'oklch(68% 0.15 60)',
+  'oklch(56% 0.19 35)',
+  'oklch(44% 0.20 25)',
+]
+
 /** Dry to wet. */
-const SEQUENTIAL = [
+const SEQUENTIAL_DARK = [
   'oklch(72% 0.03 230)',
   'oklch(74% 0.08 225)',
   'oklch(70% 0.12 220)',
@@ -71,6 +94,20 @@ const SEQUENTIAL = [
   'oklch(52% 0.17 250)',
   'oklch(42% 0.17 265)',
 ]
+
+const SEQUENTIAL_LIGHT = [
+  'oklch(84% 0.03 230)',
+  'oklch(76% 0.08 225)',
+  'oklch(66% 0.13 220)',
+  'oklch(56% 0.16 235)',
+  'oklch(46% 0.17 250)',
+  'oklch(36% 0.16 265)',
+]
+
+const RAMPS = {
+  dark: { diverging: DIVERGING_DARK, sequential: SEQUENTIAL_DARK },
+  light: { diverging: DIVERGING_LIGHT, sequential: SEQUENTIAL_LIGHT },
+}
 
 function ramp(colours: string[], t: number): string {
   const clamped = Math.max(0, Math.min(1, t))
@@ -86,7 +123,11 @@ interface Scale {
   zeroIsAbsence: boolean
 }
 
-function buildScale(values: number[], kind: string): Scale | null {
+function buildScale(
+  values: number[],
+  kind: string,
+  ramps: (typeof RAMPS)['dark'],
+): Scale | null {
   if (values.length === 0) return null
   const sorted = [...values].sort((a, b) => a - b)
 
@@ -94,7 +135,7 @@ function buildScale(values: number[], kind: string): Scale | null {
     // Anchored at zero and cut at the 98th percentile: a single cloudburst
     // would otherwise push every other station into the first colour step.
     const high = percentile(sorted, 0.98) ?? sorted.at(-1)!
-    return { low: 0, high: high > 0 ? high : 1, colours: SEQUENTIAL, zeroIsAbsence: true }
+    return { low: 0, high: high > 0 ? high : 1, colours: ramps.sequential, zeroIsAbsence: true }
   }
 
   const low = percentile(sorted, 0.02) ?? sorted[0]!
@@ -102,7 +143,7 @@ function buildScale(values: number[], kind: string): Scale | null {
   return {
     low,
     high: high > low ? high : low + 1,
-    colours: DIVERGING,
+    colours: ramps.diverging,
     zeroIsAbsence: false,
   }
 }
@@ -118,6 +159,7 @@ const WIDTH = 640
 const HEIGHT = 820
 
 export function GermanyMap() {
+  const [theme] = useTheme()
   const [date, setDate] = useUrlState<string>('datum', null)
   const [field, setField] = useUrlState<string>('groesse', null)
 
@@ -160,6 +202,7 @@ export function GermanyMap() {
   const scale = buildScale(
     pairs.map(([, v]) => v),
     active.scale,
+    RAMPS[theme],
   )
 
   const project = makeProjection(register.data.bounds, WIDTH, HEIGHT)

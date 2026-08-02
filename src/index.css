@@ -8,6 +8,19 @@
  * adjust and drifted over time (both #181818 and #151515 were used for the
  * same "raised" surface). Everything now flows from these tokens.
  */
+/*
+ * Two themes, one set of names.
+ *
+ * The dark values live in `@theme` because Tailwind needs them at build time to
+ * emit the utility classes; the light ones override the same custom properties
+ * under `:root[data-theme='light']`, which the utilities then pick up at
+ * runtime. Nothing in a component knows which theme is active.
+ *
+ * The data colours are not the dark ones lightened. A gold that glows on near
+ * black is invisible on near white, so the light set is a separate design at
+ * roughly 50-58 % lightness — dark enough to carry 4.5:1 against the light
+ * surface, saturated enough to stay distinguishable from its neighbours.
+ */
 @theme {
   /* Surfaces: canvas -> card -> raised -> input, each one step lighter. */
   --color-canvas: oklch(14.5% 0.004 260);
@@ -22,7 +35,9 @@
   /* Text. */
   --color-ink: oklch(96% 0.003 260);
   --color-ink-muted: oklch(72% 0.008 260);
-  --color-ink-faint: oklch(56% 0.008 260);
+  /* 60 %, not the 56 % this started at: at 10-11 px these captions are normal
+     text and need 4.5:1, which 56 % missed at 4.05. Measured, not guessed. */
+  --color-ink-faint: oklch(61% 0.009 260);
 
   /* Brand + data colours. Tuned for >=4.5:1 on --color-surface. */
   --color-brand: oklch(84% 0.17 92);
@@ -35,6 +50,25 @@
   --color-dry: oklch(78% 0.13 75);
   --color-good: oklch(76% 0.17 150);
   --color-bad: oklch(68% 0.2 25);
+  /* Used where a series needs a colour that is none of the above — the
+     incomplete-year marker and the phenology autumn band. */
+  --color-accent: oklch(74% 0.17 340);
+
+  /* Chart furniture. Recharts writes these into SVG presentation attributes,
+     where var() resolves like any other CSS value — verified in the browser. */
+  --color-chart-grid: oklch(28% 0.008 260);
+  --color-chart-axis: oklch(56% 0.008 260);
+  --color-chart-tick: oklch(72% 0.008 260);
+  /* Hover backdrop behind a bar; the soft one sits under line charts. */
+  --color-chart-cursor: oklch(28% 0.008 260 / 0.4);
+  --color-chart-cursor-soft: oklch(100% 0 0 / 0.03);
+  --color-chart-label: oklch(72% 0.008 260);
+  /* Heatmap: the "no data" fill and the hatching for months below the
+     coverage rule. Both carry `text-ink-muted`, so they have to flip with the
+     theme or the label disappears into its own tile. */
+  --color-tile-empty: oklch(22% 0.006 260);
+  --color-tile-hatch-a: oklch(38% 0.01 260);
+  --color-tile-hatch-b: oklch(28% 0.008 260);
 
   --radius-card: 0.625rem;
 
@@ -44,9 +78,56 @@
     monospace;
 }
 
+/*
+ * The light theme.
+ *
+ * Applied by `data-theme="light"` on <html>, set before first paint by a small
+ * inline script so the page never flashes dark on its way to light.
+ */
+:root[data-theme='light'] {
+  /* Surfaces run the other way: the canvas is faintly grey, cards are white. */
+  --color-canvas: oklch(97.5% 0.003 260);
+  --color-surface: oklch(100% 0 0);
+  --color-raised: oklch(97% 0.004 260);
+  --color-inset: oklch(93.5% 0.005 260);
+
+  --color-line: oklch(90% 0.006 260);
+  --color-line-strong: oklch(78% 0.01 260);
+
+  --color-ink: oklch(24% 0.012 260);
+  --color-ink-muted: oklch(45% 0.012 260);
+  --color-ink-faint: oklch(54% 0.012 260);
+
+  --color-brand: oklch(56% 0.14 70);
+  --color-brand-dim: oklch(64% 0.12 72);
+  --color-warm: oklch(52% 0.2 25);
+  --color-hot: oklch(56% 0.17 50);
+  --color-cool: oklch(52% 0.14 235);
+  --color-cold: oklch(46% 0.17 258);
+  --color-wet: oklch(50% 0.12 205);
+  --color-dry: oklch(57% 0.13 70);
+  --color-good: oklch(48% 0.15 152);
+  --color-bad: oklch(50% 0.21 25);
+  --color-accent: oklch(50% 0.19 340);
+
+  --color-chart-grid: oklch(91% 0.005 260);
+  --color-chart-axis: oklch(62% 0.008 260);
+  --color-chart-tick: oklch(45% 0.012 260);
+  --color-chart-cursor: oklch(60% 0.01 260 / 0.14);
+  --color-chart-cursor-soft: oklch(0% 0 0 / 0.04);
+  --color-chart-label: oklch(45% 0.012 260);
+  --color-tile-empty: oklch(94% 0.004 260);
+  --color-tile-hatch-a: oklch(86% 0.008 260);
+  --color-tile-hatch-b: oklch(93% 0.005 260);
+}
+
 @layer base {
   html {
     color-scheme: dark;
+  }
+
+  html[data-theme='light'] {
+    color-scheme: light;
   }
 
   body {
@@ -58,6 +139,16 @@
       transparent 70%
     );
     background-attachment: fixed;
+  }
+
+  /* On a light canvas the same vignette would be a dirty smudge; a much
+     fainter warm wash keeps the page from reading as a flat sheet of paper. */
+  html[data-theme='light'] body {
+    background-image: radial-gradient(
+      110ch 60ch at 50% -10%,
+      oklch(88% 0.05 92 / 0.4),
+      transparent 70%
+    );
   }
 
   /* The original app relied on the browser default focus ring, which is

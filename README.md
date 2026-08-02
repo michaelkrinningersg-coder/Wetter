@@ -88,6 +88,12 @@ Der Workflow `.github/workflows/pages.yml` veröffentlicht nach jedem Datenlauf.
 Damit er greifen kann, muss in den Repository-Einstellungen unter **Pages** als
 Quelle **GitHub Actions** eingestellt sein.
 
+Die Oberfläche kennt einen hellen und einen dunklen Farbsatz, umschaltbar oben
+rechts. Dunkel bleibt die Vorgabe; die Wahl wird gespeichert und vor dem ersten
+Bildaufbau von einem Inline-Skript gesetzt, damit die Seite nicht kurz dunkel
+aufblitzt. Sämtliche Farben sind CSS-Variablen — auch die der Diagramme, weil
+recharts sie in SVG-Präsentationsattribute schreibt, wo `var()` aufgelöst wird.
+
 Zwei Dinge kann eine statische Auslieferung nicht, und sie täuscht es auch
 nicht vor: den DWD-Import auf Knopfdruck und das Nachladen der Pegel beim
 Aufruf. Beide Schalter sind ausgeblendet; die Daten sind so frisch wie der
@@ -149,6 +155,7 @@ src/
     format.ts          null-sichere Formatierung, de-DE
     stats.ts           lineare Regression, Perzentile
     url-state.ts       Ansichtszustand im Query-String
+    theme.ts           heller und dunkler Farbsatz
   components/
     ui.tsx             Karten, Kacheln, Filter, Tooltips, Zustände
     …                  13 Analysekomponenten
@@ -315,6 +322,12 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   stärker als die Abweichung, die es messen soll. Genommen wird ein Fenster von
   ±5 Tagen um das Datum, also 330 Werte — so verläuft das Normal glatt durchs
   Jahr, wie es auch die geglätteten Normale des DWD tun.
+- **Farbkontraste.** Beide Farbsätze sind gemessen, nicht geschätzt: Textfarben
+  erreichen mindestens 4,5:1 gegen die Kartenfläche, Datenfarben mindestens
+  3:1. Der helle Satz ist keine aufgehellte Kopie des dunklen — ein Gold, das
+  auf Schwarz leuchtet, ist auf Weiß unsichtbar —, sondern ein eigener Entwurf
+  bei rund 50 % Helligkeit. Die Kartenrampen sind ebenfalls getrennt: die
+  dunkle läuft in der Mitte auf 86 % Helligkeit, was auf Weiß verschwände.
 - **Flusspegel.** Alle Werte in Zentimeter über Pegelnullpunkt. Die Achse des
   Verlaufs ist auf die Messwerte skaliert, weil die täglichen Schwankungen im
   Zentimeterbereich die eigentliche Information sind; Kennwerte und Meldestufen

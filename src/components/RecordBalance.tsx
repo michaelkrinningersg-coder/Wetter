@@ -140,7 +140,7 @@ export function RecordBalance({
                 tickLine={false}
                 tickFormatter={(v: number) => String(Math.abs(v))}
               />
-              <Tooltip content={<BalanceTooltip />} cursor={{ fill: 'oklch(100% 0 0 / 0.03)' }} />
+              <Tooltip content={<BalanceTooltip />} cursor={{ fill: CHART.cursorSoft }} />
               <Legend verticalAlign="top" height={32} wrapperStyle={{ fontSize: 11 }} />
               <ReferenceLine y={0} stroke={CHART.axis} />
               <ReferenceLine

@@ -136,13 +136,13 @@ export function Comparison({
               />
               <Tooltip
                 content={<ComparisonTooltip baseline={baseline} />}
-                cursor={{ fill: 'oklch(100% 0 0 / 0.03)' }}
+                cursor={{ fill: CHART.cursorSoft }}
               />
               <Bar dataKey="avg_temp" radius={[3, 3, 0, 0]} maxBarSize={56}>
                 <LabelList
                   dataKey="avg_temp"
                   position="top"
-                  fill="oklch(72% 0.008 260)"
+                  fill={CHART.tick.fill}
                   fontSize={11}
                   formatter={(v: unknown) =>
                     typeof v === 'number' ? temp(v, 2) : ''

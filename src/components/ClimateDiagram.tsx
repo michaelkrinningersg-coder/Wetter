@@ -121,7 +121,7 @@ export function ClimateDiagram({
                   (max: number) => Math.ceil(max / 10) * 10 * 2,
                 ]}
               />
-              <Tooltip content={<ClimateTooltip />} cursor={{ fill: 'oklch(100% 0 0 / 0.03)' }} />
+              <Tooltip content={<ClimateTooltip />} cursor={{ fill: CHART.cursorSoft }} />
               <Legend verticalAlign="top" height={32} wrapperStyle={{ fontSize: 11 }} />
               <Bar
                 yAxisId="precip"

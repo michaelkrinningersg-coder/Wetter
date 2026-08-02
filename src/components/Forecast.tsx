@@ -263,7 +263,7 @@ export function Forecast({ stationId }: { stationId: string }) {
               />
               <Tooltip
                 content={<ForecastTooltip view={view} runningYear={data.runningYear} />}
-                cursor={{ fill: 'oklch(100% 0 0 / 0.03)' }}
+                cursor={{ fill: CHART.cursorSoft }}
               />
               <Legend verticalAlign="top" height={32} wrapperStyle={{ fontSize: 10 }} />
 
