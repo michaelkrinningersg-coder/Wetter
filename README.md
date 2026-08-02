@@ -130,7 +130,7 @@ Verteilung statt als Mittelwert
 **Rekorde** — Monats-Heatmap · Spitzenwerte (Top-50-Tage) ·
 Spitzenmonate (Top-50-Monate) · Perioden & Serien (längste Hitze-, Trocken-,
 Frost- und Niederschlagsperioden) · Rekordbilanz · Rekordgeschichte: wie alt
-die stehenden Rekorde sind
+die stehenden Rekorde sind und aus welchen Jahren die 366 Tagesrekorde stammen
 
 **Klimatologie** — Klimadiagramm nach Walter & Lieth · Referenzperioden ·
 Jahresprognose
@@ -386,6 +386,15 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   den Beginn der jeweiligen Messreihe, nicht das älteste noch stehende
   Rekorddatum — Höchst- und Tiefsttemperatur werden erst seit 1885 bzw. 1871
   aufgezeichnet, Böen seit 1969.
+- **Rekordkalender.** Für jeden der 366 Kalendertage eine Kachel, eingefärbt
+  nach dem Jahr des Rekords. Bei der Höchsttemperatur stammen **42 %** der
+  Tagesrekorde aus den letzten dreißig Jahren, bei der Tiefsttemperatur **14 %**
+  — dieselbe Reihe, dieselbe Methode, gegenläufiges Bild. Der 29. Februar steht
+  mit in der Liste und ist kein Fehler: er hat ein Viertel der Messungen der
+  übrigen Tage, weshalb die Zahl der Messungen in jedem Kachel-Hinweis steht.
+  Die Nulllinie unter dem Jahrzehnt-Diagramm ist bewusst nicht gezeichnet — die
+  Erwartung ist nicht gleichverteilt, sondern fällt, weil ein spätes Jahrzehnt
+  mehr frühere Werte schlagen muss als ein frühes.
 - **Verteilungsverschiebung.** Jeder andere Trend hier gibt einen Mittelwert
   an. Ein Mittelwert kann steigen, weil der kalte Rand kürzer wurde, weil der
   warme Rand wuchs oder weil sich alles gemeinsam verschob — drei verschiedene

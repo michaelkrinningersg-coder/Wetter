@@ -97,6 +97,19 @@ export function shareOf(value: number | null | undefined, digits = 0): string {
 
 /** `1858-01-01` -> `01.01.1858`, without constructing a Date (which would
  *  shift the day for pre-1900 dates in some timezones). */
+/**
+ * A year, without a thousands separator.
+ *
+ * `num(1885, 0)` produces "1.885" under de-DE grouping, which is correct for a
+ * count and wrong for a year. Every axis, legend and caption that shows a year
+ * goes through here instead.
+ */
+export function year(value: number | null | undefined): string {
+  return value === null || value === undefined || !Number.isFinite(value)
+    ? '—'
+    : String(Math.round(value))
+}
+
 export function isoToGerman(iso: string | null | undefined): string {
   if (!iso) return '—'
   const [y, m, d] = iso.split('-')

@@ -1629,3 +1629,28 @@ export interface RecordAgesResponse {
     coldFields: number
   }
 }
+
+export interface RecordCalendarField {
+  key: string
+  label: string
+  short: string
+  unit: string
+  decimals: number
+  direction: 'max' | 'min'
+  warm: boolean | null
+  note: string | null
+  first: string
+  /** [value, year, observations] per calendar key, null where never measured. */
+  entries: ([number, number, number] | null)[]
+  covered: number
+  minYear: number | null
+  maxYear: number | null
+}
+
+export interface RecordCalendarResponse {
+  station: string
+  last: string
+  /** The 366 calendar keys as MM-DD, sent once for every category. */
+  days: string[]
+  fields: RecordCalendarField[]
+}

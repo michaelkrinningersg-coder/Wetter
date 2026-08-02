@@ -42,7 +42,7 @@ Ideen zurückgestellt wurden (siehe unten).
 | 5 | Nord-Süd- und West-Ost-Gefälle | `nationwide_daily` | **fertig** |
 | 6 | Deutschlands Extrempunkte | `nationwide_daily` | **fertig** |
 | 8 | Wie alt ist jeder Rekord | `daily` | **fertig** |
-| 9 | Rekordkalender: 366 Kacheln | `daily` | offen |
+| 9 | Rekordkalender: 366 Kacheln | `daily` | **fertig** |
 | 11 | Rekordjahrgänge | `daily` | offen |
 | 12 | Überlebenskurve eines Rekords | `daily` | offen |
 | 13 | Bundesweite Rekordbilanz seit 1881 | `regional_values` | offen |
@@ -56,10 +56,6 @@ Ideen zurückgestellt wurden (siehe unten).
 | 20 | Newsroom: automatische Meldungen | alle | offen |
 
 ### Was die einzelnen Punkte vorhaben
-
-**9 — Rekordkalender: 366 Kacheln.** Für jeden Kalendertag der Allzeitrekord
-mit Jahreszahl, eingefärbt nach Jahrzehnt. Zeigt, aus welchen Jahren die
-Rekorde stammen und wie ungleich sie über das Jahr verteilt sind.
 
 **10 — Fast-Rekorde.** Tage, die knapp an einem Rekord vorbeischrammten und
 deshalb in keiner Liste stehen. Es gibt deutlich mehr davon als Rekorde, und

@@ -1,7 +1,8 @@
-import { Hourglass } from 'lucide-react'
+import { Grid3x3, Hourglass } from 'lucide-react'
 
 import { useUrlState } from '../lib/url-state'
 import { RecordAges } from './RecordAges'
+import { RecordCalendar } from './RecordCalendar'
 import { SubNav } from './ui'
 
 /**
@@ -16,7 +17,10 @@ import { SubNav } from './ui'
  * Not to be confused with "Allzeitrekorde", which asks the same question of
  * every station in Germany for one day at a time.
  */
-const VIEWS = [{ value: 'alter', label: 'Alter', icon: Hourglass }] as const
+const VIEWS = [
+  { value: 'alter', label: 'Alter', icon: Hourglass },
+  { value: 'kalender', label: 'Kalender', icon: Grid3x3 },
+] as const
 
 export function RecordHistory({
   stationId,
@@ -29,10 +33,12 @@ export function RecordHistory({
 
   return (
     <div className="space-y-6">
-      {VIEWS.length > 1 && (
-        <SubNav label="Auswertung" value={view} items={VIEWS} onChange={setView} />
+      <SubNav label="Auswertung" value={view} items={VIEWS} onChange={setView} />
+      {view === 'kalender' ? (
+        <RecordCalendar stationId={stationId} stationName={stationName} />
+      ) : (
+        <RecordAges stationId={stationId} stationName={stationName} />
       )}
-      {view === 'alter' && <RecordAges stationId={stationId} stationName={stationName} />}
     </div>
   )
 }

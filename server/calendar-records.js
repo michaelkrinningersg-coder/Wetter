@@ -375,3 +375,70 @@ export function recordAges(stationId) {
     },
   }
 }
+
+/* -------------------------------------------------------------------------- */
+/* The record calendar                                                        */
+/* -------------------------------------------------------------------------- */
+
+/** The 366 calendar keys in order, so the payload carries them once. */
+function calendarKeys() {
+  const keys = []
+  const lengths = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+  for (let month = 1; month <= 12; month++) {
+    for (let day = 1; day <= lengths[month - 1]; day++) {
+      keys.push(`${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`)
+    }
+  }
+  return keys
+}
+
+const CALENDAR_KEYS = calendarKeys()
+
+/**
+ * Every calendar day's standing record, for every category.
+ *
+ * The dates are not sent: a record's date is its year plus its calendar key, so
+ * repeating it would be 3,660 redundant strings. Nor are the keys sent per
+ * field — they are the same 366 for all of them.
+ *
+ * The 29th of February is in the list and is not a mistake. It has a quarter of
+ * the observations the other days have, which makes its record easier to hold
+ * and harder to break; the observation count travels with every tile so the
+ * view can say so rather than quietly presenting it as an equal.
+ */
+export function recordCalendar(stationId) {
+  const last = lastDayOf(stationId)
+  if (!last) return null
+
+  const fields = []
+  for (const field of RECORD_FIELDS) {
+    const walked = recordWalk(stationId, field.key)
+    if (!walked || walked.days === 0) continue
+
+    const entries = CALENDAR_KEYS.map((key) => {
+      const held = walked.standing.get(key)
+      return held ? [held.value, held.year, held.observations] : null
+    })
+
+    const years = entries.filter(Boolean).map((e) => e[1])
+    fields.push({
+      key: field.key,
+      label: field.label,
+      short: field.short,
+      unit: field.unit,
+      decimals: field.decimals,
+      direction: field.direction,
+      warm: field.warm,
+      note: field.note ?? null,
+      first: walked.first,
+      /** [value, year, observations] per calendar key, null where never measured. */
+      entries,
+      covered: years.length,
+      minYear: years.length > 0 ? Math.min(...years) : null,
+      maxYear: years.length > 0 ? Math.max(...years) : null,
+    })
+  }
+
+  if (fields.length === 0) return null
+  return { station: stationId, last, days: CALENDAR_KEYS, fields }
+}
