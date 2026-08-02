@@ -1654,3 +1654,50 @@ export interface RecordCalendarResponse {
   days: string[]
   fields: RecordCalendarField[]
 }
+
+export interface VintageYear {
+  year: number
+  /** Records this year established at the time. */
+  set: number
+  /** What chance alone would have produced, summing 1/k over the year's days. */
+  expected: number
+  /** Records from this year that still stand today. */
+  standing: number
+  opportunities: number
+}
+
+export interface VintageDecade extends Omit<VintageYear, 'year'> {
+  decade: number
+  years: number
+  ratio: number | null
+}
+
+export interface VintageField {
+  key: string
+  label: string
+  short: string
+  unit: string
+  decimals: number
+  direction: 'max' | 'min'
+  warm: boolean | null
+  note: string | null
+  first: string
+  years: VintageYear[]
+  decades: VintageDecade[]
+  totals: { set: number; standing: number; expected: number }
+  top: VintageYear[]
+}
+
+export interface VintageGroup {
+  fields: number
+  years: VintageYear[]
+  decades: VintageDecade[]
+}
+
+export interface RecordVintagesResponse {
+  station: string
+  last: string
+  vintages: number
+  fields: VintageField[]
+  groups: Record<string, VintageGroup>
+}

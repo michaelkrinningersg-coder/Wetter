@@ -130,7 +130,8 @@ Verteilung statt als Mittelwert
 **Rekorde** — Monats-Heatmap · Spitzenwerte (Top-50-Tage) ·
 Spitzenmonate (Top-50-Monate) · Perioden & Serien (längste Hitze-, Trocken-,
 Frost- und Niederschlagsperioden) · Rekordbilanz · Rekordgeschichte: wie alt
-die stehenden Rekorde sind und aus welchen Jahren die 366 Tagesrekorde stammen
+die stehenden Rekorde sind, aus welchen Jahren die 366 Tagesrekorde stammen und
+welche Jahrgänge mehr Rekorde stellten, als der Zufall hergibt
 
 **Klimatologie** — Klimadiagramm nach Walter & Lieth · Referenzperioden ·
 Jahresprognose
@@ -385,7 +386,11 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   1. März mit dem 29. Februar vergleichen. Und die Spalte „Reihe seit" nennt
   den Beginn der jeweiligen Messreihe, nicht das älteste noch stehende
   Rekorddatum — Höchst- und Tiefsttemperatur werden erst seit 1885 bzw. 1871
-  aufgezeichnet, Böen seit 1969.
+  aufgezeichnet, Böen seit 1969. Bei Schneehöhe, Niederschlag und Sonnenschein
+  zählen nur Tage, an denen die Größe überhaupt auftrat: ein Maximum von 0 cm
+  ist keine Rekordmarke, sondern die Auskunft, dass es an diesem Kalendertag nie
+  geschneit hat — 179 der 192 vermeintlichen Rekorde des Jahres 1858 waren genau
+  das.
 - **Rekordkalender.** Für jeden der 366 Kalendertage eine Kachel, eingefärbt
   nach dem Jahr des Rekords. Bei der Höchsttemperatur stammen **42 %** der
   Tagesrekorde aus den letzten dreißig Jahren, bei der Tiefsttemperatur **14 %**
@@ -395,6 +400,20 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   Die Nulllinie unter dem Jahrzehnt-Diagramm ist bewusst nicht gezeichnet — die
   Erwartung ist nicht gleichverteilt, sondern fällt, weil ein spätes Jahrzehnt
   mehr frühere Werte schlagen muss als ein frühes.
+- **Rekordjahrgänge.** Zwei Fragen heißen beide „Rekordjahr", und nur eine
+  davon ist fair. Wie viele Rekorde ein Jahr *heute noch hält*, bevorzugt späte
+  Jahre mechanisch. Wie viele es *damals aufstellte*, bevorzugt frühe — die
+  1880er stellten Hunderte auf, weil fast jeder Kalendertag erst zum dritten
+  Mal gemessen wurde. Die Korrektur liefert die klassische Rekordtheorie: bei
+  unverändertem Klima ist die k-te Messung eines Kalendertages mit
+  Wahrscheinlichkeit 1/k ein Rekord, die erwartete Ausbeute eines Jahres also
+  die Summe der 1/k über seine Tage. Das Verhältnis von beobachtet zu erwartet
+  ist die ganze Auswertung: über 168 Jahre fielen 4.478 Rekorde bei 4.067
+  erwartbaren — im Mittel also Zufall. In der Verteilung steckt die Aussage:
+  **warme Rekorde 2,75× im laufenden Jahrzehnt, kalte 0,25× — ein Verhältnis
+  von 11 zu 1.** Niederschlag und Luftdruck liegen als Kontrollgruppe nahe bei
+  1; die Sonnenscheindauer nicht, was als eigener Befund benannt und nicht
+  erklärt wird.
 - **Verteilungsverschiebung.** Jeder andere Trend hier gibt einen Mittelwert
   an. Ein Mittelwert kann steigen, weil der kalte Rand kürzer wurde, weil der
   warme Rand wuchs oder weil sich alles gemeinsam verschob — drei verschiedene

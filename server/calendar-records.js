@@ -81,6 +81,7 @@ export const RECORD_FIELDS = [
     unit: 'mm',
     decimals: 1,
     warm: null,
+    zeroIsAbsence: true,
   },
   {
     key: 'snow',
@@ -91,6 +92,7 @@ export const RECORD_FIELDS = [
     unit: 'cm',
     decimals: 0,
     warm: false,
+    zeroIsAbsence: true,
   },
   {
     key: 'wind_max',
@@ -112,6 +114,7 @@ export const RECORD_FIELDS = [
     unit: 'h',
     decimals: 1,
     warm: null,
+    zeroIsAbsence: true,
     note: 'Die Sonnenscheindauer wird erst seit 1927 gemessen.',
   },
   {
@@ -144,11 +147,27 @@ const beats = (direction, value, record) => (direction === 'max' ? value > recor
 /* The walk                                                                   */
 /* -------------------------------------------------------------------------- */
 
-const seriesStmt = (column) =>
+/**
+ * A maximum of zero is not a record.
+ *
+ * Snow depth, rainfall and sunshine measure something that may simply not
+ * happen, and their smallest possible value is nought. Left in, the snow record
+ * of the 15th of July is "0 cm, set in 1858 and never beaten" — which is not a
+ * record but the statement that it has never snowed on that day, dressed up as
+ * one. It was also a large statement: 179 of the 192 records the year 1858 held
+ * were exactly this.
+ *
+ * So for these three the series is the days on which the quantity occurred at
+ * all. Everything downstream — the running maximum, the k-th-observation
+ * expectation, the counts — then refers to that conditional sample, and calendar
+ * days on which it never snowed simply have no snow record.
+ */
+const seriesStmt = (column, zeroIsAbsence) =>
   db.prepare(
     `SELECT date, year, CAST(strftime('%m', date) AS INTEGER) AS month,
             strftime('%m-%d', date) AS key, ${column} AS value
      FROM daily WHERE station_id = ? AND ${column} IS NOT NULL
+       ${zeroIsAbsence ? `AND ${column} > 0` : ''}
      ORDER BY date`,
   )
 
@@ -177,11 +196,31 @@ const daysBetween = (from, to) =>
  * of event and can be excluded.
  */
 function walk(stationId, field) {
-  const rows = seriesStmt(field.column).all(stationId)
+  const rows = seriesStmt(field.column, field.zeroIsAbsence).all(stationId)
   const standing = new Map()
   const spells = []
 
+  // How often each calendar day has been observed so far, and what that means
+  // for the year currently being read. Under a stationary climate the k-th
+  // observation of a calendar day is a record with probability 1/k — that is
+  // the whole of classical record theory, and it is the only fair yardstick for
+  // comparing a year that had to beat two predecessors with one that had to
+  // beat a hundred and sixty.
+  const ordinal = new Map()
+  const byYear = new Map()
+
   for (const row of rows) {
+    const k = (ordinal.get(row.key) ?? 0) + 1
+    ordinal.set(row.key, k)
+
+    let year = byYear.get(row.year)
+    if (!year) {
+      year = { year: row.year, opportunities: 0, expected: 0, set: 0, standing: 0 }
+      byYear.set(row.year, year)
+    }
+    year.opportunities++
+    year.expected += 1 / k
+
     const held = standing.get(row.key)
 
     if (!held) {
@@ -198,6 +237,7 @@ function walk(stationId, field) {
       }
       spells.push(spell)
       standing.set(row.key, { ...spell, spell, observations: 1 })
+      year.set++
       continue
     }
 
@@ -221,6 +261,7 @@ function walk(stationId, field) {
       observations: held.observations,
     }
     spells.push(spell)
+    year.set++
 
     held.value = row.value
     held.date = row.date
@@ -229,9 +270,17 @@ function walk(stationId, field) {
     held.spell = spell
   }
 
+  // Which years the surviving records belong to — only knowable once the whole
+  // series has been read.
+  for (const held of standing.values()) {
+    const year = byYear.get(held.year)
+    if (year) year.standing++
+  }
+
   return {
     standing,
     spells,
+    byYear: [...byYear.values()].sort((a, b) => a.year - b.year),
     days: rows.length,
     // When the quantity was first measured, which is not the same as the
     // earliest standing record: the wind series starts in 1969 whatever its
@@ -441,4 +490,138 @@ export function recordCalendar(stationId) {
 
   if (fields.length === 0) return null
   return { station: stationId, last, days: CALENDAR_KEYS, fields }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Which years left the most records behind                                   */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Two different questions that both get called "record year".
+ *
+ * *Standing* counts the records a year still holds today. It is the intuitive
+ * reading — 2015 owns twelve calendar days of the heat record — but it favours
+ * recent years mechanically, because a record from 1900 has had a century in
+ * which to be beaten.
+ *
+ * *Set* counts the records a year established at the time, and it is compared
+ * against what chance alone would have produced. Under a stationary climate the
+ * k-th observation of a calendar day is a record with probability 1/k, so a
+ * year's expected haul is the sum of 1/k over its days. That expectation falls
+ * as the series grows, which is exactly the correction the raw count needs: the
+ * 1880s set hundreds of records because almost every day was being seen for the
+ * third time, and that is not news.
+ *
+ * The ratio of the two is the whole analysis. Above one means more records than
+ * chance, and for Göttingen's heat records the 2010s sit at 2.5 while the cold
+ * records of the same decade sit at 0.6.
+ */
+const DECADE = 10
+
+function decadesOf(years) {
+  const map = new Map()
+  for (const year of years) {
+    const decade = Math.floor(year.year / DECADE) * DECADE
+    const entry = map.get(decade) ?? {
+      decade,
+      set: 0,
+      expected: 0,
+      standing: 0,
+      opportunities: 0,
+      years: 0,
+    }
+    entry.set += year.set
+    entry.expected += year.expected
+    entry.standing += year.standing
+    entry.opportunities += year.opportunities
+    entry.years++
+    map.set(decade, entry)
+  }
+
+  return [...map.values()]
+    .sort((a, b) => a.decade - b.decade)
+    .map((entry) => ({
+      ...entry,
+      expected: Number(entry.expected.toFixed(2)),
+      ratio: entry.expected > 0 ? entry.set / entry.expected : null,
+    }))
+}
+
+function mergeYears(lists) {
+  const map = new Map()
+  for (const years of lists) {
+    for (const year of years) {
+      const entry = map.get(year.year) ?? {
+        year: year.year,
+        set: 0,
+        expected: 0,
+        standing: 0,
+        opportunities: 0,
+      }
+      entry.set += year.set
+      entry.expected += year.expected
+      entry.standing += year.standing
+      entry.opportunities += year.opportunities
+      map.set(year.year, entry)
+    }
+  }
+  return [...map.values()]
+    .sort((a, b) => a.year - b.year)
+    .map((entry) => ({ ...entry, expected: Number(entry.expected.toFixed(2)) }))
+}
+
+/** How many top years each ranking shows. */
+const VINTAGES = 12
+
+export function recordVintages(stationId) {
+  const last = lastDayOf(stationId)
+  if (!last) return null
+
+  const fields = []
+  for (const field of RECORD_FIELDS) {
+    const walked = recordWalk(stationId, field.key)
+    if (!walked || walked.days === 0) continue
+
+    const years = walked.byYear.map((y) => ({ ...y, expected: Number(y.expected.toFixed(2)) }))
+    fields.push({
+      key: field.key,
+      label: field.label,
+      short: field.short,
+      unit: field.unit,
+      decimals: field.decimals,
+      direction: field.direction,
+      warm: field.warm,
+      note: field.note ?? null,
+      first: walked.first,
+      years,
+      decades: decadesOf(walked.byYear),
+      totals: {
+        set: walked.spells.length,
+        standing: walked.standing.size,
+        expected: Number(walked.byYear.reduce((a, y) => a + y.expected, 0).toFixed(1)),
+      },
+      top: [...years].sort((a, b) => b.standing - a.standing || b.set - a.set).slice(0, VINTAGES),
+    })
+  }
+
+  if (fields.length === 0) return null
+
+  const pick = (test) => fields.filter((f) => test(f.warm))
+  const group = (list) => ({
+    fields: list.length,
+    years: mergeYears(list.map((f) => f.years)),
+    decades: decadesOf(mergeYears(list.map((f) => f.years))),
+  })
+
+  return {
+    station: stationId,
+    last,
+    vintages: VINTAGES,
+    fields,
+    groups: {
+      alle: group(fields),
+      warm: group(pick((w) => w === true)),
+      kalt: group(pick((w) => w === false)),
+    },
+  }
 }

@@ -1,8 +1,9 @@
-import { Grid3x3, Hourglass } from 'lucide-react'
+import { Award, Grid3x3, Hourglass } from 'lucide-react'
 
 import { useUrlState } from '../lib/url-state'
 import { RecordAges } from './RecordAges'
 import { RecordCalendar } from './RecordCalendar'
+import { RecordVintages } from './RecordVintages'
 import { SubNav } from './ui'
 
 /**
@@ -20,6 +21,7 @@ import { SubNav } from './ui'
 const VIEWS = [
   { value: 'alter', label: 'Alter', icon: Hourglass },
   { value: 'kalender', label: 'Kalender', icon: Grid3x3 },
+  { value: 'jahrgaenge', label: 'Jahrgänge', icon: Award },
 ] as const
 
 export function RecordHistory({
@@ -34,9 +36,11 @@ export function RecordHistory({
   return (
     <div className="space-y-6">
       <SubNav label="Auswertung" value={view} items={VIEWS} onChange={setView} />
-      {view === 'kalender' ? (
-        <RecordCalendar stationId={stationId} stationName={stationName} />
-      ) : (
+      {view === 'kalender' && <RecordCalendar stationId={stationId} stationName={stationName} />}
+      {view === 'jahrgaenge' && (
+        <RecordVintages stationId={stationId} stationName={stationName} />
+      )}
+      {!['kalender', 'jahrgaenge'].includes(view) && (
         <RecordAges stationId={stationId} stationName={stationName} />
       )}
     </div>
