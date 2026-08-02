@@ -8,6 +8,7 @@ import { pollenLatest } from './pollen.js'
 import { AIR_STATIONS, COMPONENT_BY_KEY } from './air-sources.js'
 import { odlProbes, odlRange } from './odl.js'
 import { twinHeadline } from './twins.js'
+import { tickerHeadlines } from './ticker.js'
 
 /**
  * One answer for the opening view.
@@ -381,6 +382,12 @@ export function dashboard() {
      * dashboard that compares a whole day rather than one quantity.
      */
     twin: twinHeadline(STATION_ID),
+    /**
+     * The only figures on this page that change every single day: the streaks
+     * that are still running. Filtered to the rare ones — a five-day dry spell
+     * happens eighteen times a year and is not news.
+     */
+    ticker: tickerHeadlines(STATION_ID),
     environment: {
       pollen: pollenNow(),
       air: airNow(),

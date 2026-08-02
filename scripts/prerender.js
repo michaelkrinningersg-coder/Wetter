@@ -54,6 +54,7 @@ import { TWIN_SETS, weatherTwins } from '../server/twins.js'
 import { yearbook, yearbookYears } from '../server/yearbook.js'
 import { curiosities } from '../server/curiosities.js'
 import { episodes, EPISODE_KEYS } from '../server/episodes.js'
+import { ticker } from '../server/ticker.js'
 import { NATIONAL_FIELD_KEYS, nationalField, nationalOverview } from '../server/national.js'
 import { pressureAnalysis } from '../server/pressure.js'
 import { frostRiskAll } from '../server/frost.js'
@@ -138,6 +139,7 @@ const SIMPLE = [
   ['pressure', pressureAnalysis],
   ['distribution', distributionOverview],
   ['curiosities', curiosities],
+  ['ticker', ticker],
   ['record-ages', recordAges],
   ['record-calendar', recordCalendar],
   ['record-vintages', recordVintages],

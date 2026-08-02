@@ -5,6 +5,7 @@ import {
   Flower2,
   Map,
   Radiation as RadiationIcon,
+  Radio,
   Thermometer,
   Trophy,
   Waves,
@@ -153,7 +154,7 @@ export function Dashboard({ stationName }: { stationName: string }) {
   if (error) return <ErrorState message={error} />
   if (!data) return null
 
-  const { latest, year, germany, records, today, twin, environment } = data
+  const { latest, year, germany, records, today, twin, ticker, environment } = data
   const pollen = environment.pollen
   const air = environment.air
   const radiation = environment.radiation
@@ -271,6 +272,32 @@ export function Dashboard({ stationName }: { stationName: string }) {
             <TileLink href={link('day-in-history', { monat: today.month, tag: today.day })}>
               Dieser Tag in der Geschichte
             </TileLink>
+          </Tile>
+        )}
+
+        {ticker && ticker.length > 0 && (
+          <Tile icon={Radio} title="Was gerade läuft" accent="brand">
+            <p className="numeric mt-2 text-3xl font-semibold tracking-tight text-ink">
+              {num(ticker[0]!.days, 0)}{' '}
+              <span className="text-sm font-normal text-ink-muted">
+                {ticker[0]!.days === 1 ? 'Tag' : 'Tage'}
+              </span>
+            </p>
+            <p className="mt-1.5 text-xs text-ink-muted">{ticker[0]!.label}</p>
+            <ul className="mt-2 space-y-0.5 text-[11px] text-ink-muted">
+              {ticker.map((row) => (
+                <li key={row.key}>
+                  <span className="numeric text-ink">{num(row.days, 0)}</span> von{' '}
+                  <span className="numeric">{num(row.record, 0)}</span> — {row.label}
+                  {row.complete ? '' : ' (teils unbelegt)'}
+                </li>
+              ))}
+              <li className="text-ink-faint">
+                Stand {isoToGerman(ticker[0]!.reference)} — gezeigt wird nur, was
+                seltener als zweimal im Jahr so weit kommt
+              </li>
+            </ul>
+            <TileLink href={link('spells', { ansicht: 'ticker' })}>Serien-Ticker</TileLink>
           </Tile>
         )}
 

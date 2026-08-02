@@ -51,14 +51,11 @@ Ideen zurückgestellt wurden (siehe unten).
 | 15 | Jahres-Wrapped: zehn markante Tage je Jahr | `daily` | **fertig** |
 | 16 | Kuriositätenkabinett | `daily` | **fertig** |
 | 17 | Episoden statt Tage | `daily` | **fertig** |
-| 18 | Serien-Ticker | `daily` | offen |
+| 18 | Serien-Ticker | `daily` | **fertig** |
 | 19 | Monatsbilanz live | `daily` | offen |
 | 20 | Newsroom: automatische Meldungen | alle | offen |
 
 ### Was die einzelnen Punkte vorhaben
-
-**18 — Serien-Ticker.** Was gerade läuft, mit Abstand zum Rekord. Die einzige
-Kennzahl, die sich täglich ändert und trotzdem historisch eingeordnet ist.
 
 **19 — Monatsbilanz live.** Rang des laufenden Monats unter allen Ausgaben
 desselben Monats, mit Angabe, wie viel sich bis Monatsende noch verschieben

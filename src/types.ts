@@ -1073,6 +1073,8 @@ export interface DashboardResponse {
   } | null
   /** The nearest neighbour of the latest day, as one sentence. */
   twin: TwinHeadline | null
+  /** The streaks still running — the only figures here that change daily. */
+  ticker: TickerHeadline[] | null
   environment: {
     pollen: {
       issued: string
@@ -2087,6 +2089,71 @@ export interface EpisodesResponse {
   recent: Episode[]
   current: Episode | null
   hint?: string
+}
+
+/* -------------------------------------------------------------------------- */
+/* Running streaks                                                            */
+/* -------------------------------------------------------------------------- */
+
+export interface TickerSeries {
+  key: string
+  /** 'serie' counts days that keep meeting a criterion, 'pause' days since one. */
+  family: 'serie' | 'pause'
+  label: string
+  note: string
+  accent: string
+  event: string | null
+  breakLabel: string
+  /** The last day in the archive, not today — the DWD publishes with a lag. */
+  reference: string
+  measuredToday: boolean
+  /** True when this quantity has stopped being reported for this station. */
+  stale: boolean
+  /** How often the criterion ever failed; zero changes what the row may say. */
+  events: number
+  never: boolean
+  current: { days: number; start: string | null; complete: boolean }
+  since: {
+    days: number
+    date: string
+    value: number
+    measured: number
+    /** Days inside the stretch that carry no measurement at all. */
+    missing: number
+  } | null
+  record: { days: number; start: string; end: string; current: boolean } | null
+  /** The number the row leads with, and the one the rank refers to. */
+  lead: number
+  leadBasis: 'verified' | 'since'
+  rank: number | null
+  runs: number
+  atLeast: number | null
+  perYear: number | null
+  range: { first: string | null; last: string | null; days: number; years: number }
+}
+
+export interface TickerResponse {
+  station: string
+  reference: string
+  minYearsForMean: number
+  series: TickerSeries[]
+}
+
+export interface TickerHeadline {
+  key: string
+  family: 'serie' | 'pause'
+  label: string
+  accent: string
+  days: number
+  verified: number
+  complete: boolean
+  since: number | null
+  record: number | null
+  recordEnd: string | null
+  rank: number | null
+  runs: number
+  perYear: number
+  reference: string
 }
 
 /* -------------------------------------------------------------------------- */

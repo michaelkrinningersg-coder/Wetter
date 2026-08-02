@@ -41,6 +41,7 @@ import { weatherTwins } from './twins.js'
 import { yearbook } from './yearbook.js'
 import { curiosities } from './curiosities.js'
 import { episodes, EPISODE_KEYS } from './episodes.js'
+import { ticker } from './ticker.js'
 import { NATIONAL_FIELD_KEYS, nationalField, nationalOverview } from './national.js'
 import { pressureAnalysis } from './pressure.js'
 import { frostRiskAll } from './frost.js'
@@ -163,6 +164,7 @@ const simple = {
   '/api/weather/frost-risk': frostRiskAll,
   '/api/weather/distribution': distributionOverview,
   '/api/weather/curiosities': curiosities,
+  '/api/weather/ticker': ticker,
   '/api/weather/record-ages': recordAges,
   '/api/weather/record-calendar': recordCalendar,
   '/api/weather/record-vintages': recordVintages,

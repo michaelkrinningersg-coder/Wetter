@@ -133,7 +133,7 @@ Verteilung statt als Mittelwert
 **Rekorde** — Monats-Heatmap · Spitzenwerte (Top-50-Tage) ·
 Spitzenmonate (Top-50-Monate) · Perioden & Episoden (längste Hitze-, Trocken-,
 Frost- und Niederschlagsperioden, dazu dieselben Lagen als Episoden mit Stärke
-und Einordnung) · Rekordbilanz der Station · Rekordgeschichte: wie alt
+und Einordnung, dazu der Ticker der noch laufenden Reihen) · Rekordbilanz der Station · Rekordgeschichte: wie alt
 die stehenden Rekorde sind, aus welchen Jahren die 366 Tagesrekorde stammen und
 welche Jahrgänge mehr Rekorde stellten, als der Zufall hergibt, wie lange ein
 Rekord überlebt und wie oft einer knapp verfehlt wurde
@@ -204,6 +204,7 @@ server/
   yearbook.js          zehn markante Tage je Jahr, gegen den Kalendertag gerankt
   curiosities.js       zwölf Fragen abseits der üblichen Ranglisten
   episodes.js          Wetterlagen als Episoden: Dauer, Stärke, Einordnung
+  ticker.js            laufende Serien und Pausen gegen ihren Rekord
   distribution.js      Verteilungen dreier Referenzperioden, Kenntage
   nationwide-shape.js  die Form eines Tages über Deutschland, reine Rechnung
   nationwide-csv.js    Jahresarchiv dieser Tagesformen plus Stationsregister
@@ -536,6 +537,32 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   nicht behaupten, er sei knapp darunter gewesen. Die Stärke ist die Summe über
   der Schwelle (Gradtage, Niederschlagssumme), was Dauer und Intensität in einer
   Zahl vereint; die Einordnung ist eine Auszählung, keine angepasste Verteilung.
+- **Serien-Ticker.** Die einzige Zahl im Projekt, die sich täglich ändert:
+  was gerade läuft, mit dem Abstand zum Rekord und der Angabe, wie oft eine
+  Reihe dieser Art so weit kommt. Zwei Familien, ein Rechenweg — Serien
+  („4 Sommertage in Folge, Rekord 28") und Pausen („92 Tage seit dem letzten
+  Frost, Rekord 237"), denn die zweite ist die erste mit negiertem Kriterium.
+  Der Platz bezieht sich immer auf die Kopfzahl der Zeile und wird gegen alle
+  *abgeschlossenen* Reihen derselben Art gebildet, die laufende zählt nicht
+  gegen sich selbst. Stichtag ist der letzte Tag im Archiv, nicht heute: der
+  DWD veröffentlicht mit ein bis zwei Tagen Verzug, und ein Ticker, der bis zur
+  Uhrzeit weiterzählte, addierte Tage, die niemand gemessen hat. Fehlt ein
+  Messwert mitten in einer Strecke, stehen **zwei Zahlen** da — im Juli 2026
+  meldete Göttingen an mehreren Tagen kein Minimum, lückenlos belegt sind
+  deshalb 16 frostfreie Tage, während der letzte aufgezeichnete Frost 92 Tage
+  zurückliegt. Die schwächer belegte Zahl führt die Zeile an, weil sie die
+  gesuchte ist, und ist rot als solche gekennzeichnet. Die drei seltensten
+  laufenden Reihen stehen auf dem Dashboard; alltägliche Stände — eine
+  fünftägige Trockenserie kommt achtzehnmal im Jahr vor — bleiben draußen.
+  Zwei Fälle bekommen bewusst gar keine Zahl, weil die erste Fassung dort
+  Unsinn meldete: Wird eine Größe am Stichtag nicht mehr geliefert, ist keine
+  laufende Reihe feststellbar — die Zugspitze meldet seit Februar 2026 keine
+  Schneehöhe, und ungeprüft stand dort „180 Tage ohne Schneedecke, Rekord
+  übertroffen", gestützt auf **keinen einzigen** gemessenen Tag. Und kam ein
+  Ereignis an einer Station nie vor — der Brocken hat in 130 Jahren keinen Tag
+  mit 30 °C —, dann zählt „seit dem letzten Mal" nur den Abstand zur letzten
+  Messlücke; gemeldet wurden so 29.571 Tage mit einem „Rekord" von ebenfalls
+  29.571.
 - **Verteilungsverschiebung.** Jeder andere Trend hier gibt einen Mittelwert
   an. Ein Mittelwert kann steigen, weil der kalte Rand kürzer wurde, weil der
   warme Rand wuchs oder weil sich alles gemeinsam verschob — drei verschiedene
