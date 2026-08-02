@@ -49,6 +49,7 @@ import { NATIONAL_FIELD_KEYS, nationalField, nationalOverview } from '../server/
 import { pressureAnalysis } from '../server/pressure.js'
 import { frostRiskAll } from '../server/frost.js'
 import { distributionOverview } from '../server/distribution.js'
+import { spanAnalysis } from '../server/nationwide.js'
 import { staticPath } from '../src/lib/static-path.js'
 
 const outDir = process.argv[2] ?? 'dist'
@@ -221,6 +222,14 @@ for (const gauge of GAUGES) {
       'Pegel',
     )
   }
+}
+
+/* -------------------------------------------------------------------------- */
+/* The shape of a German day                                                  */
+/* -------------------------------------------------------------------------- */
+
+for (const [path, query] of [['/api/nationwide/span', spanAnalysis]]) {
+  emit(path, query(), 'Deutschlandtage')
 }
 
 /* -------------------------------------------------------------------------- */

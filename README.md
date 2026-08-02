@@ -152,7 +152,8 @@ wärmste und kälteste Station im Mittel und absolut, stärkste Bö, windigste
 Station im Mittel, nasseste Station und größte Tagesspanne — jeweils für ganz
 Deutschland und für alles unterhalb 1000 m · Allzeitrekorde: welche Station an
 welchem Tag ihren eigenen Höchst- oder Tiefstwert gebrochen hat, als Liste und
-als Karte · Markante Tage
+als Karte · Deutschlandtage: die Spanne zwischen dem wärmsten und dem kältesten
+Ort des Landes, für jeden Tag seit 1936 · Markante Tage
 des Archivs in zehn Kategorien · Bundesvergleich: wo Göttingen an jedem
 Archivtag unter den rund 2.200 meldenden Stationen stand, mit dem Jahresgang
 daraus
@@ -189,6 +190,9 @@ server/
   pressure.js          Luftdruck, Sturmlagen, Bezug zum Wind
   frost.js             Spätfrostrisiko: Beginn gegen letzten Frost
   distribution.js      Verteilungen dreier Referenzperioden, Kenntage
+  nationwide-shape.js  die Form eines Tages über Deutschland, reine Rechnung
+  nationwide-csv.js    Jahresarchiv dieser Tagesformen plus Stationsregister
+  nationwide.js        Spanne, Gefälle und Extrempunkte des Landes
   regional-sources.js  amtliche DWD-Gebietsmittel
   regional.js          Gebietsmittel: Reihen und Ranglisten
   records-kinds.js     Rekordkategorien
@@ -382,6 +386,23 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   stammen die Grenzen aus der Reihe der Station selbst: das unterste Prozent von
   Druck und Tagesänderung. Die Tagesänderung gilt nur, wo der Vortag wirklich
   der Vortag ist — über eine Lücke hinweg wäre sie ein erfundener Sturm.
+- **Deutschlandtage.** Die Spanne zwischen dem wärmsten und dem kältesten Ort
+  des Landes braucht mehr Geschichte, als das eigene Tagesarchiv hergibt, und
+  ein rückwirkendes Vollarchiv aller Stationen wäre über ein Gigabyte. Ein
+  einmaliger Durchlauf durch die historischen DWD-Archive liest deshalb 18,5
+  Millionen Einzelmessungen und behält davon **eine Zeile je Tag** — Extreme,
+  Höhengradient und geografisches Gefälle, seit 1759. Jeder Tag ab dem Beginn
+  des Tagesarchivs wird beim Start neu daraus gerechnet, durch dieselbe
+  Funktion, sonst hätte die Reihe an der Nahtstelle einen Sprung. Beteiligt sind
+  nur die Klimastationen: das Niederschlagsnetz ist viermal so groß, misst aber
+  keine Temperatur. Ein Tag zählt ab 100 meldenden Stationen, was die belastbare
+  Reihe 1936 beginnen lässt — eine Spanne zwischen zwei Stationen kann nur
+  wachsen, wenn Stationen dazukommen, und ein dünner Tag unterschätzt sie.
+  Deshalb steht die Stationszahl im selben Diagramm wie die Spanne. Jede Spanne
+  gibt es zweimal: über alle Stationen hält die Zugspitze das kalte Ende an
+  92 % aller Tage, womit die Zahl vor allem misst, wie hoch Deutschlands
+  höchster Berg ist; unterhalb 1000 m wird daraus eine Frage über Orte, an denen
+  Menschen wohnen.
 - **Bundesvergleich.** Das Perzentil zählt Stationen unter dem Wert plus die
   Hälfte der gleichen. Diese Halbierung ist keine Pedanterie: der DWD gibt
   Temperaturen auf eine Nachkommastelle aus, an einem ruhigen Tag teilen sich

@@ -1,6 +1,7 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react'
 import {
   AlertTriangle,
+  ArrowLeftRight,
   BarChart3,
   CalendarDays,
   CalendarHeart,
@@ -93,6 +94,8 @@ const LOAD = {
   FrostRisk: () => import('./components/FrostRisk').then((m) => ({ default: m.FrostRisk })),
   Distribution: () =>
     import('./components/Distribution').then((m) => ({ default: m.Distribution })),
+  Nationwide: () =>
+    import('./components/Nationwide').then((m) => ({ default: m.Nationwide })),
   National: () =>
     import('./components/National').then((m) => ({ default: m.National })),
 }
@@ -130,6 +133,7 @@ const National = lazy(LOAD.National)
 const Pressure = lazy(LOAD.Pressure)
 const FrostRisk = lazy(LOAD.FrostRisk)
 const Distribution = lazy(LOAD.Distribution)
+const Nationwide = lazy(LOAD.Nationwide)
 
 /**
  * Which module a tab renders.
@@ -155,6 +159,7 @@ const TAB_MODULE: Record<string, string> = {
   'pressure': 'Pressure',
   'frost-risk': 'FrostRisk',
   'distribution': 'Distribution',
+  'nationwide': 'Nationwide',
   'heatmap': 'Heatmap',
   'extremes': 'Extremes',
   'extreme-months': 'ExtremeMonths',
@@ -223,6 +228,7 @@ type TabId =
   | 'notable'
   | 'regional'
   | 'national'
+  | 'nationwide'
 
 interface TabDef {
   id: TabId
@@ -269,6 +275,7 @@ const TABS: TabDef[] = [
   { id: 'phenology', label: 'Phänologie', icon: Sprout, group: 'Umwelt' },
   { id: 'germany', label: 'Deutschland gestern', icon: Map, group: 'Deutschland' },
   { id: 'germany-map', label: 'Karte', icon: MapPin, group: 'Deutschland' },
+  { id: 'nationwide', label: 'Deutschlandtage', icon: ArrowLeftRight, group: 'Deutschland' },
   { id: 'records', label: 'Allzeitrekorde', icon: Trophy, group: 'Deutschland' },
   { id: 'notable', label: 'Markante Tage', icon: Sparkles, group: 'Deutschland' },
   { id: 'regional', label: 'Bundesländer', icon: Landmark, group: 'Deutschland' },
@@ -592,6 +599,8 @@ export default function App() {
             {tab === 'germany' && <Germany />}
 
             {tab === 'germany-map' && <GermanyMap />}
+
+            {tab === 'nationwide' && <Nationwide />}
 
             {tab === 'records' && <Records />}
 

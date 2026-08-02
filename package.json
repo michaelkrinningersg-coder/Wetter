@@ -20,6 +20,7 @@
     "fetch:phenology": "node scripts/fetch-phenology.js",
     "fetch:germany": "node scripts/fetch-germany.js",
     "fetch:records": "node scripts/fetch-records.js",
+    "fetch:nationwide": "node scripts/fetch-nationwide.js",
     "fetch:regional": "node scripts/fetch-regional.js",
     "import:stations": "node scripts/import-stations.js",
     "prerender": "node scripts/prerender.js",

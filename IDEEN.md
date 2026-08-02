@@ -17,6 +17,7 @@ Diese vier Reichweiten entscheiden über fast jede Frage:
 | `germany_daily` | **ab 27.01.2025**, 2.363 Stationen, 1,28 Mio. Zeilen | wächst täglich, reicht aber nicht in die Vergangenheit |
 | `regional_values` | 1881 – 2026, DWD-Gebietsmittel je Bundesland | Flächenmittel, keine Stationen — kein Tageswert, nur Monat/Jahreszeit/Jahr |
 | `record_events` | ab 17.04.2025, 895 Ereignisse | beginnt mit dem Nachspielen des Archivs, nicht mit der Messreihe |
+| `nationwide_daily` | 1759 – heute, 93.476 Tage | nur die *Form* jedes Tages, keine Einzelwerte; belastbar ab 1936 |
 
 Die wichtigste davon ist die zweite: **das bundesweite Stationsarchiv ist
 anderthalb Jahre alt.** Jede Idee, die „gestern gegen 1881" fragt, muss
@@ -36,10 +37,10 @@ Ideen zurückgestellt wurden (siehe unten).
 | # | Idee | Quelle | Stand |
 | --- | --- | --- | --- |
 | 2 | Rekordkarte des Tages | `record_events` | **fertig** |
-| 3 | Die Spanne des Tages | `germany_daily` | offen |
-| 4 | Höhenprofil des Tages | `germany_daily` + `germany_stations` | offen |
-| 5 | Nord-Süd- und West-Ost-Gefälle | `germany_daily` + `germany_stations` | offen |
-| 6 | Deutschlands Extrempunkte | `germany_daily` | offen |
+| 3 | Die Spanne des Tages | `nationwide_daily` | **fertig** |
+| 4 | Höhenprofil des Tages | `nationwide_daily` | offen |
+| 5 | Nord-Süd- und West-Ost-Gefälle | `nationwide_daily` | offen |
+| 6 | Deutschlands Extrempunkte | `nationwide_daily` | offen |
 | 8 | Wie alt ist jeder Rekord | `daily` | offen |
 | 9 | Rekordkalender: 366 Kacheln | `daily` | offen |
 | 11 | Rekordjahrgänge | `daily` | offen |
@@ -55,11 +56,6 @@ Ideen zurückgestellt wurden (siehe unten).
 | 20 | Newsroom: automatische Meldungen | alle | offen |
 
 ### Was die einzelnen Punkte vorhaben
-
-**3 — Die Spanne des Tages.** Wärmster minus kältester Ort Deutschlands, für
-jeden Tag, mit beiden beteiligten Stationen. Rangliste der Tage mit der
-größten Spreizung: im Winter Inversionslagen mit zweistelligen Unterschieden
-auf wenigen hundert Kilometern, im Sommer Gewitterfronten.
 
 **4 — Höhenprofil des Tages.** Temperatur gegen Stationshöhe als
 Streudiagramm mit Ausgleichsgerade. An normalen Tagen fällt sie um rund 0,6 K

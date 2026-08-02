@@ -23,6 +23,7 @@ import {
   superlatives,
 } from './germany.js'
 import { recordCount, recordDays, recordRange, recordSpread, recordsForDate } from './records.js'
+import { spanAnalysis } from './nationwide.js'
 import { regionalMeta, regionalSeries } from './regional.js'
 import { airComponentKeys, airOverview, airProfiles } from './air.js'
 import { odlOverview } from './odl.js'
@@ -361,6 +362,23 @@ app.get(
     res.json({ range, dates: availableDates(), day })
   }),
 )
+
+/* -------------------------------------------------------------------------- */
+/* The shape of a German day                                                  */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * No station parameter: these are statements about the country, not about a
+ * station, so they are the same answer for every visitor and every selection.
+ */
+for (const [path, query] of [['/api/nationwide/span', spanAnalysis]]) {
+  app.get(
+    path,
+    handler((_req, res) => {
+      res.json(query())
+    }),
+  )
+}
 
 /* -------------------------------------------------------------------------- */
 /* All-time station records                                                   */

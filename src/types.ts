@@ -1316,3 +1316,81 @@ export interface DistributionResponse {
   fields: DistributionField[]
   thresholds: ThresholdShift[]
 }
+
+/* -------------------------------------------------------------------------- */
+/* The shape of a German day                                                  */
+/* -------------------------------------------------------------------------- */
+
+export interface NationwideStation {
+  id: string
+  name: string
+  state: string
+  elevation: number | null
+}
+
+export interface NationwideRange {
+  days: number
+  first: string | null
+  last: string | null
+  /** Days that clear the station threshold — the ones any figure rests on. */
+  counted: number
+  countedFrom: string | null
+  /** First day of the daily archive; everything before it comes from the one-off pass. */
+  cutoff: string | null
+  minStations: number
+  minForFit: number
+}
+
+export interface SpanDay {
+  date: string
+  stations: number
+  source: string
+  meanHi: number
+  meanHiStation: NationwideStation
+  meanLo: number
+  meanLoStation: NationwideStation
+  absHi: number
+  absHiStation: NationwideStation
+  absLo: number
+  absLoStation: NationwideStation
+  meanSpan: number
+  absSpan: number
+}
+
+export interface SpanScope {
+  key: string
+  label: string
+  note: string
+  days: number
+  annual: {
+    year: number
+    days: number
+    meanSpan: number
+    maxMeanSpan: number
+    absSpan: number
+    maxAbsSpan: number
+    stations: number
+  }[]
+  monthly: {
+    month: number
+    label: string
+    days: number
+    meanSpan: number
+    absSpan: number
+    maxAbsSpan: number
+  }[]
+  top: { absolute: SpanDay[]; mean: SpanDay[]; narrow: SpanDay[] }
+  /** Which stations hold each end of the span, and on how many days. */
+  holders: {
+    warm: (NationwideStation & { days: number })[]
+    cold: (NationwideStation & { days: number })[]
+  }
+}
+
+export interface SpanResponse {
+  range: NationwideRange
+  lowlandLimit: number
+  minDaysPerYear: number
+  top: number
+  scopes: SpanScope[]
+}
