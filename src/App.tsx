@@ -12,6 +12,7 @@ import {
   Flower2,
   Gauge,
   Grid3x3,
+  Hourglass,
   LineChart,
   Landmark,
   LayoutDashboard,
@@ -96,6 +97,8 @@ const LOAD = {
     import('./components/Distribution').then((m) => ({ default: m.Distribution })),
   Nationwide: () =>
     import('./components/Nationwide').then((m) => ({ default: m.Nationwide })),
+  RecordHistory: () =>
+    import('./components/RecordHistory').then((m) => ({ default: m.RecordHistory })),
   National: () =>
     import('./components/National').then((m) => ({ default: m.National })),
 }
@@ -134,6 +137,7 @@ const Pressure = lazy(LOAD.Pressure)
 const FrostRisk = lazy(LOAD.FrostRisk)
 const Distribution = lazy(LOAD.Distribution)
 const Nationwide = lazy(LOAD.Nationwide)
+const RecordHistory = lazy(LOAD.RecordHistory)
 
 /**
  * Which module a tab renders.
@@ -160,6 +164,7 @@ const TAB_MODULE: Record<string, string> = {
   'frost-risk': 'FrostRisk',
   'distribution': 'Distribution',
   'nationwide': 'Nationwide',
+  'record-history': 'RecordHistory',
   'heatmap': 'Heatmap',
   'extremes': 'Extremes',
   'extreme-months': 'ExtremeMonths',
@@ -229,6 +234,7 @@ type TabId =
   | 'regional'
   | 'national'
   | 'nationwide'
+  | 'record-history'
 
 interface TabDef {
   id: TabId
@@ -265,6 +271,7 @@ const TABS: TabDef[] = [
   { id: 'extreme-months', label: 'Spitzenmonate', icon: ListOrdered, group: 'Rekorde' },
   { id: 'spells', label: 'Perioden & Serien', icon: CalendarRange, group: 'Rekorde' },
   { id: 'record-balance', label: 'Rekordbilanz', icon: Scale, group: 'Rekorde' },
+  { id: 'record-history', label: 'Rekordgeschichte', icon: Hourglass, group: 'Rekorde' },
   { id: 'climate', label: 'Klimadiagramm', icon: BarChart3, group: 'Klimatologie' },
   { id: 'comparison', label: 'Referenzperioden', icon: Layers, group: 'Klimatologie' },
   { id: 'forecast', label: 'Prognose', icon: Sparkles, group: 'Klimatologie' },
@@ -599,6 +606,10 @@ export default function App() {
             {tab === 'germany' && <Germany />}
 
             {tab === 'germany-map' && <GermanyMap />}
+
+            {tab === 'record-history' && (
+              <RecordHistory stationId={stationId} stationName={stationName} />
+            )}
 
             {tab === 'nationwide' && <Nationwide />}
 

@@ -1583,3 +1583,49 @@ export interface ExtremesResponse {
   holders: number
   kinds: ExtremeKind[]
 }
+
+/* -------------------------------------------------------------------------- */
+/* Record history                                                             */
+/* -------------------------------------------------------------------------- */
+
+export interface StandingRecord {
+  value: number
+  date: string
+  year: number
+  /** True when this value took the calendar day without beating anything. */
+  seeded: boolean
+  observations: number
+  days: number
+  years: number
+  runnerUp: { value: number; date: string; margin: number } | null
+}
+
+export interface RecordAgeField {
+  key: string
+  label: string
+  short: string
+  unit: string
+  decimals: number
+  direction: 'max' | 'min'
+  /** True for warm records, false for cold, null where the question makes no sense. */
+  warm: boolean | null
+  note: string | null
+  days: number
+  first: string
+  allTime: StandingRecord
+  monthly: (StandingRecord & { month: number; label: string })[]
+  meanMonthlyAge: number | null
+}
+
+export interface RecordAgesResponse {
+  station: string
+  /** Ages are measured against this day, not the wall clock. */
+  last: string
+  fields: RecordAgeField[]
+  summary: {
+    warmAge: number | null
+    coldAge: number | null
+    warmFields: number
+    coldFields: number
+  }
+}

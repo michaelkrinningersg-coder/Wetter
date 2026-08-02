@@ -129,7 +129,8 @@ Verteilung statt als Mittelwert
 
 **Rekorde** — Monats-Heatmap · Spitzenwerte (Top-50-Tage) ·
 Spitzenmonate (Top-50-Monate) · Perioden & Serien (längste Hitze-, Trocken-,
-Frost- und Niederschlagsperioden) · Rekordbilanz
+Frost- und Niederschlagsperioden) · Rekordbilanz · Rekordgeschichte: wie alt
+die stehenden Rekorde sind
 
 **Klimatologie** — Klimadiagramm nach Walter & Lieth · Referenzperioden ·
 Jahresprognose
@@ -192,6 +193,7 @@ server/
   national.js          Rang der Station unter allen DWD-Stationen
   pressure.js          Luftdruck, Sturmlagen, Bezug zum Wind
   frost.js             Spätfrostrisiko: Beginn gegen letzten Frost
+  calendar-records.js  Rekorde je Kalendertag und ihre Wechsel
   distribution.js      Verteilungen dreier Referenzperioden, Kenntage
   nationwide-shape.js  die Form eines Tages über Deutschland, reine Rechnung
   nationwide-csv.js    Jahresarchiv dieser Tagesformen plus Stationsregister
@@ -370,6 +372,20 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   (+58 %). Der Befund hält in allen drei Varianten, „verdoppelt" gilt nur für
   die ungefilterte. Jahre mit negativem Fenster bleiben in der Rechnung —
   wegzulassen würde den Mittelwert nach oben verzerren.
+- **Rekordalter.** Ein Rekord hat ein Datum, und dieses Datum ist eine
+  Aussage: die warmen Rekorde Göttingens sind im Mittel 59 Jahre alt, die
+  kalten 105 — das 1,8-fache. Dafür braucht es keine Trendgerade, keine
+  Referenzperiode und keine Glättung, nur eine Subtraktion. Neben jedem
+  Allzeitrekord stehen die zwölf Monatsrekorde, weil ein einzelner Allzeitwert
+  ein Zufall ist und zwölf Monatswerte ein Muster. Gerechnet wird gegen den
+  letzten Tag der Reihe statt gegen die Uhr, damit die vorberechneten Dateien
+  nicht vom laufenden Server abweichen. Kalendertage werden über Monat und Tag
+  geschlüsselt, nie über `strftime('%j')`: der 1. März ist im Schaltjahr Tag 61
+  und sonst Tag 60, ein Tagesindex würde also für ein Viertel der Reihe den
+  1. März mit dem 29. Februar vergleichen. Und die Spalte „Reihe seit" nennt
+  den Beginn der jeweiligen Messreihe, nicht das älteste noch stehende
+  Rekorddatum — Höchst- und Tiefsttemperatur werden erst seit 1885 bzw. 1871
+  aufgezeichnet, Böen seit 1969.
 - **Verteilungsverschiebung.** Jeder andere Trend hier gibt einen Mittelwert
   an. Ein Mittelwert kann steigen, weil der kalte Rand kürzer wurde, weil der
   warme Rand wuchs oder weil sich alles gemeinsam verschob — drei verschiedene
