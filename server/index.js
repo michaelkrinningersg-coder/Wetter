@@ -22,7 +22,7 @@ import {
   notableOverview,
   superlatives,
 } from './germany.js'
-import { recordCount, recordDays, recordRange, recordsForDate } from './records.js'
+import { recordCount, recordDays, recordRange, recordSpread, recordsForDate } from './records.js'
 import { regionalMeta, regionalSeries } from './regional.js'
 import { airComponentKeys, airOverview, airProfiles } from './air.js'
 import { odlOverview } from './odl.js'
@@ -391,7 +391,8 @@ app.get(
     // Without a date the newest day that actually saw a record is shown —
     // landing on an empty page would be the common case otherwise.
     const date = String(requested ?? days[0].date)
-    res.json({ range, days, day: { date, events: recordsForDate(date) } })
+    const events = recordsForDate(date)
+    res.json({ range, days, day: { date, events, spread: recordSpread(events) } })
   }),
 )
 

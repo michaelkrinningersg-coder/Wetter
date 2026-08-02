@@ -4,6 +4,9 @@ import {
   ChevronRight,
   CloudRain,
   Flame,
+  List,
+  MapPin,
+  Move3d,
   Snowflake,
   ThermometerSnowflake,
   ThermometerSun,
@@ -16,10 +19,12 @@ import type { ComponentType } from 'react'
 import { useApi } from '../lib/api'
 import { useUrlState } from '../lib/url-state'
 import { isoToGerman, num } from '../lib/format'
-import type { RecordEvent, RecordsResponse } from '../types'
+import { makeProjection } from '../lib/projection'
+import type { GermanyStationRegister, RecordEvent, RecordsResponse } from '../types'
 import {
   type Accent,
   Card,
+  ChoiceGroup,
   EmptyState,
   ErrorState,
   InfoPanel,
@@ -27,6 +32,7 @@ import {
   SectionHeading,
   StatGrid,
   StatTile,
+  SubNav,
 } from './ui'
 
 const STYLE: Record<string, { icon: ComponentType<LucideProps>; accent: Accent }> = {
@@ -50,6 +56,19 @@ const ACCENT_TEXT: Record<Accent, string> = {
   dry: 'text-dry',
   good: 'text-good',
   neutral: 'text-ink',
+}
+
+/** The same accents as SVG fills. Custom properties resolve in presentation attributes. */
+const ACCENT_FILL: Record<Accent, string> = {
+  brand: 'var(--color-brand)',
+  warm: 'var(--color-warm)',
+  hot: 'var(--color-hot)',
+  cool: 'var(--color-cool)',
+  cold: 'var(--color-cold)',
+  wet: 'var(--color-wet)',
+  dry: 'var(--color-dry)',
+  good: 'var(--color-good)',
+  neutral: 'var(--color-ink-muted)',
 }
 
 /** Year alone — the day a century-old series began is noise. */
@@ -129,6 +148,90 @@ function EventRow({ event }: { event: RecordEvent }) {
   )
 }
 
+/* -------------------------------------------------------------------------- */
+/* The map                                                                    */
+/* -------------------------------------------------------------------------- */
+
+const WIDTH = 640
+const HEIGHT = 820
+
+/** A degree of latitude in kilometres — the same figure the server uses. */
+const KM_PER_DEGREE = 111.2
+
+/**
+ * How big a record's dot is.
+ *
+ * By length of the series it broke, not by the value: a gust record at a
+ * station opened in 2007 and one at a station measuring since 1881 are the same
+ * event on a map that sizes by wind speed, and they are not the same event.
+ */
+function radiusFor(years: number): number {
+  return 2.4 + Math.min(3.4, years / 45)
+}
+
+function RecordMap({
+  events,
+  register,
+}: {
+  events: RecordEvent[]
+  register: GermanyStationRegister
+}) {
+  const project = useMemo(
+    () => makeProjection(register.bounds, WIDTH, HEIGHT),
+    [register.bounds],
+  )
+
+  const background = useMemo(
+    () => register.stations.map(([, , , lat, lon]) => project(lat, lon)),
+    [register.stations, project],
+  )
+
+  const points = events
+    .filter((e) => e.lat !== null && e.lon !== null)
+    .map((e) => ({ event: e, ...project(e.lat!, e.lon!) }))
+    // Long series last, so the meaningful records are not buried under the rest.
+    .sort((a, b) => a.event.years - b.event.years)
+
+  return (
+    <svg
+      viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+      className="mx-auto block h-auto w-full max-w-[34rem]"
+      role="img"
+      aria-label={`${points.length} Rekorde auf der Karte Deutschlands`}
+    >
+      {/* Every station of the network, so the country's outline is there and
+          one sees how small a share of it a record day actually touches. */}
+      {background.map((p, i) => (
+        <circle key={i} cx={p.x} cy={p.y} r={0.9} fill="var(--color-line-strong)" />
+      ))}
+
+      {points.map(({ event, x, y }) => {
+        const { accent } = STYLE[event.kind] ?? FALLBACK
+        return (
+          <circle
+            key={`${event.station_id}-${event.kind}`}
+            cx={x}
+            cy={y}
+            r={radiusFor(event.years)}
+            fill={ACCENT_FILL[accent]}
+            fillOpacity={0.85}
+            stroke="var(--color-canvas)"
+            strokeWidth={0.5}
+          >
+            <title>
+              {`${event.name} (${event.state}) — ${event.label}: ${value(event, event.value)}` +
+                `\nbisher ${value(event, event.previous)} am ${isoToGerman(event.previousDate)}` +
+                `\n${num(event.years, 0)} Jahre Messwerte`}
+            </title>
+          </circle>
+        )
+      })}
+    </svg>
+  )
+}
+
+/* -------------------------------------------------------------------------- */
+
 /**
  * Rows shown before the list has to be unfolded.
  *
@@ -138,12 +241,25 @@ function EventRow({ event }: { event: RecordEvent }) {
  */
 const PAGE = 100
 
+const VIEWS = [
+  { value: 'liste', label: 'Liste', icon: List },
+  { value: 'karte', label: 'Karte', icon: MapPin },
+] as const
+
 export function Records() {
   const [date, setDate] = useUrlState<string>('datum', null)
+  const [view, setView] = useUrlState<string>('ansicht', 'liste')
+  const [kind, setKind] = useUrlState<string>('art', 'alle')
   const [showAll, setShowAll] = useState(false)
+
   const { data, loading, error } = useApi<RecordsResponse>(
     `/api/records${date ? `?date=${date}` : ''}`,
     [date],
+  )
+  // Only the map needs the register, and it is 2.400 stations of coordinates.
+  const register = useApi<GermanyStationRegister>(
+    view === 'karte' ? '/api/germany/stations' : null,
+    [view],
   )
 
   const days = useMemo(() => data?.days ?? [], [data])
@@ -171,6 +287,10 @@ export function Records() {
     (best, e) => (!best || e.years > best.years ? e : best),
     null,
   )
+
+  const kinds = [...new Map(day.events.map((e) => [e.kind, e.label])).entries()]
+  const shown = kind === 'alle' ? day.events : day.events.filter((e) => e.kind === kind)
+  const { spread } = day
 
   return (
     <div className="space-y-6">
@@ -295,23 +415,166 @@ export function Records() {
               />
             </StatGrid>
 
-            <ol className="mt-5 divide-y divide-line">
-              {(showAll ? day.events : day.events.slice(0, PAGE)).map((e) => (
-                <EventRow key={`${e.station_id}-${e.kind}`} event={e} />
-              ))}
-            </ol>
+            <div className="mt-5">
+              <SubNav label="Darstellung" value={view} items={VIEWS} onChange={setView} />
+            </div>
 
-            {!showAll && day.events.length > PAGE && (
-              <button
-                type="button"
-                onClick={() => setShowAll(true)}
-                className="mt-4 w-full cursor-pointer rounded-md border border-line bg-raised px-3 py-2 text-xs font-medium text-ink-muted transition-colors hover:border-line-strong hover:text-ink"
-              >
-                Alle {num(day.events.length, 0)} Rekorde anzeigen
-                <span className="ml-1.5 text-ink-faint">
-                  — {num(day.events.length - PAGE, 0)} weitere, nach Reihenlänge absteigend
-                </span>
-              </button>
+            {view === 'karte' ? (
+              <div className="mt-5">
+                {register.loading && !register.data ? (
+                  <Loading message="Stationsregister wird geladen …" />
+                ) : register.error ? (
+                  <ErrorState message={register.error} />
+                ) : register.data ? (
+                  <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_16rem]">
+                    <div className="rounded-card border border-line bg-raised p-3">
+                      <RecordMap events={shown} register={register.data} />
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <p className="label mb-2">Rekordart</p>
+                        <ChoiceGroup
+                          label="Rekordart"
+                          value={kind}
+                          choices={[
+                            { value: 'alle', label: `Alle ${day.events.length}` },
+                            ...kinds.map(([key, label]) => ({
+                              value: key,
+                              label: `${day.events.filter((e) => e.kind === key).length}× ${label}`,
+                            })),
+                          ]}
+                          onChange={setKind}
+                          size="sm"
+                        />
+                      </div>
+
+                      <div>
+                        <p className="label mb-2">Punktgröße</p>
+                        <div className="flex items-end gap-3">
+                          {[10, 50, 150].map((years) => (
+                            <div key={years} className="text-center">
+                              <svg width="16" height="16" className="mx-auto block">
+                                <circle
+                                  cx="8"
+                                  cy="8"
+                                  r={radiusFor(years)}
+                                  fill="var(--color-ink-muted)"
+                                />
+                              </svg>
+                              <span className="numeric text-[10px] text-ink-faint">{years} J.</span>
+                            </div>
+                          ))}
+                        </div>
+                        <p className="mt-1.5 text-[10px] leading-relaxed text-ink-faint">
+                          nach Länge der gebrochenen Reihe, nicht nach Messwert
+                        </p>
+                      </div>
+
+                      <p className="text-[11px] leading-relaxed text-ink-faint">
+                        Die kleinen grauen Punkte sind alle{' '}
+                        {num(register.data.count, 0)} Stationen des Netzes. Zeiger
+                        über einen farbigen Punkt halten zeigt Station, Rekord und
+                        Reihenlänge.
+                      </p>
+                    </div>
+                  </div>
+                ) : null}
+
+                {spread && (
+                  <>
+                    <div className="mt-6">
+                      <StatGrid>
+                        <StatTile
+                          label="Betroffene Bundesländer"
+                          value={num(spread.states, 0)}
+                          caption="von 16"
+                          accent="brand"
+                        />
+                        <StatTile
+                          label="Nord–Süd"
+                          value={`${num(spread.northSouth, 0)} km`}
+                          caption={
+                            register.data
+                              ? `Deutschland misst rund ${num(
+                                  (register.data.bounds.maxLat - register.data.bounds.minLat) *
+                                    KM_PER_DEGREE,
+                                  0,
+                                )} km`
+                              : undefined
+                          }
+                          accent="neutral"
+                          icon={Move3d}
+                        />
+                        <StatTile
+                          label="West–Ost"
+                          value={`${num(spread.westEast, 0)} km`}
+                          caption={
+                            register.data
+                              ? `Deutschland misst rund ${num(
+                                  (register.data.bounds.maxLon - register.data.bounds.minLon) *
+                                    KM_PER_DEGREE *
+                                    Math.cos(
+                                      (((register.data.bounds.minLat +
+                                        register.data.bounds.maxLat) /
+                                        2) *
+                                        Math.PI) /
+                                        180,
+                                    ),
+                                  0,
+                                )} km`
+                              : undefined
+                          }
+                          accent="neutral"
+                        />
+                        <StatTile
+                          label="Weiteste Paarung"
+                          value={spread.widest ? `${num(spread.widest.km, 0)} km` : '—'}
+                          caption={
+                            spread.widest
+                              ? `${spread.widest.from} ↔ ${spread.widest.to}`
+                              : 'nur eine Station'
+                          }
+                          accent="warm"
+                        />
+                      </StatGrid>
+                    </div>
+
+                    <p className="mt-4 border-t border-line pt-3 text-[11px] leading-relaxed text-ink-faint">
+                      Die Liste allein kann nicht sagen, ob ein Rekordtag ein
+                      Gewitter über einem Landkreis war oder eine Lage über dem
+                      halben Land — fünfhundert Namen lesen sich in beiden Fällen
+                      gleich. Ausdehnung und Zahl der Bundesländer beantworten es
+                      in zwei Zahlen; als Maßstab steht daneben, wie groß das
+                      Stationsnetz insgesamt ist. Gerechnet wird auf der Kugel
+                      vereinfacht, mit einem Breitengrad zu {num(KM_PER_DEGREE, 1)} km und
+                      der Längenachse um den Kosinus der Breite gestaucht — über
+                      800 km liegt der Fehler weit unter einem Prozent.
+                    </p>
+                  </>
+                )}
+              </div>
+            ) : (
+              <>
+                <ol className="mt-5 divide-y divide-line">
+                  {(showAll ? day.events : day.events.slice(0, PAGE)).map((e) => (
+                    <EventRow key={`${e.station_id}-${e.kind}`} event={e} />
+                  ))}
+                </ol>
+
+                {!showAll && day.events.length > PAGE && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAll(true)}
+                    className="mt-4 w-full cursor-pointer rounded-md border border-line bg-raised px-3 py-2 text-xs font-medium text-ink-muted transition-colors hover:border-line-strong hover:text-ink"
+                  >
+                    Alle {num(day.events.length, 0)} Rekorde anzeigen
+                    <span className="ml-1.5 text-ink-faint">
+                      — {num(day.events.length - PAGE, 0)} weitere, nach Reihenlänge absteigend
+                    </span>
+                  </button>
+                )}
+              </>
             )}
           </>
         )}

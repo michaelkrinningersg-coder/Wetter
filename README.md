@@ -151,7 +151,8 @@ Tageswerten · Spitzenreiter aller DWD-Stationen für einen einzelnen Tag:
 wärmste und kälteste Station im Mittel und absolut, stärkste Bö, windigste
 Station im Mittel, nasseste Station und größte Tagesspanne — jeweils für ganz
 Deutschland und für alles unterhalb 1000 m · Allzeitrekorde: welche Station an
-welchem Tag ihren eigenen Höchst- oder Tiefstwert gebrochen hat · Markante Tage
+welchem Tag ihren eigenen Höchst- oder Tiefstwert gebrochen hat, als Liste und
+als Karte · Markante Tage
 des Archivs in zehn Kategorien · Bundesvergleich: wo Göttingen an jedem
 Archivtag unter den rund 2.200 meldenden Stationen stand, mit dem Jahresgang
 daraus
@@ -303,7 +304,13 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   Jahresangabe zählt Tage mit gültigem Messwert je Parameter, nicht die Spanne:
   Leipzig-Holzhausen misst seit 1759, hat aber 192 Jahre Messwerte. Sortiert
   wird nach Reihenlänge. Stationen ohne Historie vor dem Stichtag setzen keinen
-  Rekord, sie beginnen eine Reihe.
+  Rekord, sie beginnen eine Reihe. Auf der Karte sitzt jeder Rekord an seinem
+  Standort, die Punktgröße folgt der Länge der gebrochenen Reihe und nicht dem
+  Messwert. Dazu drei Zahlen, die die Liste nicht hergibt: betroffene
+  Bundesländer, Nord-Süd- und West-Ost-Ausdehnung und die weiteste Paarung.
+  Fünfhundert Stationsnamen lesen sich gleich, ob sie ein Gewitter über einem
+  Landkreis oder eine Lage über dem halben Land beschreiben — 39 Rekorde von
+  Hiddensee bis Rheinfelden sind ein anderes Ereignis als 39 in Oberbayern.
 - **Luftqualität.** Ein Tagesmittel entsteht erst ab 18 gültigen Stunden, ein
   Jahresmittel ab 300 gültigen Tagen — bei Größen mit ausgeprägtem Tagesgang
   wäre ein Mittel über die zufällig funktionierenden Stunden kein schwaches

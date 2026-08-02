@@ -32,7 +32,13 @@ import {
   notableOverview,
   superlatives,
 } from '../server/germany.js'
-import { recordCount, recordDays, recordRange, recordsForDate } from '../server/records.js'
+import {
+  recordCount,
+  recordDays,
+  recordRange,
+  recordSpread,
+  recordsForDate,
+} from '../server/records.js'
 import { regionalMeta, regionalPairs, regionalSeries } from '../server/regional.js'
 import { airComponentKeys, airOverview, airProfiles } from '../server/air.js'
 import { odlOverview } from '../server/odl.js'
@@ -256,7 +262,12 @@ const recDays = recordDays()
 
 if (recDays.length > 0) {
   for (const { date } of recDays) {
-    const payload = { range: recRange, days: recDays, day: { date, events: recordsForDate(date) } }
+    const events = recordsForDate(date)
+    const payload = {
+      range: recRange,
+      days: recDays,
+      day: { date, events, spread: recordSpread(events) },
+    }
     emit(`/api/records?date=${date}`, payload, 'Rekorde')
     if (date === recDays[0].date) emit('/api/records', payload, 'Rekorde')
   }

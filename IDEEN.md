@@ -1,0 +1,191 @@
+# Ideen
+
+Was noch nicht umgesetzt ist, warum es interessant wäre und woran es hängt.
+Umgesetztes wandert aus dieser Datei heraus und in die README, wo es unter
+„Was die Auswertungen tun" beschrieben steht.
+
+---
+
+## Datengrenzen, die jede Idee betreffen
+
+Bevor eine Idee bewertet werden kann, muss klar sein, was überhaupt vorliegt.
+Diese vier Reichweiten entscheiden über fast jede Frage:
+
+| Quelle | Umfang | Grenze |
+| --- | --- | --- |
+| `daily` | 01.01.1858 – heute, 152.587 Tage, 3 Stationen | die lange Reihe, aber nur Göttingen und Umgebung |
+| `germany_daily` | **ab 27.01.2025**, 2.363 Stationen, 1,28 Mio. Zeilen | wächst täglich, reicht aber nicht in die Vergangenheit |
+| `regional_values` | 1881 – 2026, DWD-Gebietsmittel je Bundesland | Flächenmittel, keine Stationen — kein Tageswert, nur Monat/Jahreszeit/Jahr |
+| `record_events` | ab 17.04.2025, 895 Ereignisse | beginnt mit dem Nachspielen des Archivs, nicht mit der Messreihe |
+
+Die wichtigste davon ist die zweite: **das bundesweite Stationsarchiv ist
+anderthalb Jahre alt.** Jede Idee, die „gestern gegen 1881" fragt, muss
+entweder über die Gebietsmittel laufen oder auf Göttingen beschränkt bleiben.
+Das ist keine Nachlässigkeit, sondern die Bauart — das Archiv entsteht durch
+tägliches Mitschreiben, weil der DWD die Tageswerte aller Stationen nicht als
+fertiges Paket anbietet.
+
+---
+
+## Roadmap
+
+Die Reihenfolge ist gesetzt. Die laufenden Nummern sind die aus der
+Ideenliste, aus der ausgewählt wurde — sie sind nicht fortlaufend, weil zwei
+Ideen zurückgestellt wurden (siehe unten).
+
+| # | Idee | Quelle | Stand |
+| --- | --- | --- | --- |
+| 2 | Rekordkarte des Tages | `record_events` | **fertig** |
+| 3 | Die Spanne des Tages | `germany_daily` | offen |
+| 4 | Höhenprofil des Tages | `germany_daily` + `germany_stations` | offen |
+| 5 | Nord-Süd- und West-Ost-Gefälle | `germany_daily` + `germany_stations` | offen |
+| 6 | Deutschlands Extrempunkte | `germany_daily` | offen |
+| 8 | Wie alt ist jeder Rekord | `daily` | offen |
+| 9 | Rekordkalender: 366 Kacheln | `daily` | offen |
+| 11 | Rekordjahrgänge | `daily` | offen |
+| 12 | Überlebenskurve eines Rekords | `daily` | offen |
+| 13 | Bundesweite Rekordbilanz seit 1881 | `regional_values` | offen |
+| 10 | Fast-Rekorde | `daily` | offen |
+| 14 | Wetterzwillinge (Aussage auch ins Dashboard) | `daily` | offen |
+| 15 | Jahres-Wrapped: zehn markante Tage je Jahr | `daily` | offen |
+| 16 | Kuriositätenkabinett | `daily` | offen |
+| 17 | Episoden statt Tage | `daily` | offen |
+| 18 | Serien-Ticker | `daily` | offen |
+| 19 | Monatsbilanz live | `daily` | offen |
+| 20 | Newsroom: automatische Meldungen | alle | offen |
+
+### Was die einzelnen Punkte vorhaben
+
+**3 — Die Spanne des Tages.** Wärmster minus kältester Ort Deutschlands, für
+jeden Tag, mit beiden beteiligten Stationen. Rangliste der Tage mit der
+größten Spreizung: im Winter Inversionslagen mit zweistelligen Unterschieden
+auf wenigen hundert Kilometern, im Sommer Gewitterfronten.
+
+**4 — Höhenprofil des Tages.** Temperatur gegen Stationshöhe als
+Streudiagramm mit Ausgleichsgerade. An normalen Tagen fällt sie um rund 0,6 K
+je 100 m; an Inversionstagen steigt sie, und man sieht mit einem Blick, dass
+im Tal Nebel und auf dem Berg Sonne war.
+
+**5 — Nord-Süd- und West-Ost-Gefälle.** Dieselbe Regression gegen Breite und
+Länge, in K je 100 km. Über die Zeit aufgetragen zeigt es, wann Deutschland
+ein Wetter hat und wann zwei.
+
+**6 — Deutschlands Extrempunkte.** Welche Station war wie oft der wärmste,
+kälteste, nasseste, windigste Ort des Landes. Nach anderthalb Jahren schon
+eine belastbare Rangliste — die Antwort ist nicht überall die erwartete.
+
+**8 — Wie alt ist jeder Rekord.** Das Alter des noch stehenden Rekords je
+Kategorie, sortiert. Steht der Kälterekord seit Jahrzehnten und der
+Wärmerekord seit wenigen Jahren, ist das eine Aussage über das Klima, die
+ohne jeden Trendparameter auskommt.
+
+**9 — Rekordkalender: 366 Kacheln.** Für jeden Kalendertag der Allzeitrekord
+mit Jahreszahl, eingefärbt nach Jahrzehnt. Zeigt, aus welchen Jahren die
+Rekorde stammen und wie ungleich sie über das Jahr verteilt sind.
+
+**10 — Fast-Rekorde.** Tage, die knapp an einem Rekord vorbeischrammten und
+deshalb in keiner Liste stehen. Es gibt deutlich mehr davon als Rekorde, und
+ihre Häufung ist aussagekräftiger als die Rekorde selbst.
+
+**11 — Rekordjahrgänge.** Welches Jahr hält die meisten noch stehenden
+Kalendertagsrekorde. Ein Balken je Jahr über 168 Jahre, getrennt nach Wärme
+und Kälte.
+
+**12 — Überlebenskurve eines Rekords.** Wie lange hält ein Rekord, und hat
+sich das geändert. Muss auf die ungleiche Expositionszeit korrigiert werden —
+ein Rekord von 1870 hatte 156 Jahre Zeit zu fallen, einer von 2019 sieben —,
+sonst ist die Kurve nur eine Alterspyramide. Statistisch der anspruchsvollste
+Punkt der Liste.
+
+**13 — Bundesweite Rekordbilanz seit 1881.** Die lokale Rekordbilanz auf die
+Gebietsmittel übertragen, für Deutschland und jedes Bundesland. Der einzige
+Weg, die Rekordfrage bundesweit über 145 Jahre zu stellen.
+
+**14 — Wetterzwillinge.** Welcher Tag der Vergangenheit ähnelt dem gestrigen
+am meisten, mit Angabe, wie ähnlich er wirklich war. Ergibt Sätze wie „so ein
+2. August war zuletzt 1911" — und wenn kein ähnlicher Tag existiert, ist
+gerade das die Meldung. Die Kernaussage soll zusätzlich auf dem Dashboard
+stehen.
+
+**15 — Jahres-Wrapped.** Ein automatisch erzeugter Rückblick: die zehn
+markantesten Tage eines Jahres, nach derselben Logik wie die markanten Tage,
+aber auf ein Jahr eingegrenzt und für jedes der 168 Jahre abrufbar.
+
+**16 — Kuriositätenkabinett.** Systematisch gesuchte Merkwürdigkeiten statt
+reiner Extremwerte: größter Tagesgang, größter Sprung zum Vortag, wärmster
+Wintertag, kältester Sommertag, nassester Tag im trockensten Monat, größter
+Abstand zum Kalendermittel. Jede Zeile eine kleine Geschichte, keine davon in
+einer normalen Rekordliste.
+
+**17 — Episoden statt Tage.** Markante Tage sind Einzeltage; das Gedächtnis
+arbeitet in Ereignissen. Zusammenhängende Hitze-, Kälte-, Trocken- und
+Nassphasen als Episoden mit Dauer, Stärke und Einordnung.
+
+**18 — Serien-Ticker.** Was gerade läuft, mit Abstand zum Rekord. Die einzige
+Kennzahl, die sich täglich ändert und trotzdem historisch eingeordnet ist.
+
+**19 — Monatsbilanz live.** Rang des laufenden Monats unter allen Ausgaben
+desselben Monats, mit Angabe, wie viel sich bis Monatsende noch verschieben
+kann. Am 2. eine schwache Aussage, am 28. eine starke — und das sollte
+dabeistehen.
+
+**20 — Newsroom.** Ein Regelwerk, das täglich prüft, ob etwas berichtenswert
+war — Rekord, Fast-Rekord, Serie, Rang, ungewöhnliche Spanne — und daraus
+Sätze formuliert. Deterministisch, aus Satzbausteinen; kein Sprachmodell im
+Auslieferungspfad, sonst wäre die Seite nicht mehr statisch vorberechenbar.
+Muss auch „gestern war nichts Besonderes" sagen können und das begründen.
+
+---
+
+## Zurückgestellt
+
+**1 — Anomaliekarte statt Absolutkarte.** Dieselbe Deutschlandkarte, aber jede
+Station gegen ihr eigenes Klimamittel: nicht „18 °C in Hamburg, 24 °C in
+Freiburg", sondern „+4 K und −1 K". Das ist die Karte, die man eigentlich
+lesen will — die absolute zeigt vor allem Geografie. Hängt daran, dass
+Stationsmittel der Periode 1991–2020 für alle 2.363 Stationen beschafft werden
+müssten; ob der DWD sie in dieser Vollständigkeit veröffentlicht, ist ungeprüft.
+
+**7 — Zeitraffer der Karte.** Ein Schieberegler über mehrere Tage, damit man
+eine Hitzewelle über Deutschland ziehen sieht. Technisch die vorhandene Karte
+plus Vorladen mehrerer Tage; der Reiz liegt darin, dass Wetter erst in der
+Bewegung erzählt. Zurückgestellt, weil es je Tag eine eigene vorberechnete
+JSON-Datei braucht und die Anzahl der Dateien auf den Pages-Build durchschlägt.
+
+---
+
+## Ältere offene Punkte
+
+**Tests.** Der wichtigste Punkt der Datei. Inzwischen über 4.000 Zeilen
+Serverrechnung ohne einen einzigen Test. Kandidaten mit echter Fallhöhe: die
+Midrank-Perzentilformel im Bundesvergleich, die Acht-Stunden-Mittel der
+Luftqualität über Tagesgrenzen hinweg, das Nachspielen des Rekordarchivs, die
+Quantilinterpolation der Verteilungsverschiebung, der Streaming-Filter der
+Phänologiedateien.
+
+**Export.** CSV und JSON zu jeder Tabelle und jedem Diagramm. Die Daten sind
+frei verwendbar (GeoNutzV), die Oberfläche gibt sie aber nur zum Ansehen her.
+
+**Zoom in Diagrammen.** Bei 168 Jahren auf 900 Pixeln ist ein Jahrzehnt drei
+Pixel breit. Auswahlrechteck mit Zurücksetzen.
+
+**Vergleichsjahr als Überlagerung.** Ein zweites Jahr in dieselbe Achse legen,
+statt zwischen zwei Ansichten zu wechseln.
+
+**Befehlspalette.** 34 Reiter sind über die Seitenleiste erreichbar, aber
+nicht durchsuchbar. Strg+K mit Volltextsuche über Reiternamen und Kennzahlen.
+
+**Spaltenauswahl in den Tabellen.** Monats- und Jahresübersicht zeigen einen
+festen Satz Spalten; welche davon interessieren, ist Geschmackssache.
+
+**Heiz- und Kühlgradtage.** Die klassische energetische Kennzahl, aus
+`daily` sofort zu rechnen, bisher nur als Idee notiert.
+
+**Wiederkehrperiode.** Extremwertstatistik: wie selten ist ein Ereignis
+wirklich. Braucht eine Verteilungsanpassung (GEV) und eine ehrliche Angabe des
+Vertrauensbereichs — sonst entsteht der Eindruck von Präzision, die die Reihe
+nicht hergibt.
+
+**Tages-Anomaliekalender.** Ein Jahr als 365 Kacheln, eingefärbt nach dem
+Abstand zum Kalendertagsmittel. Die Heatmap gibt es auf Monatsebene, auf
+Tagesebene wäre sie feiner.

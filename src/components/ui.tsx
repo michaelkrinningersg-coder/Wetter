@@ -224,6 +224,61 @@ export function ChoiceGroup<T extends string>({
   )
 }
 
+/**
+ * Sub-navigation inside one view.
+ *
+ * Several analyses answer the same question from different angles and belong
+ * on one page — the record day, its map, the age of the records and the
+ * calendar they fall in are one subject, not four entries in a sidebar that
+ * already holds thirty. This is the strip that switches between them.
+ *
+ * Deliberately not a `ChoiceGroup`: that one picks a parameter *within* a
+ * chart, this one changes what the page shows. Same keyboard behaviour, a
+ * different shape, so the two never look interchangeable.
+ */
+export function SubNav<T extends string>({
+  label,
+  value,
+  items,
+  onChange,
+}: {
+  label: string
+  value: T
+  items: readonly { value: T; label: string; icon?: ComponentType<LucideProps>; hint?: string }[]
+  onChange: (value: T) => void
+}) {
+  return (
+    <div
+      role="radiogroup"
+      aria-label={label}
+      className="flex flex-wrap items-center gap-x-1 gap-y-1 border-b border-line"
+    >
+      {items.map((item) => {
+        const active = item.value === value
+        const Icon = item.icon
+        return (
+          <button
+            key={item.value}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            title={item.hint}
+            onClick={() => onChange(item.value)}
+            className={`-mb-px flex cursor-pointer items-center gap-1.5 border-b-2 px-3 py-2 text-xs font-medium transition-colors ${
+              active
+                ? 'border-brand text-ink'
+                : 'border-transparent text-ink-muted hover:border-line-strong hover:text-ink'
+            }`}
+          >
+            {Icon && <Icon className="size-3.5" aria-hidden />}
+            {item.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 export function SearchInput({
   value,
   onChange,

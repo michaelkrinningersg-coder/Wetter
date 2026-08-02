@@ -504,6 +504,8 @@ export interface RecordEvent {
   name: string
   state: string
   elevation: number | null
+  lat: number | null
+  lon: number | null
   kind: string
   label: string
   unit: string
@@ -527,8 +529,19 @@ export interface RecordsResponse {
     cutoff: string | null
   }
   days: { date: string; count: number }[]
-  day: { date: string; events: RecordEvent[] } | null
+  day: { date: string; events: RecordEvent[]; spread: RecordSpread | null } | null
   hint?: string
+}
+
+/** How far across the country one day's records reached. */
+export interface RecordSpread {
+  located: number
+  states: number
+  stations: number
+  /** Extent of the affected stations, in kilometres. */
+  northSouth: number
+  westEast: number
+  widest: { km: number; from: string; to: string } | null
 }
 
 /* -------------------------------------------------------------------------- */
