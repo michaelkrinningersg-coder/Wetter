@@ -49,7 +49,13 @@ import { NATIONAL_FIELD_KEYS, nationalField, nationalOverview } from '../server/
 import { pressureAnalysis } from '../server/pressure.js'
 import { frostRiskAll } from '../server/frost.js'
 import { distributionOverview } from '../server/distribution.js'
-import { lapseAnalysis, nationwideOverview, shapeForDate, spanAnalysis } from '../server/nationwide.js'
+import {
+  gradientAnalysis,
+  lapseAnalysis,
+  nationwideOverview,
+  shapeForDate,
+  spanAnalysis,
+} from '../server/nationwide.js'
 import { staticPath } from '../src/lib/static-path.js'
 
 const outDir = process.argv[2] ?? 'dist'
@@ -232,6 +238,7 @@ for (const [path, query] of [
   ['/api/nationwide', nationwideOverview],
   ['/api/nationwide/span', spanAnalysis],
   ['/api/nationwide/lapse', lapseAnalysis],
+  ['/api/nationwide/gradient', gradientAnalysis],
 ]) {
   emit(path, query(), 'Deutschlandtage')
 }

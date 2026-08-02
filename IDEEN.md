@@ -39,7 +39,7 @@ Ideen zurückgestellt wurden (siehe unten).
 | 2 | Rekordkarte des Tages | `record_events` | **fertig** |
 | 3 | Die Spanne des Tages | `nationwide_daily` | **fertig** |
 | 4 | Höhenprofil des Tages | `nationwide_daily` | **fertig** |
-| 5 | Nord-Süd- und West-Ost-Gefälle | `nationwide_daily` | offen |
+| 5 | Nord-Süd- und West-Ost-Gefälle | `nationwide_daily` | **fertig** |
 | 6 | Deutschlands Extrempunkte | `nationwide_daily` | offen |
 | 8 | Wie alt ist jeder Rekord | `daily` | offen |
 | 9 | Rekordkalender: 366 Kacheln | `daily` | offen |
@@ -56,10 +56,6 @@ Ideen zurückgestellt wurden (siehe unten).
 | 20 | Newsroom: automatische Meldungen | alle | offen |
 
 ### Was die einzelnen Punkte vorhaben
-
-**5 — Nord-Süd- und West-Ost-Gefälle.** Dieselbe Regression gegen Breite und
-Länge, in K je 100 km. Über die Zeit aufgetragen zeigt es, wann Deutschland
-ein Wetter hat und wann zwei.
 
 **6 — Deutschlands Extrempunkte.** Welche Station war wie oft der wärmste,
 kälteste, nasseste, windigste Ort des Landes. Nach anderthalb Jahren schon

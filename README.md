@@ -154,7 +154,8 @@ Deutschland und für alles unterhalb 1000 m · Allzeitrekorde: welche Station an
 welchem Tag ihren eigenen Höchst- oder Tiefstwert gebrochen hat, als Liste und
 als Karte · Deutschlandtage: die Spanne zwischen dem wärmsten und dem kältesten
 Ort des Landes für jeden Tag seit 1936, das Höhenprofil eines einzelnen Tages
-und die Abnahme der Temperatur mit der Höhe über 145 Jahre · Markante Tage
+und die Abnahme der Temperatur mit der Höhe über 145 Jahre, dazu der
+Jahreslauf des geografischen Gefälles · Markante Tage
 des Archivs in zehn Kategorien · Bundesvergleich: wo Göttingen an jedem
 Archivtag unter den rund 2.200 meldenden Stationen stand, mit dem Jahresgang
 daraus
@@ -417,6 +418,16 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   bis September an keinem. An manchen dieser Tage fällt das rohe Streubild
   trotzdem noch — auch das steht in der Ansicht, samt Begründung, statt zwei
   Zahlen nebeneinanderzustellen, die sich zu widersprechen scheinen.
+- **Geografisches Gefälle.** Dieselbe Anpassung liefert zwei weitere
+  Koeffizienten: K je 100 km nach Norden und je 100 km nach Osten, jeweils mit
+  den anderen beiden festgehalten. Zusammen sind sie ein Vektor, und der dreht
+  sich im Jahreslauf. Im Januar ist die Nord-Süd-Komponente mit −0,07 praktisch
+  null und die Ost-West-Komponente mit −0,47 stark negativ: Deutschland ist
+  dann nicht im Norden kälter, sondern im Osten. Im Juni steht es umgekehrt bei
+  −0,60 und **+0,19** — der Osten ist wärmer als der Westen, an 65 % der
+  Junitage gegen 13 % der Januartage. Das ist Kontinentalität, gemessen statt
+  behauptet. Aufgetragen als Schleife über zwölf Monatspunkte ist der ganze
+  Jahreslauf ein Bild.
 - **Bundesvergleich.** Das Perzentil zählt Stationen unter dem Wert plus die
   Hälfte der gleichen. Diese Halbierung ist keine Pedanterie: der DWD gibt
   Temperaturen auf eine Nachkommastelle aus, an einem ruhigen Tag teilen sich

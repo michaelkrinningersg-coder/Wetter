@@ -23,7 +23,13 @@ import {
   superlatives,
 } from './germany.js'
 import { recordCount, recordDays, recordRange, recordSpread, recordsForDate } from './records.js'
-import { lapseAnalysis, nationwideOverview, shapeForDate, spanAnalysis } from './nationwide.js'
+import {
+  gradientAnalysis,
+  lapseAnalysis,
+  nationwideOverview,
+  shapeForDate,
+  spanAnalysis,
+} from './nationwide.js'
 import { regionalMeta, regionalSeries } from './regional.js'
 import { airComponentKeys, airOverview, airProfiles } from './air.js'
 import { odlOverview } from './odl.js'
@@ -375,6 +381,7 @@ for (const [path, query] of [
   ['/api/nationwide', nationwideOverview],
   ['/api/nationwide/span', spanAnalysis],
   ['/api/nationwide/lapse', lapseAnalysis],
+  ['/api/nationwide/gradient', gradientAnalysis],
 ]) {
   app.get(
     path,

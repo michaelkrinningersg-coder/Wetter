@@ -1485,3 +1485,60 @@ export interface NationwideOverview {
   range: NationwideRange
   lowlandLimit: number
 }
+
+/** The direction in which it gets warmer, as a vector. */
+export interface GradientDirection {
+  magnitude: number
+  bearing: number
+  compass: string
+}
+
+export interface GradientDay extends GradientDirection {
+  date: string
+  stations: number
+  source: string
+  gradN: number
+  gradE: number
+  gradH: number
+  gradR2: number
+  absHi: number | null
+  absHiStation: NationwideStation
+  absLo: number | null
+  absLoStation: NationwideStation
+}
+
+export interface GradientResponse {
+  range: NationwideRange
+  minDaysPerYear: number
+  top: number
+  overall: GradientDirection & {
+    days: number
+    gradN: number
+    gradE: number
+    gradH: number
+    gradR2: number
+    absN: number
+    absE: number
+  }
+  annual: (GradientDirection & {
+    year: number
+    days: number
+    gradN: number
+    gradE: number
+    gradR2: number
+  })[]
+  monthly: (GradientDirection & {
+    month: number
+    label: string
+    days: number
+    gradN: number
+    gradE: number
+    gradH: number
+    gradR2: number
+    eastWarmerDays: number
+    northWarmerDays: number
+    eastWarmerShare: number
+    northWarmerShare: number
+  })[]
+  extremes: { key: string; label: string; note: string; days: GradientDay[] }[]
+}
