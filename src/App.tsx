@@ -11,6 +11,7 @@ import {
   Grid3x3,
   LineChart,
   Landmark,
+  LayoutDashboard,
   Layers,
   Leaf,
   Map,
@@ -35,7 +36,7 @@ import { readParam, setTabParam, useUrlNumber, useUrlState } from './lib/url-sta
 import type { ImportStatus, Station } from './types'
 import { Header } from './components/Header'
 import { Loading } from './components/ui'
-import { MonthlyOverview } from './components/MonthlyOverview'
+import { Dashboard } from './components/Dashboard'
 
 /* -------------------------------------------------------------------------- */
 /* Lazily loaded views                                                        */
@@ -55,6 +56,8 @@ import { MonthlyOverview } from './components/MonthlyOverview'
  * registry would have thrown away.
  */
 const LOAD = {
+  MonthlyOverview: () =>
+    import('./components/MonthlyOverview').then((m) => ({ default: m.MonthlyOverview })),
   TempTrend: () => import('./components/TempTrend').then((m) => ({ default: m.TempTrend })),
   PrecipTrend: () => import('./components/PrecipTrend').then((m) => ({ default: m.PrecipTrend })),
   AnnualMeans: () => import('./components/AnnualMeans').then((m) => ({ default: m.AnnualMeans })),
@@ -85,6 +88,7 @@ const LOAD = {
   Regional: () => import('./components/Regional').then((m) => ({ default: m.Regional })),
 }
 
+const MonthlyOverview = lazy(LOAD.MonthlyOverview)
 const TempTrend = lazy(LOAD.TempTrend)
 const PrecipTrend = lazy(LOAD.PrecipTrend)
 const AnnualMeans = lazy(LOAD.AnnualMeans)
@@ -124,6 +128,7 @@ const Regional = lazy(LOAD.Regional)
  * would be a wasted request.
  */
 const TAB_MODULE: Record<string, string> = {
+  overview: 'MonthlyOverview',
   'annual-overview': 'AnnualOverview',
   'day-in-history': 'DayInHistory',
   'temp-trend': 'TempTrend',
@@ -167,6 +172,7 @@ const FALLBACK_STATIONS: Station[] = [
 ]
 
 type TabId =
+  | 'dashboard'
   | 'overview'
   | 'temp-trend'
   | 'precip-trend'
@@ -202,6 +208,7 @@ interface TabDef {
   label: string
   icon: typeof Thermometer
   group:
+    | 'Überblick'
     | 'Messwerte'
     | 'Trends'
     | 'Rekorde'
@@ -211,6 +218,7 @@ interface TabDef {
 }
 
 const TABS: TabDef[] = [
+  { id: 'dashboard', label: 'Überblick', icon: LayoutDashboard, group: 'Überblick' },
   { id: 'overview', label: 'Monatsübersicht', icon: CalendarDays, group: 'Messwerte' },
   { id: 'annual-overview', label: 'Jahresübersicht', icon: Table2, group: 'Messwerte' },
   { id: 'day-in-history', label: 'Dieser Tag', icon: CalendarHeart, group: 'Messwerte' },
@@ -243,6 +251,7 @@ const TABS: TabDef[] = [
 ]
 
 const GROUPS = [
+  'Überblick',
   'Messwerte',
   'Trends',
   'Rekorde',
@@ -280,7 +289,7 @@ export default function App() {
   const [stations, setStations] = useState<Station[]>(FALLBACK_STATIONS)
   const [stationId, setStationId] = useUrlState<string>('station', initialStation())
   const [status, setStatus] = useState<ImportStatus | null>(null)
-  const [tab] = useUrlState<TabId>('bereich', 'overview', { allowed: TAB_IDS })
+  const [tab] = useUrlState<TabId>('bereich', 'dashboard', { allowed: TAB_IDS })
 
   const now = new Date()
   const [selectedYear, setSelectedYear] = useUrlNumber('jahr', now.getFullYear(), {
@@ -470,6 +479,7 @@ export default function App() {
                 boundary per view would be twenty-eight copies of the same
                 fallback. */}
             <Suspense fallback={<Loading message="Ansicht wird geladen …" />}>
+            {tab === 'dashboard' && <Dashboard stationName={stationName} />}
             {tab === 'overview' && (
               <MonthlyOverview
                 stationId={stationId}

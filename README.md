@@ -44,8 +44,14 @@ JSON-Datei:
 
 ```bash
 npm run import:stations   # Datenbank füllen (die drei Stationen vom DWD)
-npm run build:static      # dist/ mit 7.467 Dateien, 143 MB
+npm run build:static      # dist/ mit 7.673 Dateien, 144 MB
 ```
+
+Das JavaScript ist aufgeteilt: 34 Chunks statt einer Datei. Der Erstaufruf lädt
+**65 kB gzip** (Gerüst, React, Icons) statt 235 — die Diagrammbibliothek ist mit
+123 kB gzip der größte Brocken und kommt erst beim ersten Diagramm. Die
+Startansicht ist deshalb bewusst ohne sie gebaut. Überfährt man einen Tab, wird
+seine Ansicht schon geladen, bevor der Klick kommt.
 
 Der Zustand der Ansicht steht in der Adresszeile, damit sich jede Ansicht
 verlinken lässt:
@@ -88,6 +94,11 @@ Aufruf. Beide Schalter sind ausgeblendet; die Daten sind so frisch wie der
 letzte Deploy.
 
 ## Analysebereiche
+
+**Überblick** — Startansicht: letzter Messtag gegen das Übliche desselben
+Kalendertags, laufendes Jahr gegen die Referenzperiode, die vier auffälligsten
+Stationen Deutschlands, Allzeitrekorde des Tages, Pollen, Luft, Strahlung und
+Pegel. Jede Kachel verlinkt in die Ansicht, aus der ihre Zahl stammt.
 
 **Messwerte** — Monatsübersicht (Tageswerte, Tagesverlauf, Jahresverlauf) ·
 Jahresübersicht (Kenndaten und Schwellenwerttage je Kalenderjahr) ·
@@ -148,6 +159,7 @@ server/
   queries.js           sämtliche Aggregationen
   stations.js          Stationsverzeichnis
   zip.js               ZIP-Leser auf node:zlib, ohne Abhängigkeit
+  dashboard.js         Überblick: zieht die Startansicht zusammen
   gauges.js            Flusspegel: Abruf, Parser, eigene Zeitreihe
   germany-sources.js   bundesweiter Abruf beider DWD-Stationsnetze
   germany-csv.js       Tagesarchiv, eine CSV je Tag
@@ -297,6 +309,12 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   Phänomen hinter einem Buchführungswechsel verstecken. Der Spätsommer nutzt
   „Pflückreife Beginn", nicht „erste reife Früchte" wie die Wildarten. In den
   Kalender kommt nur, was mindestens 20 Jahre trägt.
+- **Tagesnormale im Überblick.** Die Abweichung des letzten Messtags ist gegen
+  1991–2020 gerechnet, aber nicht gegen den einzelnen Kalendertag: dreißig Werte
+  eines deutschen Julitags streuen um zehn Grad, das „Übliche" schwankte damit
+  stärker als die Abweichung, die es messen soll. Genommen wird ein Fenster von
+  ±5 Tagen um das Datum, also 330 Werte — so verläuft das Normal glatt durchs
+  Jahr, wie es auch die geglätteten Normale des DWD tun.
 - **Flusspegel.** Alle Werte in Zentimeter über Pegelnullpunkt. Die Achse des
   Verlaufs ist auf die Messwerte skaliert, weil die täglichen Schwankungen im
   Zentimeterbereich die eigentliche Information sind; Kennwerte und Meldestufen

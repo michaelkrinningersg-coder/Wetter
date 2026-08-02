@@ -38,6 +38,7 @@ import { airComponentKeys, airOverview, airProfiles } from '../server/air.js'
 import { odlOverview } from '../server/odl.js'
 import { pollenOverview } from '../server/pollen.js'
 import { comboSeries, phenoComboKeys, phenoOverview } from '../server/pheno.js'
+import { dashboard } from '../server/dashboard.js'
 import { staticPath } from '../src/lib/static-path.js'
 
 const outDir = process.argv[2] ?? 'dist'
@@ -329,6 +330,12 @@ if (pheno.range.last) {
     )
   }
 }
+
+/* -------------------------------------------------------------------------- */
+/* Dashboard                                                                  */
+/* -------------------------------------------------------------------------- */
+
+emit('/api/dashboard', dashboard(), 'Dashboard')
 
 /* -------------------------------------------------------------------------- */
 

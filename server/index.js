@@ -28,6 +28,7 @@ import { airComponentKeys, airOverview, airProfiles } from './air.js'
 import { odlOverview } from './odl.js'
 import { pollenOverview } from './pollen.js'
 import { comboSeries, phenoComboKeys, phenoOverview } from './pheno.js'
+import { dashboard } from './dashboard.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -549,6 +550,15 @@ app.get(
     }
     res.json(series)
   }),
+)
+
+/* -------------------------------------------------------------------------- */
+/* Dashboard                                                                  */
+/* -------------------------------------------------------------------------- */
+
+app.get(
+  '/api/dashboard',
+  handler((_req, res) => res.json(dashboard())),
 )
 
 /* -------------------------------------------------------------------------- */

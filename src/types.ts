@@ -971,3 +971,129 @@ export interface PhenoSeriesResponse {
   phaseName: string
   points: PhenoPoint[]
 }
+
+/* -------------------------------------------------------------------------- */
+/* Dashboard                                                                  */
+/* -------------------------------------------------------------------------- */
+
+export interface DashboardLatest {
+  date: string
+  year: number
+  month: number
+  day: number
+  temp_mean: number | null
+  temp_max: number | null
+  temp_min: number | null
+  precipitation: number | null
+  wind_max: number | null
+  wind_mean: number | null
+  sunshine: number | null
+  snow: number | null
+  normal: {
+    temp_mean: number
+    temp_max: number
+    temp_min: number
+    precipitation: number
+    days: number
+  } | null
+  anomaly: { temp_mean: number | null; temp_max: number | null; temp_min: number | null } | null
+  /** `place` counts from the warm end: 1 is the warmest such calendar date ever. */
+  rank: { place: number; of: number } | null
+  reference: { from: number; to: number }
+  windowDays: number
+}
+
+export interface DashboardYear {
+  year: number
+  upTo: string
+  mean: number
+  days: number
+  referenceMean: number | null
+  anomaly: number | null
+  place: number
+  of: number
+  reference: { from: number; to: number }
+}
+
+export interface DashboardPick {
+  key: string
+  label: string
+  short: string
+  unit: string
+  decimals: number
+  station: string
+  state: string
+  elevation: number | null
+  value: number
+}
+
+export interface DashboardResponse {
+  station: { id: string; name: string; altitude: number | null }
+  latest: DashboardLatest | null
+  year: DashboardYear | null
+  germany: {
+    date: string
+    stations: number | null
+    highest: { name: string; elevation: number } | null
+    picks: DashboardPick[]
+  } | null
+  records: {
+    date: string
+    count: number
+    events: { station: string; name: string; kind: string; label: string; value: number }[]
+  } | null
+  today: {
+    month: number
+    day: number
+    count: number
+    firstYear: number | null
+    lastYear: number | null
+    meanOfDay: number | null
+    holders: Partial<
+      Record<
+        'warmest' | 'coldest' | 'wettest' | 'windiest' | 'warmestMean' | 'coldestMean',
+        { year: number; value: number } | null
+      >
+    >
+  } | null
+  environment: {
+    pollen: {
+      issued: string
+      active: { label: string; value: string; level: number | null }[]
+      total: number
+    } | null
+    air: {
+      date: string
+      hour: number
+      values: {
+        station: string
+        stationName: string
+        kind: string
+        component: string
+        short: string
+        unit: string
+        decimals: number
+        value: number
+      }[]
+    } | null
+    radiation: {
+      probe: string
+      distance: number
+      value: number
+      date: string
+      hour: number
+      mean: number | null
+      days: number
+    } | null
+    gauges: {
+      id: string
+      name: string
+      water: string
+      value: number | null
+      ts: string | null
+      trend: string | null
+      level: number | null
+      mean: number | null
+    }[]
+  }
+}

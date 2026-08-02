@@ -31,9 +31,20 @@ export default defineConfig({
          * Measured: recharts 567 kB, icons 35 kB, our code plus React 233 kB.
          * After a deploy only the last of those has to travel again.
          */
-        manualChunks: {
-          recharts: ['recharts'],
-          icons: ['lucide-react'],
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined
+
+          // The package name, not a substring match: 'react' as a substring
+          // also catches 'react-smooth' and 'react-transition-group', which
+          // belong to recharts and would drag the chart library into the
+          // entry chunk. That is exactly what happened when this was a plain
+          // list — React ended up inside the recharts chunk, so every first
+          // paint had to download all 167 kB of it.
+          const name = id.split('node_modules/').pop()?.split('/')[0] ?? ''
+
+          if (name === 'lucide-react') return 'icons'
+          if (name === 'react' || name === 'react-dom' || name === 'scheduler') return 'react'
+          return 'vendor'
         },
       },
     },
