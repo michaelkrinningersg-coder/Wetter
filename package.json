@@ -12,6 +12,7 @@
     "preview": "vite preview",
     "start": "NODE_ENV=production node server/index.js",
     "typecheck": "tsc -b --noEmit",
+    "test": "node --test \"test/**/*.test.js\"",
     "lint": "eslint .",
     "fetch:air": "node scripts/fetch-air.js",
     "fetch:gauges": "node scripts/fetch-gauges.js",

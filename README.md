@@ -39,10 +39,44 @@ npm start          # liefert dist/ und die API auf Port 3001
 ```bash
 npm run lint       # ESLint 9, Flat Config
 npm run typecheck  # tsc --noEmit
+npm test           # node:test, keine weitere Abhängigkeit
 ```
 
-Beide laufen im Pages-Workflow vor dem Build und brechen den Deploy ab, bevor
-eine kaputte Fassung veröffentlicht wird.
+Alle drei laufen im Pages-Workflow vor dem Build und brechen den Deploy ab,
+bevor eine kaputte Fassung veröffentlicht wird.
+
+### Tests
+
+57 Tests in sieben Dateien, zwei Sorten und beide nötig:
+
+**Regressionstests gegen erfundene Messreihen.** Jede Zahl darin ist von Hand
+nachrechenbar, und keine hängt davon ab, dass der DWD morgen einen Tag
+nachliefert. `server/db.js` öffnet `$DATA_DIR/weather.sqlite` beim ersten
+Import, deshalb setzt jede Testdatei die Variable und importiert danach — und
+`node --test` gibt jeder Datei einen eigenen Prozess, also auch ein eigenes,
+leeres Archiv. Getestet wird, was schiefgegangen *ist*: null als Rekord, der
+Kalendertag als `%m-%d` statt `%j`, relative gegen absolute
+Fast-Rekord-Abstände, der Mittelrang bei Gleichständen, das Überbrücken in
+Episoden, `never` und `stale` im Ticker, Teilmonat gegen Teilmonat samt
+Ensemble-Vollständigkeit, die Newsroom-Währung und die Dateinamen der
+statischen Vorberechnung.
+
+**Rauchtests gegen das echte Archiv.** Sie behaupten keinen einzigen Messwert —
+die Sammler schreiben jeden Morgen einen Tag dazu, und ein Test, der „der
+Rekord liegt bei 13 Tagen" festschriebe, ginge von allein rot. Geprüft wird,
+was unabhängig von den Daten gelten muss: Jeder Endpunkt antwortet, **keine
+Zahl ist NaN** (`JSON.stringify` macht daraus stillschweigend `null`, und im
+Diagramm sähe eine Division durch null wie eine Messlücke aus), kein Rang liegt
+außerhalb seines Feldes, und der Newsroom veröffentlicht nichts über seiner
+eigenen Schwelle.
+
+Die Tests haben beim Schreiben zwei Fehler gefunden. `newsroom.js` fragte
+`germany_daily` ab, ohne zu prüfen, ob es die Tabelle gibt — das Modul lief nur,
+weil der Server zufällig vorher ein anderes importiert hatte. Und die
+Rangfunktion zählte nur echt größere Werte: Ein Tagesgang, den vierzig
+identische Jahre teilten, bekam Platz 1 und die Rate „einmal in vierzig
+Jahren", obwohl er an 335 Tagen im Jahr zutraf. Beides ist repariert, beides
+steht jetzt als Test da.
 
 ### GitHub Pages
 

@@ -62,6 +62,13 @@ jobs:
       - name: Stationen importieren
         run: npm run import:stations
 
+      # Nach dem Import, weil die Rauchtests das echte Archiv brauchen; die
+      # Regressionstests legen sich ihre eigene, leere Datenbank an und sehen
+      # es nie. Rot heißt: kein Deploy. Ein Rechenfehler soll die Seite nicht
+      # erreichen, auch nicht mit frischen Messwerten im Rücken.
+      - name: Tests
+        run: npm test
+
       - name: Statisch bauen
         env:
           # Eine Pages-Seite liegt unter /<repo>/; ohne das Präfix zeigen alle

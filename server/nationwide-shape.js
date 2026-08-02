@@ -174,7 +174,7 @@ export function addReading(days, date, station, row) {
 /* -------------------------------------------------------------------------- */
 
 /** Gauss-Jordan with partial pivoting, for the 4×4 normal equations. */
-function solve(matrix, rhs) {
+export function solve(matrix, rhs) {
   const size = rhs.length
   const a = matrix.map((row, i) => [...row, rhs[i]])
 

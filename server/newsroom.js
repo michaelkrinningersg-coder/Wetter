@@ -153,23 +153,37 @@ const seriesStmt = db.prepare(`
 
 const cache = new Map()
 
-/** Rank of `value` among `sorted` (ascending), counting from the top. */
+/**
+ * Two ranks for one value: the place, and the midrank the rate is taken from.
+ *
+ * `place` counts only the strictly better values, because that is the number a
+ * sentence quotes — "Platz 1 von 157". The rate may not use it: a value tied
+ * with half the archive would then look unique. Counting the tie block as half,
+ * the convention the yearbook already follows, keeps a genuine record at one
+ * and puts an everyday value where it belongs. A fixture of forty identical
+ * years is how this came to light — a daily range shared by every day of the
+ * record was being announced as a once-in-forty-years event.
+ */
 function rankFromTop(sorted, value) {
   let better = 0
+  let equal = 0
   for (let i = sorted.length - 1; i >= 0; i--) {
     if (sorted[i] > value) better++
+    else if (sorted[i] === value) equal++
     else break
   }
-  return better + 1
+  return { place: better + 1, midrank: better + (equal + 1) / 2 }
 }
 
 function rankFromBottom(sorted, value) {
   let better = 0
+  let equal = 0
   for (let i = 0; i < sorted.length; i++) {
     if (sorted[i] < value) better++
+    else if (sorted[i] === value) equal++
     else break
   }
-  return better + 1
+  return { place: better + 1, midrank: better + (equal + 1) / 2 }
 }
 
 function buildIndex(stationId) {
@@ -332,12 +346,27 @@ const NATIONAL = [
 ]
 
 /**
+ * Whether a table exists at all.
+ *
+ * `daily` is created by `db.js` itself; the German archive and the air
+ * measurements are created by the modules that fill them. Without this guard
+ * the newsroom would work only when something else had happened to import
+ * those modules first — an ordering dependency that held in the server and
+ * broke the moment the module was used on its own.
+ */
+const hasTable = (name) =>
+  db
+    .prepare("SELECT COUNT(*) AS n FROM sqlite_master WHERE type = 'table' AND name = ?")
+    .get(name).n > 0
+
+/**
  * How often this station holds a national extreme, and which days it did.
  *
  * The archive is short — it began on 27 January 2025 — so the rate rests on a
  * year and a half rather than on a century. Every item built from it says so.
  */
 function germanyIndex(stationId) {
+  if (!hasTable('germany_daily') || !hasTable('record_events')) return null
   const range = db
     .prepare('SELECT MIN(date) AS first, MAX(date) AS last, COUNT(DISTINCT date) AS days FROM germany_daily')
     .get()
@@ -428,6 +457,7 @@ const AIR_RULES = [
 ]
 
 function airIndex() {
+  if (!hasTable('air_daily')) return null
   const range = db
     .prepare('SELECT MIN(date) AS first, MAX(date) AS last, COUNT(DISTINCT date) AS days FROM air_daily')
     .get()
@@ -477,8 +507,8 @@ function calendarItems(index, row) {
     if (!sorted || sorted.length < 30) continue
 
     const directions = [
-      field.high ? { dir: 'max', rank: rankFromTop(sorted, value), word: field.high, accent: field.accent } : null,
-      field.low ? { dir: 'min', rank: rankFromBottom(sorted, value), word: field.low, accent: field.lowAccent } : null,
+      field.high ? { dir: 'max', ...rankFromTop(sorted, value), word: field.high, accent: field.accent } : null,
+      field.low ? { dir: 'min', ...rankFromBottom(sorted, value), word: field.low, accent: field.lowAccent } : null,
     ].filter(Boolean)
 
     for (const entry of directions) {
@@ -486,7 +516,7 @@ function calendarItems(index, row) {
       if (field.zero && entry.dir === 'max' && value <= 0) continue
       // Days per year on which this quantity lands in the top `rank` of its own
       // calendar day: one opportunity per calendar day, 366 of them a year.
-      const perYear = (366 * entry.rank) / sorted.length
+      const perYear = (366 * entry.midrank) / sorted.length
       out.push(
         item({
           key: `calendar_${field.key}_${entry.dir}`,
@@ -496,10 +526,10 @@ function calendarItems(index, row) {
           accent: entry.accent,
           perYear,
           headline:
-            entry.rank === 1
+            entry.place === 1
               ? `${cap(entry.word)} ${dayOf(row.date)} seit ${yearOf(index.first)}`
-              : `${ordinal(entry.rank, entry.word)} ${dayOf(row.date)} seit ${yearOf(index.first)}`,
-          detail: `${field.label} ${fmt(value, field.decimals)} ${field.unit} — Platz ${entry.rank} von ${sorted.length} gemessenen Ausgaben dieses Kalendertages`,
+              : `${ordinal(entry.place, entry.word)} ${dayOf(row.date)} seit ${yearOf(index.first)}`,
+          detail: `${field.label} ${fmt(value, field.decimals)} ${field.unit} — Platz ${entry.place} von ${sorted.length} gemessenen Ausgaben dieses Kalendertages`,
           link: { tab: 'day-in-history', params: { monat: row.month, tag: row.day } },
         }),
       )
@@ -517,8 +547,8 @@ function derivedItems(index, row) {
     const sorted = index.derived.get(spec.key)
     if (!sorted || sorted.length < 100) continue
 
-    const rank = rankFromTop(sorted, value)
-    const perYear = rank / index.years
+    const { place, midrank } = rankFromTop(sorted, value)
+    const perYear = midrank / index.years
 
     out.push(
       item({
@@ -529,7 +559,7 @@ function derivedItems(index, row) {
         accent: spec.accent,
         perYear,
         headline: spec.sentence(`${fmt(value, spec.decimals)} ${spec.unit}`),
-        detail: `Das ist Platz ${rank} unter ${sorted.length} Tagen mit dieser Angabe, also ${everyText(perYear)}.`,
+        detail: `Das ist Platz ${place} unter ${sorted.length} Tagen mit dieser Angabe, also ${everyText(perYear)}.`,
         link: { tab: 'yearbook', params: { ansicht: 'kurioses' } },
       }),
     )
@@ -743,7 +773,12 @@ export function newsroom(stationId, date = null) {
   if (!index) return null
 
   const dates = index.rows.slice(-WINDOW_DAYS).map((r) => r.date)
-  const target = date && index.byDate.has(date) ? date : dates[dates.length - 1]
+  // Only days inside the window get an edition. The archive reaches back a
+  // century and a half, but the static build writes one file per day of the
+  // last year — answering for an older day live would promise a page that does
+  // not exist once the site is deployed.
+  const inWindow = new Set(dates)
+  const target = date && inWindow.has(date) ? date : dates[dates.length - 1]
   const row = index.byDate.get(target)
 
   const candidates = [

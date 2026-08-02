@@ -79,12 +79,20 @@ JSON-Datei braucht und die Anzahl der Dateien auf den Pages-Build durchschlägt.
 
 ## Ältere offene Punkte
 
-**Tests.** Der wichtigste Punkt der Datei. Inzwischen über 4.000 Zeilen
-Serverrechnung ohne einen einzigen Test. Kandidaten mit echter Fallhöhe: die
-Midrank-Perzentilformel im Bundesvergleich, die Acht-Stunden-Mittel der
-Luftqualität über Tagesgrenzen hinweg, das Nachspielen des Rekordarchivs, die
-Quantilinterpolation der Verteilungsverschiebung, der Streaming-Filter der
-Phänologiedateien.
+**Tests — angefangen.** 57 Tests in sieben Dateien laufen mit `npm test`
+(node:test, keine neue Abhängigkeit) und hängen als Tor vor dem Pages-Deploy.
+Abgedeckt sind die Fehler, die dieses Projekt tatsächlich gemacht hat: null als
+Rekord, Kalendertag als `%m-%d` statt `%j`, relative gegen absolute
+Fast-Rekord-Abstände, der Mittelrang bei Gleichständen, das Überbrücken in
+Episoden, `never` und `stale` im Ticker, Teilmonat gegen Teilmonat samt
+Ensemble-Vollständigkeit, die Newsroom-Währung, die Dateinamen der statischen
+Vorberechnung und die Regression des Deutschlandtages.
+
+Noch ohne Test, mit echter Fallhöhe: die Midrank-Perzentilformel im
+Bundesvergleich, die Acht-Stunden-Mittel der Luftqualität über Tagesgrenzen
+hinweg, das Nachspielen des Rekordarchivs, die Quantilinterpolation der
+Verteilungsverschiebung, der Streaming-Filter der Phänologiedateien, die
+Kaplan-Meier-Schätzung der Rekordüberlebenskurve.
 
 **Export.** CSV und JSON zu jeder Tabelle und jedem Diagramm. Die Daten sind
 frei verwendbar (GeoNutzV), die Oberfläche gibt sie aber nur zum Ansehen her.

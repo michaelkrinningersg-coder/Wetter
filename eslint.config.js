@@ -60,7 +60,7 @@ export default tseslint.config(
   /* Server and collectors: plain Node                                  */
   /* ------------------------------------------------------------------ */
   {
-    files: ['server/**/*.js', 'scripts/**/*.js', 'vite.config.ts'],
+    files: ['server/**/*.js', 'scripts/**/*.js', 'test/**/*.js', 'vite.config.ts'],
     extends: [js.configs.recommended],
     languageOptions: {
       ecmaVersion: 2022,
