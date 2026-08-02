@@ -1,7 +1,7 @@
 import { Flower2, CalendarRange, Target } from 'lucide-react'
 
 import { useApi } from '../lib/api'
-import { isoToGerman, num, percent } from '../lib/format'
+import { isoToGerman, num, shareOf } from '../lib/format'
 import type { PollenLevel, PollenResponse } from '../types'
 import {
   Card,
@@ -111,7 +111,7 @@ export function Pollen() {
           label="Treffsicherheit"
           value={
             data.accuracy.ready
-              ? percent(data.accuracy.horizons.find((h) => h.offset === 2)?.exact ?? 0)
+              ? shareOf(data.accuracy.horizons.find((h) => h.offset === 2)?.exact ?? 0)
               : '—'
           }
           caption={
@@ -227,8 +227,8 @@ export function Pollen() {
           <ul className="mt-4 space-y-2">
             {data.accuracy.horizons.map((h) => (
               <li key={h.offset} className="text-xs text-ink-muted">
-                <span className="text-ink">{h.label}</span>: {percent(h.exact ?? 0)} exakt
-                getroffen, {percent(h.within ?? 0)} um höchstens eine Stufe daneben — aus{' '}
+                <span className="text-ink">{h.label}</span>: {shareOf(h.exact ?? 0)} exakt
+                getroffen, {shareOf(h.within ?? 0)} um höchstens eine Stufe daneben — aus{' '}
                 {num(h.compared, 0)} Vergleichen.
               </li>
             ))}

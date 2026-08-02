@@ -41,6 +41,12 @@ db.exec(`
     -- Date first: every ranking is "one day, all stations".
     PRIMARY KEY (date, station_id)
   );
+
+  -- The other direction: one station across every day. The national standing
+  -- asks that question, and without this index it scans all 1.28 million rows
+  -- to find the 543 that belong to Göttingen.
+  CREATE INDEX IF NOT EXISTS idx_germany_daily_station
+    ON germany_daily (station_id, date);
 `)
 
 /* -------------------------------------------------------------------------- */

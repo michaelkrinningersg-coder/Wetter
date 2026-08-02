@@ -149,7 +149,9 @@ wärmste und kälteste Station im Mittel und absolut, stärkste Bö, windigste
 Station im Mittel, nasseste Station und größte Tagesspanne — jeweils für ganz
 Deutschland und für alles unterhalb 1000 m · Allzeitrekorde: welche Station an
 welchem Tag ihren eigenen Höchst- oder Tiefstwert gebrochen hat · Markante Tage
-des Archivs in zehn Kategorien
+des Archivs in zehn Kategorien · Bundesvergleich: wo Göttingen an jedem
+Archivtag unter den rund 2.200 meldenden Stationen stand, mit dem Jahresgang
+daraus
 
 ## Aufbau
 
@@ -179,6 +181,7 @@ server/
   germany-sources.js   bundesweiter Abruf beider DWD-Stationsnetze
   germany-csv.js       Tagesarchiv, eine CSV je Tag
   germany.js           Superlative, Stationsregister und Kartendaten
+  national.js          Rang der Station unter allen DWD-Stationen
   regional-sources.js  amtliche DWD-Gebietsmittel
   regional.js          Gebietsmittel: Reihen und Ranglisten
   records-kinds.js     Rekordkategorien
@@ -336,6 +339,13 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   auf Schwarz leuchtet, ist auf Weiß unsichtbar —, sondern ein eigener Entwurf
   bei rund 50 % Helligkeit. Die Kartenrampen sind ebenfalls getrennt: die
   dunkle läuft in der Mitte auf 86 % Helligkeit, was auf Weiß verschwände.
+- **Bundesvergleich.** Das Perzentil zählt Stationen unter dem Wert plus die
+  Hälfte der gleichen. Diese Halbierung ist keine Pedanterie: der DWD gibt
+  Temperaturen auf eine Nachkommastelle aus, an einem ruhigen Tag teilen sich
+  hundert Stationen dieselbe Zahl, und zählte man sie alle als „darunter",
+  stünde Göttingen beim 96. Perzentil dafür, exakt Durchschnitt zu sein.
+  Luftdruck bleibt außen vor, obwohl die Spalte existiert — er wird auf
+  Stationshöhe gemessen, eine bundesweite Rangliste sortierte also die Höhe.
 - **Flusspegel.** Alle Werte in Zentimeter über Pegelnullpunkt. Die Achse des
   Verlaufs ist auf die Messwerte skaliert, weil die täglichen Schwankungen im
   Zentimeterbereich die eigentliche Information sind; Kennwerte und Meldestufen

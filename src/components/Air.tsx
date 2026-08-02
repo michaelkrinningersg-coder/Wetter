@@ -18,7 +18,7 @@ import { Building2, Car, Clock, Factory, Sun, TrendingDown, Wind } from 'lucide-
 
 import { useApi } from '../lib/api'
 import { useUrlState } from '../lib/url-state'
-import { MONTHS_SHORT, isoToGerman, num, percent } from '../lib/format'
+import { MONTHS_SHORT, isoToGerman, num, percent, shareOf } from '../lib/format'
 import { linearFit } from '../lib/stats'
 import type {
   AirComponent,
@@ -458,7 +458,7 @@ function AnnualTrend({
               <span className={change < 0 ? 'text-good' : 'text-hot'}>
                 {change < 0 ? '−' : '+'}
                 {num(Math.abs(change), component.decimals)} {component.unit},{' '}
-                {percent(Math.abs(change) / (first.mean as number))}
+                {shareOf(Math.abs(change) / (first.mean as number))}
               </span>
               )
               {fit && (
@@ -627,7 +627,7 @@ function OzoneHeat({ data }: { data: AirOverviewResponse }) {
         direkt an den Wetterdaten dieses Projekts festmachen lässt — und der
         Zusammenhang ist deutlich: Unterhalb von 18 °C wurde der Zielwert von{' '}
         {heat.target} µg/m³ an {num(first.days, 0)} Tagen kein einziges Mal
-        erreicht, im Band {last.label} °C an {percent(last.share / 100)} der
+        erreicht, im Band {last.label} °C an {percent(last.share)} der
         Tage.
       </p>
 
@@ -686,7 +686,7 @@ function OzoneHeat({ data }: { data: AirOverviewResponse }) {
                         { label: 'Ozon im Mittel', value: `${num(row.mean, 0)} µg/m³` },
                         {
                           label: 'über Zielwert',
-                          value: `${num(row.over, 0)} Tage (${percent(row.share / 100)})`,
+                          value: `${num(row.over, 0)} Tage (${percent(row.share)})`,
                           className: row.share > 0 ? 'text-hot' : 'text-ink',
                         },
                       ]}
@@ -801,7 +801,7 @@ export function Air() {
                       key={cov.station}
                       label={station?.name ?? cov.station}
                       value={`${num(cov.hours, 0)} h`}
-                      caption={`${percent(cov.share)} der Stunden gemessen · ${isoToGerman(cov.first)} bis ${isoToGerman(cov.last)}`}
+                      caption={`${shareOf(cov.share)} der Stunden gemessen · ${isoToGerman(cov.first)} bis ${isoToGerman(cov.last)}`}
                       accent={station?.kind === 'traffic' ? 'warm' : 'cool'}
                       icon={station?.kind === 'traffic' ? Car : Building2}
                     />

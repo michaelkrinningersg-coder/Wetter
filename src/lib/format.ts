@@ -80,8 +80,19 @@ export function signed(
   return `${sign}${nf(digits).format(Math.abs(value))}${unit ? ` ${unit}` : ''}`
 }
 
+/**
+ * A value that is *already* in percent units — 16.5 becomes "16,5 %".
+ *
+ * The name is a trap and has caught this project once: it appends a sign, it
+ * does not convert. For a fraction between 0 and 1, use `shareOf` instead.
+ */
 export function percent(value: number | null | undefined, digits = 0): string {
   return num(value, digits, '%')
+}
+
+/** A fraction between 0 and 1 — 0.8 becomes "80 %". */
+export function shareOf(value: number | null | undefined, digits = 0): string {
+  return value === null || value === undefined ? num(value, digits, '%') : num(value * 100, digits, '%')
 }
 
 /** `1858-01-01` -> `01.01.1858`, without constructing a Date (which would

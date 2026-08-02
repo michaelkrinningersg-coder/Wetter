@@ -5,6 +5,7 @@ import {
   CalendarHeart,
   CalendarRange,
   CloudRain,
+  Flag,
   Flame,
   Flower2,
   Gauge,
@@ -86,6 +87,8 @@ const LOAD = {
   Pollen: () => import('./components/Pollen').then((m) => ({ default: m.Pollen })),
   Phenology: () => import('./components/Phenology').then((m) => ({ default: m.Phenology })),
   Regional: () => import('./components/Regional').then((m) => ({ default: m.Regional })),
+  National: () =>
+    import('./components/National').then((m) => ({ default: m.National })),
 }
 
 const MonthlyOverview = lazy(LOAD.MonthlyOverview)
@@ -117,6 +120,7 @@ const Radiation = lazy(LOAD.Radiation)
 const Pollen = lazy(LOAD.Pollen)
 const Phenology = lazy(LOAD.Phenology)
 const Regional = lazy(LOAD.Regional)
+const National = lazy(LOAD.National)
 
 /**
  * Which module a tab renders.
@@ -157,6 +161,7 @@ const TAB_MODULE: Record<string, string> = {
   'records': 'Records',
   'notable': 'Notable',
   'regional': 'Regional',
+  'national': 'National',
 }
 
 /** Start a view's download without rendering it. */
@@ -202,6 +207,7 @@ type TabId =
   | 'records'
   | 'notable'
   | 'regional'
+  | 'national'
 
 interface TabDef {
   id: TabId
@@ -248,6 +254,7 @@ const TABS: TabDef[] = [
   { id: 'records', label: 'Allzeitrekorde', icon: Trophy, group: 'Deutschland' },
   { id: 'notable', label: 'Markante Tage', icon: Sparkles, group: 'Deutschland' },
   { id: 'regional', label: 'Bundesländer', icon: Landmark, group: 'Deutschland' },
+  { id: 'national', label: 'Bundesvergleich', icon: Flag, group: 'Deutschland' },
 ]
 
 const GROUPS = [
@@ -564,6 +571,8 @@ export default function App() {
             {tab === 'notable' && <Notable />}
 
             {tab === 'regional' && <Regional />}
+
+            {tab === 'national' && <National />}
             </Suspense>
           </main>
         </div>

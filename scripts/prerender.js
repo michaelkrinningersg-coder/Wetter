@@ -39,6 +39,7 @@ import { odlOverview } from '../server/odl.js'
 import { pollenOverview } from '../server/pollen.js'
 import { comboSeries, phenoComboKeys, phenoOverview } from '../server/pheno.js'
 import { dashboard } from '../server/dashboard.js'
+import { NATIONAL_FIELD_KEYS, nationalField, nationalOverview } from '../server/national.js'
 import { staticPath } from '../src/lib/static-path.js'
 
 const outDir = process.argv[2] ?? 'dist'
@@ -336,6 +337,22 @@ if (pheno.range.last) {
 /* -------------------------------------------------------------------------- */
 
 emit('/api/dashboard', dashboard(), 'Dashboard')
+
+/* -------------------------------------------------------------------------- */
+/* National standing                                                          */
+/* -------------------------------------------------------------------------- */
+
+const national = nationalOverview()
+if (national.fields.length > 0) {
+  emit('/api/national', national, 'Bundesvergleich')
+  for (const key of NATIONAL_FIELD_KEYS) {
+    const payload = nationalField(key)
+    if (!payload) continue
+    emit(`/api/national/field?field=${key}`, payload, 'Bundesvergleich')
+    // The view's first request names no field.
+    if (key === NATIONAL_FIELD_KEYS[0]) emit('/api/national/field', payload, 'Bundesvergleich')
+  }
+}
 
 /* -------------------------------------------------------------------------- */
 

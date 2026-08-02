@@ -29,6 +29,7 @@ import { odlOverview } from './odl.js'
 import { pollenOverview } from './pollen.js'
 import { comboSeries, phenoOverview } from './pheno.js'
 import { dashboard } from './dashboard.js'
+import { NATIONAL_FIELD_KEYS, nationalField, nationalOverview } from './national.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -559,6 +560,29 @@ app.get(
 app.get(
   '/api/dashboard',
   handler((_req, res) => res.json(dashboard())),
+)
+
+/* -------------------------------------------------------------------------- */
+/* National standing                                                          */
+/* -------------------------------------------------------------------------- */
+
+app.get(
+  '/api/national',
+  handler((_req, res) => res.json(nationalOverview())),
+)
+
+app.get(
+  '/api/national/field',
+  handler((req, res) => {
+    const key = String(req.query.field ?? NATIONAL_FIELD_KEYS[0])
+    const result = nationalField(key)
+    if (!result) {
+      return res.status(400).json({
+        error: `Unbekannte Größe "${key}". Verfügbar: ${NATIONAL_FIELD_KEYS.join(', ')}.`,
+      })
+    }
+    res.json(result)
+  }),
 )
 
 /* -------------------------------------------------------------------------- */

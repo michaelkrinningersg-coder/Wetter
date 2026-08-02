@@ -1097,3 +1097,53 @@ export interface DashboardResponse {
     }[]
   }
 }
+
+/* -------------------------------------------------------------------------- */
+/* National standing                                                          */
+/* -------------------------------------------------------------------------- */
+
+export interface NationalFieldMeta {
+  key: string
+  label: string
+  short: string
+  unit: string
+  decimals: number
+  /** What the ends of the scale mean, for wording and axis labels. */
+  high: string
+  low: string
+}
+
+export interface NationalPoint {
+  date: string
+  value: number
+  total: number
+  /** 100 = highest in Germany that day, 0 = lowest. Ties share the middle. */
+  percentile: number
+  rank: number
+}
+
+export interface NationalSummary {
+  days: number
+  mean: number
+  top: number
+  bottom: number
+  highest: NationalPoint
+  lowest: NationalPoint
+  monthly: { month: number; label: string; days: number; mean: number }[]
+}
+
+export interface NationalOverviewResponse {
+  station: { id: string; name: string; altitude: number | null }
+  range: { first: string | null; last: string | null; days: number }
+  lowlandLimit: number
+  minDaysPerMonth: number
+  fields: { field: NationalFieldMeta; all: NationalSummary; lowland: NationalSummary }[]
+}
+
+export interface NationalFieldResponse {
+  field: NationalFieldMeta
+  range: { first: string | null; last: string | null; days: number }
+  lowlandLimit: number
+  all: { points: NationalPoint[]; summary: NationalSummary }
+  lowland: { points: NationalPoint[]; summary: NationalSummary }
+}
