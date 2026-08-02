@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react'
 import {
   BarChart3,
   CalendarDays,
@@ -34,35 +34,131 @@ import { apiGet } from './lib/api'
 import { readParam, setTabParam, useUrlNumber, useUrlState } from './lib/url-state'
 import type { ImportStatus, Station } from './types'
 import { Header } from './components/Header'
+import { Loading } from './components/ui'
 import { MonthlyOverview } from './components/MonthlyOverview'
-import { TempTrend } from './components/TempTrend'
-import { PrecipTrend } from './components/PrecipTrend'
-import { AnnualMeans } from './components/AnnualMeans'
-import { Heatmap } from './components/Heatmap'
-import { Extremes } from './components/Extremes'
-import { ExtremeMonths } from './components/ExtremeMonths'
-import { ClimateDiagram } from './components/ClimateDiagram'
-import { Comparison } from './components/Comparison'
-import { YtdTemp } from './components/YtdTemp'
-import { AnnualOverview } from './components/AnnualOverview'
-import { Forecast } from './components/Forecast'
-import { Spells } from './components/Spells'
-import { Vegetation } from './components/Vegetation'
-import { Seasons } from './components/Seasons'
-import { RecordBalance } from './components/RecordBalance'
-import { PrecipIntensity } from './components/PrecipIntensity'
-import { DayInHistory } from './components/DayInHistory'
-import { Gauges } from './components/Gauges'
-import { Germany } from './components/Germany'
-import { GermanyMap } from './components/GermanyMap'
-import { Indices } from './components/Indices'
-import { Notable } from './components/Notable'
-import { Records } from './components/Records'
-import { Air } from './components/Air'
-import { Radiation } from './components/Radiation'
-import { Pollen } from './components/Pollen'
-import { Phenology } from './components/Phenology'
-import { Regional } from './components/Regional'
+
+/* -------------------------------------------------------------------------- */
+/* Lazily loaded views                                                        */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * Every view except the one the app opens on is fetched when it is first
+ * shown. Twenty-eight views in one bundle meant that reading the monthly table
+ * also downloaded the Germany map, the phenology charts and the air-quality
+ * analyses — and two thirds of that weight is the chart library, which ten of
+ * the views never touch.
+ *
+ * The loaders are named rather than inlined into `lazy()` so the same function
+ * can be called again on hover: the download then starts before the click
+ * lands, and on a fast connection the chunk has arrived before the pointer
+ * stops moving. `lazy(LOAD.X)` still infers X's props, which an untyped
+ * registry would have thrown away.
+ */
+const LOAD = {
+  TempTrend: () => import('./components/TempTrend').then((m) => ({ default: m.TempTrend })),
+  PrecipTrend: () => import('./components/PrecipTrend').then((m) => ({ default: m.PrecipTrend })),
+  AnnualMeans: () => import('./components/AnnualMeans').then((m) => ({ default: m.AnnualMeans })),
+  Heatmap: () => import('./components/Heatmap').then((m) => ({ default: m.Heatmap })),
+  Extremes: () => import('./components/Extremes').then((m) => ({ default: m.Extremes })),
+  ExtremeMonths: () => import('./components/ExtremeMonths').then((m) => ({ default: m.ExtremeMonths })),
+  ClimateDiagram: () => import('./components/ClimateDiagram').then((m) => ({ default: m.ClimateDiagram })),
+  Comparison: () => import('./components/Comparison').then((m) => ({ default: m.Comparison })),
+  YtdTemp: () => import('./components/YtdTemp').then((m) => ({ default: m.YtdTemp })),
+  AnnualOverview: () => import('./components/AnnualOverview').then((m) => ({ default: m.AnnualOverview })),
+  Forecast: () => import('./components/Forecast').then((m) => ({ default: m.Forecast })),
+  Spells: () => import('./components/Spells').then((m) => ({ default: m.Spells })),
+  Vegetation: () => import('./components/Vegetation').then((m) => ({ default: m.Vegetation })),
+  Seasons: () => import('./components/Seasons').then((m) => ({ default: m.Seasons })),
+  RecordBalance: () => import('./components/RecordBalance').then((m) => ({ default: m.RecordBalance })),
+  PrecipIntensity: () => import('./components/PrecipIntensity').then((m) => ({ default: m.PrecipIntensity })),
+  DayInHistory: () => import('./components/DayInHistory').then((m) => ({ default: m.DayInHistory })),
+  Gauges: () => import('./components/Gauges').then((m) => ({ default: m.Gauges })),
+  Germany: () => import('./components/Germany').then((m) => ({ default: m.Germany })),
+  GermanyMap: () => import('./components/GermanyMap').then((m) => ({ default: m.GermanyMap })),
+  Indices: () => import('./components/Indices').then((m) => ({ default: m.Indices })),
+  Notable: () => import('./components/Notable').then((m) => ({ default: m.Notable })),
+  Records: () => import('./components/Records').then((m) => ({ default: m.Records })),
+  Air: () => import('./components/Air').then((m) => ({ default: m.Air })),
+  Radiation: () => import('./components/Radiation').then((m) => ({ default: m.Radiation })),
+  Pollen: () => import('./components/Pollen').then((m) => ({ default: m.Pollen })),
+  Phenology: () => import('./components/Phenology').then((m) => ({ default: m.Phenology })),
+  Regional: () => import('./components/Regional').then((m) => ({ default: m.Regional })),
+}
+
+const TempTrend = lazy(LOAD.TempTrend)
+const PrecipTrend = lazy(LOAD.PrecipTrend)
+const AnnualMeans = lazy(LOAD.AnnualMeans)
+const Heatmap = lazy(LOAD.Heatmap)
+const Extremes = lazy(LOAD.Extremes)
+const ExtremeMonths = lazy(LOAD.ExtremeMonths)
+const ClimateDiagram = lazy(LOAD.ClimateDiagram)
+const Comparison = lazy(LOAD.Comparison)
+const YtdTemp = lazy(LOAD.YtdTemp)
+const AnnualOverview = lazy(LOAD.AnnualOverview)
+const Forecast = lazy(LOAD.Forecast)
+const Spells = lazy(LOAD.Spells)
+const Vegetation = lazy(LOAD.Vegetation)
+const Seasons = lazy(LOAD.Seasons)
+const RecordBalance = lazy(LOAD.RecordBalance)
+const PrecipIntensity = lazy(LOAD.PrecipIntensity)
+const DayInHistory = lazy(LOAD.DayInHistory)
+const Gauges = lazy(LOAD.Gauges)
+const Germany = lazy(LOAD.Germany)
+const GermanyMap = lazy(LOAD.GermanyMap)
+const Indices = lazy(LOAD.Indices)
+const Notable = lazy(LOAD.Notable)
+const Records = lazy(LOAD.Records)
+const Air = lazy(LOAD.Air)
+const Radiation = lazy(LOAD.Radiation)
+const Pollen = lazy(LOAD.Pollen)
+const Phenology = lazy(LOAD.Phenology)
+const Regional = lazy(LOAD.Regional)
+
+/**
+ * Which module a tab renders.
+ *
+ * Spelled out rather than derived from the tab id: 'overview' renders
+ * MonthlyOverview and 'climate' renders ClimateDiagram, so any rule that turned
+ * one into the other would be a rule with exceptions. The opening view is
+ * absent because it is imported eagerly — preloading what is already there
+ * would be a wasted request.
+ */
+const TAB_MODULE: Record<string, string> = {
+  'annual-overview': 'AnnualOverview',
+  'day-in-history': 'DayInHistory',
+  'temp-trend': 'TempTrend',
+  'precip-trend': 'PrecipTrend',
+  'annual-means': 'AnnualMeans',
+  'ytd-temp': 'YtdTemp',
+  'seasons': 'Seasons',
+  'vegetation': 'Vegetation',
+  'precip-intensity': 'PrecipIntensity',
+  'indices': 'Indices',
+  'heatmap': 'Heatmap',
+  'extremes': 'Extremes',
+  'extreme-months': 'ExtremeMonths',
+  'spells': 'Spells',
+  'record-balance': 'RecordBalance',
+  'climate': 'ClimateDiagram',
+  'comparison': 'Comparison',
+  'forecast': 'Forecast',
+  'gauges': 'Gauges',
+  'air': 'Air',
+  'radiation': 'Radiation',
+  'pollen': 'Pollen',
+  'phenology': 'Phenology',
+  'germany': 'Germany',
+  'germany-map': 'GermanyMap',
+  'records': 'Records',
+  'notable': 'Notable',
+  'regional': 'Regional',
+}
+
+/** Start a view's download without rendering it. */
+function preload(tab: string) {
+  const load = (LOAD as Record<string, undefined | (() => Promise<unknown>)>)[TAB_MODULE[tab] ?? '']
+  void load?.()
+}
 
 const FALLBACK_STATIONS: Station[] = [
   { id: '01691', name: 'Göttingen', altitude: 167 },
@@ -318,6 +414,8 @@ export default function App() {
                           type="button"
                           aria-current={active ? 'page' : undefined}
                           onClick={() => setTab(t.id)}
+                          onMouseEnter={() => preload(t.id)}
+                          onFocus={() => preload(t.id)}
                           className={`flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-xs font-medium transition-colors ${
                             active
                               ? 'bg-brand/15 text-brand'
@@ -350,6 +448,8 @@ export default function App() {
                       type="button"
                       aria-current={active ? 'page' : undefined}
                       onClick={() => setTab(t.id)}
+                      onTouchStart={() => preload(t.id)}
+                      onFocus={() => preload(t.id)}
                       className={`flex cursor-pointer items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-xs font-medium transition-colors ${
                         active
                           ? 'bg-brand text-canvas'
@@ -366,6 +466,10 @@ export default function App() {
           </nav>
 
           <main className="min-w-0 flex-1 space-y-6">
+            {/* One boundary for all views: only ever one is mounted, so a
+                boundary per view would be twenty-eight copies of the same
+                fallback. */}
+            <Suspense fallback={<Loading message="Ansicht wird geladen …" />}>
             {tab === 'overview' && (
               <MonthlyOverview
                 stationId={stationId}
@@ -450,6 +554,7 @@ export default function App() {
             {tab === 'notable' && <Notable />}
 
             {tab === 'regional' && <Regional />}
+            </Suspense>
           </main>
         </div>
 
