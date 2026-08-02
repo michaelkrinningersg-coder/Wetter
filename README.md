@@ -153,7 +153,8 @@ Station im Mittel, nasseste Station und größte Tagesspanne — jeweils für ga
 Deutschland und für alles unterhalb 1000 m · Allzeitrekorde: welche Station an
 welchem Tag ihren eigenen Höchst- oder Tiefstwert gebrochen hat, als Liste und
 als Karte · Deutschlandtage: die Spanne zwischen dem wärmsten und dem kältesten
-Ort des Landes, für jeden Tag seit 1936 · Markante Tage
+Ort des Landes für jeden Tag seit 1936, das Höhenprofil eines einzelnen Tages
+und die Abnahme der Temperatur mit der Höhe über 145 Jahre · Markante Tage
 des Archivs in zehn Kategorien · Bundesvergleich: wo Göttingen an jedem
 Archivtag unter den rund 2.200 meldenden Stationen stand, mit dem Jahresgang
 daraus
@@ -403,6 +404,19 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   92 % aller Tage, womit die Zahl vor allem misst, wie hoch Deutschlands
   höchster Berg ist; unterhalb 1000 m wird daraus eine Frage über Orte, an denen
   Menschen wohnen.
+- **Höhengefälle.** Temperatur gegen Stationshöhe zu regressieren ergibt über
+  diese Reihe rund **−0,39 K je 100 m** — zu flach. Der Grund: Deutschlands
+  Höhen liegen im Süden, und der Süden ist auch weiter vom Meer entfernt, also
+  schreibt die einfache Regression der Höhe zu, was in Wahrheit Lage ist.
+  Rechnet man Höhe gemeinsam mit Nord und Ost, ergibt sich **−0,55 K je 100 m**
+  und die Anpassung steigt von R² 0,40 auf 0,70. Beide Zahlen werden
+  ausgewiesen, denn die erste ist das, was ein Streudiagramm tatsächlich zeigt —
+  sie zu verschweigen hieße, das Diagramm der danebenstehenden Zahl
+  widersprechen zu lassen. An 784 von 32.780 Tagen ist der lagebereinigte
+  Koeffizient positiv: eine Inversionslage, im Januar an 7,6 % der Tage, von Mai
+  bis September an keinem. An manchen dieser Tage fällt das rohe Streubild
+  trotzdem noch — auch das steht in der Ansicht, samt Begründung, statt zwei
+  Zahlen nebeneinanderzustellen, die sich zu widersprechen scheinen.
 - **Bundesvergleich.** Das Perzentil zählt Stationen unter dem Wert plus die
   Hälfte der gleichen. Diese Halbierung ist keine Pedanterie: der DWD gibt
   Temperaturen auf eine Nachkommastelle aus, an einem ruhigen Tag teilen sich

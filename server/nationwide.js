@@ -433,6 +433,18 @@ const withStations = (row) => ({
   absLoStation: stationOf(row.absLoStation),
 })
 
+/**
+ * Just the extent of the archive.
+ *
+ * Every sub-view fetches its own payload, but they all share one preamble —
+ * how far the archive reaches and what it rests on. Two hundred bytes, so the
+ * shell can say it without pulling in a whole analysis the reader may not open.
+ */
+export function nationwideOverview() {
+  const range = nationwideRange()
+  return range.days === 0 ? null : { range, lowlandLimit: LOWLAND_LIMIT }
+}
+
 export function spanAnalysis() {
   const range = nationwideRange()
   if (range.counted === 0) return null
@@ -443,5 +455,311 @@ export function spanAnalysis() {
     minDaysPerYear: MIN_DAYS_PER_YEAR,
     top: TOP,
     scopes: SPAN_SCOPES.map(spanFor),
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* How temperature falls with altitude                                        */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Two answers to the same question, and their difference is the point.
+ *
+ * Regressing temperature on altitude alone gives about −0.4 K per 100 m over
+ * this record. That is too shallow, and the reason is that Germany's high
+ * ground is in the south and the south is also further from the sea: the naive
+ * fit blames altitude for part of what is really geography, and geography here
+ * works against it. Fitting altitude together with north and east — the same
+ * fit the gradients use — gives about −0.55, and the goodness of fit rises from
+ * 0.40 to 0.70.
+ *
+ * Both numbers ship. The naive one is what a scatter plot of temperature
+ * against altitude actually shows, and hiding it would make the chart disagree
+ * with the number printed beside it.
+ */
+const lapseComplete = 'stations >= ? AND lapse IS NOT NULL AND grad_h IS NOT NULL'
+
+const lapseAnnualStmt = db.prepare(`
+  SELECT CAST(strftime('%Y', date) AS INTEGER) AS year,
+         COUNT(*) AS days,
+         AVG(lapse) AS lapse, AVG(lapse_r2) AS lapseR2,
+         AVG(grad_h) AS gradH, AVG(grad_r2) AS gradR2,
+         SUM(CASE WHEN grad_h > 0 THEN 1 ELSE 0 END) AS inversionDays,
+         AVG(stations) AS stations
+  FROM nationwide_daily
+  WHERE ${lapseComplete}
+  GROUP BY year HAVING days >= ? ORDER BY year
+`)
+
+const lapseMonthlyStmt = db.prepare(`
+  SELECT CAST(strftime('%m', date) AS INTEGER) AS month,
+         COUNT(*) AS days,
+         AVG(lapse) AS lapse, AVG(lapse_r2) AS lapseR2,
+         AVG(grad_h) AS gradH, AVG(grad_r2) AS gradR2,
+         SUM(CASE WHEN grad_h > 0 THEN 1 ELSE 0 END) AS inversionDays
+  FROM nationwide_daily
+  WHERE ${lapseComplete}
+  GROUP BY month ORDER BY month
+`)
+
+const lapseDaySelect = `
+  date, stations, source, lapse, lapse_r2 AS lapseR2,
+  grad_h AS gradH, grad_n AS gradN, grad_e AS gradE, grad_r2 AS gradR2,
+  abs_hi AS absHi, abs_hi_station AS absHiStation,
+  abs_lo AS absLo, abs_lo_station AS absLoStation
+`
+
+const lapseTopStmt = (order) =>
+  db.prepare(
+    `SELECT ${lapseDaySelect} FROM nationwide_daily
+     WHERE ${lapseComplete} ORDER BY grad_h ${order} LIMIT ?`,
+  )
+
+const strongestInversionStmt = lapseTopStmt('DESC')
+const steepestLapseStmt = lapseTopStmt('ASC')
+
+/**
+ * The distribution of the daily gradient, in steps of 0.05 K per 100 m.
+ *
+ * A mean of −0.55 could be a narrow cluster or two seasons pulling apart. The
+ * histogram settles it, and it puts the inversion days where they belong: not
+ * as an anomaly in a footnote but as the right-hand tail of an ordinary
+ * distribution.
+ */
+const LAPSE_BIN = 0.05
+
+const lapseHistogramStmt = db.prepare(`
+  SELECT CAST(FLOOR(grad_h / ${LAPSE_BIN}) AS INTEGER) AS bin, COUNT(*) AS days
+  FROM nationwide_daily WHERE ${lapseComplete}
+  GROUP BY bin ORDER BY bin
+`)
+
+const withLapseStations = (row) => ({
+  ...row,
+  absHiStation: stationOf(row.absHiStation),
+  absLoStation: stationOf(row.absLoStation),
+})
+
+export function lapseAnalysis() {
+  const range = nationwideRange()
+  if (range.counted === 0) return null
+
+  const overall = db
+    .prepare(
+      `SELECT COUNT(*) AS days,
+              AVG(lapse) AS lapse, AVG(lapse_r2) AS lapseR2,
+              AVG(grad_h) AS gradH, AVG(grad_r2) AS gradR2,
+              SUM(CASE WHEN grad_h > 0 THEN 1 ELSE 0 END) AS inversionDays
+       FROM nationwide_daily WHERE ${lapseComplete}`,
+    )
+    .get(MIN_STATIONS)
+
+  return {
+    range,
+    minDaysPerYear: MIN_DAYS_PER_YEAR,
+    binWidth: LAPSE_BIN,
+    top: TOP,
+    overall,
+    annual: lapseAnnualStmt.all(MIN_STATIONS, MIN_DAYS_PER_YEAR),
+    monthly: lapseMonthlyStmt.all(MIN_STATIONS).map((row) => ({
+      ...row,
+      label: MONTHS[row.month - 1],
+      inversionShare: row.inversionDays / row.days,
+    })),
+    histogram: lapseHistogramStmt.all(MIN_STATIONS).map((row) => ({
+      from: row.bin * LAPSE_BIN,
+      to: (row.bin + 1) * LAPSE_BIN,
+      days: row.days,
+      share: row.days / (overall?.days ?? 1),
+    })),
+    inversions: strongestInversionStmt.all(MIN_STATIONS, TOP).map(withLapseStations),
+    steepest: steepestLapseStmt.all(MIN_STATIONS, TOP).map(withLapseStations),
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* One day's shape                                                            */
+/* -------------------------------------------------------------------------- */
+
+const shapeStmt = db.prepare(`
+  SELECT ${lapseDaySelect},
+         mean_hi AS meanHi, mean_hi_station AS meanHiStation,
+         mean_lo AS meanLo, mean_lo_station AS meanLoStation,
+         low_abs_hi AS lowAbsHi, low_abs_hi_station AS lowAbsHiStation,
+         low_abs_lo AS lowAbsLo, low_abs_lo_station AS lowAbsLoStation
+  FROM nationwide_daily WHERE date = ?
+`)
+
+/**
+ * The fitted shape of a single day, to travel with that day's map.
+ *
+ * The map payload already carries every station's reading, so the scatter of
+ * temperature against altitude can be drawn in the browser from what is
+ * already there. What the browser cannot derive is the fit that holds position
+ * constant — that needs the sums this table was built from — so it rides along
+ * here rather than becoming a request of its own.
+ */
+export function shapeForDate(date) {
+  const row = shapeStmt.get(date)
+  if (!row) return null
+  return {
+    ...row,
+    minStations: MIN_STATIONS,
+    enough: row.stations >= MIN_STATIONS,
+    absHiStation: stationOf(row.absHiStation),
+    absLoStation: stationOf(row.absLoStation),
+    meanHiStation: stationOf(row.meanHiStation),
+    meanLoStation: stationOf(row.meanLoStation),
+    lowAbsHiStation: stationOf(row.lowAbsHiStation),
+    lowAbsLoStation: stationOf(row.lowAbsLoStation),
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* The geographic gradient                                                    */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Which way it gets warmer, and by how much.
+ *
+ * The same fit that produces the altitude coefficient produces two more: how
+ * temperature changes per 100 km northward and per 100 km eastward, each with
+ * the other two held constant. Together they are a vector — a direction and a
+ * steepness — and that vector turns through the year in a way no single
+ * coefficient shows.
+ *
+ * In January the north-south component is near zero and the east-west one is
+ * strongly negative: the country is not colder in the north, it is colder in
+ * the east. In June it reverses — the east is warmer and the north-south
+ * gradient is at its steepest. That is continentality, measured rather than
+ * asserted: in winter the Atlantic warms what is near it, in summer it cools it.
+ */
+const GRAD_COMPLETE = 'stations >= ? AND grad_n IS NOT NULL AND grad_e IS NOT NULL'
+
+/** Compass points, for saying "warmer towards the south-west" in two letters. */
+const COMPASS = ['N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW']
+
+/**
+ * The direction in which it gets warmer, as a bearing from north.
+ *
+ * `gradN` is K per 100 km northward, `gradE` per 100 km eastward, so the pair
+ * is already a vector in (north, east). Its bearing is the direction of
+ * steepest increase; its length is how steep, in K per 100 km, regardless of
+ * which way the country happens to be tilted that day.
+ */
+function direction(gradN, gradE) {
+  if (gradN === null || gradE === null) return null
+  const magnitude = Math.hypot(gradN, gradE)
+  const bearing = (((Math.atan2(gradE, gradN) * 180) / Math.PI) + 360) % 360
+  return {
+    magnitude,
+    bearing,
+    compass: COMPASS[Math.round(bearing / 45) % 8],
+  }
+}
+
+const gradAnnualStmt = db.prepare(`
+  SELECT CAST(strftime('%Y', date) AS INTEGER) AS year, COUNT(*) AS days,
+         AVG(grad_n) AS gradN, AVG(grad_e) AS gradE, AVG(grad_r2) AS gradR2
+  FROM nationwide_daily WHERE ${GRAD_COMPLETE}
+  GROUP BY year HAVING days >= ? ORDER BY year
+`)
+
+const gradMonthlyStmt = db.prepare(`
+  SELECT CAST(strftime('%m', date) AS INTEGER) AS month, COUNT(*) AS days,
+         AVG(grad_n) AS gradN, AVG(grad_e) AS gradE,
+         AVG(grad_h) AS gradH, AVG(grad_r2) AS gradR2,
+         SUM(CASE WHEN grad_e > 0 THEN 1 ELSE 0 END) AS eastWarmerDays,
+         SUM(CASE WHEN grad_n > 0 THEN 1 ELSE 0 END) AS northWarmerDays
+  FROM nationwide_daily WHERE ${GRAD_COMPLETE}
+  GROUP BY month ORDER BY month
+`)
+
+const gradDaySelect = `
+  date, stations, source,
+  grad_n AS gradN, grad_e AS gradE, grad_h AS gradH, grad_r2 AS gradR2,
+  abs_hi AS absHi, abs_hi_station AS absHiStation,
+  abs_lo AS absLo, abs_lo_station AS absLoStation
+`
+
+const gradTopStmt = (order) =>
+  db.prepare(
+    `SELECT ${gradDaySelect} FROM nationwide_daily
+     WHERE ${GRAD_COMPLETE} ORDER BY ${order} LIMIT ?`,
+  )
+
+/**
+ * Four rankings, one per direction the country can tilt.
+ *
+ * Not "the biggest gradient" in the abstract: a day on which the south is
+ * 6 K warmer than the north and one on which the east is 6 K colder than the
+ * west are different weather, and a single ranking by magnitude would mix them.
+ */
+const GRAD_EXTREMES = [
+  {
+    key: 'southWarm',
+    label: 'Süden am wärmsten',
+    note: 'Föhnlagen und Frühjahrstage, an denen der Norden noch unter Meereinfluss steht.',
+    order: 'grad_n ASC',
+  },
+  {
+    key: 'northWarm',
+    label: 'Norden am wärmsten',
+    note: 'Meist Winterlagen mit milder Meeresluft im Norden und Kaltluftsee im Süden.',
+    order: 'grad_n DESC',
+  },
+  {
+    key: 'westWarm',
+    label: 'Westen am wärmsten',
+    note: 'Atlantische Milderung gegen kontinentale Kälte — die klassische Winterlage.',
+    order: 'grad_e ASC',
+  },
+  {
+    key: 'eastWarm',
+    label: 'Osten am wärmsten',
+    note: 'Sommerliche Kontinentalität: der Osten heizt sich auf, während der Westen Seewind bekommt.',
+    order: 'grad_e DESC',
+  },
+]
+
+const withGradStations = (row) => ({
+  ...row,
+  ...direction(row.gradN, row.gradE),
+  absHiStation: stationOf(row.absHiStation),
+  absLoStation: stationOf(row.absLoStation),
+})
+
+export function gradientAnalysis() {
+  const range = nationwideRange()
+  if (range.counted === 0) return null
+
+  const overall = db
+    .prepare(
+      `SELECT COUNT(*) AS days, AVG(grad_n) AS gradN, AVG(grad_e) AS gradE,
+              AVG(grad_h) AS gradH, AVG(grad_r2) AS gradR2,
+              AVG(ABS(grad_n)) AS absN, AVG(ABS(grad_e)) AS absE
+       FROM nationwide_daily WHERE ${GRAD_COMPLETE}`,
+    )
+    .get(MIN_STATIONS)
+
+  return {
+    range,
+    minDaysPerYear: MIN_DAYS_PER_YEAR,
+    top: TOP,
+    overall: { ...overall, ...direction(overall.gradN, overall.gradE) },
+    annual: gradAnnualStmt
+      .all(MIN_STATIONS, MIN_DAYS_PER_YEAR)
+      .map((row) => ({ ...row, ...direction(row.gradN, row.gradE) })),
+    monthly: gradMonthlyStmt.all(MIN_STATIONS).map((row) => ({
+      ...row,
+      label: MONTHS[row.month - 1],
+      eastWarmerShare: row.eastWarmerDays / row.days,
+      northWarmerShare: row.northWarmerDays / row.days,
+      ...direction(row.gradN, row.gradE),
+    })),
+    extremes: GRAD_EXTREMES.map((extreme) => ({
+      ...extreme,
+      days: gradTopStmt(extreme.order).all(MIN_STATIONS, TOP).map(withGradStations),
+    })),
   }
 }

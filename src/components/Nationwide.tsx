@@ -1,25 +1,33 @@
-import { ArrowLeftRight } from 'lucide-react'
+import { ArrowLeftRight, Mountain } from 'lucide-react'
 
 import { useApi } from '../lib/api'
 import { useUrlState } from '../lib/url-state'
 import { isoToGerman, num } from '../lib/format'
-import type { SpanResponse } from '../types'
+import type { NationwideOverview } from '../types'
+import { NationwideLapse } from './NationwideLapse'
 import { NationwideSpan } from './NationwideSpan'
 import { ErrorState, InfoPanel, Loading, SubNav } from './ui'
 
 /**
- * One day of German weather, seen four ways.
+ * One day of German weather, seen several ways.
  *
  * Everything on this page is a statement about the country rather than about a
- * station, and all of it rests on the same archive: the shape of every day since
- * 1936, derived once from the DWD historical files and extended nightly from the
+ * station, and all of it rests on the same archive: the shape of every day,
+ * derived once from the DWD historical files and extended nightly from the
  * daily archive.
+ *
+ * The shell fetches only the preamble. Each sub-view loads its own payload
+ * when it is opened, because the span alone is 78 kB and a reader who came for
+ * the altitude gradient should not pay for it.
  */
-const VIEWS = [{ value: 'spanne', label: 'Spanne', icon: ArrowLeftRight }] as const
+const VIEWS = [
+  { value: 'spanne', label: 'Spanne', icon: ArrowLeftRight },
+  { value: 'hoehe', label: 'Höhenprofil', icon: Mountain },
+] as const
 
 export function Nationwide() {
   const [view, setView] = useUrlState<string>('ansicht', 'spanne')
-  const { data, loading, error } = useApi<SpanResponse>('/api/nationwide/span')
+  const { data, loading, error } = useApi<NationwideOverview>('/api/nationwide')
 
   if (loading && !data) return <Loading message="Deutschlandtage werden geladen …" />
   if (error) return <ErrorState message={error} />
@@ -58,11 +66,9 @@ export function Nationwide() {
         </p>
       </InfoPanel>
 
-      {VIEWS.length > 1 && (
-        <SubNav label="Auswertung" value={view} items={VIEWS} onChange={setView} />
-      )}
+      <SubNav label="Auswertung" value={view} items={VIEWS} onChange={setView} />
 
-      {view === 'spanne' && <NationwideSpan data={data} />}
+      {view === 'hoehe' ? <NationwideLapse /> : <NationwideSpan />}
     </div>
   )
 }

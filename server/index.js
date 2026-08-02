@@ -23,7 +23,7 @@ import {
   superlatives,
 } from './germany.js'
 import { recordCount, recordDays, recordRange, recordSpread, recordsForDate } from './records.js'
-import { spanAnalysis } from './nationwide.js'
+import { lapseAnalysis, nationwideOverview, shapeForDate, spanAnalysis } from './nationwide.js'
 import { regionalMeta, regionalSeries } from './regional.js'
 import { airComponentKeys, airOverview, airProfiles } from './air.js'
 import { odlOverview } from './odl.js'
@@ -359,7 +359,7 @@ app.get(
     const day = germanyMap(date)
     if (!day) return res.status(404).json({ error: `Für den ${date} liegen keine Werte vor.` })
 
-    res.json({ range, dates: availableDates(), day })
+    res.json({ range, dates: availableDates(), day, shape: shapeForDate(date) })
   }),
 )
 
@@ -371,7 +371,11 @@ app.get(
  * No station parameter: these are statements about the country, not about a
  * station, so they are the same answer for every visitor and every selection.
  */
-for (const [path, query] of [['/api/nationwide/span', spanAnalysis]]) {
+for (const [path, query] of [
+  ['/api/nationwide', nationwideOverview],
+  ['/api/nationwide/span', spanAnalysis],
+  ['/api/nationwide/lapse', lapseAnalysis],
+]) {
   app.get(
     path,
     handler((_req, res) => {

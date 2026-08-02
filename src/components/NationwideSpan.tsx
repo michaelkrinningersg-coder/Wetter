@@ -13,6 +13,7 @@ import {
 } from 'recharts'
 import { ArrowLeftRight, Mountain, Snowflake, Thermometer } from 'lucide-react'
 
+import { useApi } from '../lib/api'
 import { useUrlState } from '../lib/url-state'
 import { isoToGerman, num, shareOf } from '../lib/format'
 import { linearFit } from '../lib/stats'
@@ -23,6 +24,8 @@ import {
   ChartFrame,
   ChartTooltip,
   ChoiceGroup,
+  ErrorState,
+  Loading,
   SectionHeading,
   StatGrid,
   StatTile,
@@ -97,8 +100,13 @@ function DayTable({
 
 /* -------------------------------------------------------------------------- */
 
-export function NationwideSpan({ data }: { data: SpanResponse }) {
+export function NationwideSpan() {
   const [scopeKey, setScopeKey] = useUrlState<string>('umfang', 'flachland')
+  const { data, loading, error } = useApi<SpanResponse>('/api/nationwide/span')
+
+  if (loading && !data) return <Loading message="Spannen werden geladen …" />
+  if (error) return <ErrorState message={error} />
+  if (!data) return null
 
   const scope = data.scopes.find((s) => s.key === scopeKey) ?? data.scopes[0]
   if (!scope) return null

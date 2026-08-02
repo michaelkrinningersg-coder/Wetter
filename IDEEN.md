@@ -38,7 +38,7 @@ Ideen zurückgestellt wurden (siehe unten).
 | --- | --- | --- | --- |
 | 2 | Rekordkarte des Tages | `record_events` | **fertig** |
 | 3 | Die Spanne des Tages | `nationwide_daily` | **fertig** |
-| 4 | Höhenprofil des Tages | `nationwide_daily` | offen |
+| 4 | Höhenprofil des Tages | `nationwide_daily` | **fertig** |
 | 5 | Nord-Süd- und West-Ost-Gefälle | `nationwide_daily` | offen |
 | 6 | Deutschlands Extrempunkte | `nationwide_daily` | offen |
 | 8 | Wie alt ist jeder Rekord | `daily` | offen |
@@ -56,11 +56,6 @@ Ideen zurückgestellt wurden (siehe unten).
 | 20 | Newsroom: automatische Meldungen | alle | offen |
 
 ### Was die einzelnen Punkte vorhaben
-
-**4 — Höhenprofil des Tages.** Temperatur gegen Stationshöhe als
-Streudiagramm mit Ausgleichsgerade. An normalen Tagen fällt sie um rund 0,6 K
-je 100 m; an Inversionstagen steigt sie, und man sieht mit einem Blick, dass
-im Tal Nebel und auf dem Berg Sonne war.
 
 **5 — Nord-Süd- und West-Ost-Gefälle.** Dieselbe Regression gegen Breite und
 Länge, in K je 100 km. Über die Zeit aufgetragen zeigt es, wann Deutschland

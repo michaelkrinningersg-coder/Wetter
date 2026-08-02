@@ -49,7 +49,7 @@ import { NATIONAL_FIELD_KEYS, nationalField, nationalOverview } from '../server/
 import { pressureAnalysis } from '../server/pressure.js'
 import { frostRiskAll } from '../server/frost.js'
 import { distributionOverview } from '../server/distribution.js'
-import { spanAnalysis } from '../server/nationwide.js'
+import { lapseAnalysis, nationwideOverview, shapeForDate, spanAnalysis } from '../server/nationwide.js'
 import { staticPath } from '../src/lib/static-path.js'
 
 const outDir = process.argv[2] ?? 'dist'
@@ -228,7 +228,11 @@ for (const gauge of GAUGES) {
 /* The shape of a German day                                                  */
 /* -------------------------------------------------------------------------- */
 
-for (const [path, query] of [['/api/nationwide/span', spanAnalysis]]) {
+for (const [path, query] of [
+  ['/api/nationwide', nationwideOverview],
+  ['/api/nationwide/span', spanAnalysis],
+  ['/api/nationwide/lapse', lapseAnalysis],
+]) {
   emit(path, query(), 'Deutschlandtage')
 }
 
@@ -260,7 +264,7 @@ if (range.last) {
   emit('/api/germany/notable', notableOverview(), 'Markante Tage')
   emit('/api/germany/stations', germanyStationRegister(), 'Karte')
   for (const date of dates) {
-    const payload = { range, dates, day: germanyMap(date) }
+    const payload = { range, dates, day: germanyMap(date), shape: shapeForDate(date) }
     emit(`/api/germany/map?date=${date}`, payload, 'Karte')
     if (date === range.last) emit('/api/germany/map', payload, 'Karte')
   }

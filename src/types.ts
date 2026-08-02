@@ -610,6 +610,8 @@ export interface GermanyMapResponse {
     /** parameter -> [stationId, value] for every station that measured it. */
     values: Record<string, [string, number][]>
   } | null
+  /** The day's fitted shape, so the altitude view needs no request of its own. */
+  shape?: DayShape | null
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1393,4 +1395,93 @@ export interface SpanResponse {
   minDaysPerYear: number
   top: number
   scopes: SpanScope[]
+}
+
+export interface DayShape {
+  date: string
+  stations: number
+  source: string
+  minStations: number
+  /** False when the day rests on too few stations for any of this to be stated. */
+  enough: boolean
+  /** Naive regression of temperature on altitude alone, K per 100 m. */
+  lapse: number | null
+  lapseR2: number | null
+  /** The same slope with position held constant — the honest one. */
+  gradH: number | null
+  gradN: number | null
+  gradE: number | null
+  gradR2: number | null
+  absHi: number | null
+  absHiStation: NationwideStation
+  absLo: number | null
+  absLoStation: NationwideStation
+  meanHi: number | null
+  meanHiStation: NationwideStation
+  meanLo: number | null
+  meanLoStation: NationwideStation
+  lowAbsHi: number | null
+  lowAbsHiStation: NationwideStation
+  lowAbsLo: number | null
+  lowAbsLoStation: NationwideStation
+}
+
+export interface LapseDay {
+  date: string
+  stations: number
+  source: string
+  lapse: number
+  lapseR2: number
+  gradH: number
+  gradN: number
+  gradE: number
+  gradR2: number
+  absHi: number | null
+  absHiStation: NationwideStation
+  absLo: number | null
+  absLoStation: NationwideStation
+}
+
+export interface LapseResponse {
+  range: NationwideRange
+  minDaysPerYear: number
+  binWidth: number
+  top: number
+  overall: {
+    days: number
+    lapse: number
+    lapseR2: number
+    gradH: number
+    gradR2: number
+    inversionDays: number
+  }
+  annual: {
+    year: number
+    days: number
+    lapse: number
+    lapseR2: number
+    gradH: number
+    gradR2: number
+    inversionDays: number
+    stations: number
+  }[]
+  monthly: {
+    month: number
+    label: string
+    days: number
+    lapse: number
+    lapseR2: number
+    gradH: number
+    gradR2: number
+    inversionDays: number
+    inversionShare: number
+  }[]
+  histogram: { from: number; to: number; days: number; share: number }[]
+  inversions: LapseDay[]
+  steepest: LapseDay[]
+}
+
+export interface NationwideOverview {
+  range: NationwideRange
+  lowlandLimit: number
 }
