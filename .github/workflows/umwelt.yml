@@ -50,25 +50,48 @@ jobs:
             node scripts/fetch-air.js
           fi
 
+      # Beide Quellen halten nur ein kurzes Fenster vor: das BfS sieben Tage,
+      # der DWD nur die jeweils aktuelle Ausgabe. Ein Fehlschlag hier darf den
+      # Lauf nicht abbrechen, sonst geht auch die Luftqualität verloren.
+      - name: Ortsdosisleistung abrufen
+        continue-on-error: true
+        run: node scripts/fetch-odl.js
+
+      - name: Pollenflug abrufen
+        continue-on-error: true
+        run: node scripts/fetch-pollen.js
+
       - name: Änderungen committen
         run: |
-          if [ -z "$(git status --porcelain data/air)" ]; then
+          if [ -z "$(git status --porcelain data/air data/odl data/pollen)" ]; then
             echo "Keine neuen oder korrigierten Stunden — nichts zu committen."
             exit 0
           fi
 
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/air
+          git add data/air data/odl data/pollen
 
           # Neue Tage getrennt von nachträglich korrigierten ausweisen: das UBA
           # prüft Stundenwerte nach, und eine Änderung an einem alten Tag ist
           # etwas anderes als ein hinzugekommener.
-          neu=$(git diff --cached --name-only --diff-filter=A -- 'data/air/*/*.csv' | wc -l)
-          geaendert=$(git diff --cached --name-only --diff-filter=M -- 'data/air/*/*.csv' | wc -l)
+          summary=""
+          for quelle in air:Luftqualität odl:Ortsdosisleistung pollen:Pollenflug; do
+            dir=${quelle%%:*}
+            name=${quelle##*:}
+            neu=$(git diff --cached --name-only --diff-filter=A -- "data/$dir/*/*.csv" | wc -l)
+            alt=$(git diff --cached --name-only --diff-filter=M -- "data/$dir/*/*.csv" | wc -l)
+            # Als if geschrieben, nicht als &&-Kette: unter `set -e` bestimmt
+            # der letzte Schleifendurchlauf den Rückgabewert der Schleife, und
+            # eine Quelle ohne Änderung würde den ganzen Schritt scheitern
+            # lassen.
+            if [ "$neu" -gt 0 ] || [ "$alt" -gt 0 ]; then
+              summary="$summary$name: $neu neu, $alt korrigiert"$'\n'
+            fi
+          done
+          [ -n "$summary" ] || summary="Register aktualisiert"
 
-          git commit -m "Umweltdaten $(date -u '+%Y-%m-%d %H:%M UTC')" \
-                     -m "Luftqualität: $neu neue Tage, $geaendert nachträglich korrigiert"
+          git commit -m "Umweltdaten $(date -u '+%Y-%m-%d %H:%M UTC')" -m "$summary"
 
           # Zwischen Abruf und Push kann ein anderer Sammellauf committet haben.
           for attempt in 1 2 3 4 5; do

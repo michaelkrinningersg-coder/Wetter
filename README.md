@@ -59,7 +59,7 @@ Browser statt ein Übersetzungsfehler.
 | Monatsansicht | 5.020 | 30,3 MB |
 | Dieser Tag | 1.116 | 17,3 MB |
 | Gebietsmittel | 60 | 3,3 MB |
-| übrige (inkl. Luftqualität) | 170 | 2,0 MB |
+| übrige (inkl. Umweltdaten) | 175 | 2,3 MB |
 
 Der Workflow `.github/workflows/pages.yml` veröffentlicht nach jedem Datenlauf.
 Damit er greifen kann, muss in den Repository-Einstellungen unter **Pages** als
@@ -94,7 +94,9 @@ Jahresprognose
 aus den beiden Göttinger UBA-Stationen: Tagesgang je Messgröße im Vergleich
 Hintergrund gegen Verkehr, Wochentags- und Jahresverlauf, Jahresmittel gegen
 die Grenzwerte, Überschreitungen der 39. BImSchV und Ozon gegen die
-Tageshöchsttemperatur derselben Stadt
+Tageshöchsttemperatur derselben Stadt · Ortsdosisleistung der elf BfS-Sonden im
+25-km-Umkreis, eine davon an der Wetterstation selbst · Pollenflug für die
+DWD-Region, acht Arten über drei Vorhersagetage
 
 **Deutschland** — Gebietsmittel für Deutschland und die Bundesländer seit 1881
 (Trend je Jahrzehnt, Rangliste, zehn Größen) · Karte aller Stationen mit den
@@ -138,6 +140,12 @@ server/
   air-sources.js       UBA-Luftqualität: Stationen, Grenzwerte, Abruf
   air-csv.js           Stundenarchiv, eine CSV je Tag
   air.js               Tagesgang, Jahresreihen, Überschreitungen
+  odl-sources.js       BfS-Ortsdosisleistung: Sondenwahl und WFS-Abruf
+  odl-csv.js           Stundenarchiv, eine CSV je Tag
+  odl.js               Sondenvergleich und Verlauf
+  pollen-sources.js    DWD-Pollenvorhersage: Region, Arten, Stufen
+  pollen-csv.js        Ausgabenarchiv, eine CSV je Ausgabe
+  pollen.js            Saisonkalender und Treffsicherheit
 ```
 
 Die Datenbank liegt unter `data/weather.sqlite` (per `.gitignore`
@@ -247,6 +255,17 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   zählt nur, wenn es acht aufeinanderfolgende Stunden umfasst und mindestens
   sechs davon einen Ozonwert tragen. Zeitstempel werden unverändert übernommen,
   wie das UBA sie veröffentlicht, und nicht umgerechnet.
+- **Ortsdosisleistung.** Die elf Sonden werden nicht fest eingetragen, sondern
+  bei jedem Lauf aus dem BfS-Bestand nach Entfernung zur DWD-Station 01691
+  ausgewählt — kommt eine Sonde hinzu, wandert sie von selbst ins Archiv.
+  Zeitangaben in UTC, wie das BfS sie veröffentlicht; Tagesgrenzen dieses
+  Archivs sind daher UTC-Tage. Jede Sonde wird gegen ihre eigene Spanne
+  gelesen, nicht gegen eine gemeinsame Skala: die Unterschiede zwischen den
+  Standorten sind geologisch und würden jede gemeinsame Einfärbung dominieren.
+- **Pollenflug.** Die Belastungsstufen sind Ränge, keine Messwerte — „1-2" ist
+  eine eigene Kategorie zwischen „1" und „2", keine gerundete 1,5. Sie werden
+  deshalb gezählt und nie gemittelt. Die Treffsicherheit der Vorhersage wird
+  erst ab zehn Ausgaben ausgewiesen; darunter wäre jede Prozentzahl Theater.
 - **Flusspegel.** Alle Werte in Zentimeter über Pegelnullpunkt. Die Achse des
   Verlaufs ist auf die Messwerte skaliert, weil die täglichen Schwankungen im
   Zentimeterbereich die eigentliche Information sind; Kennwerte und Meldestufen
@@ -277,6 +296,13 @@ Tageswerte (`kl`). Frei verwendbar nach GeoNutzV; Quellenangabe erforderlich.
 **Luftqualität:** [Umweltbundesamt, Luftdaten-API](https://luftdaten.umweltbundesamt.de/api/air-data/v3),
 Stundenwerte der Stationen DENI042 und DENI068. Der ältere Pfad unter
 `umweltbundesamt.de/api/air_data/` leitet dorthin um.
+
+**Ortsdosisleistung:** [Bundesamt für Strahlenschutz, ODL-Messnetz](https://www.imis.bfs.de/ogc/opendata/ows),
+offenes WFS, Layer `opendata:odlinfo_odl_1h_latest` und
+`opendata:odlinfo_timeseries_odl_1h`.
+
+**Pollenflug:** [DWD, `s31fg.json`](https://opendata.dwd.de/climate_environment/health/alerts/s31fg.json),
+Vorhersage für 27 Regionen, täglich gegen 11:00 Uhr.
 
 ### Deutschlandarchiv
 
@@ -358,6 +384,50 @@ erzeugen eine byte-identische Datei und damit keinen Commit.
 Die Abdeckung ist nicht überall gleich: SO₂ liegt nur für 40 % der Stunden vor,
 alle übrigen Größen für 95 bis 100 %. Die Oberfläche weist das je Größe aus,
 statt eine dünn belegte Reihe wie eine dichte aussehen zu lassen.
+
+### Ortsdosisleistung
+
+```bash
+npm run fetch:odl     # täglich; einen Backfill gibt es nicht
+```
+
+Elf BfS-Sonden im 25-km-Umkreis der DWD-Station, ausgewählt aus rund 1700
+bundesweiten nach Entfernung. Zwei davon stehen praktisch am selben Ort:
+**Göttingen DWD** 100 m von der Wetterstation entfernt auf 168 m, **Göttingen**
+1,8 km weiter auf 150 m.
+
+Der entscheidende Unterschied zu allen anderen Quellen hier: **das BfS hält
+sieben Tage vor.** Was älter ist, gibt es nicht mehr — ein versäumter Tag ist
+dauerhaft verloren. Umgekehrt kostet ein einzelner Fehlschlag nichts, weil der
+nächste Lauf das ganze Fenster erneut sieht und die Lücke schließt.
+
+Abgelegt als `data/odl/probes.csv` (Register) und `data/odl/2026/2026-08-02.csv`
+mit `probe,hour,value` — 264 Zeilen am Tag, gut 4 kB.
+
+Die Sonden unterscheiden sich um rund die Hälfte, von 0,114 bis 0,156 µSv/h im
+Mittel. Das ist fast vollständig der terrestrische Anteil (0,072 bis 0,110); der
+kosmische liegt bei allen elf zwischen 0,044 und 0,046 µSv/h, denn über 175
+Höhenmeter ist der Höheneffekt bei drei Nachkommastellen nicht zu sehen.
+
+### Pollenflug
+
+```bash
+npm run fetch:pollen  # täglich; einen Backfill gibt es nicht
+```
+
+Der DWD veröffentlicht jeden Vormittag `s31fg.json` für ganz Deutschland — acht
+Pollenarten, sieben Belastungsstufen, drei Tage, 27 Regionen — und ersetzt die
+Datei am nächsten Morgen. Ein Archiv gibt es nicht.
+
+Göttingen liegt in Region 30 „Niedersachsen und Bremen". Deren Teilung in einen
+westlichen und einen östlichen Teil benennt der DWD in den Daten nicht;
+Göttingen liegt im Südosten, also im östlichen Teil. **Mitgeschrieben werden
+beide**, damit die Zuordnung umkehrbar bleibt — das kostet acht Zeilen am Tag.
+
+Alle drei Vorhersagehorizonte werden festgehalten, nicht nur der laufende Tag.
+Damit lässt sich später eine Frage beantworten, die die DWD-Datei selbst nicht
+beantworten kann: wie gut das, was zwei Tage im Voraus gesagt wurde, zu dem
+passt, was am Tag selbst galt.
 
 ### Allzeitrekorde
 

@@ -15,6 +15,8 @@
     "lint": "eslint .",
     "fetch:air": "node scripts/fetch-air.js",
     "fetch:gauges": "node scripts/fetch-gauges.js",
+    "fetch:odl": "node scripts/fetch-odl.js",
+    "fetch:pollen": "node scripts/fetch-pollen.js",
     "fetch:germany": "node scripts/fetch-germany.js",
     "fetch:records": "node scripts/fetch-records.js",
     "fetch:regional": "node scripts/fetch-regional.js",

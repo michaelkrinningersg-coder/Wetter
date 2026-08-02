@@ -6,6 +6,7 @@ import {
   CalendarRange,
   CloudRain,
   Flame,
+  Flower2,
   Gauge,
   Grid3x3,
   LineChart,
@@ -17,6 +18,7 @@ import {
   Scale,
   Snowflake,
   Umbrella,
+  Radio,
   Waves,
   Wind,
   ListOrdered,
@@ -55,6 +57,8 @@ import { Indices } from './components/Indices'
 import { Notable } from './components/Notable'
 import { Records } from './components/Records'
 import { Air } from './components/Air'
+import { Radiation } from './components/Radiation'
+import { Pollen } from './components/Pollen'
 import { Regional } from './components/Regional'
 
 const FALLBACK_STATIONS: Station[] = [
@@ -85,6 +89,8 @@ type TabId =
   | 'day-in-history'
   | 'gauges'
   | 'air'
+  | 'radiation'
+  | 'pollen'
   | 'germany'
   | 'germany-map'
   | 'records'
@@ -126,6 +132,8 @@ const TABS: TabDef[] = [
   { id: 'forecast', label: 'Prognose', icon: Sparkles, group: 'Klimatologie' },
   { id: 'gauges', label: 'Flusspegel', icon: Waves, group: 'Umwelt' },
   { id: 'air', label: 'Luftqualität', icon: Wind, group: 'Umwelt' },
+  { id: 'radiation', label: 'Ortsdosisleistung', icon: Radio, group: 'Umwelt' },
+  { id: 'pollen', label: 'Pollenflug', icon: Flower2, group: 'Umwelt' },
   { id: 'germany', label: 'Deutschland gestern', icon: Map, group: 'Deutschland' },
   { id: 'germany-map', label: 'Karte', icon: MapPin, group: 'Deutschland' },
   { id: 'records', label: 'Allzeitrekorde', icon: Trophy, group: 'Deutschland' },
@@ -398,6 +406,10 @@ export default function App() {
             {tab === 'gauges' && <Gauges />}
 
             {tab === 'air' && <Air />}
+
+            {tab === 'radiation' && <Radiation />}
+
+            {tab === 'pollen' && <Pollen />}
 
             {tab === 'germany' && <Germany />}
 

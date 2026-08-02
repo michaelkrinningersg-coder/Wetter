@@ -1,0 +1,12 @@
+id,code,name,lat,lon,elevation,distance,status,cosmic,terrestrial
+031520061,DEZ0180,Dransfeld,51.5,9.76,310,13.2,in Betrieb,0.046,0.082
+031520091,DEZ0182,Friedland-Groß Schneen,51.44,9.93,180,6.8,in Betrieb,0.044,0.104
+031520101,DEZ0183,Gieboldehausen,51.61,10.2,150,21.1,in Betrieb,0.044,0.101
+031520111,DEZ0185,Rittmarshausen,51.48,10.11,260,11.3,in Betrieb,0.046,0.077
+031520121,DEZ0186,Göttingen,51.51,9.93,150,1.8,in Betrieb,0.044,0.077
+031520122,DEZ3452,Göttingen DWD,51.5,9.95,168,0.1,in Betrieb,0.044,0.098
+031520271,DEZ0188,Waake,51.56,10.05,260,9.6,in Betrieb,0.046,0.11
+031550071,DEZ0209,Katlenburg-Lindau,51.68,10.1,150,22.5,in Betrieb,0.044,0.079
+031550121,DEZ0212,Uslar OT Schoningen,51.62,9.66,135,24.1,in Betrieb,0.044,0.083
+066330221,DEZ0899,Reinhardshagen OT Veckerhagen,51.49,9.59,154,25,in Betrieb,0.044,0.072
+066360161,DEZ0932,Witzenhausen,51.35,9.86,156,17.8,in Betrieb,0.044,0.095

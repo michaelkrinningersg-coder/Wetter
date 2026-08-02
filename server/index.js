@@ -25,6 +25,8 @@ import {
 import { recordCount, recordDays, recordRange, recordsForDate } from './records.js'
 import { regionalMeta, regionalSeries } from './regional.js'
 import { airComponentKeys, airOverview, airProfiles } from './air.js'
+import { odlOverview } from './odl.js'
+import { pollenOverview } from './pollen.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -459,6 +461,52 @@ app.get(
       })
     }
     res.json(profiles)
+  }),
+)
+
+/* -------------------------------------------------------------------------- */
+/* Gamma dose rate                                                            */
+/* -------------------------------------------------------------------------- */
+
+app.get(
+  '/api/radiation',
+  handler((req, res) => {
+    // The window is capped: the archive grows by 264 hourly values a day, and
+    // an uncapped request would eventually ship years of them to draw a chart
+    // thirty days wide.
+    const requested = Number(req.query.days)
+    const days = Number.isFinite(requested) ? Math.min(Math.max(requested, 1), 365) : 30
+
+    const overview = odlOverview({ days })
+    if (!overview.range.last) {
+      return res.json({
+        ...overview,
+        hint:
+          'Noch keine Messwerte im Archiv. Einmal `npm run fetch:odl` ausführen —' +
+          ' das holt das Sieben-Tage-Fenster des BfS für die Sonden um Göttingen.',
+      })
+    }
+    res.json(overview)
+  }),
+)
+
+/* -------------------------------------------------------------------------- */
+/* Pollen                                                                     */
+/* -------------------------------------------------------------------------- */
+
+app.get(
+  '/api/pollen',
+  handler((_req, res) => {
+    const overview = pollenOverview()
+    if (!overview.range.last) {
+      return res.json({
+        ...overview,
+        hint:
+          'Noch keine Ausgabe im Archiv. Einmal `npm run fetch:pollen` ausführen —' +
+          ' das holt die aktuelle DWD-Vorhersage für die Region Niedersachsen.',
+      })
+    }
+    res.json(overview)
   }),
 )
 

@@ -755,3 +755,129 @@ export interface AirProfilesResponse {
   component: AirComponent
   series: AirStationProfile[]
 }
+
+/* -------------------------------------------------------------------------- */
+/* Gamma dose rate                                                            */
+/* -------------------------------------------------------------------------- */
+
+export interface OdlProbe {
+  id: string
+  code: string
+  name: string
+  lat: number
+  lon: number
+  elevation: number | null
+  /** Kilometres from DWD station 01691. */
+  distance: number
+  status: string
+  /** The site's split into cosmic and terrestrial share, as the BfS reports it. */
+  cosmic: number | null
+  terrestrial: number | null
+  hours: number
+  mean: number | null
+  min: number | null
+  max: number | null
+  latest: { value: number; date: string; hour: number } | null
+}
+
+export interface OdlSeries {
+  probe: string
+  /** `at` is a UTC stamp — the BfS publishes this series in UTC. */
+  points: { at: string; value: number }[]
+}
+
+export interface OdlDaily {
+  probe: string
+  date: string
+  mean: number
+  min: number
+  max: number
+  hours: number
+}
+
+export interface RadiationResponse {
+  quantity: { key: string; label: string; short: string; unit: string; decimals: number; note: string }
+  origin: { lat: number; lon: number; station: string }
+  radiusKm: number
+  range: { first: string | null; last: string | null; days: number }
+  since: string | null
+  probes: OdlProbe[]
+  series: OdlSeries[]
+  daily: OdlDaily[]
+  windowNote: string
+  hint?: string
+}
+
+/* -------------------------------------------------------------------------- */
+/* Pollen                                                                     */
+/* -------------------------------------------------------------------------- */
+
+export interface PollenKind {
+  key: string
+  label: string
+  order: number
+}
+
+export interface PollenLevel {
+  value: string
+  /** A rank over the DWD's seven steps, not a measurement — never averaged. */
+  level: number
+  label: string
+}
+
+export interface PollenHorizon {
+  key: string
+  label: string
+  date: string
+  value: string
+  level: number | null
+}
+
+export interface PollenPoint {
+  date: string
+  value: string
+  level: number | null
+}
+
+export interface PollenCalendarEntry {
+  pollen: string
+  label: string
+  points: PollenPoint[]
+  activeDays: number
+  peak: PollenPoint | null
+}
+
+export interface PollenAccuracy {
+  ready: boolean
+  issues: number
+  needed: number
+  horizons: {
+    offset: number
+    label: string
+    compared: number
+    exact: number | null
+    within: number | null
+  }[]
+}
+
+export interface PollenResponse {
+  region: string
+  homePartregion: number
+  partregions: number[]
+  kinds: PollenKind[]
+  levels: PollenLevel[]
+  range: { first: string | null; last: string | null; issues: number }
+  latest: {
+    issued: string
+    regions: {
+      partregion: number
+      home: boolean
+      kinds: { pollen: string; label: string; order: number; horizons: PollenHorizon[] }[]
+    }[]
+  } | null
+  calendar: PollenCalendarEntry[]
+  accuracy: PollenAccuracy
+  windowNote: string
+  regionNote: string
+  hint?: string
+}

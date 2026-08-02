@@ -35,6 +35,8 @@ import {
 import { recordCount, recordDays, recordRange, recordsForDate } from '../server/records.js'
 import { regionalMeta, regionalPairs, regionalSeries } from '../server/regional.js'
 import { airComponentKeys, airOverview, airProfiles } from '../server/air.js'
+import { odlOverview } from '../server/odl.js'
+import { pollenOverview } from '../server/pollen.js'
 import { staticPath } from '../src/lib/static-path.js'
 
 const outDir = process.argv[2] ?? 'dist'
@@ -285,6 +287,29 @@ if (airComponents.length > 0) {
     if (component === airComponents[0]) emit('/api/air/profiles', payload, 'Luftqualität')
   }
 }
+
+/* -------------------------------------------------------------------------- */
+/* Gamma dose rate                                                            */
+/* -------------------------------------------------------------------------- */
+
+// The windows the view actually offers. Every other value the API accepts would
+// be a file nobody requests.
+const RADIATION_DAYS = [7, 30, 90]
+
+const radiation = odlOverview({ days: 30 })
+if (radiation.range.last) {
+  emit('/api/radiation', radiation, 'Strahlung')
+  for (const days of RADIATION_DAYS) {
+    emit(`/api/radiation?days=${days}`, odlOverview({ days }), 'Strahlung')
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Pollen                                                                     */
+/* -------------------------------------------------------------------------- */
+
+const pollen = pollenOverview()
+if (pollen.range.last) emit('/api/pollen', pollen, 'Pollenflug')
 
 /* -------------------------------------------------------------------------- */
 
