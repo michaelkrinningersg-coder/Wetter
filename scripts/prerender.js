@@ -49,7 +49,12 @@ import { NATIONAL_FIELD_KEYS, nationalField, nationalOverview } from '../server/
 import { pressureAnalysis } from '../server/pressure.js'
 import { frostRiskAll } from '../server/frost.js'
 import { distributionOverview } from '../server/distribution.js'
-import { recordAges, recordCalendar, recordVintages } from '../server/calendar-records.js'
+import {
+  recordAges,
+  recordCalendar,
+  recordSurvival,
+  recordVintages,
+} from '../server/calendar-records.js'
 import {
   extremePoints,
   gradientAnalysis,
@@ -125,6 +130,7 @@ const SIMPLE = [
   ['record-ages', recordAges],
   ['record-calendar', recordCalendar],
   ['record-vintages', recordVintages],
+  ['record-survival', recordSurvival],
   ['frost-risk', frostRiskAll],
   ['records-balance', api.recordBalance],
   ['seasons', api.seasons],

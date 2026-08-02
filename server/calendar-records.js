@@ -234,6 +234,12 @@ function walk(stationId, field) {
         untilValue: null,
         seeded: true,
         observations: 1,
+        // Which observation of this calendar day set the record, and which one
+        // ended it. The difference is the fair clock: a record can only fall on
+        // a day the station measured, and years in which it did not are not
+        // years the record survived anything.
+        ordinal: k,
+        untilOrdinal: null,
       }
       spells.push(spell)
       standing.set(row.key, { ...spell, spell, observations: 1 })
@@ -248,6 +254,7 @@ function walk(stationId, field) {
 
     held.spell.until = row.date
     held.spell.untilValue = row.value
+    held.spell.untilOrdinal = k
 
     const spell = {
       key: row.key,
@@ -259,6 +266,8 @@ function walk(stationId, field) {
       untilValue: null,
       seeded: false,
       observations: held.observations,
+      ordinal: k,
+      untilOrdinal: null,
     }
     spells.push(spell)
     year.set++
@@ -271,10 +280,12 @@ function walk(stationId, field) {
   }
 
   // Which years the surviving records belong to — only knowable once the whole
-  // series has been read.
+  // series has been read. The running spells are censored at the last
+  // observation of their own calendar day, not at the last day of the series.
   for (const held of standing.values()) {
     const year = byYear.get(held.year)
     if (year) year.standing++
+    held.spell.untilOrdinal = ordinal.get(held.key) ?? held.spell.ordinal
   }
 
   return {
@@ -622,6 +633,294 @@ export function recordVintages(stationId) {
       alle: group(fields),
       warm: group(pick((w) => w === true)),
       kalt: group(pick((w) => w === false)),
+    },
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* How long a record survives                                                 */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The one question on this page that cannot be answered by counting.
+ *
+ * "How long does a record last" runs into two problems at once. The records
+ * still standing have no end date — they are right-censored, and averaging only
+ * the ones that already fell would answer a different and much shorter
+ * question. And exposure is wildly unequal: a record set in 1870 has had 156
+ * years in which to be beaten, one set in 2019 has had seven, so any comparison
+ * across eras that ignores this reports the recent era as short-lived no matter
+ * what happened.
+ *
+ * Kaplan-Meier solves both. At each moment a record fell, the survival estimate
+ * is multiplied by (1 − fallen / still at risk); a censored record leaves the
+ * risk set at its censoring time without ever counting as fallen. The curve is
+ * therefore estimable exactly as far as the data reach and no further, which is
+ * the honest place to stop drawing it.
+ *
+ * Seeded spells are excluded. The first value a calendar day ever saw took the
+ * title without beating anything, and its survival is dominated by the coin
+ * flip at the next observation — including them would pile short spells into
+ * the earliest era, which is precisely the era comparison being made.
+ */
+
+/** Where the survival curve is evaluated, in years. */
+const SURVIVAL_GRID = [0.5, 1, 2, 3, 5, 7, 10, 15, 20, 30, 40, 50, 75, 100, 125]
+
+/**
+ * The same curve on the fair clock, in further observations of the calendar day.
+ *
+ * Years are what a reader understands, and they are the wrong unit for
+ * comparing eras. A record set at the third observation of its calendar day
+ * falls quickly because two thirds of all later values beat a third-place
+ * starting point; one set at the hundred-and-fiftieth is hard to beat by
+ * construction. Comparing 1880 with 1990 on a calendar clock therefore measures
+ * how long the series had been running, not what the weather did.
+ *
+ * Counted in observations the comparison becomes fair, because the stationary
+ * expectation is exactly computable: a record set at the k-th observation
+ * survives the next m with probability k/(k+m). The dashed line in the view is
+ * that expectation for the same records, so the two curves answer "more or less
+ * durable than chance" rather than "earlier or later in the archive".
+ */
+const STEP_GRID = [1, 2, 3, 5, 8, 12, 20, 30, 45, 65, 90, 120]
+
+/**
+ * The eras a record can be set in.
+ *
+ * Four blocks rather than decades: a Kaplan-Meier curve needs enough events to
+ * be worth drawing, and a decade of one category yields a few dozen.
+ */
+export const SURVIVAL_ERAS = [
+  { key: 'e1', from: 1858, to: 1900, label: 'bis 1900' },
+  { key: 'e2', from: 1901, to: 1950, label: '1901–1950' },
+  { key: 'e3', from: 1951, to: 2000, label: '1951–2000' },
+  { key: 'e4', from: 2001, to: 9999, label: 'seit 2001' },
+]
+
+/**
+ * Kaplan-Meier from a list of {duration, fell}.
+ *
+ * `fell` false means the record still stands and `duration` is how long it has
+ * stood so far — the censoring time. Ties are handled the standard way: all
+ * events at the same duration are applied in one step.
+ */
+function kaplanMeier(observations, grid) {
+  const sorted = [...observations].sort((a, b) => a.duration - b.duration)
+  const total = sorted.length
+  if (total === 0) return null
+
+  let atRisk = total
+  let survival = 1
+  let index = 0
+  const steps = []
+
+  while (index < sorted.length) {
+    const time = sorted[index].duration
+    let fell = 0
+    let left = 0
+    while (index < sorted.length && sorted[index].duration === time) {
+      if (sorted[index].fell) fell++
+      else left++
+      index++
+    }
+    if (fell > 0 && atRisk > 0) {
+      survival *= 1 - fell / atRisk
+      steps.push({ time, survival, atRisk, fell })
+    }
+    atRisk -= fell + left
+  }
+
+  // The grid is only filled as far as anyone was still at risk. Beyond that the
+  // estimate would be a flat line drawn from nothing.
+  const lastObserved = sorted.at(-1).duration
+  const curve = grid
+    .filter((t) => t <= lastObserved)
+    .map((t) => {
+      const step = [...steps].reverse().find((s) => s.time <= t)
+      const risk = sorted.filter((o) => o.duration >= t).length
+      return { t, survival: step ? step.survival : 1, atRisk: risk }
+    })
+
+  const half = steps.find((s) => s.survival <= 0.5)
+  const at = (t) => {
+    const step = [...steps].reverse().find((s) => s.time <= t)
+    return t <= lastObserved ? (step ? step.survival : 1) : null
+  }
+
+  return {
+    n: total,
+    events: sorted.filter((o) => o.fell).length,
+    censored: sorted.filter((o) => !o.fell).length,
+    median: half ? half.time : null,
+    at10: at(10),
+    at25: at(25),
+    maxObserved: lastObserved,
+    curve,
+  }
+}
+
+function spellsOf(walked, last) {
+  const out = []
+  for (const spell of walked.spells) {
+    if (spell.seeded) continue
+    const end = spell.until ?? last
+    out.push({
+      key: spell.key,
+      value: spell.value,
+      date: spell.date,
+      year: spell.year,
+      until: spell.until,
+      untilValue: spell.untilValue,
+      fell: spell.until !== null,
+      duration: daysBetween(spell.date, end) / YEAR,
+      /** Which observation of this calendar day set it — the k of the 1/k rule. */
+      ordinal: spell.ordinal,
+      /** How many further observations it survived. */
+      steps: (spell.untilOrdinal ?? spell.ordinal) - spell.ordinal,
+    })
+  }
+  return out
+}
+
+const eraOf = (year) => SURVIVAL_ERAS.find((e) => year >= e.from && year <= e.to) ?? null
+
+/**
+ * What survival would look like if nothing had changed.
+ *
+ * For a record set at the k-th observation, the chance of surviving m more is
+ * k/(k+m). Averaged over a cohort that is the curve chance alone would draw,
+ * and it is not flat across eras — later records start from a larger k and are
+ * expected to last longer. That is the whole point of showing it.
+ */
+function expectedCurve(spells, grid) {
+  if (spells.length === 0) return []
+  return grid.map((m) => ({
+    t: m,
+    survival: spells.reduce((a, s) => a + s.ordinal / (s.ordinal + m), 0) / spells.length,
+  }))
+}
+
+const EMPTY = { n: 0, events: 0, censored: 0, median: null, at10: null, at25: null, curve: [] }
+
+function stepSurvival(spells) {
+  const observed = kaplanMeier(
+    spells.map((s) => ({ duration: s.steps, fell: s.fell })),
+    STEP_GRID,
+  )
+  if (!observed) return null
+
+  const expected = expectedCurve(spells, STEP_GRID)
+  const byStep = new Map(expected.map((e) => [e.t, e.survival]))
+
+  return {
+    ...observed,
+    curve: observed.curve.map((point) => ({
+      ...point,
+      expected: byStep.get(point.t) ?? null,
+      ratio: byStep.get(point.t) ? point.survival / byStep.get(point.t) : null,
+    })),
+    /** Mean ordinal of the cohort — how deep into the series these records sit. */
+    meanOrdinal: spells.reduce((a, s) => a + s.ordinal, 0) / spells.length,
+  }
+}
+
+function survivalFor(spells) {
+  const inEra = (era) => spells.filter((s) => s.year >= era.from && s.year <= era.to)
+  return {
+    overall: kaplanMeier(spells, SURVIVAL_GRID),
+    overallSteps: stepSurvival(spells),
+    eras: SURVIVAL_ERAS.map((era) => ({
+      ...era,
+      ...(kaplanMeier(inEra(era), SURVIVAL_GRID) ?? EMPTY),
+      steps: stepSurvival(inEra(era)),
+    })),
+  }
+}
+
+/**
+ * The longest spell of each category, rather than the ten longest overall.
+ *
+ * Unfiltered, both lists fill up with the same two or three quantities: the
+ * pressure series began in 1858 and its early records are essentially
+ * unbeatable, so ten rows would say one thing ten times. One row per category
+ * says ten things.
+ */
+function longestPerField(spells) {
+  const best = new Map()
+  for (const spell of spells) {
+    const held = best.get(spell.field)
+    if (!held || spell.duration > held.duration) best.set(spell.field, spell)
+  }
+  return [...best.values()].sort((a, b) => b.duration - a.duration)
+}
+
+export function recordSurvival(stationId) {
+  const last = lastDayOf(stationId)
+  if (!last) return null
+
+  const perField = []
+  const all = []
+  for (const field of RECORD_FIELDS) {
+    const walked = recordWalk(stationId, field.key)
+    if (!walked || walked.days === 0) continue
+
+    const spells = spellsOf(walked, last)
+    if (spells.length === 0) continue
+
+    perField.push({ field, spells })
+    for (const spell of spells) all.push({ ...spell, field: field.key })
+  }
+
+  if (perField.length === 0) return null
+
+  const describe = ({ field, spells }) => ({
+    key: field.key,
+    label: field.label,
+    short: field.short,
+    unit: field.unit,
+    decimals: field.decimals,
+    direction: field.direction,
+    warm: field.warm,
+    note: field.note ?? null,
+    ...survivalFor(spells),
+  })
+
+  const group = (test) => {
+    const spells = perField.filter((f) => test(f.field.warm)).flatMap((f) => f.spells)
+    return { fields: perField.filter((f) => test(f.field.warm)).length, ...survivalFor(spells) }
+  }
+
+  const named = (spell) => {
+    const field = RECORD_FIELD_BY_KEY.get(spell.field)
+    return {
+      field: spell.field,
+      label: field?.label ?? spell.field,
+      unit: field?.unit ?? '',
+      decimals: field?.decimals ?? 1,
+      value: spell.value,
+      date: spell.date,
+      until: spell.until,
+      untilValue: spell.untilValue,
+      years: spell.duration,
+      era: eraOf(spell.year)?.label ?? null,
+    }
+  }
+
+  return {
+    station: stationId,
+    last,
+    grid: SURVIVAL_GRID,
+    eras: SURVIVAL_ERAS,
+    fields: perField.map(describe),
+    groups: {
+      alle: { fields: perField.length, ...survivalFor(all) },
+      warm: group((w) => w === true),
+      kalt: group((w) => w === false),
+    },
+    longest: {
+      completed: longestPerField(all.filter((s) => s.fell)).map(named),
+      standing: longestPerField(all.filter((s) => !s.fell)).map(named),
     },
   }
 }

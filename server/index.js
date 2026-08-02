@@ -41,7 +41,12 @@ import { NATIONAL_FIELD_KEYS, nationalField, nationalOverview } from './national
 import { pressureAnalysis } from './pressure.js'
 import { frostRiskAll } from './frost.js'
 import { distributionOverview } from './distribution.js'
-import { recordAges, recordCalendar, recordVintages } from './calendar-records.js'
+import {
+  recordAges,
+  recordCalendar,
+  recordSurvival,
+  recordVintages,
+} from './calendar-records.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -155,6 +160,7 @@ const simple = {
   '/api/weather/record-ages': recordAges,
   '/api/weather/record-calendar': recordCalendar,
   '/api/weather/record-vintages': recordVintages,
+  '/api/weather/record-survival': recordSurvival,
 }
 
 for (const [path, query] of Object.entries(simple)) {

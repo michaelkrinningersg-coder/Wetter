@@ -1701,3 +1701,77 @@ export interface RecordVintagesResponse {
   fields: VintageField[]
   groups: Record<string, VintageGroup>
 }
+
+export interface SurvivalPoint {
+  t: number
+  survival: number
+  atRisk: number
+  /** Only on the observation clock: what chance alone would give. */
+  expected?: number | null
+  ratio?: number | null
+}
+
+export interface SurvivalEstimate {
+  n: number
+  events: number
+  censored: number
+  /** First time the estimate drops to or below one half; null when it never does. */
+  median: number | null
+  at10: number | null
+  at25: number | null
+  maxObserved: number
+  curve: SurvivalPoint[]
+}
+
+export interface StepSurvival extends SurvivalEstimate {
+  /** Mean k of the cohort — how deep into the series these records sit. */
+  meanOrdinal: number
+}
+
+export interface SurvivalEra extends SurvivalEstimate {
+  key: string
+  from: number
+  to: number
+  label: string
+  steps: StepSurvival | null
+}
+
+export interface SurvivalBlock {
+  overall: SurvivalEstimate | null
+  overallSteps: StepSurvival | null
+  eras: SurvivalEra[]
+}
+
+export interface SurvivalField extends SurvivalBlock {
+  key: string
+  label: string
+  short: string
+  unit: string
+  decimals: number
+  direction: 'max' | 'min'
+  warm: boolean | null
+  note: string | null
+}
+
+export interface SurvivalSpell {
+  field: string
+  label: string
+  unit: string
+  decimals: number
+  value: number
+  date: string
+  until: string | null
+  untilValue: number | null
+  years: number
+  era: string | null
+}
+
+export interface RecordSurvivalResponse {
+  station: string
+  last: string
+  grid: number[]
+  eras: { key: string; from: number; to: number; label: string }[]
+  fields: SurvivalField[]
+  groups: Record<string, SurvivalBlock & { fields: number }>
+  longest: { completed: SurvivalSpell[]; standing: SurvivalSpell[] }
+}

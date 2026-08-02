@@ -44,7 +44,7 @@ Ideen zurückgestellt wurden (siehe unten).
 | 8 | Wie alt ist jeder Rekord | `daily` | **fertig** |
 | 9 | Rekordkalender: 366 Kacheln | `daily` | **fertig** |
 | 11 | Rekordjahrgänge | `daily` | **fertig** |
-| 12 | Überlebenskurve eines Rekords | `daily` | offen |
+| 12 | Überlebenskurve eines Rekords | `daily` | **fertig** |
 | 13 | Bundesweite Rekordbilanz seit 1881 | `regional_values` | offen |
 | 10 | Fast-Rekorde | `daily` | offen |
 | 14 | Wetterzwillinge (Aussage auch ins Dashboard) | `daily` | offen |
@@ -60,12 +60,6 @@ Ideen zurückgestellt wurden (siehe unten).
 **10 — Fast-Rekorde.** Tage, die knapp an einem Rekord vorbeischrammten und
 deshalb in keiner Liste stehen. Es gibt deutlich mehr davon als Rekorde, und
 ihre Häufung ist aussagekräftiger als die Rekorde selbst.
-
-**12 — Überlebenskurve eines Rekords.** Wie lange hält ein Rekord, und hat
-sich das geändert. Muss auf die ungleiche Expositionszeit korrigiert werden —
-ein Rekord von 1870 hatte 156 Jahre Zeit zu fallen, einer von 2019 sieben —,
-sonst ist die Kurve nur eine Alterspyramide. Statistisch der anspruchsvollste
-Punkt der Liste.
 
 **13 — Bundesweite Rekordbilanz seit 1881.** Die lokale Rekordbilanz auf die
 Gebietsmittel übertragen, für Deutschland und jedes Bundesland. Der einzige

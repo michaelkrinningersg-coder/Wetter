@@ -131,7 +131,8 @@ Verteilung statt als Mittelwert
 Spitzenmonate (Top-50-Monate) · Perioden & Serien (längste Hitze-, Trocken-,
 Frost- und Niederschlagsperioden) · Rekordbilanz · Rekordgeschichte: wie alt
 die stehenden Rekorde sind, aus welchen Jahren die 366 Tagesrekorde stammen und
-welche Jahrgänge mehr Rekorde stellten, als der Zufall hergibt
+welche Jahrgänge mehr Rekorde stellten, als der Zufall hergibt, und wie lange
+ein Rekord überlebt
 
 **Klimatologie** — Klimadiagramm nach Walter & Lieth · Referenzperioden ·
 Jahresprognose
@@ -414,6 +415,22 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   von 11 zu 1.** Niederschlag und Luftdruck liegen als Kontrollgruppe nahe bei
   1; die Sonnenscheindauer nicht, was als eigener Befund benannt und nicht
   erklärt wird.
+- **Überlebenskurve.** Zwei Fallen auf einmal. Die noch stehenden Rekorde haben
+  kein Enddatum; nur die gefallenen zu mitteln, beantwortete eine andere und
+  viel kürzere Frage — das löst Kaplan-Meier, bei dem ein stehender Rekord die
+  Risikogruppe verlässt, ohne je als gefallen zu zählen. Schwerer wiegt die
+  zweite: ein Rekord, der bei der dritten Messung eines Kalendertages
+  aufgestellt wurde, fällt schnell, weil zwei Drittel aller späteren Werte einen
+  dritten Platz schlagen; einer von der hundertfünfzigsten hält lange, ganz ohne
+  Klimawandel. Auf der Jahresuhr steigt der Median deshalb von 10 auf 45 Jahre,
+  und **das ist Buchhaltung, kein Befund** — die frühen Rekorde saßen im Mittel
+  auf der 9., die späten auf der 126. Messung. Die Seite zeigt diese Kurve
+  trotzdem, mit dem Warnhinweis daneben, und rechnet sie in der nächsten Karte
+  heraus: gezählt in weiteren Messungen desselben Kalendertages überlebt ein
+  Rekord der k-ten Messung die nächsten m mit Wahrscheinlichkeit k/(k+m). Gegen
+  diese Erwartung bleibt ein echtes Signal übrig — warme Rekorde der Periode
+  1951–2000 standen nach 65 weiteren Messungen noch zu **27 % statt der
+  erwarteten 59 %** (0,45×), kalte zu **68 % statt 49 %** (1,39×).
 - **Verteilungsverschiebung.** Jeder andere Trend hier gibt einen Mittelwert
   an. Ein Mittelwert kann steigen, weil der kalte Rand kürzer wurde, weil der
   warme Rand wuchs oder weil sich alles gemeinsam verschob — drei verschiedene
