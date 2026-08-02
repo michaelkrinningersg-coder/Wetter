@@ -1,5 +1,6 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react'
 import {
+  AlertTriangle,
   BarChart3,
   CalendarDays,
   CalendarHeart,
@@ -88,6 +89,7 @@ const LOAD = {
   Phenology: () => import('./components/Phenology').then((m) => ({ default: m.Phenology })),
   Regional: () => import('./components/Regional').then((m) => ({ default: m.Regional })),
   Pressure: () => import('./components/Pressure').then((m) => ({ default: m.Pressure })),
+  FrostRisk: () => import('./components/FrostRisk').then((m) => ({ default: m.FrostRisk })),
   National: () =>
     import('./components/National').then((m) => ({ default: m.National })),
 }
@@ -123,6 +125,7 @@ const Phenology = lazy(LOAD.Phenology)
 const Regional = lazy(LOAD.Regional)
 const National = lazy(LOAD.National)
 const Pressure = lazy(LOAD.Pressure)
+const FrostRisk = lazy(LOAD.FrostRisk)
 
 /**
  * Which module a tab renders.
@@ -146,6 +149,7 @@ const TAB_MODULE: Record<string, string> = {
   'precip-intensity': 'PrecipIntensity',
   'indices': 'Indices',
   'pressure': 'Pressure',
+  'frost-risk': 'FrostRisk',
   'heatmap': 'Heatmap',
   'extremes': 'Extremes',
   'extreme-months': 'ExtremeMonths',
@@ -200,6 +204,7 @@ type TabId =
   | 'precip-intensity'
   | 'indices'
   | 'pressure'
+  | 'frost-risk'
   | 'day-in-history'
   | 'gauges'
   | 'air'
@@ -238,6 +243,7 @@ const TABS: TabDef[] = [
   { id: 'ytd-temp', label: 'Mitteltemp. YTD', icon: Gauge, group: 'Trends' },
   { id: 'seasons', label: 'Jahreszeiten', icon: Snowflake, group: 'Trends' },
   { id: 'vegetation', label: 'Vegetationsperiode', icon: Leaf, group: 'Trends' },
+  { id: 'frost-risk', label: 'Spätfrostrisiko', icon: AlertTriangle, group: 'Trends' },
   { id: 'precip-intensity', label: 'Starkregenanteil', icon: Umbrella, group: 'Trends' },
   { id: 'indices', label: 'Weitere Kenngrößen', icon: Snowflake, group: 'Trends' },
   { id: 'pressure', label: 'Luftdruck', icon: Gauge, group: 'Trends' },
@@ -558,6 +564,9 @@ export default function App() {
             {tab === 'indices' && <Indices stationId={stationId} />}
             {tab === 'pressure' && (
               <Pressure stationId={stationId} stationName={stationName} />
+            )}
+            {tab === 'frost-risk' && (
+              <FrostRisk stationId={stationId} stationName={stationName} />
             )}
 
             {tab === 'gauges' && <Gauges />}

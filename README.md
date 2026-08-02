@@ -123,7 +123,8 @@ Anomalien und Warming Stripes · Mitteltemperatur Year-to-Date · Jahreszeiten �
 Vegetationsperiode und Wachstumsgradtage · Starkregenanteil · Weitere
 Kenngrößen (Schneedeckentage, heitere und trübe Tage, Sonnenscheindauer,
 Luftfeuchte, schwüle Tage, Bodenfrosttage) · Luftdruck seit 1858 mit dem
-Zusammenhang zur Windstärke
+Zusammenhang zur Windstärke · Spätfrostrisiko: Vegetationsbeginn gegen letzten
+Frühjahrsfrost
 
 **Rekorde** — Monats-Heatmap · Spitzenwerte (Top-50-Tage) ·
 Spitzenmonate (Top-50-Monate) · Perioden & Serien (längste Hitze-, Trocken-,
@@ -184,6 +185,7 @@ server/
   germany.js           Superlative, Stationsregister und Kartendaten
   national.js          Rang der Station unter allen DWD-Stationen
   pressure.js          Luftdruck, Sturmlagen, Bezug zum Wind
+  frost.js             Spätfrostrisiko: Beginn gegen letzten Frost
   regional-sources.js  amtliche DWD-Gebietsmittel
   regional.js          Gebietsmittel: Reihen und Ranglisten
   records-kinds.js     Rekordkategorien
@@ -341,6 +343,17 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   auf Schwarz leuchtet, ist auf Weiß unsichtbar —, sondern ein eigener Entwurf
   bei rund 50 % Helligkeit. Die Kartenrampen sind ebenfalls getrennt: die
   dunkle läuft in der Mitte auf 86 % Helligkeit, was auf Weiß verschwände.
+- **Spätfrostrisiko.** Der Vegetationsbeginn rückt vor, der letzte
+  Frühjahrsfrost bewegt sich nicht — das Fenster dazwischen wächst. Eine
+  methodische Entscheidung verändert die Größe des Ergebnisses spürbar, deshalb
+  stehen drei Varianten nebeneinander statt einer: die Sechs-Tage-Regel wird ab
+  dem 1. Januar geprüft, sodass ein milder Jahresanfang den „Beginn" in die
+  erste Januarwoche setzt — dreizehnmal in 141 Jahren, über die ganze Reihe
+  verteilt. Ungefiltert wächst das Fenster von 35,5 auf 72,7 Tage (+105 %), ohne
+  Januarbeginne von 32,4 auf 61,5 (+90 %), bei strengster Auswahl auf 51,1
+  (+58 %). Der Befund hält in allen drei Varianten, „verdoppelt" gilt nur für
+  die ungefilterte. Jahre mit negativem Fenster bleiben in der Rechnung —
+  wegzulassen würde den Mittelwert nach oben verzerren.
 - **Luftdruck.** Die DWD-Spalte enthält **Stationsdruck, nicht auf Meereshöhe
   reduziert** — Göttingen 996,5 hPa auf 167 m, Brocken 882 auf 1141 m, Zugspitze
   706 auf 2964 m. Die geläufige Schwelle „unter 990 hPa ist ein Sturmtief" gilt

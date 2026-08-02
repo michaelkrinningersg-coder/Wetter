@@ -1193,3 +1193,54 @@ export interface PressureResponse {
     byChange: PressureBand[]
   }
 }
+
+/* -------------------------------------------------------------------------- */
+/* Late-frost risk                                                            */
+/* -------------------------------------------------------------------------- */
+
+export interface FrostPoint {
+  year: number
+  /** Day of year the growing season began, by the six-day 5 °C rule. */
+  start: number
+  startDate: string
+  /** Day of year of the last frost between February and June. */
+  frost: number
+  frostDate: string | null
+  frostTemp: number | null
+  frostDays: number
+  /** Days of exposure; negative means the frost came before growth began. */
+  window: number
+}
+
+export interface FrostSummary {
+  earlyYears: [number, number]
+  lateYears: [number, number]
+  earlyStart: number
+  lateStart: number
+  earlyFrost: number
+  lateFrost: number
+  earlyWindow: number
+  lateWindow: number
+  exposedYears: number
+  exposedShare: number
+  widest: FrostPoint
+}
+
+export interface FrostVariant {
+  key: string
+  label: string
+  note: string
+  /** Earliest day of year a vegetation start may have to count. */
+  minStart: number
+  range: { first: number; last: number; years: number }
+  points: FrostPoint[]
+  summary: FrostSummary
+}
+
+export interface FrostRiskResponse {
+  station: string
+  frostWindow: { from: number; to: number }
+  base: number
+  runLength: number
+  variants: FrostVariant[]
+}
