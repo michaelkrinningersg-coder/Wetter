@@ -124,7 +124,8 @@ Vegetationsperiode und Wachstumsgradtage · Starkregenanteil · Weitere
 Kenngrößen (Schneedeckentage, heitere und trübe Tage, Sonnenscheindauer,
 Luftfeuchte, schwüle Tage, Bodenfrosttage) · Luftdruck seit 1858 mit dem
 Zusammenhang zur Windstärke · Spätfrostrisiko: Vegetationsbeginn gegen letzten
-Frühjahrsfrost
+Frühjahrsfrost · Verteilungsverschiebung: drei Referenzperioden als ganze
+Verteilung statt als Mittelwert
 
 **Rekorde** — Monats-Heatmap · Spitzenwerte (Top-50-Tage) ·
 Spitzenmonate (Top-50-Monate) · Perioden & Serien (längste Hitze-, Trocken-,
@@ -186,6 +187,7 @@ server/
   national.js          Rang der Station unter allen DWD-Stationen
   pressure.js          Luftdruck, Sturmlagen, Bezug zum Wind
   frost.js             Spätfrostrisiko: Beginn gegen letzten Frost
+  distribution.js      Verteilungen dreier Referenzperioden, Kenntage
   regional-sources.js  amtliche DWD-Gebietsmittel
   regional.js          Gebietsmittel: Reihen und Ranglisten
   records-kinds.js     Rekordkategorien
@@ -354,6 +356,17 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   (+58 %). Der Befund hält in allen drei Varianten, „verdoppelt" gilt nur für
   die ungefilterte. Jahre mit negativem Fenster bleiben in der Rechnung —
   wegzulassen würde den Mittelwert nach oben verzerren.
+- **Verteilungsverschiebung.** Jeder andere Trend hier gibt einen Mittelwert
+  an. Ein Mittelwert kann steigen, weil der kalte Rand kürzer wurde, weil der
+  warme Rand wuchs oder weil sich alles gemeinsam verschob — drei verschiedene
+  Klimata mit derselben Kennzahl. Verglichen werden drei gleich lange
+  Referenzperioden (1931–1960, 1961–1990, 1991–2020), aufgetragen als Anteile
+  statt als Stückzahlen, weil die Perioden unterschiedlich viele gültige Tage
+  enthalten. Für Göttingen stieg das 1. Perzentil des Tagesmittels um 3,76 K,
+  der Median nur um 1,00 K — die kältesten Tage haben sich fast viermal so stark
+  erwärmt wie der mittlere. Bei den Kenntagen steht neben den Werten je Jahr,
+  wie oft es den Tag in der ganzen Reihe überhaupt gab: „0,0 Tropennächte je
+  Jahr" heißt nicht „nie", sondern dreimal seit 1858, zuletzt 1988.
 - **Luftdruck.** Die DWD-Spalte enthält **Stationsdruck, nicht auf Meereshöhe
   reduziert** — Göttingen 996,5 hPa auf 167 m, Brocken 882 auf 1141 m, Zugspitze
   706 auf 2964 m. Die geläufige Schwelle „unter 990 hPa ist ein Sturmtief" gilt

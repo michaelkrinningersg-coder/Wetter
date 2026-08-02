@@ -42,6 +42,7 @@ import { dashboard } from '../server/dashboard.js'
 import { NATIONAL_FIELD_KEYS, nationalField, nationalOverview } from '../server/national.js'
 import { pressureAnalysis } from '../server/pressure.js'
 import { frostRiskAll } from '../server/frost.js'
+import { distributionOverview } from '../server/distribution.js'
 import { staticPath } from '../src/lib/static-path.js'
 
 const outDir = process.argv[2] ?? 'dist'
@@ -105,6 +106,7 @@ const SIMPLE = [
   ['indices', api.extraIndices],
   ['precip-intensity', api.precipIntensity],
   ['pressure', pressureAnalysis],
+  ['distribution', distributionOverview],
   ['frost-risk', frostRiskAll],
   ['records-balance', api.recordBalance],
   ['seasons', api.seasons],

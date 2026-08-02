@@ -32,6 +32,7 @@ import { dashboard } from './dashboard.js'
 import { NATIONAL_FIELD_KEYS, nationalField, nationalOverview } from './national.js'
 import { pressureAnalysis } from './pressure.js'
 import { frostRiskAll } from './frost.js'
+import { distributionOverview } from './distribution.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -141,6 +142,7 @@ const simple = {
   '/api/weather/indices': api.extraIndices,
   '/api/weather/pressure': pressureAnalysis,
   '/api/weather/frost-risk': frostRiskAll,
+  '/api/weather/distribution': distributionOverview,
 }
 
 for (const [path, query] of Object.entries(simple)) {

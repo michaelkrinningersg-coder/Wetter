@@ -20,6 +20,7 @@ import {
   MapPin,
   Scale,
   Snowflake,
+  SlidersHorizontal,
   Sprout,
   Umbrella,
   Radio,
@@ -90,6 +91,8 @@ const LOAD = {
   Regional: () => import('./components/Regional').then((m) => ({ default: m.Regional })),
   Pressure: () => import('./components/Pressure').then((m) => ({ default: m.Pressure })),
   FrostRisk: () => import('./components/FrostRisk').then((m) => ({ default: m.FrostRisk })),
+  Distribution: () =>
+    import('./components/Distribution').then((m) => ({ default: m.Distribution })),
   National: () =>
     import('./components/National').then((m) => ({ default: m.National })),
 }
@@ -126,6 +129,7 @@ const Regional = lazy(LOAD.Regional)
 const National = lazy(LOAD.National)
 const Pressure = lazy(LOAD.Pressure)
 const FrostRisk = lazy(LOAD.FrostRisk)
+const Distribution = lazy(LOAD.Distribution)
 
 /**
  * Which module a tab renders.
@@ -150,6 +154,7 @@ const TAB_MODULE: Record<string, string> = {
   'indices': 'Indices',
   'pressure': 'Pressure',
   'frost-risk': 'FrostRisk',
+  'distribution': 'Distribution',
   'heatmap': 'Heatmap',
   'extremes': 'Extremes',
   'extreme-months': 'ExtremeMonths',
@@ -205,6 +210,7 @@ type TabId =
   | 'indices'
   | 'pressure'
   | 'frost-risk'
+  | 'distribution'
   | 'day-in-history'
   | 'gauges'
   | 'air'
@@ -247,6 +253,7 @@ const TABS: TabDef[] = [
   { id: 'precip-intensity', label: 'Starkregenanteil', icon: Umbrella, group: 'Trends' },
   { id: 'indices', label: 'Weitere Kenngrößen', icon: Snowflake, group: 'Trends' },
   { id: 'pressure', label: 'Luftdruck', icon: Gauge, group: 'Trends' },
+  { id: 'distribution', label: 'Verteilungsverschiebung', icon: SlidersHorizontal, group: 'Trends' },
   { id: 'heatmap', label: 'Monats-Heatmap', icon: Grid3x3, group: 'Rekorde' },
   { id: 'extremes', label: 'Spitzenwerte', icon: Flame, group: 'Rekorde' },
   { id: 'extreme-months', label: 'Spitzenmonate', icon: ListOrdered, group: 'Rekorde' },
@@ -567,6 +574,9 @@ export default function App() {
             )}
             {tab === 'frost-risk' && (
               <FrostRisk stationId={stationId} stationName={stationName} />
+            )}
+            {tab === 'distribution' && (
+              <Distribution stationId={stationId} stationName={stationName} />
             )}
 
             {tab === 'gauges' && <Gauges />}

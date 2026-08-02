@@ -1244,3 +1244,62 @@ export interface FrostRiskResponse {
   runLength: number
   variants: FrostVariant[]
 }
+
+/* -------------------------------------------------------------------------- */
+/* Distribution shift                                                         */
+/* -------------------------------------------------------------------------- */
+
+export interface DistributionPeriod {
+  key: string
+  from: number
+  to: number
+  label: string
+  days: number
+  mean: number
+  quantiles: { p: number; value: number }[]
+  bands: { from: number; to: number; days: number; share: number }[]
+}
+
+export interface DistributionField {
+  field: {
+    key: string
+    column: string
+    label: string
+    short: string
+    unit: string
+    width: number
+    decimals: number
+  }
+  minDays: number
+  periods: DistributionPeriod[]
+  /** One aligned band list; each period's share under its own key. */
+  bands: ({ from: number; to: number } & Record<string, number>)[]
+  comparison: {
+    from: string
+    to: string
+    meanChange: number
+    quantileChange: { p: number; from: number | null; to: number | null; change: number | null }[]
+    biggestGain: { from: number; to: number; change: number } | null
+    biggestLoss: { from: number; to: number; change: number } | null
+  }
+}
+
+export interface ThresholdShift {
+  key: string
+  label: string
+  note: string
+  value: number
+  periods: { key: string; label: string; perYear: number; years: number }[]
+  change: number
+  /** The whole record, so a threshold that is simply rare reads as rare. */
+  ever: { days: number; first: string | null; last: string | null }
+}
+
+export interface DistributionResponse {
+  station: string
+  periods: { key: string; from: number; to: number; label: string }[]
+  minDays: number
+  quantiles: number[]
+  fields: DistributionField[]
+  thresholds: ThresholdShift[]
+}
