@@ -1542,3 +1542,44 @@ export interface GradientResponse {
   })[]
   extremes: { key: string; label: string; note: string; days: GradientDay[] }[]
 }
+
+export interface ExtremeHolder extends NationwideStation {
+  days: number
+  share: number
+  first: string
+  last: string
+  /** The most extreme value this station ever held the title with. */
+  extreme: number | null
+}
+
+export interface ExtremeDecade {
+  decade: number
+  days: number
+  station: NationwideStation
+  topDays: number
+  share: number
+}
+
+export interface ExtremeScope {
+  total: number
+  stations: ExtremeHolder[]
+  decades: ExtremeDecade[]
+}
+
+export interface ExtremeKind {
+  key: string
+  label: string
+  note: string
+  unit: string
+  /** False for the categories the archive keeps only once, without a height limit. */
+  scoped: boolean
+  direction: 'max' | 'min'
+  scopes: Record<string, ExtremeScope>
+}
+
+export interface ExtremesResponse {
+  range: NationwideRange
+  lowlandLimit: number
+  holders: number
+  kinds: ExtremeKind[]
+}

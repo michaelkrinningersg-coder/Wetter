@@ -24,6 +24,7 @@ import {
 } from './germany.js'
 import { recordCount, recordDays, recordRange, recordSpread, recordsForDate } from './records.js'
 import {
+  extremePoints,
   gradientAnalysis,
   lapseAnalysis,
   nationwideOverview,
@@ -382,6 +383,7 @@ for (const [path, query] of [
   ['/api/nationwide/span', spanAnalysis],
   ['/api/nationwide/lapse', lapseAnalysis],
   ['/api/nationwide/gradient', gradientAnalysis],
+  ['/api/nationwide/extremes', extremePoints],
 ]) {
   app.get(
     path,

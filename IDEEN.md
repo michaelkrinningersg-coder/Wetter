@@ -40,7 +40,7 @@ Ideen zurückgestellt wurden (siehe unten).
 | 3 | Die Spanne des Tages | `nationwide_daily` | **fertig** |
 | 4 | Höhenprofil des Tages | `nationwide_daily` | **fertig** |
 | 5 | Nord-Süd- und West-Ost-Gefälle | `nationwide_daily` | **fertig** |
-| 6 | Deutschlands Extrempunkte | `nationwide_daily` | offen |
+| 6 | Deutschlands Extrempunkte | `nationwide_daily` | **fertig** |
 | 8 | Wie alt ist jeder Rekord | `daily` | offen |
 | 9 | Rekordkalender: 366 Kacheln | `daily` | offen |
 | 11 | Rekordjahrgänge | `daily` | offen |
@@ -56,10 +56,6 @@ Ideen zurückgestellt wurden (siehe unten).
 | 20 | Newsroom: automatische Meldungen | alle | offen |
 
 ### Was die einzelnen Punkte vorhaben
-
-**6 — Deutschlands Extrempunkte.** Welche Station war wie oft der wärmste,
-kälteste, nasseste, windigste Ort des Landes. Nach anderthalb Jahren schon
-eine belastbare Rangliste — die Antwort ist nicht überall die erwartete.
 
 **8 — Wie alt ist jeder Rekord.** Das Alter des noch stehenden Rekords je
 Kategorie, sortiert. Steht der Kälterekord seit Jahrzehnten und der

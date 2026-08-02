@@ -155,7 +155,8 @@ welchem Tag ihren eigenen Höchst- oder Tiefstwert gebrochen hat, als Liste und
 als Karte · Deutschlandtage: die Spanne zwischen dem wärmsten und dem kältesten
 Ort des Landes für jeden Tag seit 1936, das Höhenprofil eines einzelnen Tages
 und die Abnahme der Temperatur mit der Höhe über 145 Jahre, dazu der
-Jahreslauf des geografischen Gefälles · Markante Tage
+Jahreslauf des geografischen Gefälles und die Stationen, die Deutschlands
+Extreme halten · Markante Tage
 des Archivs in zehn Kategorien · Bundesvergleich: wo Göttingen an jedem
 Archivtag unter den rund 2.200 meldenden Stationen stand, mit dem Jahresgang
 daraus
@@ -428,6 +429,16 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   Junitage gegen 13 % der Januartage. Das ist Kontinentalität, gemessen statt
   behauptet. Aufgetragen als Schleife über zwölf Monatspunkte ist der ganze
   Jahreslauf ein Bild.
+- **Extrempunkte.** Weil das Archiv zu jedem Tagesextrem die Station nennt,
+  sind neunzig Jahre „wo war es heute am kältesten" eine Zählaufgabe. Zwei
+  Dinge müssen dabei ausgesprochen werden, sonst führt die Bestenliste in die
+  Irre. Stationen öffnen und schließen: eine, die 1970 stillgelegt wurde, kann
+  danach nicht mehr auftauchen, also vermischt eine Lebenszeit-Zählung Epochen —
+  deshalb steht daneben, wer jedes Jahrzehnt gewonnen hat. Und die Höhe
+  entscheidet das kalte Ende fast allein, weshalb die Temperaturkategorien
+  dieselben zwei Auswahlen tragen wie die Spanne. Ergebnisse, die man nicht
+  erwartet: der wärmste Ort des Tages ist heute am häufigsten eine
+  Nordsee-Forschungsplattform, und der nasseste ist zu 4,2 % die Zugspitze.
 - **Bundesvergleich.** Das Perzentil zählt Stationen unter dem Wert plus die
   Hälfte der gleichen. Diese Halbierung ist keine Pedanterie: der DWD gibt
   Temperaturen auf eine Nachkommastelle aus, an einem ruhigen Tag teilen sich

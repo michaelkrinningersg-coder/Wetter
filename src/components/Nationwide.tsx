@@ -1,9 +1,10 @@
-import { ArrowLeftRight, Compass, Mountain } from 'lucide-react'
+import { ArrowLeftRight, Compass, Mountain, Trophy } from 'lucide-react'
 
 import { useApi } from '../lib/api'
 import { useUrlState } from '../lib/url-state'
 import { isoToGerman, num } from '../lib/format'
 import type { NationwideOverview } from '../types'
+import { NationwideExtremes } from './NationwideExtremes'
 import { NationwideGradient } from './NationwideGradient'
 import { NationwideLapse } from './NationwideLapse'
 import { NationwideSpan } from './NationwideSpan'
@@ -25,6 +26,7 @@ const VIEWS = [
   { value: 'spanne', label: 'Spanne', icon: ArrowLeftRight },
   { value: 'hoehe', label: 'Höhenprofil', icon: Mountain },
   { value: 'gefaelle', label: 'Gefälle', icon: Compass },
+  { value: 'extrempunkte', label: 'Extrempunkte', icon: Trophy },
 ] as const
 
 export function Nationwide() {
@@ -72,7 +74,8 @@ export function Nationwide() {
 
       {view === 'hoehe' && <NationwideLapse />}
       {view === 'gefaelle' && <NationwideGradient />}
-      {view !== 'hoehe' && view !== 'gefaelle' && <NationwideSpan />}
+      {view === 'extrempunkte' && <NationwideExtremes />}
+      {!['hoehe', 'gefaelle', 'extrempunkte'].includes(view) && <NationwideSpan />}
     </div>
   )
 }

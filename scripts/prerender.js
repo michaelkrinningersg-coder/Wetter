@@ -50,6 +50,7 @@ import { pressureAnalysis } from '../server/pressure.js'
 import { frostRiskAll } from '../server/frost.js'
 import { distributionOverview } from '../server/distribution.js'
 import {
+  extremePoints,
   gradientAnalysis,
   lapseAnalysis,
   nationwideOverview,
@@ -239,6 +240,7 @@ for (const [path, query] of [
   ['/api/nationwide/span', spanAnalysis],
   ['/api/nationwide/lapse', lapseAnalysis],
   ['/api/nationwide/gradient', gradientAnalysis],
+  ['/api/nationwide/extremes', extremePoints],
 ]) {
   emit(path, query(), 'Deutschlandtage')
 }

@@ -763,3 +763,174 @@ export function gradientAnalysis() {
     })),
   }
 }
+
+/* -------------------------------------------------------------------------- */
+/* Who holds Germany's extremes                                               */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Which place was the country's warmest, coldest, wettest, windiest — how often.
+ *
+ * The archive already names the station behind every daily extreme, so ninety
+ * years of "where was it coldest today" is a counting exercise. The answers are
+ * not all obvious: the warm end is held by places one would name, the cold end
+ * by a summit almost nobody would, and the wettest place changes with every
+ * thunderstorm.
+ *
+ * Two things have to be said out loud or the ranking misleads. First, stations
+ * open and close: one that shut in 1970 cannot appear after it, so a lifetime
+ * count mixes eras. The decade table beside the ranking is the answer — it
+ * shows who held a title while they were there. Second, altitude decides the
+ * cold end almost by itself, which is why the temperature categories come in
+ * the same two scopes the span uses.
+ */
+export const EXTREME_KINDS = [
+  {
+    key: 'warm',
+    label: 'Wärmster Ort',
+    note: 'höchstes Tagesmittel im Land',
+    unit: '°C',
+    columns: { alle: 'mean_hi', flachland: 'low_hi' },
+    scoped: true,
+    direction: 'max',
+  },
+  {
+    key: 'cold',
+    label: 'Kältester Ort',
+    note: 'tiefstes Tagesmittel im Land',
+    unit: '°C',
+    columns: { alle: 'mean_lo', flachland: 'low_lo' },
+    scoped: true,
+    direction: 'min',
+  },
+  {
+    key: 'hottest',
+    label: 'Höchster Wert',
+    note: 'höchste Tageshöchsttemperatur im Land',
+    unit: '°C',
+    columns: { alle: 'abs_hi', flachland: 'low_abs_hi' },
+    scoped: true,
+    direction: 'max',
+  },
+  {
+    key: 'coldest',
+    label: 'Tiefster Wert',
+    note: 'tiefste Tagestiefsttemperatur im Land',
+    unit: '°C',
+    columns: { alle: 'abs_lo', flachland: 'low_abs_lo' },
+    scoped: true,
+    direction: 'min',
+  },
+  {
+    key: 'wet',
+    label: 'Nassester Ort',
+    note: 'höchste Tagessumme im Land',
+    unit: 'mm',
+    columns: { alle: 'wet', flachland: 'wet' },
+    scoped: false,
+    direction: 'max',
+  },
+  {
+    key: 'gust',
+    label: 'Stärkste Bö',
+    note: 'höchste Spitzenbö im Land — Böen stehen erst ab 1948 im Archiv',
+    unit: 'm/s',
+    columns: { alle: 'gust', flachland: 'gust' },
+    scoped: false,
+    direction: 'max',
+  },
+]
+
+/** How many stations each ranking lists. */
+const HOLDERS = 20
+
+function holdersFor(column, direction) {
+  const best = direction === 'max' ? 'MAX' : 'MIN'
+  const rows = prepared(`
+    SELECT ${column}_station AS id, COUNT(*) AS days,
+           MIN(date) AS first, MAX(date) AS last,
+           ${best}(${column}) AS extreme,
+           MIN(CASE WHEN ${column} = x.peak THEN date END) AS extremeDate
+    FROM nationwide_daily,
+         (SELECT ${best}(${column}) AS peak FROM nationwide_daily WHERE stations >= ?) AS x
+    WHERE stations >= ? AND ${column}_station IS NOT NULL
+    GROUP BY id ORDER BY days DESC LIMIT ?
+  `).all(MIN_STATIONS, MIN_STATIONS, HOLDERS)
+
+  const total = prepared(
+    `SELECT COUNT(*) AS n FROM nationwide_daily WHERE stations >= ? AND ${column}_station IS NOT NULL`,
+  ).get(MIN_STATIONS)?.n ?? 0
+
+  return {
+    total,
+    stations: rows.map((row) => ({
+      ...stationOf(row.id),
+      days: row.days,
+      share: total > 0 ? row.days / total : 0,
+      first: row.first,
+      last: row.last,
+      /** The most extreme value this station ever held the title with. */
+      extreme: row.extreme,
+    })),
+  }
+}
+
+/**
+ * The title holder of each decade.
+ *
+ * A lifetime ranking rewards stations that were open the longest. Per decade
+ * the field is level, and the turnover becomes visible: the same summit for
+ * eighty years in one category, a different village every decade in another.
+ */
+function decadesFor(column) {
+  const rows = prepared(`
+    SELECT (CAST(strftime('%Y', date) AS INTEGER) / 10) * 10 AS decade,
+           ${column}_station AS id, COUNT(*) AS days
+    FROM nationwide_daily
+    WHERE stations >= ? AND ${column}_station IS NOT NULL
+    GROUP BY decade, id
+  `).all(MIN_STATIONS)
+
+  const byDecade = new Map()
+  for (const row of rows) {
+    const entry = byDecade.get(row.decade) ?? { decade: row.decade, days: 0, top: null }
+    entry.days += row.days
+    if (!entry.top || row.days > entry.top.days) entry.top = { id: row.id, days: row.days }
+    byDecade.set(row.decade, entry)
+  }
+
+  return [...byDecade.values()]
+    .sort((a, b) => a.decade - b.decade)
+    .map((entry) => ({
+      decade: entry.decade,
+      days: entry.days,
+      station: stationOf(entry.top?.id),
+      topDays: entry.top?.days ?? 0,
+      share: entry.days > 0 ? (entry.top?.days ?? 0) / entry.days : 0,
+    }))
+}
+
+export function extremePoints() {
+  const range = nationwideRange()
+  if (range.counted === 0) return null
+
+  return {
+    range,
+    lowlandLimit: LOWLAND_LIMIT,
+    holders: HOLDERS,
+    kinds: EXTREME_KINDS.map((kind) => ({
+      key: kind.key,
+      label: kind.label,
+      note: kind.note,
+      unit: kind.unit,
+      scoped: kind.scoped,
+      direction: kind.direction,
+      scopes: Object.fromEntries(
+        Object.entries(kind.columns).map(([scope, column]) => [
+          scope,
+          { ...holdersFor(column, kind.direction), decades: decadesFor(column) },
+        ]),
+      ),
+    })),
+  }
+}
