@@ -88,7 +88,7 @@ const MIN_HOURS_FOR_8H = 6
  * restarting the window at midnight would systematically understate a morning
  * that inherited a high evening.
  */
-function maxEightHourMeans(rows) {
+export function maxEightHourMeans(rows) {
   const out = new Map()
   const window = []
 
@@ -140,7 +140,7 @@ const insertDaily = db.prepare(`
     o3_max8h = excluded.o3_max8h
 `)
 
-function buildDaily() {
+export function buildDaily() {
   const byStation = db
     .prepare('SELECT DISTINCT station FROM air_hourly ORDER BY station')
     .all()

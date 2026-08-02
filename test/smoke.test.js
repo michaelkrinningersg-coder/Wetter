@@ -39,6 +39,12 @@ function scan(value, path, found) {
   }
 }
 
+/**
+ * The nationwide analyses are exercised here rather than against a fixture:
+ * they read the committed CSV archive at import, and rebuilding ninety-three
+ * thousand days of it in a temporary directory would test the fixture more than
+ * the code. What is asserted is what must hold whatever the archive says.
+ */
 const ENDPOINTS = [
   ['annualMeans', async (id) => (await import('../server/queries.js')).annualMeans(id)],
   ['heatmap', async (id) => (await import('../server/queries.js')).heatmap(id)],
@@ -57,6 +63,18 @@ const ENDPOINTS = [
   ['newsroom', async (id) => (await import('../server/newsroom.js')).newsroom(id)],
   ['yearbook', async (id) => (await import('../server/yearbook.js')).yearbook(id)],
   ['twins', async (id) => (await import('../server/twins.js')).weatherTwins(id)],
+  ['dashboard', async () => (await import('../server/dashboard.js')).dashboard()],
+  ['spanAnalysis', async () => (await import('../server/nationwide.js')).spanAnalysis()],
+  ['lapseAnalysis', async () => (await import('../server/nationwide.js')).lapseAnalysis()],
+  ['gradientAnalysis', async () => (await import('../server/nationwide.js')).gradientAnalysis()],
+  ['extremePoints', async () => (await import('../server/nationwide.js')).extremePoints()],
+  ['nationalOverview', async () => (await import('../server/national.js')).nationalOverview()],
+  ['regionalBalance', async () => (await import('../server/regional.js')).regionalBalance('temp_mean')],
+  ['airOverview', async () => (await import('../server/air.js')).airOverview()],
+  ['phenology', async () => (await import('../server/pheno.js')).phenoOverview()],
+  ['pollen', async () => (await import('../server/pollen.js')).pollenOverview()],
+  ['radiation', async () => (await import('../server/odl.js')).odlOverview()],
+  ['notable', async () => (await import('../server/germany.js')).notableOverview()],
 ]
 
 for (const [name, run] of ENDPOINTS) {
@@ -118,5 +136,55 @@ test('die Monatsbilanz ordnet nur ein, was genug Messtage hat', { skip }, async 
         }
       }
     }
+  }
+})
+
+test('die Deutschlandtage ordnen jeden Tag genau einer Quelle zu', { skip }, async () => {
+  const { spanAnalysis, lapseAnalysis } = await import('../server/nationwide.js')
+  const span = spanAnalysis()
+  assert.ok(span.range.days > 0)
+  assert.ok(span.range.counted <= span.range.days, 'mehr gezählte als vorhandene Tage')
+
+  for (const scope of span.scopes) {
+    for (const year of scope.annual) {
+      assert.ok(year.days > 0, `${year.year}: Jahr ohne Tage`)
+      assert.ok(year.maxAbsSpan >= year.absSpan, 'das Maximum liegt unter dem Mittel')
+      assert.ok(year.stations >= span.range.minStations, `${year.year}: zu wenige Stationen`)
+    }
+    for (const day of scope.top.absolute) {
+      assert.ok(day.absHi >= day.absLo, `${day.date}: Höchstwert unter dem Tiefstwert`)
+      assert.ok(Math.abs(day.absSpan - (day.absHi - day.absLo)) < 1e-6)
+    }
+  }
+
+  const lapse = lapseAnalysis()
+  for (const bin of lapse.histogram) {
+    assert.ok(bin.share >= 0 && bin.share <= 1, `Anteil ${bin.share}`)
+  }
+  const total = lapse.histogram.reduce((sum, bin) => sum + bin.share, 0)
+  assert.ok(Math.abs(total - 1) < 0.01, `die Verteilung summiert sich auf ${total}`)
+})
+
+test('das Dashboard verlinkt nur Ansichten, die es gibt', { skip }, async () => {
+  const { dashboard } = await import('../server/dashboard.js')
+  const board = dashboard()
+
+  assert.ok(board.station.id)
+  if (board.latest?.rank) {
+    assert.ok(
+      board.latest.rank.place >= 1 && board.latest.rank.place <= board.latest.rank.of,
+      'der Platz des letzten Messtags liegt außerhalb seines Feldes',
+    )
+  }
+  if (board.year) {
+    assert.ok(board.year.place >= 1 && board.year.place <= board.year.of)
+    assert.ok(board.year.days > 0)
+  }
+  for (const entry of board.ticker ?? []) {
+    assert.ok(entry.days > 0, `${entry.label} steht mit null Tagen im Ticker`)
+    assert.ok(entry.perYear > 0)
+  }
+  if (board.newsroom) {
+    assert.equal(board.newsroom.quiet, board.newsroom.top.length === 0)
   }
 })

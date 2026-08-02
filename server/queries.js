@@ -1355,8 +1355,13 @@ export function vegetation(stationId) {
       year,
       startDate: `${year}-${String(startDay.month).padStart(2, '0')}-${String(startDay.day).padStart(2, '0')}`,
       startDayOfYear: startDoy,
+      // The day *before* the closing run begins — the same day `endDoy` counts
+      // to. Naming the first cold day here instead put the date one day past
+      // the length beside it, and the two were read together in the view.
       endDate: closingDay
-        ? `${year}-${String(closingDay.month).padStart(2, '0')}-${String(closingDay.day).padStart(2, '0')}`
+        ? new Date(Date.UTC(year, closingDay.month - 1, closingDay.day - 1))
+            .toISOString()
+            .slice(0, 10)
         : `${year}-12-31`,
       endDayOfYear: endDoy,
       lengthDays: endDoy - startDoy + 1,

@@ -79,7 +79,7 @@ JSON-Datei braucht und die Anzahl der Dateien auf den Pages-Build durchschlägt.
 
 ## Ältere offene Punkte
 
-**Tests — angefangen.** 57 Tests in sieben Dateien laufen mit `npm test`
+**Tests.** 149 Tests in 23 Dateien laufen mit `npm test`
 (node:test, keine neue Abhängigkeit) und hängen als Tor vor dem Pages-Deploy.
 Abgedeckt sind die Fehler, die dieses Projekt tatsächlich gemacht hat: null als
 Rekord, Kalendertag als `%m-%d` statt `%j`, relative gegen absolute
@@ -88,11 +88,16 @@ Episoden, `never` und `stale` im Ticker, Teilmonat gegen Teilmonat samt
 Ensemble-Vollständigkeit, die Newsroom-Währung, die Dateinamen der statischen
 Vorberechnung und die Regression des Deutschlandtages.
 
-Noch ohne Test, mit echter Fallhöhe: die Midrank-Perzentilformel im
-Bundesvergleich, die Acht-Stunden-Mittel der Luftqualität über Tagesgrenzen
-hinweg, das Nachspielen des Rekordarchivs, die Quantilinterpolation der
-Verteilungsverschiebung, der Streaming-Filter der Phänologiedateien, die
-Kaplan-Meier-Schätzung der Rekordüberlebenskurve.
+Inzwischen abgedeckt sind auch die Stellen, die hier als offen standen: das
+Mittelrang-Perzentil des Bundesvergleichs, die Achtstundenmittel der
+Luftqualität über Tagesgrenzen hinweg, die Geometrie der Rekordkarte, die
+Quantile der Verteilungsverschiebung, die Phänologie-Kombinationen und
+Kaplan-Meier mit Zensierung.
+
+Was weiterhin nur über die Rauchtests läuft, weil ein Fixture mehr das Fixture
+als den Code prüfen würde: die Abrufmodule mit Netzzugriff (`dwd.js`,
+`*-sources.js`) und die Deutschlandtage-Auswertungen, die ihr Archiv beim
+Import aus 93.000 Zeilen CSV lesen.
 
 **Export.** CSV und JSON zu jeder Tabelle und jedem Diagramm. Die Daten sind
 frei verwendbar (GeoNutzV), die Oberfläche gibt sie aber nur zum Ansehen her.

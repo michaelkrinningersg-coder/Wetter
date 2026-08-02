@@ -47,7 +47,7 @@ bevor eine kaputte Fassung veröffentlicht wird.
 
 ### Tests
 
-57 Tests in sieben Dateien, zwei Sorten und beide nötig:
+149 Tests in 23 Dateien, zwei Sorten und beide nötig:
 
 **Regressionstests gegen erfundene Messreihen.** Jede Zahl darin ist von Hand
 nachrechenbar, und keine hängt davon ab, dass der DWD morgen einen Tag
@@ -70,13 +70,28 @@ Diagramm sähe eine Division durch null wie eine Messlücke aus), kein Rang lieg
 außerhalb seines Feldes, und der Newsroom veröffentlicht nichts über seiner
 eigenen Schwelle.
 
-Die Tests haben beim Schreiben zwei Fehler gefunden. `newsroom.js` fragte
-`germany_daily` ab, ohne zu prüfen, ob es die Tabelle gibt — das Modul lief nur,
-weil der Server zufällig vorher ein anderes importiert hatte. Und die
-Rangfunktion zählte nur echt größere Werte: Ein Tagesgang, den vierzig
-identische Jahre teilten, bekam Platz 1 und die Rate „einmal in vierzig
-Jahren", obwohl er an 335 Tagen im Jahr zutraf. Beides ist repariert, beides
-steht jetzt als Test da.
+Getestet sind außerdem der ZIP-Leser (mit von Hand gebauten Archiven, samt
+einem, dessen Kommentar die Signatur des Endverzeichnisses enthält), die
+Quantile der Verteilungsverschiebung, Kaplan-Meier mit Zensierung, die
+Sechs-Tage-Regel der Vegetationsperiode, die Achtstundenmittel der
+Luftqualität über Mitternacht hinweg, das Mittelrang-Perzentil des
+Bundesvergleichs, die 1/k-Erwartung der Gebietsmittel, der Rundlauf der
+Deutschlandtage-CSVs und der Kilometerabstand der Rekordkarte.
+
+Die Tests haben beim Schreiben vier Fehler gefunden:
+
+- `newsroom.js` fragte `germany_daily` ab, ohne zu prüfen, ob es die Tabelle
+  gibt — das Modul lief nur, weil der Server zufällig vorher ein anderes
+  importiert hatte. Ebenso hing `records.js` daran, dass jemand vor ihm
+  `germany.js` geladen hatte; allein importiert warf es beim Laden.
+- Die Rangfunktion des Newsrooms zählte nur echt größere Werte: Ein Tagesgang,
+  den vierzig identische Jahre teilten, bekam Platz 1 und die Rate „einmal in
+  vierzig Jahren", obwohl er an 335 Tagen im Jahr zutraf.
+- Die Vegetationsperiode gab als `endDate` den ersten kalten Tag zurück,
+  während `endDayOfYear` und `lengthDays` den Tag davor meinten — Enddatum und
+  Länge widersprachen sich um einen Tag.
+
+Alle vier sind repariert und stehen jetzt als Test da.
 
 ### GitHub Pages
 
