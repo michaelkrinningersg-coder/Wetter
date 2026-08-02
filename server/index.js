@@ -42,6 +42,7 @@ import { pressureAnalysis } from './pressure.js'
 import { frostRiskAll } from './frost.js'
 import { distributionOverview } from './distribution.js'
 import {
+  nearMisses,
   recordAges,
   recordCalendar,
   recordSurvival,
@@ -161,6 +162,7 @@ const simple = {
   '/api/weather/record-calendar': recordCalendar,
   '/api/weather/record-vintages': recordVintages,
   '/api/weather/record-survival': recordSurvival,
+  '/api/weather/near-misses': nearMisses,
 }
 
 for (const [path, query] of Object.entries(simple)) {

@@ -55,6 +55,7 @@ import { pressureAnalysis } from '../server/pressure.js'
 import { frostRiskAll } from '../server/frost.js'
 import { distributionOverview } from '../server/distribution.js'
 import {
+  nearMisses,
   recordAges,
   recordCalendar,
   recordSurvival,
@@ -136,6 +137,7 @@ const SIMPLE = [
   ['record-calendar', recordCalendar],
   ['record-vintages', recordVintages],
   ['record-survival', recordSurvival],
+  ['near-misses', nearMisses],
   ['frost-risk', frostRiskAll],
   ['records-balance', api.recordBalance],
   ['seasons', api.seasons],

@@ -1,8 +1,9 @@
-import { Activity, Award, Grid3x3, Hourglass } from 'lucide-react'
+import { Activity, Award, Crosshair, Grid3x3, Hourglass } from 'lucide-react'
 
 import { useUrlState } from '../lib/url-state'
 import { RecordAges } from './RecordAges'
 import { RecordCalendar } from './RecordCalendar'
+import { RecordNearMisses } from './RecordNearMisses'
 import { RecordSurvival } from './RecordSurvival'
 import { RecordVintages } from './RecordVintages'
 import { SubNav } from './ui'
@@ -24,6 +25,7 @@ const VIEWS = [
   { value: 'kalender', label: 'Kalender', icon: Grid3x3 },
   { value: 'jahrgaenge', label: 'Jahrgänge', icon: Award },
   { value: 'ueberleben', label: 'Überleben', icon: Activity },
+  { value: 'fast', label: 'Fast-Rekorde', icon: Crosshair },
 ] as const
 
 export function RecordHistory({
@@ -45,7 +47,10 @@ export function RecordHistory({
       {view === 'ueberleben' && (
         <RecordSurvival stationId={stationId} stationName={stationName} />
       )}
-      {!['kalender', 'jahrgaenge', 'ueberleben'].includes(view) && (
+      {view === 'fast' && (
+        <RecordNearMisses stationId={stationId} stationName={stationName} />
+      )}
+      {!['kalender', 'jahrgaenge', 'ueberleben', 'fast'].includes(view) && (
         <RecordAges stationId={stationId} stationName={stationName} />
       )}
     </div>

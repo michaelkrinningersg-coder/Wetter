@@ -139,6 +139,44 @@ export const RECORD_FIELDS = [
   },
 ]
 
+/**
+ * How close a day has to come to count as a near miss.
+ *
+ * In the unit of the quantity itself, because "within 0.4 K" is a sentence a
+ * reader can check and "within the 98th percentile of the gap distribution" is
+ * not. The tiers are one, two and four times this, so the view can show how
+ * much the finding depends on where the line is drawn.
+ *
+ * Temperature and pressure get an absolute margin: they are interval scales,
+ * where a difference of half a degree means the same thing at −20 °C as at
+ * 35 °C. Rainfall, snow, sunshine and gusts get a relative one, because their
+ * records grow — a fixed five millimetres would call 5.0 mm a near miss of a
+ * 5.1 mm record and produce twenty thousand of them.
+ */
+export const NEAR_MARGINS = {
+  temp_max_high: { value: 0.5, relative: false },
+  temp_min_low: { value: 0.5, relative: false },
+  temp_mean_high: { value: 0.5, relative: false },
+  temp_mean_low: { value: 0.5, relative: false },
+  pressure_high: { value: 2, relative: false },
+  pressure_low: { value: 2, relative: false },
+  precipitation: { value: 0.1, relative: true },
+  snow: { value: 0.1, relative: true },
+  wind_max: { value: 0.1, relative: true },
+  sunshine: { value: 0.1, relative: true },
+}
+
+/**
+ * How much history a calendar day needs before "near the record" means anything.
+ *
+ * At the third observation almost every value is near the record, because the
+ * record is whatever the first two happened to be. Ten is where the phrase
+ * starts carrying information.
+ */
+export const NEAR_MIN_ORDINAL = 10
+
+export const NEAR_TIERS = [1, 2, 4]
+
 export const RECORD_FIELD_BY_KEY = new Map(RECORD_FIELDS.map((f) => [f.key, f]))
 
 const beats = (direction, value, record) => (direction === 'max' ? value > record : value < record)
@@ -209,17 +247,72 @@ function walk(stationId, field) {
   const ordinal = new Map()
   const byYear = new Map()
 
+  // The best three values each calendar day has seen so far. Three is enough:
+  // a value outside them has rank four or worse, which is all the rank test
+  // needs to know. It also gives the gap to the standing record for free.
+  const top3 = new Map()
+  const near = []
+  const nearRule = NEAR_MARGINS[field.key] ?? null
+  const widest = nearRule ? nearRule.value * Math.max(...NEAR_TIERS) : 0
+  const better = (a, b) => (field.direction === 'max' ? a - b : b - a)
+
   for (const row of rows) {
     const k = (ordinal.get(row.key) ?? 0) + 1
     ordinal.set(row.key, k)
 
     let year = byYear.get(row.year)
     if (!year) {
-      year = { year: row.year, opportunities: 0, expected: 0, set: 0, standing: 0 }
+      year = {
+        year: row.year,
+        opportunities: 0,
+        expected: 0,
+        set: 0,
+        standing: 0,
+        // Second and third places have the same 1/k expectation a record has,
+        // which makes "nearly a record" as testable as "a record".
+        rank2: 0,
+        rank3: 0,
+        nearExpected: 0,
+        nearDays: 0,
+      }
       byYear.set(row.year, year)
     }
     year.opportunities++
     year.expected += 1 / k
+
+    // Rank and gap are read before the value is folded in, so both describe the
+    // day as it stood when the measurement was taken.
+    const best = top3.get(row.key) ?? []
+    const rank = best.filter((v) => better(v, row.value) > 0).length + 1
+    const gap = best.length > 0 ? Math.abs(best[0] - row.value) : null
+    const allowed =
+      nearRule && best.length > 0
+        ? nearRule.relative
+          ? Math.abs(best[0]) * widest
+          : widest
+        : 0
+    if (rank > 1 && k >= NEAR_MIN_ORDINAL && gap !== null && gap <= allowed) {
+      near.push({
+        key: row.key,
+        month: row.month,
+        date: row.date,
+        year: row.year,
+        value: row.value,
+        record: best[0],
+        gap,
+        rank,
+        ordinal: k,
+      })
+    }
+    if (k >= NEAR_MIN_ORDINAL) {
+      year.nearDays++
+      year.nearExpected += 1 / k
+      if (rank === 2) year.rank2++
+      if (rank === 3) year.rank3++
+    }
+
+    const merged = [...best, row.value].sort((a, b) => better(b, a)).slice(0, 3)
+    top3.set(row.key, merged)
 
     const held = standing.get(row.key)
 
@@ -291,6 +384,7 @@ function walk(stationId, field) {
   return {
     standing,
     spells,
+    near,
     byYear: [...byYear.values()].sort((a, b) => a.year - b.year),
     days: rows.length,
     // When the quantity was first measured, which is not the same as the
@@ -922,5 +1016,151 @@ export function recordSurvival(stationId) {
       completed: longestPerField(all.filter((s) => s.fell)).map(named),
       standing: longestPerField(all.filter((s) => !s.fell)).map(named),
     },
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* The days that came close                                                   */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Near misses: the days that stand in no list at all.
+ *
+ * A record is a single day per calendar day per category; everything else
+ * disappears, including the day that missed by a tenth of a degree. There are
+ * far more of those, and their distribution over time is the more robust
+ * signal — one record can be a freak, four hundred near misses cannot.
+ *
+ * Two readings, because the obvious one has a hole. **By margin** is what a
+ * reader means: within half a degree of the standing record, within ten percent
+ * of it for the quantities whose records grow. It is intuitive and it is not
+ * normalised — the number of days measured per decade differs, and so does how
+ * extreme the record already was.
+ *
+ * **By rank** closes that. The k-th observation of a calendar day is its second
+ * best with probability 1/k, exactly as it is its best with probability 1/k. So
+ * second and third places carry the same expectation records do, and observed
+ * against expected is comparable across decades without further argument.
+ */
+const NEAR_LIST = 20
+
+function nearFor(stationId, field) {
+  const walked = recordWalk(stationId, field.key)
+  if (!walked || walked.days === 0) return null
+
+  const rule = NEAR_MARGINS[field.key]
+  if (!rule) return null
+
+  const allowedFor = (record, tier) =>
+    rule.relative ? Math.abs(record) * rule.value * tier : rule.value * tier
+
+  const decades = new Map()
+  const touch = (decade) => {
+    let entry = decades.get(decade)
+    if (!entry) {
+      entry = {
+        decade,
+        tiers: Object.fromEntries(NEAR_TIERS.map((t) => [t, 0])),
+        records: 0,
+        days: 0,
+        nearDays: 0,
+        rank2: 0,
+        rank3: 0,
+        expected: 0,
+      }
+      decades.set(decade, entry)
+    }
+    return entry
+  }
+
+  for (const year of walked.byYear) {
+    const entry = touch(Math.floor(year.year / DECADE) * DECADE)
+    entry.records += year.set
+    entry.days += year.opportunities
+    entry.nearDays += year.nearDays
+    entry.rank2 += year.rank2
+    entry.rank3 += year.rank3
+    entry.expected += year.nearExpected
+  }
+
+  for (const miss of walked.near) {
+    const entry = touch(Math.floor(miss.year / DECADE) * DECADE)
+    for (const tier of NEAR_TIERS) {
+      if (miss.gap <= allowedFor(miss.record, tier)) entry.tiers[tier]++
+    }
+  }
+
+  const byDecade = [...decades.values()]
+    .sort((a, b) => a.decade - b.decade)
+    .map((entry) => ({
+      ...entry,
+      expected: Number(entry.expected.toFixed(2)),
+      /** Per thousand measured days, so decades with gaps do not read as calm. */
+      rates: Object.fromEntries(
+        NEAR_TIERS.map((t) => [t, entry.days > 0 ? (entry.tiers[t] / entry.days) * 1000 : 0]),
+      ),
+      /** Second and third places against their 1/k expectation. */
+      rankRatio: entry.expected > 0 ? (entry.rank2 + entry.rank3) / (2 * entry.expected) : null,
+    }))
+
+  const closest = [...walked.near]
+    .filter((miss) => miss.gap <= allowedFor(miss.record, 1))
+    .sort((a, b) => a.gap - b.gap || b.date.localeCompare(a.date))
+    .slice(0, NEAR_LIST)
+    .map((miss) => ({
+      date: miss.date,
+      year: miss.year,
+      value: miss.value,
+      record: miss.record,
+      gap: miss.gap,
+      rank: miss.rank,
+      observation: miss.ordinal,
+    }))
+
+  const totals = byDecade.reduce(
+    (a, d) => ({
+      records: a.records + d.records,
+      rank2: a.rank2 + d.rank2,
+      rank3: a.rank3 + d.rank3,
+      expected: a.expected + d.expected,
+      tiers: Object.fromEntries(NEAR_TIERS.map((t) => [t, a.tiers[t] + d.tiers[t]])),
+    }),
+    { records: 0, rank2: 0, rank3: 0, expected: 0, tiers: Object.fromEntries(NEAR_TIERS.map((t) => [t, 0])) },
+  )
+
+  return {
+    key: field.key,
+    label: field.label,
+    short: field.short,
+    unit: field.unit,
+    decimals: field.decimals,
+    direction: field.direction,
+    warm: field.warm,
+    note: field.note ?? null,
+    margin: rule,
+    decades: byDecade,
+    closest,
+    totals: { ...totals, expected: Number(totals.expected.toFixed(1)) },
+  }
+}
+
+export function nearMisses(stationId) {
+  const last = lastDayOf(stationId)
+  if (!last) return null
+
+  const fields = []
+  for (const field of RECORD_FIELDS) {
+    const result = nearFor(stationId, field)
+    if (result) fields.push(result)
+  }
+  if (fields.length === 0) return null
+
+  return {
+    station: stationId,
+    last,
+    tiers: NEAR_TIERS,
+    minObservation: NEAR_MIN_ORDINAL,
+    list: NEAR_LIST,
+    fields,
   }
 }

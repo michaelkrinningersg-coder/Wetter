@@ -131,8 +131,8 @@ Verteilung statt als Mittelwert
 Spitzenmonate (Top-50-Monate) · Perioden & Serien (längste Hitze-, Trocken-,
 Frost- und Niederschlagsperioden) · Rekordbilanz der Station · Rekordgeschichte: wie alt
 die stehenden Rekorde sind, aus welchen Jahren die 366 Tagesrekorde stammen und
-welche Jahrgänge mehr Rekorde stellten, als der Zufall hergibt, und wie lange
-ein Rekord überlebt
+welche Jahrgänge mehr Rekorde stellten, als der Zufall hergibt, wie lange ein
+Rekord überlebt und wie oft einer knapp verfehlt wurde
 
 **Klimatologie** — Klimadiagramm nach Walter & Lieth · Referenzperioden ·
 Jahresprognose
@@ -442,6 +442,21 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   deutsche Sommer ist hier das Mittel über die Landesfläche, nicht der höchste
   Wert, den irgendein Thermometer gesehen hat — beides sind verschiedene
   Rekorde, und nur der zweite steht in den Zeitungen.
+- **Fast-Rekorde.** Ein Rekord ist ein einziger Tag je Kalendertag und Größe;
+  der Tag, der um ein Zehntel Grad daneben lag, steht in keiner Liste. Davon
+  gibt es sechsmal so viele, und ihre Verteilung ist der belastbarere Befund.
+  Zwei Lesarten: **nach Abstand** ist anschaulich (ein halbes Grad, bei Größen
+  mit wachsenden Rekorden zehn Prozent davon — Temperatur und Druck sind
+  Intervallskalen und bekommen absolute Grenzen, Regen, Schnee, Sonne und Böen
+  relative, weil ein fester Fünf-Millimeter-Abstand sonst 5,0 mm als
+  Beinahe-Rekord eines 5,1-mm-Rekords zählt), aber nicht normiert. **Nach Rang**
+  schließt das: die k-te Messung eines Kalendertages ist mit Wahrscheinlichkeit
+  1/k seine zweitbeste, genau wie sie mit 1/k seine beste ist — zweite und
+  dritte Plätze tragen dieselbe Erwartung wie Rekorde. Für Göttingens
+  Höchsttemperatur steigt das Verhältnis von **0,83× in den 1950ern auf 2,41× in
+  den 2020ern**, für die Tiefsttemperatur fällt es von 1,48× auf 0,82×. Gezählt
+  wird erst ab der zehnten Messung eines Kalendertages; davor ist fast jeder Wert
+  nah am Rekord, weil der Rekord noch nichts ist.
 - **Verteilungsverschiebung.** Jeder andere Trend hier gibt einen Mittelwert
   an. Ein Mittelwert kann steigen, weil der kalte Rand kürzer wurde, weil der
   warme Rand wuchs oder weil sich alles gemeinsam verschob — drei verschiedene

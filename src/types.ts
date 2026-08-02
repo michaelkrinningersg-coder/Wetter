@@ -1835,3 +1835,53 @@ export interface RegionalBalanceResponse {
   regions: { name: string; kind: string }[]
   balance: RegionalBalance | null
 }
+
+export interface NearDecade {
+  decade: number
+  /** Near misses per margin tier, keyed by the tier multiplier. */
+  tiers: Record<string, number>
+  rates: Record<string, number>
+  records: number
+  days: number
+  nearDays: number
+  rank2: number
+  rank3: number
+  expected: number
+  /** Second and third places against their 1/k expectation. */
+  rankRatio: number | null
+}
+
+export interface NearMiss {
+  date: string
+  year: number
+  value: number
+  record: number
+  gap: number
+  rank: number
+  /** Which observation of this calendar day it was. */
+  observation: number
+}
+
+export interface NearField {
+  key: string
+  label: string
+  short: string
+  unit: string
+  decimals: number
+  direction: 'max' | 'min'
+  warm: boolean | null
+  note: string | null
+  margin: { value: number; relative: boolean }
+  decades: NearDecade[]
+  closest: NearMiss[]
+  totals: { records: number; rank2: number; rank3: number; expected: number; tiers: Record<string, number> }
+}
+
+export interface NearMissesResponse {
+  station: string
+  last: string
+  tiers: number[]
+  minObservation: number
+  list: number
+  fields: NearField[]
+}

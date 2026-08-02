@@ -46,7 +46,7 @@ Ideen zurückgestellt wurden (siehe unten).
 | 11 | Rekordjahrgänge | `daily` | **fertig** |
 | 12 | Überlebenskurve eines Rekords | `daily` | **fertig** |
 | 13 | Bundesweite Rekordbilanz seit 1881 | `regional_values` | **fertig** |
-| 10 | Fast-Rekorde | `daily` | offen |
+| 10 | Fast-Rekorde | `daily` | **fertig** |
 | 14 | Wetterzwillinge (Aussage auch ins Dashboard) | `daily` | offen |
 | 15 | Jahres-Wrapped: zehn markante Tage je Jahr | `daily` | offen |
 | 16 | Kuriositätenkabinett | `daily` | offen |
@@ -56,10 +56,6 @@ Ideen zurückgestellt wurden (siehe unten).
 | 20 | Newsroom: automatische Meldungen | alle | offen |
 
 ### Was die einzelnen Punkte vorhaben
-
-**10 — Fast-Rekorde.** Tage, die knapp an einem Rekord vorbeischrammten und
-deshalb in keiner Liste stehen. Es gibt deutlich mehr davon als Rekorde, und
-ihre Häufung ist aussagekräftiger als die Rekorde selbst.
 
 **14 — Wetterzwillinge.** Welcher Tag der Vergangenheit ähnelt dem gestrigen
 am meisten, mit Angabe, wie ähnlich er wirklich war. Ergibt Sätze wie „so ein
