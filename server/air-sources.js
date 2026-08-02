@@ -41,6 +41,12 @@ export const ARCHIVE_START = '2016-01-01'
  * them: everything is a one-hour mean except carbon monoxide, which the service
  * publishes only as an eight-hour mean. The column is named accordingly so a
  * reader never takes it for an hourly figure.
+ *
+ * `limits` carries the thresholds of the 39. BImSchV. Each one names the
+ * statistic it applies to, because the same pollutant is bounded in several
+ * ways at once and a bare number would be unreadable: PM₁₀ has both a daily
+ * limit that may be exceeded 35 times a year and an annual limit that may not
+ * be exceeded at all.
  */
 export const COMPONENTS = [
   {
@@ -51,8 +57,10 @@ export const COMPONENTS = [
     short: 'PM₁₀',
     unit: 'µg/m³',
     decimals: 0,
-    /** Daily mean above this counts as an exceedance (39. BImSchV). */
-    dayLimit: 50,
+    limits: [
+      { stat: 'day_mean', value: 50, allowance: 35, label: 'Tagesmittel' },
+      { stat: 'year_mean', value: 40, allowance: 0, label: 'Jahresmittel' },
+    ],
   },
   {
     key: 'pm25',
@@ -62,7 +70,7 @@ export const COMPONENTS = [
     short: 'PM₂٫₅',
     unit: 'µg/m³',
     decimals: 0,
-    dayLimit: null,
+    limits: [{ stat: 'year_mean', value: 25, allowance: 0, label: 'Jahresmittel' }],
   },
   {
     key: 'o3',
@@ -72,9 +80,11 @@ export const COMPONENTS = [
     short: 'O₃',
     unit: 'µg/m³',
     decimals: 0,
-    /** The information threshold, as a one-hour mean. */
-    hourLimit: 180,
-    dayLimit: null,
+    limits: [
+      { stat: 'hour', value: 180, allowance: 0, label: 'Informationsschwelle, 1 h' },
+      { stat: 'hour', value: 240, allowance: 0, label: 'Alarmschwelle, 1 h' },
+      { stat: 'day_max8h', value: 120, allowance: 25, label: 'Zielwert, höchstes 8-h-Mittel' },
+    ],
   },
   {
     key: 'no2',
@@ -84,8 +94,10 @@ export const COMPONENTS = [
     short: 'NO₂',
     unit: 'µg/m³',
     decimals: 0,
-    hourLimit: 200,
-    dayLimit: null,
+    limits: [
+      { stat: 'hour', value: 200, allowance: 18, label: 'Stundenmittel' },
+      { stat: 'year_mean', value: 40, allowance: 0, label: 'Jahresmittel' },
+    ],
   },
   {
     key: 'so2',
@@ -95,8 +107,10 @@ export const COMPONENTS = [
     short: 'SO₂',
     unit: 'µg/m³',
     decimals: 0,
-    hourLimit: 350,
-    dayLimit: 125,
+    limits: [
+      { stat: 'hour', value: 350, allowance: 24, label: 'Stundenmittel' },
+      { stat: 'day_mean', value: 125, allowance: 3, label: 'Tagesmittel' },
+    ],
   },
   {
     key: 'co_8h',
@@ -108,7 +122,7 @@ export const COMPONENTS = [
     // Values sit around 0.3 mg/m³ — a single decimal would quantise the whole
     // series into three or four distinct numbers.
     decimals: 2,
-    dayLimit: null,
+    limits: [{ stat: 'day_max', value: 10, allowance: 0, label: 'höchstes 8-h-Mittel' }],
   },
 ]
 

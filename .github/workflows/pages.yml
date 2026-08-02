@@ -12,7 +12,7 @@ name: GitHub Pages
 on:
   # Nach jedem Datenlauf neu veröffentlichen, damit die Seite dem Archiv folgt.
   workflow_run:
-    workflows: ['Deutschlandwerte sammeln', 'Pegelstände sammeln']
+    workflows: ['Deutschlandwerte sammeln', 'Pegelstände sammeln', 'Umweltdaten sammeln']
     types: [completed]
   push:
     branches: [claude/wetter-station-github-analysis-257mst]

@@ -34,6 +34,7 @@ import {
 } from '../server/germany.js'
 import { recordCount, recordDays, recordRange, recordsForDate } from '../server/records.js'
 import { regionalMeta, regionalPairs, regionalSeries } from '../server/regional.js'
+import { airComponentKeys, airOverview, airProfiles } from '../server/air.js'
 import { staticPath } from '../src/lib/static-path.js'
 
 const outDir = process.argv[2] ?? 'dist'
@@ -267,6 +268,21 @@ if (meta.parameters.length > 0) {
       emit('/api/regional', payload, 'Gebietsmittel')
       emit(`/api/regional?parameter=${parameter}`, payload, 'Gebietsmittel')
     }
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Air quality                                                                */
+/* -------------------------------------------------------------------------- */
+
+const airComponents = airComponentKeys()
+if (airComponents.length > 0) {
+  emit('/api/air', airOverview(), 'Luftqualität')
+  for (const component of airComponents) {
+    const payload = airProfiles(component)
+    emit(`/api/air/profiles?component=${component}`, payload, 'Luftqualität')
+    // The view's first request names no component.
+    if (component === airComponents[0]) emit('/api/air/profiles', payload, 'Luftqualität')
   }
 }
 

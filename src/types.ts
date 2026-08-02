@@ -644,3 +644,114 @@ export interface NotableResponse {
   categories: NotableCategory[]
   records: NotableCategory
 }
+
+/* -------------------------------------------------------------------------- */
+/* Air quality                                                                */
+/* -------------------------------------------------------------------------- */
+
+export interface AirLimit {
+  /** Which statistic the threshold applies to — the same pollutant has several. */
+  stat: 'hour' | 'day_mean' | 'day_max' | 'day_max8h' | 'year_mean'
+  value: number
+  /** How often it may be passed per year before it counts as exceeded. */
+  allowance: number
+  label: string
+}
+
+export interface AirComponent {
+  key: string
+  label: string
+  short: string
+  unit: string
+  decimals: number
+  limits: AirLimit[]
+}
+
+export interface AirStation {
+  id: string
+  name: string
+  kind: 'background' | 'traffic'
+  kindLabel: string
+  address: string
+  lat: number
+  lon: number
+  components: string[]
+}
+
+export interface AirCoverage {
+  station: string
+  component: string
+  hours: number
+  first: string | null
+  last: string | null
+  /** Measured hours over archived hours — sulphur dioxide reaches only 40 %. */
+  share: number
+}
+
+export interface AirAnnualPoint {
+  year: number
+  mean: number | null
+  days: number
+  peak: number | null
+  complete: boolean
+  /** Keyed `${stat}_${value}`; null where the limit is a value, not a count. */
+  exceedances: Record<string, number | null>
+}
+
+export interface AirAnnualSeries {
+  station: string
+  component: string
+  points: AirAnnualPoint[]
+}
+
+export interface AirBand {
+  from: number
+  to: number
+  days: number
+  mean: number
+  max: number
+}
+
+export interface AirOzoneHeat {
+  station: string
+  dwdStation: string
+  months: string
+  target: number | null
+  days: number
+  binned: AirBand[]
+  exceedanceByBand: { from: number; to: number; days: number; over: number; share: number }[]
+}
+
+export interface AirOverviewResponse {
+  range: { first: string | null; last: string | null; days: number }
+  stations: AirStation[]
+  components: AirComponent[]
+  coverage: AirCoverage[]
+  annual: AirAnnualSeries[]
+  ozoneHeat: AirOzoneHeat | null
+  minDaysForYear: number
+  minHoursForDayMean: number
+  hint?: string
+}
+
+export interface AirProfilePoint {
+  hour: number
+  mean: number
+  n: number
+}
+
+export interface AirStationProfile {
+  station: string
+  name: string
+  kind: 'background' | 'traffic'
+  kindLabel: string
+  diurnal: AirProfilePoint[]
+  bySeason: { key: string; label: string; points: AirProfilePoint[] }[]
+  weekday: { weekday: number; mean: number; n: number }[]
+  monthly: { month: number; mean: number; n: number }[]
+}
+
+export interface AirProfilesResponse {
+  component: AirComponent
+  series: AirStationProfile[]
+}

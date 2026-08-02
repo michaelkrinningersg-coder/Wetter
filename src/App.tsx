@@ -18,6 +18,7 @@ import {
   Snowflake,
   Umbrella,
   Waves,
+  Wind,
   ListOrdered,
   Sparkles,
   Table2,
@@ -53,6 +54,7 @@ import { GermanyMap } from './components/GermanyMap'
 import { Indices } from './components/Indices'
 import { Notable } from './components/Notable'
 import { Records } from './components/Records'
+import { Air } from './components/Air'
 import { Regional } from './components/Regional'
 
 const FALLBACK_STATIONS: Station[] = [
@@ -82,6 +84,7 @@ type TabId =
   | 'indices'
   | 'day-in-history'
   | 'gauges'
+  | 'air'
   | 'germany'
   | 'germany-map'
   | 'records'
@@ -92,7 +95,13 @@ interface TabDef {
   id: TabId
   label: string
   icon: typeof Thermometer
-  group: 'Messwerte' | 'Trends' | 'Rekorde' | 'Klimatologie' | 'Gewässer' | 'Deutschland'
+  group:
+    | 'Messwerte'
+    | 'Trends'
+    | 'Rekorde'
+    | 'Klimatologie'
+    | 'Umwelt'
+    | 'Deutschland'
 }
 
 const TABS: TabDef[] = [
@@ -115,7 +124,8 @@ const TABS: TabDef[] = [
   { id: 'climate', label: 'Klimadiagramm', icon: BarChart3, group: 'Klimatologie' },
   { id: 'comparison', label: 'Referenzperioden', icon: Layers, group: 'Klimatologie' },
   { id: 'forecast', label: 'Prognose', icon: Sparkles, group: 'Klimatologie' },
-  { id: 'gauges', label: 'Flusspegel', icon: Waves, group: 'Gewässer' },
+  { id: 'gauges', label: 'Flusspegel', icon: Waves, group: 'Umwelt' },
+  { id: 'air', label: 'Luftqualität', icon: Wind, group: 'Umwelt' },
   { id: 'germany', label: 'Deutschland gestern', icon: Map, group: 'Deutschland' },
   { id: 'germany-map', label: 'Karte', icon: MapPin, group: 'Deutschland' },
   { id: 'records', label: 'Allzeitrekorde', icon: Trophy, group: 'Deutschland' },
@@ -128,7 +138,7 @@ const GROUPS = [
   'Trends',
   'Rekorde',
   'Klimatologie',
-  'Gewässer',
+  'Umwelt',
   'Deutschland',
 ] as const
 
@@ -386,6 +396,8 @@ export default function App() {
             {tab === 'indices' && <Indices stationId={stationId} />}
 
             {tab === 'gauges' && <Gauges />}
+
+            {tab === 'air' && <Air />}
 
             {tab === 'germany' && <Germany />}
 

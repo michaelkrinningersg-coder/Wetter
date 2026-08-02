@@ -13,6 +13,7 @@
     "start": "NODE_ENV=production node server/index.js",
     "typecheck": "tsc -b --noEmit",
     "lint": "eslint .",
+    "fetch:air": "node scripts/fetch-air.js",
     "fetch:gauges": "node scripts/fetch-gauges.js",
     "fetch:germany": "node scripts/fetch-germany.js",
     "fetch:records": "node scripts/fetch-records.js",

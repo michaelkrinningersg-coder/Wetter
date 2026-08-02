@@ -59,7 +59,7 @@ Browser statt ein Übersetzungsfehler.
 | Monatsansicht | 5.020 | 30,3 MB |
 | Dieser Tag | 1.116 | 17,3 MB |
 | Gebietsmittel | 60 | 3,3 MB |
-| übrige | 162 | 1,9 MB |
+| übrige (inkl. Luftqualität) | 170 | 2,0 MB |
 
 Der Workflow `.github/workflows/pages.yml` veröffentlicht nach jedem Datenlauf.
 Damit er greifen kann, muss in den Repository-Einstellungen unter **Pages** als
@@ -89,8 +89,12 @@ Frost- und Niederschlagsperioden) · Rekordbilanz
 **Klimatologie** — Klimadiagramm nach Walter & Lieth · Referenzperioden ·
 Jahresprognose
 
-**Gewässer** — Flusspegel Leine (Göttingen), Rhume (Northeim) und Weser
-(Wahmbeck) mit Verlauf, Meldestufen und langjährigen Kennwerten
+**Umwelt** — Flusspegel Leine (Göttingen), Rhume (Northeim) und Weser
+(Wahmbeck) mit Verlauf, Meldestufen und langjährigen Kennwerten · Luftqualität
+aus den beiden Göttinger UBA-Stationen: Tagesgang je Messgröße im Vergleich
+Hintergrund gegen Verkehr, Wochentags- und Jahresverlauf, Jahresmittel gegen
+die Grenzwerte, Überschreitungen der 39. BImSchV und Ozon gegen die
+Tageshöchsttemperatur derselben Stadt
 
 **Deutschland** — Gebietsmittel für Deutschland und die Bundesländer seit 1881
 (Trend je Jahrzehnt, Rangliste, zehn Größen) · Karte aller Stationen mit den
@@ -131,6 +135,9 @@ server/
   records-kinds.js     Rekordkategorien
   records-csv.js       Allzeit-Basislinie je Station
   records.js           Nachspielen des Archivs, Rekordereignisse
+  air-sources.js       UBA-Luftqualität: Stationen, Grenzwerte, Abruf
+  air-csv.js           Stundenarchiv, eine CSV je Tag
+  air.js               Tagesgang, Jahresreihen, Überschreitungen
 ```
 
 Die Datenbank liegt unter `data/weather.sqlite` (per `.gitignore`
@@ -230,6 +237,16 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   Leipzig-Holzhausen misst seit 1759, hat aber 192 Jahre Messwerte. Sortiert
   wird nach Reihenlänge. Stationen ohne Historie vor dem Stichtag setzen keinen
   Rekord, sie beginnen eine Reihe.
+- **Luftqualität.** Ein Tagesmittel entsteht erst ab 18 gültigen Stunden, ein
+  Jahresmittel ab 300 gültigen Tagen — bei Größen mit ausgeprägtem Tagesgang
+  wäre ein Mittel über die zufällig funktionierenden Stunden kein schwaches
+  Mittel, sondern ein systematisch falsches. Das höchste 8-Stunden-Mittel für
+  Ozon wird über Tagesgrenzen hinweg gebildet und dem Tag zugeschlagen, in den
+  seine letzte Stunde fällt — so reichen die ersten Fenster eines Tages noch in
+  den Abend davor zurück, wofür der Grenzwert geschrieben ist. Ein Fenster
+  zählt nur, wenn es acht aufeinanderfolgende Stunden umfasst und mindestens
+  sechs davon einen Ozonwert tragen. Zeitstempel werden unverändert übernommen,
+  wie das UBA sie veröffentlicht, und nicht umgerechnet.
 - **Flusspegel.** Alle Werte in Zentimeter über Pegelnullpunkt. Die Achse des
   Verlaufs ist auf die Messwerte skaliert, weil die täglichen Schwankungen im
   Zentimeterbereich die eigentliche Information sind; Kennwerte und Meldestufen
@@ -256,6 +273,10 @@ Entscheidung offen).
 
 **Klimadaten:** [DWD Climate Data Center](https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/daily/kl/),
 Tageswerte (`kl`). Frei verwendbar nach GeoNutzV; Quellenangabe erforderlich.
+
+**Luftqualität:** [Umweltbundesamt, Luftdaten-API](https://luftdaten.umweltbundesamt.de/api/air-data/v3),
+Stundenwerte der Stationen DENI042 und DENI068. Der ältere Pfad unter
+`umweltbundesamt.de/api/air_data/` leitet dorthin um.
 
 ### Deutschlandarchiv
 
@@ -309,6 +330,34 @@ npm run fetch:regional
 Jahr. Der tägliche Workflow ruft sie mit ab: der DWD korrigiert auch
 zurückliegende Jahre, wenn sich Messnetz oder Interpolation ändern, weshalb ein
 reines „schon vorhanden" nicht genügt.
+
+### Luftqualität
+
+```bash
+npm run fetch:air -- --backfill   # einmalig, 2016 bis heute
+npm run fetch:air                 # täglich, letzte sieben Tage
+```
+
+Zwei UBA-Stationen in Göttingen: **DENI042** im vorstädtischen Hintergrund
+(Nohlstraße) und **DENI068** verkehrsnah (Bürgerstraße 20), 2,7 km auseinander.
+Neun Messreihen, stündlich — PM₁₀, PM₂٫₅, O₃, NO₂, SO₂ am Hintergrund, PM₁₀,
+PM₂٫₅, NO₂ und CO als 8-Stunden-Mittel am Verkehr. Der Backfill holt 753.563
+Werte in 3836 Tagesdateien (4,4 MB) in gut 40 Sekunden.
+
+Zwei Eigenheiten der Quelle bestimmen den Zuschnitt. Erstens liefert die
+Schnittstelle **nichts vor 2016**, ungeachtet dessen, was die
+Stationsbeschreibung über das Baujahr sagt — deshalb wird archiviert, was
+geholt wurde. Zweitens gibt es für **Ozon und Stickstoffdioxid überhaupt kein
+Tagesmittel**, nur Stundenwerte und Tagesmaxima; jede Tagesangabe dazu ist hier
+selbst gerechnet.
+
+Der tägliche Lauf liest sieben Tage zurück statt nur den Vortag, weil das UBA
+Stundenwerte nachträglich prüft und korrigiert. Tage ohne inhaltliche Änderung
+erzeugen eine byte-identische Datei und damit keinen Commit.
+
+Die Abdeckung ist nicht überall gleich: SO₂ liegt nur für 40 % der Stunden vor,
+alle übrigen Größen für 95 bis 100 %. Die Oberfläche weist das je Größe aus,
+statt eine dünn belegte Reihe wie eine dichte aussehen zu lassen.
 
 ### Allzeitrekorde
 

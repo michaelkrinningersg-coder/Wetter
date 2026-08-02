@@ -1,0 +1,84 @@
+name: Umweltdaten sammeln
+
+# Messreihen aus Göttingen, die nicht vom DWD kommen. Anders als beim
+# Wetterarchiv geht es hier nicht nur um Vollständigkeit, sondern um
+# Haltbarkeit: das Umweltbundesamt liefert nichts vor 2016 aus, und beim
+# Bundesamt für Strahlenschutz endet das Fenster nach sieben Tagen. Was dieser
+# Lauf nicht festhält, ist irgendwann nicht mehr abrufbar.
+
+on:
+  schedule:
+    # 09:00 UTC. Das UBA veröffentlicht die Stunden eines Tages im Lauf des
+    # Folgetags; der Lauf liest ohnehin eine Woche zurück und holt Nachträge
+    # damit von selbst nach.
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+    inputs:
+      backfill:
+        description: 'Luftqualität ab 2016 vollständig zurückfüllen'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: umwelt
+  cancel-in-progress: false
+
+jobs:
+  sammeln:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Kein npm ci: die Sammler nutzen ausschließlich die Node-Standard-
+      # bibliothek. Damit entfällt der native Build von better-sqlite3 und der
+      # Lauf kann nicht an einer Abhängigkeit scheitern.
+      - name: Luftqualität abrufen
+        run: |
+          if [ "${{ inputs.backfill }}" = "true" ]; then
+            node scripts/fetch-air.js --backfill
+          else
+            node scripts/fetch-air.js
+          fi
+
+      - name: Änderungen committen
+        run: |
+          if [ -z "$(git status --porcelain data/air)" ]; then
+            echo "Keine neuen oder korrigierten Stunden — nichts zu committen."
+            exit 0
+          fi
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/air
+
+          # Neue Tage getrennt von nachträglich korrigierten ausweisen: das UBA
+          # prüft Stundenwerte nach, und eine Änderung an einem alten Tag ist
+          # etwas anderes als ein hinzugekommener.
+          neu=$(git diff --cached --name-only --diff-filter=A -- 'data/air/*/*.csv' | wc -l)
+          geaendert=$(git diff --cached --name-only --diff-filter=M -- 'data/air/*/*.csv' | wc -l)
+
+          git commit -m "Umweltdaten $(date -u '+%Y-%m-%d %H:%M UTC')" \
+                     -m "Luftqualität: $neu neue Tage, $geaendert nachträglich korrigiert"
+
+          # Zwischen Abruf und Push kann ein anderer Sammellauf committet haben.
+          for attempt in 1 2 3 4 5; do
+            if git push; then
+              exit 0
+            fi
+            echo "Push fehlgeschlagen (Versuch $attempt), rebase und erneut…"
+            git pull --rebase --autostash
+            sleep $((attempt * 5))
+          done
+
+          echo "Push nach fünf Versuchen fehlgeschlagen."
+          exit 1

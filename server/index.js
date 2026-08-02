@@ -24,6 +24,7 @@ import {
 } from './germany.js'
 import { recordCount, recordDays, recordRange, recordsForDate } from './records.js'
 import { regionalMeta, regionalSeries } from './regional.js'
+import { airComponentKeys, airOverview, airProfiles } from './air.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -419,6 +420,45 @@ app.get(
     }
 
     res.json({ ...meta, series: regionalSeries(parameter, period) })
+  }),
+)
+
+/* -------------------------------------------------------------------------- */
+/* Air quality                                                                */
+/* -------------------------------------------------------------------------- */
+
+app.get(
+  '/api/air',
+  handler((_req, res) => {
+    const overview = airOverview()
+    if (!overview.range.last) {
+      return res.json({
+        ...overview,
+        hint:
+          'Noch keine Luftmesswerte im Archiv. Einmal `npm run fetch:air -- --backfill`' +
+          ' ausführen — das holt die Stundenwerte beider Göttinger Stationen ab 2016.',
+      })
+    }
+    res.json(overview)
+  }),
+)
+
+app.get(
+  '/api/air/profiles',
+  handler((req, res) => {
+    const keys = airComponentKeys()
+    if (keys.length === 0) {
+      return res.status(503).json({ error: 'Noch keine Luftmesswerte im Archiv.' })
+    }
+
+    const component = String(req.query.component ?? keys[0])
+    const profiles = airProfiles(component)
+    if (!profiles) {
+      return res.status(400).json({
+        error: `Unbekannte Größe "${component}". Verfügbar: ${keys.join(', ')}.`,
+      })
+    }
+    res.json(profiles)
   }),
 )
 
