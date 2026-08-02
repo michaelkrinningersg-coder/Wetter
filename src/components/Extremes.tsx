@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import {
   ChevronRight,
   Flame,
@@ -11,6 +10,7 @@ import {
 import type { ComponentType } from 'react'
 
 import { useApi } from '../lib/api'
+import { useUrlState } from '../lib/url-state'
 import { monthName, num, temp, wind } from '../lib/format'
 import type { ExtremeDay } from '../types'
 import {
@@ -52,7 +52,9 @@ export function Extremes({
   stationName: string
   onNavigateToMonth: (year: number, month: number) => void
 }) {
-  const [categoryId, setCategoryId] = useState(CATEGORIES[0]!.id)
+  const [categoryId, setCategoryId] = useUrlState<string>('kategorie', CATEGORIES[0]!.id, {
+    allowed: CATEGORIES.map((c) => c.id),
+  })
   const category = CATEGORIES.find((c) => c.id === categoryId) ?? CATEGORIES[0]!
 
   const { data, loading, error, reload } = useApi<ExtremeDay[]>(

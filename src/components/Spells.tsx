@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import {
   Bar,
   BarChart,
@@ -13,6 +12,7 @@ import type { ComponentType } from 'react'
 import type { LucideProps } from 'lucide-react'
 
 import { useApi } from '../lib/api'
+import { useUrlState } from '../lib/url-state'
 import { isoToGerman, num } from '../lib/format'
 import type { SpellsResponse } from '../types'
 import {
@@ -61,7 +61,9 @@ export function Spells({
   stationId: string
   stationName: string
 }) {
-  const [kindId, setKindId] = useState(KINDS[0]!.id)
+  const [kindId, setKindId] = useUrlState<string>('art', KINDS[0]!.id, {
+    allowed: KINDS.map((k) => k.id),
+  })
   const kind = KINDS.find((k) => k.id === kindId) ?? KINDS[0]!
 
   const { data, loading, error, reload } = useApi<SpellsResponse>(

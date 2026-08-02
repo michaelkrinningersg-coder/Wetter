@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import {
   Area,
   CartesianGrid,
@@ -13,6 +13,7 @@ import {
 import { Filter, Snowflake, Sun, TrendingUp } from 'lucide-react'
 
 import { useApi } from '../lib/api'
+import { useUrlState } from '../lib/url-state'
 import { centeredMovingAverage, extremeBy, linearFit, mean } from '../lib/stats'
 import { coverage, num, signed, temp } from '../lib/format'
 import type { TempTrendRecord } from '../types'
@@ -62,7 +63,7 @@ export function TempTrend({
   stationId: string
   stationName: string
 }) {
-  const [period, setPeriod] = useState<Period>('100')
+  const [period, setPeriod] = useUrlState<Period>('zeitraum', '100')
   const { data, loading, error, reload } = useApi<TempTrendRecord[]>(
     `/api/weather/trends/temp?stationId=${encodeURIComponent(stationId)}`,
   )

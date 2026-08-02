@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import {
   CartesianGrid,
   ComposedChart,
@@ -14,6 +14,7 @@ import {
 import { CalendarHeart, ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react'
 
 import { useApi } from '../lib/api'
+import { useUrlNumber } from '../lib/url-state'
 import { MONTHS, isoToGerman, mm, monthName, num, temp } from '../lib/format'
 import type { DayHistoryRow, DayInHistoryResponse } from '../types'
 import {
@@ -47,8 +48,8 @@ export function DayInHistory({
   stationName: string
 }) {
   const today = useMemo(() => new Date(), [])
-  const [month, setMonth] = useState(today.getMonth() + 1)
-  const [day, setDay] = useState(today.getDate())
+  const [month, setMonth] = useUrlNumber('monat', today.getMonth() + 1, { min: 1, max: 12 })
+  const [day, setDay] = useUrlNumber('tag', today.getDate(), { min: 1, max: 31 })
 
   const isToday = month === today.getMonth() + 1 && day === today.getDate()
 
@@ -141,7 +142,8 @@ export function DayInHistory({
                   onChange={(e) => {
                     const m = Number(e.target.value)
                     setMonth(m)
-                    setDay((d) => Math.min(d, DAYS_IN_MONTH[m - 1]!))
+                    // 31 March to February has to land on the 28th, not vanish.
+                    setDay(Math.min(day, DAYS_IN_MONTH[m - 1]!))
                   }}
                   className="cursor-pointer rounded-md border border-line bg-raised px-2.5 py-1.5 text-xs text-ink focus:border-brand focus:outline-none"
                 >

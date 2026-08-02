@@ -14,6 +14,7 @@ import {
 import type { ComponentType } from 'react'
 
 import { useApi } from '../lib/api'
+import { useUrlState } from '../lib/url-state'
 import { isoToGerman, num } from '../lib/format'
 import type { RecordEvent, RecordsResponse } from '../types'
 import {
@@ -138,7 +139,7 @@ function EventRow({ event }: { event: RecordEvent }) {
 const PAGE = 100
 
 export function Records() {
-  const [date, setDate] = useState<string | null>(null)
+  const [date, setDate] = useUrlState<string>('datum', null)
   const [showAll, setShowAll] = useState(false)
   const { data, loading, error } = useApi<RecordsResponse>(
     `/api/records${date ? `?date=${date}` : ''}`,

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import {
   Bar,
   CartesianGrid,
@@ -13,6 +13,7 @@ import {
 import { CloudRain, Droplets, Gauge, Waves } from 'lucide-react'
 
 import { useApi } from '../lib/api'
+import { useUrlState } from '../lib/url-state'
 import { centeredMovingAverage, linearFit, mean } from '../lib/stats'
 import { isoToGerman, mm, num, percent, signed } from '../lib/format'
 import type { PrecipIntensityResponse } from '../types'
@@ -48,7 +49,7 @@ export function PrecipIntensity({
   stationId: string
   stationName: string
 }) {
-  const [index, setIndex] = useState<Index>('heavy')
+  const [index, setIndex] = useUrlState<Index>('kennzahl', 'heavy')
 
   const { data, loading, error, reload } = useApi<PrecipIntensityResponse>(
     `/api/weather/precip-intensity?stationId=${encodeURIComponent(stationId)}`,

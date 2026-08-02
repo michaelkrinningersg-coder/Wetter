@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 
 import { STATIC, useApi } from '../lib/api'
+import { useUrlState } from '../lib/url-state'
 import { isoToGerman, num } from '../lib/format'
 import type { GaugeSeriesResponse, GaugeSummary, GaugesResponse } from '../types'
 import {
@@ -68,8 +69,10 @@ function TrendIcon({ trend }: { trend?: string | null }) {
 }
 
 export function Gauges() {
-  const [range, setRange] = useState<Range>('30')
-  const [selected, setSelected] = useState<string | null>(null)
+  const [range, setRange] = useUrlState<Range>('zeitraum', '30', {
+    allowed: RANGES.map((r) => r.value),
+  })
+  const [selected, setSelected] = useUrlState<string>('pegel', null)
   const [refreshing, setRefreshing] = useState(false)
 
   const { data, loading, error, reload } = useApi<GaugesResponse>('/api/gauges?days=30')

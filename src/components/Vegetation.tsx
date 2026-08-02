@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import {
   Area,
   CartesianGrid,
@@ -13,6 +13,7 @@ import {
 import { CalendarClock, Leaf, Sprout, Sun } from 'lucide-react'
 
 import { useApi } from '../lib/api'
+import { useUrlState } from '../lib/url-state'
 import { centeredMovingAverage, mean } from '../lib/stats'
 import { MONTHS_SHORT, isoToGerman, num, signed } from '../lib/format'
 import type { VegetationRecord, VegetationResponse } from '../types'
@@ -59,7 +60,7 @@ export function Vegetation({
   stationId: string
   stationName: string
 }) {
-  const [view, setView] = useState<View>('season')
+  const [view, setView] = useUrlState<View>('ansicht', 'season')
 
   const { data, loading, error, reload } = useApi<VegetationResponse>(
     `/api/weather/vegetation?stationId=${encodeURIComponent(stationId)}`,

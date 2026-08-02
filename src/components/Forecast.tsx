@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import {
   Area,
   Bar,
@@ -14,6 +14,7 @@ import {
 import { CloudRain, Sparkles, Thermometer, TrendingDown, TrendingUp } from 'lucide-react'
 
 import { useApi } from '../lib/api'
+import { useUrlState } from '../lib/url-state'
 import { mm, num, signed, temp } from '../lib/format'
 import type { ForecastMonth, ForecastResponse, YtdTrajectoryPoint } from '../types'
 import {
@@ -37,7 +38,7 @@ const VIEWS = [
 type View = (typeof VIEWS)[number]['value']
 
 export function Forecast({ stationId }: { stationId: string }) {
-  const [view, setView] = useState<View>('temp')
+  const [view, setView] = useUrlState<View>('ansicht', 'temp')
 
   const { data, loading, error, reload } = useApi<ForecastResponse>(
     `/api/weather/forecast?stationId=${encodeURIComponent(stationId)}`,

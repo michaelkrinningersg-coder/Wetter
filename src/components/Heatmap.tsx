@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Grid3x3, Search } from 'lucide-react'
 
 import { useApi } from '../lib/api'
+import { useUrlState } from '../lib/url-state'
 import { percentile } from '../lib/stats'
 import { MONTHS_SHORT, monthName, temp } from '../lib/format'
 import type { HeatmapRecord, HeatmapResponse } from '../types'
@@ -60,7 +61,7 @@ function tileColor(value: number | null, scale: Scale | undefined): string {
 }
 
 export function Heatmap({ stationId }: { stationId: string }) {
-  const [decade, setDecade] = useState<Decade>('all')
+  const [decade, setDecade] = useUrlState<Decade>('jahrzehnt', 'all')
   const [search, setSearch] = useState('')
 
   const { data, loading, error, reload } = useApi<HeatmapResponse>(

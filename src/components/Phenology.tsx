@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import {
   CartesianGrid,
   Line,
@@ -14,6 +14,7 @@ import {
 import { CalendarRange, Flower2, Leaf, MapPin, Thermometer, TrendingDown } from 'lucide-react'
 
 import { useApi } from '../lib/api'
+import { useUrlState } from '../lib/url-state'
 import { num } from '../lib/format'
 import { linearFit } from '../lib/stats'
 import type { PhenoSeason, PhenologyResponse } from '../types'
@@ -296,7 +297,7 @@ function AgainstTemperature({ data }: { data: PhenologyResponse }) {
 /* -------------------------------------------------------------------------- */
 
 function Calendar({ data }: { data: PhenologyResponse }) {
-  const [limit, setLimit] = useState<string>('40')
+  const [limit, setLimit] = useUrlState<string>('kalender', '40', { allowed: ['40', 'all'] })
   const shown = limit === 'all' ? data.calendar : data.calendar.slice(0, Number(limit))
 
   const min = Math.min(...data.calendar.map((c) => c.day))

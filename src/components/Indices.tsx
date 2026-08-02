@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import {
   Area,
   CartesianGrid,
@@ -12,6 +12,7 @@ import {
 import { Snowflake, TrendingDown, TrendingUp } from 'lucide-react'
 
 import { useApi } from '../lib/api'
+import { useUrlState } from '../lib/url-state'
 import { num } from '../lib/format'
 import { centeredMovingAverage, extremeBy, linearFit, mean } from '../lib/stats'
 import type { ExtraIndicesResponse } from '../types'
@@ -34,7 +35,7 @@ import {
 const SMOOTHING = 11
 
 export function Indices({ stationId }: { stationId: string }) {
-  const [selected, setSelected] = useState<string | null>(null)
+  const [selected, setSelected] = useUrlState<string>('kenngroesse', null)
 
   const { data, loading, error, reload } = useApi<ExtraIndicesResponse>(
     `/api/weather/indices?stationId=${encodeURIComponent(stationId)}`,

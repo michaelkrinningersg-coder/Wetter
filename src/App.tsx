@@ -31,6 +31,7 @@ import {
 } from 'lucide-react'
 
 import { apiGet } from './lib/api'
+import { readParam, setTabParam, useUrlNumber, useUrlState } from './lib/url-state'
 import type { ImportStatus, Station } from './types'
 import { Header } from './components/Header'
 import { MonthlyOverview } from './components/MonthlyOverview'
@@ -154,12 +155,24 @@ const GROUPS = [
   'Deutschland',
 ] as const
 
+const TAB_IDS = TABS.map((t) => t.id)
+
 const STORAGE_KEY = 'selected_station_id'
 
-function readStoredStation(): string {
-  // localStorage throws in private-mode Safari and in sandboxed iframes; the
-  // original app read it unguarded during useState initialisation, which took
-  // the whole app down with a white screen.
+/**
+ * Which station to open on.
+ *
+ * The URL wins where it says something — a link has to land where it points,
+ * whatever the recipient looked at last. Otherwise the remembered choice, then
+ * the first station.
+ *
+ * localStorage throws in private-mode Safari and in sandboxed iframes; the
+ * original app read it unguarded during useState initialisation, which took the
+ * whole app down with a white screen.
+ */
+function initialStation(): string {
+  const fromUrl = readParam('station')
+  if (fromUrl) return fromUrl
   try {
     return localStorage.getItem(STORAGE_KEY) ?? FALLBACK_STATIONS[0]!.id
   } catch {
@@ -169,13 +182,24 @@ function readStoredStation(): string {
 
 export default function App() {
   const [stations, setStations] = useState<Station[]>(FALLBACK_STATIONS)
-  const [stationId, setStationId] = useState<string>(readStoredStation)
+  const [stationId, setStationId] = useUrlState<string>('station', initialStation())
   const [status, setStatus] = useState<ImportStatus | null>(null)
-  const [tab, setTab] = useState<TabId>('overview')
+  const [tab] = useUrlState<TabId>('bereich', 'overview', { allowed: TAB_IDS })
 
   const now = new Date()
-  const [selectedYear, setSelectedYear] = useState(now.getFullYear())
-  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1)
+  const [selectedYear, setSelectedYear] = useUrlNumber('jahr', now.getFullYear(), {
+    min: 1700,
+    max: 2200,
+  })
+  const [selectedMonth, setSelectedMonth] = useUrlNumber('monat', now.getMonth() + 1, {
+    min: 1,
+    max: 12,
+  })
+
+  // A tab change pushes a history entry and clears the previous tab's own
+  // parameters — see `setTabParam`, which also notifies every mounted
+  // `useUrlState`, so no second write is needed to move the view.
+  const setTab = useCallback((next: TabId) => setTabParam(next), [])
 
   const station = useMemo(
     () => stations.find((s) => s.id === stationId),

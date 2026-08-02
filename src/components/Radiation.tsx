@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import {
   CartesianGrid,
   Line,
@@ -11,6 +11,7 @@ import {
 import { Mountain, Radiation as RadiationIcon, Ruler, Timer } from 'lucide-react'
 
 import { useApi } from '../lib/api'
+import { useUrlState } from '../lib/url-state'
 import { num } from '../lib/format'
 import type { OdlProbe, RadiationResponse } from '../types'
 import {
@@ -105,7 +106,9 @@ function ProbeTile({ probe, color }: { probe: OdlProbe; color: string }) {
 }
 
 export function Radiation() {
-  const [days, setDays] = useState<string>('30')
+  const [days, setDays] = useUrlState<string>('tage', '30', {
+    allowed: WINDOWS.map((w) => w.value),
+  })
   const { data, loading, error } = useApi<RadiationResponse>(`/api/radiation?days=${days}`, [days])
 
   const rows = useMemo(() => {

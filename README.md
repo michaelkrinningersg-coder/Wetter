@@ -47,6 +47,23 @@ npm run import:stations   # Datenbank füllen (die drei Stationen vom DWD)
 npm run build:static      # dist/ mit 7.467 Dateien, 143 MB
 ```
 
+Der Zustand der Ansicht steht in der Adresszeile, damit sich jede Ansicht
+verlinken lässt:
+
+```
+?bereich=air&groesse=o3&saison=summer          Ozon-Tagesgang im Sommer
+?bereich=overview&station=00722&jahr=2020&monat=7   Brocken, Juli 2020
+?bereich=day-in-history&monat=3&tag=15         der 15. März in der Geschichte
+```
+
+Ausschließlich über den Query-String, nie über den Pfad — Pages liefert Dateien
+aus und hat keine Rewrite-Regel: `/Wetter/?bereich=air` ist weiterhin eine
+Anfrage nach `/Wetter/`, `/Wetter/air` wäre ein 404. Ein Bereichswechsel legt
+einen Verlaufseintrag an und räumt die Parameter des vorigen Bereichs weg; alles
+innerhalb eines Bereichs ersetzt den Eintrag nur, damit die Zurück-Taste nicht
+unter zwanzig Reglerbewegungen begraben wird. Unbekannte Werte fallen still auf
+die Vorgabe zurück.
+
 Wohin welche Antwort geschrieben wird, entscheidet `src/lib/static-path.js` —
 und dieselbe Funktion benutzt das Frontend, um zu lesen. Eine zweite
 Implementierung würde auseinanderlaufen, und der Fehler wäre ein 404 im
@@ -120,6 +137,7 @@ src/
     api.ts             useApi() — Fetch mit AbortController
     format.ts          null-sichere Formatierung, de-DE
     stats.ts           lineare Regression, Perzentile
+    url-state.ts       Ansichtszustand im Query-String
   components/
     ui.tsx             Karten, Kacheln, Filter, Tooltips, Zustände
     …                  13 Analysekomponenten

@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react'
 
 import { useApi } from '../lib/api'
+import { useUrlState } from '../lib/url-state'
 import { isoToGerman, num } from '../lib/format'
 import { percentile } from '../lib/stats'
 import type { GermanyMapResponse, GermanyStationRegister } from '../types'
@@ -117,8 +118,8 @@ const WIDTH = 640
 const HEIGHT = 820
 
 export function GermanyMap() {
-  const [date, setDate] = useState<string | null>(null)
-  const [field, setField] = useState<string | null>(null)
+  const [date, setDate] = useUrlState<string>('datum', null)
+  const [field, setField] = useUrlState<string>('groesse', null)
 
   // The register never changes with the date, so it is its own request and the
   // browser caches it across every day the user steps through.

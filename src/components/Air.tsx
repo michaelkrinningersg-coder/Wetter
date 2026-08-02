@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import {
   Area,
   AreaChart,
@@ -17,6 +17,7 @@ import {
 import { Building2, Car, Clock, Factory, Sun, TrendingDown, Wind } from 'lucide-react'
 
 import { useApi } from '../lib/api'
+import { useUrlState } from '../lib/url-state'
 import { MONTHS_SHORT, isoToGerman, num, percent } from '../lib/format'
 import { linearFit } from '../lib/stats'
 import type {
@@ -150,7 +151,9 @@ const SEASON_CHOICES = [
 ] as const
 
 function Profiles({ componentKey }: { componentKey: string }) {
-  const [season, setSeason] = useState<string>('all')
+  const [season, setSeason] = useUrlState<string>('saison', 'all', {
+    allowed: SEASON_CHOICES.map((c) => c.value),
+  })
   const { data, loading, error } = useApi<AirProfilesResponse>(
     `/api/air/profiles?component=${componentKey}`,
     [componentKey],
@@ -720,7 +723,7 @@ function OzoneHeat({ data }: { data: AirOverviewResponse }) {
 
 export function Air() {
   const { data, loading, error } = useApi<AirOverviewResponse>('/api/air')
-  const [componentKey, setComponentKey] = useState<string>('no2')
+  const [componentKey, setComponentKey] = useUrlState<string>('groesse', 'no2')
 
   if (loading && !data) return <Loading message="Luftmesswerte werden geladen …" />
   if (error) return <ErrorState message={error} />

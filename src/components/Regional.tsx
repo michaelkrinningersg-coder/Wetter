@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import {
   CartesianGrid,
   Legend,
@@ -12,6 +12,7 @@ import {
 import { Landmark, TrendingDown, TrendingUp } from 'lucide-react'
 
 import { useApi } from '../lib/api'
+import { useUrlList, useUrlState } from '../lib/url-state'
 import { num } from '../lib/format'
 import { linearFit } from '../lib/stats'
 import type { RegionalRegion, RegionalResponse } from '../types'
@@ -117,9 +118,9 @@ function rank(regions: RegionalRegion[]): Ranked[] {
 }
 
 export function Regional() {
-  const [parameter, setParameter] = useState<string | null>(null)
-  const [period, setPeriod] = useState<string | null>(null)
-  const [selected, setSelected] = useState<string[] | null>(null)
+  const [parameter, setParameter] = useUrlState<string>('groesse', null)
+  const [period, setPeriod] = useUrlState<string>('zeitraum', null)
+  const [selected, setSelected] = useUrlList('gebiete', null)
 
   const query = [
     parameter ? `parameter=${encodeURIComponent(parameter)}` : '',
@@ -169,11 +170,10 @@ export function Regional() {
     return row
   })
 
+  // `shown` already resolves "nothing chosen yet" to the default set, so the
+  // toggle works off it rather than off the raw selection.
   const toggle = (name: string) =>
-    setSelected((current) => {
-      const base = current ?? shown
-      return base.includes(name) ? base.filter((n) => n !== name) : [...base, name]
-    })
+    setSelected(shown.includes(name) ? shown.filter((n) => n !== name) : [...shown, name])
 
   const warming = param.direction !== 'cold'
 

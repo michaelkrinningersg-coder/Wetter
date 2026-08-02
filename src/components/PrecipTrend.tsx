@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import {
   Area,
   Bar,
@@ -14,6 +14,7 @@ import {
 import { CloudRain, Droplets, Filter, Sun } from 'lucide-react'
 
 import { useApi } from '../lib/api'
+import { useUrlState } from '../lib/url-state'
 import { centeredMovingAverage, extremeBy, linearFit, mean } from '../lib/stats'
 import { coverage, mm, num, signed } from '../lib/format'
 import type { PrecipTrendRecord } from '../types'
@@ -63,7 +64,7 @@ export function PrecipTrend({
   stationId: string
   stationName: string
 }) {
-  const [period, setPeriod] = useState<Period>('100')
+  const [period, setPeriod] = useUrlState<Period>('zeitraum', '100')
   const { data, loading, error, reload } = useApi<PrecipTrendRecord[]>(
     `/api/weather/trends/precip?stationId=${encodeURIComponent(stationId)}`,
   )
