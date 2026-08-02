@@ -2002,6 +2002,94 @@ export interface YearbookResponse {
 }
 
 /* -------------------------------------------------------------------------- */
+/* Episodes                                                                   */
+/* -------------------------------------------------------------------------- */
+
+export interface EpisodeKindMeta {
+  key: string
+  /** 'schwelle' uses fixed limits, 'relativ' the calendar day's own percentile. */
+  mode: 'schwelle' | 'relativ'
+  label: string
+  short: string
+  note: string
+  unit: string
+  decimals: number
+  minDays: number
+  limit: number | null
+  percentile: number | null
+  accent: string
+  peak: 'max' | 'min' | 'sum'
+  peakLabel: string
+  severityLabel: string
+  severityUnit: string
+  severityDecimals: number
+}
+
+export interface Episode {
+  start: string
+  end: string
+  year: number
+  month: number
+  /** Calendar days from the first qualifying day to the last. */
+  span: number
+  /** The longest unbroken run inside — the length that needs no footnote. */
+  core: number
+  hits: number
+  breaks: number
+  severity: number
+  peak: { value: number; date: string } | null
+  total: number
+  mean: number
+  /** Mean threshold the episode was measured against — only telling when relative. */
+  limitMean: number
+  rank: number
+  /** Empirical, not fitted: years on record divided by the rank. */
+  returnYears: number | null
+  percentile: number | null
+  current: boolean
+}
+
+export interface EpisodeDecade {
+  decade: number
+  count: number
+  days: number
+  meanSeverity: number | null
+  maxSeverity: number | null
+  /** Measured days in the decade, so a short one is not read as a quiet one. */
+  measured: number
+  share: number
+}
+
+export interface EpisodesResponse {
+  station: string
+  kind: EpisodeKindMeta
+  kinds: { key: string; mode: 'schwelle' | 'relativ'; label: string; short: string; minDays: number }[]
+  base: {
+    from: number
+    to: number
+    window: number
+    years: number
+    covered: number
+    minYears: number
+  } | null
+  range: { first: string | null; last: string | null; days: number; years: number } | null
+  counts: {
+    episodes: number
+    withBreaks: number
+    days: number
+    hits: number
+    perDecade: number | null
+  } | null
+  decades: EpisodeDecade[]
+  months: { month: number; label: string; count: number }[]
+  strongest: Episode[]
+  longest: Episode[]
+  recent: Episode[]
+  current: Episode | null
+  hint?: string
+}
+
+/* -------------------------------------------------------------------------- */
 /* Curiosities                                                                */
 /* -------------------------------------------------------------------------- */
 

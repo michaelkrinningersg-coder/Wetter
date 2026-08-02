@@ -131,8 +131,9 @@ Frühjahrsfrost · Verteilungsverschiebung: drei Referenzperioden als ganze
 Verteilung statt als Mittelwert
 
 **Rekorde** — Monats-Heatmap · Spitzenwerte (Top-50-Tage) ·
-Spitzenmonate (Top-50-Monate) · Perioden & Serien (längste Hitze-, Trocken-,
-Frost- und Niederschlagsperioden) · Rekordbilanz der Station · Rekordgeschichte: wie alt
+Spitzenmonate (Top-50-Monate) · Perioden & Episoden (längste Hitze-, Trocken-,
+Frost- und Niederschlagsperioden, dazu dieselben Lagen als Episoden mit Stärke
+und Einordnung) · Rekordbilanz der Station · Rekordgeschichte: wie alt
 die stehenden Rekorde sind, aus welchen Jahren die 366 Tagesrekorde stammen und
 welche Jahrgänge mehr Rekorde stellten, als der Zufall hergibt, wie lange ein
 Rekord überlebt und wie oft einer knapp verfehlt wurde
@@ -202,6 +203,7 @@ server/
   twins.js             nächster Nachbar eines Tages über sieben bis neun Größen
   yearbook.js          zehn markante Tage je Jahr, gegen den Kalendertag gerankt
   curiosities.js       zwölf Fragen abseits der üblichen Ranglisten
+  episodes.js          Wetterlagen als Episoden: Dauer, Stärke, Einordnung
   distribution.js      Verteilungen dreier Referenzperioden, Kenntage
   nationwide-shape.js  die Form eines Tages über Deutschland, reine Rechnung
   nationwide-csv.js    Jahresarchiv dieser Tagesformen plus Stationsregister
@@ -508,6 +510,32 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   20 mm Monatssumme, sonst gewänne ein Nieselregen in einem sonst regenlosen
   Februar mit 100 %; die Abweichungen brauchen 30 Jahre Kalendertagsmittel,
   darunter wäre der Bezugswert Rauschen und jeder Tag sähe außergewöhnlich aus.
+- **Episoden statt Tage.** Niemand erinnert den 9. August 2003, erinnert wird
+  *der Sommer 2003*. Eine Episode ist eine Folge zusammengehöriger Tage mit drei
+  Zahlen, die ein einzelner Tag nicht hat: Dauer, Stärke und Häufigkeit. Zwei
+  Definitionen laufen nebeneinander. Die **Schwellen** sind die
+  meteorologischen Konventionen (30 °C, 25 °C, 0 °C, 1 mm) und decken sich mit
+  der Ansicht daneben. Die **relative** Betrachtung misst jeden Tag am 90. bzw.
+  10. Perzentil seines eigenen Kalendertages aus der Basisperiode 1961–1990 —
+  die ETCCDI-Konstruktion hinter WSDI und CSDI. Nur sie findet die Warmepisode
+  vom 20.12.2022 bis 08.01.2023: 20 Tage, weil 12 °C im Dezember so weit über
+  dem Üblichen liegen wie 33 °C im August. Die Basisperiode ist **fest**, nicht
+  die ganze Reihe — ein Perzentil über 1858–2026 wanderte mit dem Klima mit, das
+  es messen soll, und der Trend verschwände in seinem eigenen Maßstab. Gegen
+  1961–1990 steigt die Zahl der Warmepisoden von 4 in den 1960ern und 1980ern
+  auf **15 in den 2000ern und 15 in den 2010ern**; die Kälteepisoden fallen im
+  selben Zeitraum nur von 9 auf 5. Jede Episode trägt **zwei Längen**: ein
+  einzelner Tag unter der Schwelle beendet sie nicht (Juli/August 2018 dauert so
+  17 Tage), aber die längste ununterbrochene Strecke steht daneben (12 Tage) —
+  nach diesem Maß gehört der Rekord weiter dem August 2003 mit 13 Tagen ohne
+  Unterbrechung. Überbrücken verlängert eine Episode, es erschafft sie nicht:
+  Die ununterbrochene Strecke muss die Mindestdauer allein erreichen, sonst
+  würden aus 88 Hitzeepisoden 190, weil zwei zweitägige Spitzen um einen kühlen
+  Tag herum als „fünftägige Hitzewelle" zählten. Überbrücken darf nur ein
+  *gemessener* Tag — von einem Tag, den niemand aufgezeichnet hat, lässt sich
+  nicht behaupten, er sei knapp darunter gewesen. Die Stärke ist die Summe über
+  der Schwelle (Gradtage, Niederschlagssumme), was Dauer und Intensität in einer
+  Zahl vereint; die Einordnung ist eine Auszählung, keine angepasste Verteilung.
 - **Verteilungsverschiebung.** Jeder andere Trend hier gibt einen Mittelwert
   an. Ein Mittelwert kann steigen, weil der kalte Rand kürzer wurde, weil der
   warme Rand wuchs oder weil sich alles gemeinsam verschob — drei verschiedene

@@ -40,6 +40,7 @@ import { dashboard } from './dashboard.js'
 import { weatherTwins } from './twins.js'
 import { yearbook } from './yearbook.js'
 import { curiosities } from './curiosities.js'
+import { episodes, EPISODE_KEYS } from './episodes.js'
 import { NATIONAL_FIELD_KEYS, nationalField, nationalOverview } from './national.js'
 import { pressureAnalysis } from './pressure.js'
 import { frostRiskAll } from './frost.js'
@@ -244,6 +245,21 @@ app.get(
     if (result === null) {
       return res.status(400).json({
         error: `Unbekannte Periodenart "${req.query.kind ?? ''}". Erlaubt: ${api.SPELL_KEYS.join(', ')}.`,
+      })
+    }
+    res.json(result)
+  }),
+)
+
+app.get(
+  '/api/weather/episodes',
+  handler((req, res) => {
+    const station = resolveStation(req, res)
+    if (!station) return
+    const result = episodes(station.id, String(req.query.kind ?? 'heat'))
+    if (result === null) {
+      return res.status(400).json({
+        error: `Unbekannte Episodenart "${req.query.kind ?? ''}". Erlaubt: ${EPISODE_KEYS.join(', ')}.`,
       })
     }
     res.json(result)

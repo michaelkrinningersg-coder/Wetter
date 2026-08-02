@@ -75,7 +75,7 @@ const LOAD = {
   YtdTemp: () => import('./components/YtdTemp').then((m) => ({ default: m.YtdTemp })),
   AnnualOverview: () => import('./components/AnnualOverview').then((m) => ({ default: m.AnnualOverview })),
   Forecast: () => import('./components/Forecast').then((m) => ({ default: m.Forecast })),
-  Spells: () => import('./components/Spells').then((m) => ({ default: m.Spells })),
+  Periods: () => import('./components/Periods').then((m) => ({ default: m.Periods })),
   Vegetation: () => import('./components/Vegetation').then((m) => ({ default: m.Vegetation })),
   Seasons: () => import('./components/Seasons').then((m) => ({ default: m.Seasons })),
   RecordBalance: () => import('./components/RecordBalance').then((m) => ({ default: m.RecordBalance })),
@@ -118,7 +118,7 @@ const Comparison = lazy(LOAD.Comparison)
 const YtdTemp = lazy(LOAD.YtdTemp)
 const AnnualOverview = lazy(LOAD.AnnualOverview)
 const Forecast = lazy(LOAD.Forecast)
-const Spells = lazy(LOAD.Spells)
+const Periods = lazy(LOAD.Periods)
 const Vegetation = lazy(LOAD.Vegetation)
 const Seasons = lazy(LOAD.Seasons)
 const RecordBalance = lazy(LOAD.RecordBalance)
@@ -177,7 +177,8 @@ const TAB_MODULE: Record<string, string> = {
   'heatmap': 'Heatmap',
   'extremes': 'Extremes',
   'extreme-months': 'ExtremeMonths',
-  'spells': 'Spells',
+  // The tab id predates the sub-navigation that now sits inside it.
+  'spells': 'Periods',
   'record-balance': 'RecordBalance',
   'climate': 'ClimateDiagram',
   'comparison': 'Comparison',
@@ -282,7 +283,7 @@ const TABS: TabDef[] = [
   { id: 'heatmap', label: 'Monats-Heatmap', icon: Grid3x3, group: 'Rekorde' },
   { id: 'extremes', label: 'Spitzenwerte', icon: Flame, group: 'Rekorde' },
   { id: 'extreme-months', label: 'Spitzenmonate', icon: ListOrdered, group: 'Rekorde' },
-  { id: 'spells', label: 'Perioden & Serien', icon: CalendarRange, group: 'Rekorde' },
+  { id: 'spells', label: 'Perioden & Episoden', icon: CalendarRange, group: 'Rekorde' },
   { id: 'record-balance', label: 'Rekordbilanz', icon: Scale, group: 'Rekorde' },
   { id: 'record-history', label: 'Rekordgeschichte', icon: Hourglass, group: 'Rekorde' },
   { id: 'climate', label: 'Klimadiagramm', icon: BarChart3, group: 'Klimatologie' },
@@ -592,7 +593,7 @@ export default function App() {
               <Vegetation stationId={stationId} stationName={stationName} />
             )}
             {tab === 'spells' && (
-              <Spells stationId={stationId} stationName={stationName} />
+              <Periods stationId={stationId} stationName={stationName} />
             )}
             {tab === 'forecast' && <Forecast stationId={stationId} />}
             {tab === 'indices' && <Indices stationId={stationId} />}

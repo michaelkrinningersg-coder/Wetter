@@ -53,6 +53,7 @@ import { dashboard } from '../server/dashboard.js'
 import { TWIN_SETS, weatherTwins } from '../server/twins.js'
 import { yearbook, yearbookYears } from '../server/yearbook.js'
 import { curiosities } from '../server/curiosities.js'
+import { episodes, EPISODE_KEYS } from '../server/episodes.js'
 import { NATIONAL_FIELD_KEYS, nationalField, nationalOverview } from '../server/national.js'
 import { pressureAnalysis } from '../server/pressure.js'
 import { frostRiskAll } from '../server/frost.js'
@@ -192,6 +193,10 @@ for (const station of STATIONS) {
 
   for (const kind of SPELL_KINDS) {
     emit(`/api/weather/spells?kind=${kind}&stationId=${id}`, api.spells(id, kind), 'Perioden')
+  }
+
+  for (const kind of EPISODE_KEYS) {
+    emit(`/api/weather/episodes?kind=${kind}&stationId=${id}`, episodes(id, kind), 'Episoden')
   }
 
   // Every month on record, plus the current calendar month even when it holds

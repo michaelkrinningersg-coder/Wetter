@@ -50,16 +50,12 @@ Ideen zurückgestellt wurden (siehe unten).
 | 14 | Wetterzwillinge (Aussage auch ins Dashboard) | `daily` | **fertig** |
 | 15 | Jahres-Wrapped: zehn markante Tage je Jahr | `daily` | **fertig** |
 | 16 | Kuriositätenkabinett | `daily` | **fertig** |
-| 17 | Episoden statt Tage | `daily` | offen |
+| 17 | Episoden statt Tage | `daily` | **fertig** |
 | 18 | Serien-Ticker | `daily` | offen |
 | 19 | Monatsbilanz live | `daily` | offen |
 | 20 | Newsroom: automatische Meldungen | alle | offen |
 
 ### Was die einzelnen Punkte vorhaben
-
-**17 — Episoden statt Tage.** Markante Tage sind Einzeltage; das Gedächtnis
-arbeitet in Ereignissen. Zusammenhängende Hitze-, Kälte-, Trocken- und
-Nassphasen als Episoden mit Dauer, Stärke und Einordnung.
 
 **18 — Serien-Ticker.** Was gerade läuft, mit Abstand zum Rekord. Die einzige
 Kennzahl, die sich täglich ändert und trotzdem historisch eingeordnet ist.
