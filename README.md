@@ -129,7 +129,7 @@ Verteilung statt als Mittelwert
 
 **Rekorde** — Monats-Heatmap · Spitzenwerte (Top-50-Tage) ·
 Spitzenmonate (Top-50-Monate) · Perioden & Serien (längste Hitze-, Trocken-,
-Frost- und Niederschlagsperioden) · Rekordbilanz · Rekordgeschichte: wie alt
+Frost- und Niederschlagsperioden) · Rekordbilanz der Station · Rekordgeschichte: wie alt
 die stehenden Rekorde sind, aus welchen Jahren die 366 Tagesrekorde stammen und
 welche Jahrgänge mehr Rekorde stellten, als der Zufall hergibt, und wie lange
 ein Rekord überlebt
@@ -201,7 +201,7 @@ server/
   nationwide-csv.js    Jahresarchiv dieser Tagesformen plus Stationsregister
   nationwide.js        Spanne, Gefälle und Extrempunkte des Landes
   regional-sources.js  amtliche DWD-Gebietsmittel
-  regional.js          Gebietsmittel: Reihen und Ranglisten
+  regional.js          Gebietsmittel: Reihen, Ranglisten, Rekordbilanz
   records-kinds.js     Rekordkategorien
   records-csv.js       Allzeit-Basislinie je Station
   records.js           Nachspielen des Archivs, Rekordereignisse
@@ -431,6 +431,17 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   diese Erwartung bleibt ein echtes Signal übrig — warme Rekorde der Periode
   1951–2000 standen nach 65 weiteren Messungen noch zu **27 % statt der
   erwarteten 59 %** (0,45×), kalte zu **68 % statt 49 %** (1,39×).
+- **Rekordbilanz der Gebietsmittel.** Dieselbe Rekordfrage, an das ganze Land
+  gestellt statt an ein Thermometer. Jede Kombination aus Region, Größe und
+  Zeitraum ist eine eigene Reihe — siebzehn Regionen mal siebzehn Zeiträume —
+  und wird gegen dieselbe 1/k-Erwartung gehalten wie die Stationsrekorde. Für
+  Deutschlands Mitteltemperatur fielen in den 2000ern **14 Höchstrekorde bei 1,4
+  erwartbaren**, und seit den 1960ern kein einziger Tiefstrekord. Über die
+  letzten drei Jahrzehnte steht das Land bei 8,8× für warme und 0,0× für kalte
+  Rekorde. Wichtig für die Lesart: Gebietsmittel sind Flächenwerte. Der wärmste
+  deutsche Sommer ist hier das Mittel über die Landesfläche, nicht der höchste
+  Wert, den irgendein Thermometer gesehen hat — beides sind verschiedene
+  Rekorde, und nur der zweite steht in den Zeitungen.
 - **Verteilungsverschiebung.** Jeder andere Trend hier gibt einen Mittelwert
   an. Ein Mittelwert kann steigen, weil der kalte Rand kürzer wurde, weil der
   warme Rand wuchs oder weil sich alles gemeinsam verschob — drei verschiedene

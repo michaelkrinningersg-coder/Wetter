@@ -39,7 +39,12 @@ import {
   recordSpread,
   recordsForDate,
 } from '../server/records.js'
-import { regionalMeta, regionalPairs, regionalSeries } from '../server/regional.js'
+import {
+  regionalBalance,
+  regionalMeta,
+  regionalPairs,
+  regionalSeries,
+} from '../server/regional.js'
 import { airComponentKeys, airOverview, airProfiles } from '../server/air.js'
 import { odlOverview } from '../server/odl.js'
 import { pollenOverview } from '../server/pollen.js'
@@ -322,6 +327,12 @@ if (meta.parameters.length > 0) {
       emit('/api/regional', payload, 'Gebietsmittel')
       emit(`/api/regional?parameter=${parameter}`, payload, 'Gebietsmittel')
     }
+  }
+
+  for (const p of meta.parameters) {
+    const payload = { ...meta, balance: regionalBalance(p.key) }
+    emit(`/api/regional/balance?parameter=${p.key}`, payload, 'Gebietsmittel')
+    if (p.key === firstParam.key) emit('/api/regional/balance', payload, 'Gebietsmittel')
   }
 }
 

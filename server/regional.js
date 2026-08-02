@@ -231,3 +231,195 @@ export function regionalSeries(parameterKey, period) {
 export function regionalPairs() {
   return coverageStmt.all().map((r) => ({ parameter: r.parameter, period: r.period }))
 }
+
+/* -------------------------------------------------------------------------- */
+/* Record balance                                                             */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The record question, asked of the whole country instead of one station.
+ *
+ * The areal means reach back to 1881 and cover sixteen federal states plus
+ * Germany, which is the one way this project can put "are records still falling
+ * evenly" to more than a single thermometer in Göttingen. Every combination of
+ * region, parameter and period is its own series of annual values, and a year
+ * sets a record when it beats every year before it.
+ *
+ * Counted raw, the answer would be the same artefact as everywhere else: the
+ * 1880s set records because there was nothing to beat. So the count is measured
+ * against what chance would give — the k-th year of a series is a record with
+ * probability 1/k in each direction — exactly as the station's own record
+ * vintages are. A ratio above one means more records than a stationary climate
+ * produces.
+ *
+ * "High" and "low" rather than "warm" and "cold": for precipitation a new
+ * maximum is a wet record, for frost days a new maximum is a *cold* one. The
+ * view names them by the parameter's own direction; the arithmetic here does
+ * not need to know.
+ */
+const balanceStmt = db.prepare(`
+  SELECT region, period, year, value FROM regional_values
+  WHERE parameter = ?
+  ORDER BY region, period, year
+`)
+
+const DECADE = 10
+
+/** The stretch the summary tile reports: the three most recent decades. */
+const RECENT_FROM = 2000
+
+/** Season and month keys in the order a reader expects them. */
+const PERIOD_LABELS = {
+  year: 'Jahr',
+  winter: 'Winter',
+  spring: 'Frühling',
+  summer: 'Sommer',
+  autumn: 'Herbst',
+  '01': 'Januar', '02': 'Februar', '03': 'März', '04': 'April',
+  '05': 'Mai', '06': 'Juni', '07': 'Juli', '08': 'August',
+  '09': 'September', '10': 'Oktober', '11': 'November', '12': 'Dezember',
+}
+
+/**
+ * Spelled out, not derived from the labels above.
+ *
+ * `Object.keys` would hoist '10', '11' and '12' to the front: they are
+ * canonical array indices, and JavaScript orders those numerically before every
+ * other key. The table then began with October.
+ */
+const PERIOD_ORDER = [
+  'year',
+  'winter', 'spring', 'summer', 'autumn',
+  '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12',
+]
+
+export function regionalBalance(parameterKey) {
+  const parameter = PARAMETER_BY_KEY.get(parameterKey)
+  if (!parameter) return null
+
+  const rows = balanceStmt.all(parameterKey)
+  if (rows.length === 0) return null
+
+  // region -> period -> ordered values
+  const series = new Map()
+  for (const row of rows) {
+    let byPeriod = series.get(row.region)
+    if (!byPeriod) {
+      byPeriod = new Map()
+      series.set(row.region, byPeriod)
+    }
+    if (!byPeriod.has(row.period)) byPeriod.set(row.period, [])
+    byPeriod.get(row.period).push(row)
+  }
+
+  const regions = []
+  for (const [name, byPeriod] of series) {
+    const decades = new Map()
+    const periods = []
+    let first = Infinity
+    let last = -Infinity
+
+    for (const period of PERIOD_ORDER) {
+      const values = byPeriod.get(period)
+      if (!values || values.length === 0) continue
+
+      let high = values[0]
+      let low = values[0]
+      let k = 0
+
+      for (const row of values) {
+        k++
+        const decade = Math.floor(row.year / DECADE) * DECADE
+        let entry = decades.get(decade)
+        if (!entry) {
+          entry = { decade, high: 0, low: 0, expected: 0, series: 0 }
+          decades.set(decade, entry)
+        }
+        // One expectation per direction: the k-th value is a new maximum with
+        // probability 1/k and a new minimum with the same probability.
+        entry.expected += 1 / k
+        entry.series++
+
+        if (k === 1 || row.value > high.value) {
+          entry.high++
+          high = row
+        }
+        if (k === 1 || row.value < low.value) {
+          entry.low++
+          low = row
+        }
+      }
+
+      first = Math.min(first, values[0].year)
+      last = Math.max(last, values.at(-1).year)
+
+      periods.push({
+        period,
+        label: PERIOD_LABELS[period] ?? period,
+        years: values.length,
+        high: { year: high.year, value: high.value },
+        low: { year: low.year, value: low.value },
+      })
+    }
+
+    if (periods.length === 0) continue
+
+    const byDecade = [...decades.values()]
+      .sort((a, b) => a.decade - b.decade)
+      .map((entry) => ({
+        ...entry,
+        expected: Number(entry.expected.toFixed(2)),
+        highRatio: entry.expected > 0 ? entry.high / entry.expected : null,
+        lowRatio: entry.expected > 0 ? entry.low / entry.expected : null,
+      }))
+
+    const totals = byDecade.reduce(
+      (a, d) => ({ high: a.high + d.high, low: a.low + d.low, expected: a.expected + d.expected }),
+      { high: 0, low: 0, expected: 0 },
+    )
+
+    regions.push({
+      name,
+      kind: classifyRegion(name),
+      first,
+      last,
+      periods,
+      decades: byDecade,
+      totals: { ...totals, expected: Number(totals.expected.toFixed(1)) },
+      /** How the last three decades stand — the number the view leads with. */
+      recent: (() => {
+        const late = byDecade.filter((d) => d.decade >= RECENT_FROM)
+        const high = late.reduce((a, d) => a + d.high, 0)
+        const low = late.reduce((a, d) => a + d.low, 0)
+        const expected = late.reduce((a, d) => a + d.expected, 0)
+        return {
+          from: late[0]?.decade ?? null,
+          high,
+          low,
+          expected: Number(expected.toFixed(1)),
+          highRatio: expected > 0 ? high / expected : null,
+          lowRatio: expected > 0 ? low / expected : null,
+        }
+      })(),
+    })
+  }
+
+  return {
+    parameter: {
+      key: parameter.key,
+      label: parameter.label,
+      unit: parameter.unit,
+      decimals: parameter.decimals,
+      direction: parameter.direction,
+    },
+    periods: PERIOD_ORDER.filter((p) => regions[0]?.periods.some((x) => x.period === p)).map(
+      (p) => ({ period: p, label: PERIOD_LABELS[p] ?? p }),
+    ),
+    regions: regions.sort((a, b) => a.name.localeCompare(b.name)),
+  }
+}
+
+/** Which parameters the balance is offered for — every one that exists. */
+export function regionalBalanceParameters() {
+  return regionalMeta().parameters.map((p) => p.key)
+}

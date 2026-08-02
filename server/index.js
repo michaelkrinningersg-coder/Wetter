@@ -31,7 +31,7 @@ import {
   shapeForDate,
   spanAnalysis,
 } from './nationwide.js'
-import { regionalMeta, regionalSeries } from './regional.js'
+import { regionalBalance, regionalMeta, regionalSeries } from './regional.js'
 import { airComponentKeys, airOverview, airProfiles } from './air.js'
 import { odlOverview } from './odl.js'
 import { pollenOverview } from './pollen.js'
@@ -473,6 +473,24 @@ app.get(
     }
 
     res.json({ ...meta, series: regionalSeries(parameter, period) })
+  }),
+)
+
+/*
+ * The record balance is one payload per parameter — every region and every
+ * period at once, because the view compares them against each other.
+ */
+app.get(
+  '/api/regional/balance',
+  handler((req, res) => {
+    const meta = regionalMeta()
+    if (meta.parameters.length === 0) return res.json({ ...meta, balance: null })
+
+    const parameter = String(req.query.parameter ?? meta.parameters[0].key)
+    if (!meta.parameters.some((p) => p.key === parameter)) {
+      return res.status(400).json({ error: `Unbekannte Größe "${parameter}".` })
+    }
+    res.json({ ...meta, balance: regionalBalance(parameter) })
   }),
 )
 

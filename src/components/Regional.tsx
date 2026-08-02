@@ -9,11 +9,12 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { Landmark, TrendingDown, TrendingUp } from 'lucide-react'
+import { Landmark, Scale, TrendingDown, TrendingUp } from 'lucide-react'
 
 import { useApi } from '../lib/api'
 import { useUrlList, useUrlState } from '../lib/url-state'
 import { num } from '../lib/format'
+import { RegionalBalance } from './RegionalBalance'
 import { linearFit } from '../lib/stats'
 import type { RegionalRegion, RegionalResponse } from '../types'
 import {
@@ -28,6 +29,7 @@ import {
   SectionHeading,
   StatGrid,
   StatTile,
+  SubNav,
 } from './ui'
 
 /** The DWD transliterates umlauts in its region names; German readers do not. */
@@ -117,7 +119,14 @@ function rank(regions: RegionalRegion[]): Ranked[] {
     .sort((a, b) => (b.perDecade ?? -Infinity) - (a.perDecade ?? -Infinity))
 }
 
-export function Regional() {
+/**
+ * The series view — the original content of this tab.
+ *
+ * Renamed rather than moved: the record balance below asks a different question
+ * of the same archive, and the two belong on one page rather than in two
+ * sidebar entries.
+ */
+function RegionalSeries() {
   const [parameter, setParameter] = useUrlState<string>('groesse', null)
   const [period, setPeriod] = useUrlState<string>('zeitraum', null)
   const [selected, setSelected] = useUrlList('gebiete', null)
@@ -402,4 +411,22 @@ export function Regional() {
 /** Local alias so the tooltip can use the display name without shadowing. */
 function label_(name: string): string {
   return DISPLAY[name] ?? name
+}
+
+/* -------------------------------------------------------------------------- */
+
+const VIEWS = [
+  { value: 'reihen', label: 'Reihen', icon: TrendingUp },
+  { value: 'bilanz', label: 'Rekordbilanz', icon: Scale },
+] as const
+
+export function Regional() {
+  const [view, setView] = useUrlState<string>('ansicht', 'reihen')
+
+  return (
+    <div className="space-y-6">
+      <SubNav label="Auswertung" value={view} items={VIEWS} onChange={setView} />
+      {view === 'bilanz' ? <RegionalBalance /> : <RegionalSeries />}
+    </div>
+  )
 }

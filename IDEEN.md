@@ -45,7 +45,7 @@ Ideen zurückgestellt wurden (siehe unten).
 | 9 | Rekordkalender: 366 Kacheln | `daily` | **fertig** |
 | 11 | Rekordjahrgänge | `daily` | **fertig** |
 | 12 | Überlebenskurve eines Rekords | `daily` | **fertig** |
-| 13 | Bundesweite Rekordbilanz seit 1881 | `regional_values` | offen |
+| 13 | Bundesweite Rekordbilanz seit 1881 | `regional_values` | **fertig** |
 | 10 | Fast-Rekorde | `daily` | offen |
 | 14 | Wetterzwillinge (Aussage auch ins Dashboard) | `daily` | offen |
 | 15 | Jahres-Wrapped: zehn markante Tage je Jahr | `daily` | offen |
@@ -60,10 +60,6 @@ Ideen zurückgestellt wurden (siehe unten).
 **10 — Fast-Rekorde.** Tage, die knapp an einem Rekord vorbeischrammten und
 deshalb in keiner Liste stehen. Es gibt deutlich mehr davon als Rekorde, und
 ihre Häufung ist aussagekräftiger als die Rekorde selbst.
-
-**13 — Bundesweite Rekordbilanz seit 1881.** Die lokale Rekordbilanz auf die
-Gebietsmittel übertragen, für Deutschland und jedes Bundesland. Der einzige
-Weg, die Rekordfrage bundesweit über 145 Jahre zu stellen.
 
 **14 — Wetterzwillinge.** Welcher Tag der Vergangenheit ähnelt dem gestrigen
 am meisten, mit Angabe, wie ähnlich er wirklich war. Ergibt Sätze wie „so ein

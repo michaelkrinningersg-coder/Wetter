@@ -1775,3 +1775,63 @@ export interface RecordSurvivalResponse {
   groups: Record<string, SurvivalBlock & { fields: number }>
   longest: { completed: SurvivalSpell[]; standing: SurvivalSpell[] }
 }
+
+/* -------------------------------------------------------------------------- */
+/* Areal record balance                                                       */
+/* -------------------------------------------------------------------------- */
+
+export interface BalanceDecade {
+  decade: number
+  /** New maxima and new minima across every period of this region. */
+  high: number
+  low: number
+  /** What chance alone gives, per direction: the sum of 1/k. */
+  expected: number
+  series: number
+  highRatio: number | null
+  lowRatio: number | null
+}
+
+export interface BalancePeriod {
+  period: string
+  label: string
+  years: number
+  high: { year: number; value: number }
+  low: { year: number; value: number }
+}
+
+export interface BalanceRegion {
+  name: string
+  kind: string
+  first: number
+  last: number
+  periods: BalancePeriod[]
+  decades: BalanceDecade[]
+  totals: { high: number; low: number; expected: number }
+  recent: {
+    from: number | null
+    high: number
+    low: number
+    expected: number
+    highRatio: number | null
+    lowRatio: number | null
+  }
+}
+
+export interface RegionalBalance {
+  parameter: {
+    key: string
+    label: string
+    unit: string
+    decimals: number
+    direction: string
+  }
+  periods: { period: string; label: string }[]
+  regions: BalanceRegion[]
+}
+
+export interface RegionalBalanceResponse {
+  parameters: { key: string; label: string; unit: string; decimals: number; direction: string }[]
+  regions: { name: string; kind: string }[]
+  balance: RegionalBalance | null
+}
