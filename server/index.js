@@ -43,6 +43,7 @@ import { curiosities } from './curiosities.js'
 import { episodes, EPISODE_KEYS } from './episodes.js'
 import { ticker } from './ticker.js'
 import { monthBalance } from './month-balance.js'
+import { newsroom } from './newsroom.js'
 import { NATIONAL_FIELD_KEYS, nationalField, nationalOverview } from './national.js'
 import { pressureAnalysis } from './pressure.js'
 import { frostRiskAll } from './frost.js'
@@ -251,6 +252,19 @@ app.get(
       })
     }
     res.json(result)
+  }),
+)
+
+app.get(
+  '/api/weather/newsroom',
+  handler((req, res) => {
+    const station = resolveStation(req, res)
+    if (!station) return
+    const date = req.query.datum ? String(req.query.datum) : null
+    if (date !== null && !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return res.status(400).json({ error: 'Ungültiges Datum.' })
+    }
+    res.json(newsroom(station.id, date))
   }),
 )
 

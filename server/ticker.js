@@ -38,7 +38,7 @@ const MIN_YEARS_FOR_MEAN = 30
  * `column` is the measurement the criterion needs. A day where it is missing
  * ends the verified streak — see the two lengths below.
  */
-const SPECS = [
+export const TICKER_SPECS = [
   {
     key: 'summer',
     family: 'serie',
@@ -420,7 +420,7 @@ export function ticker(stationId) {
   const index = seriesFor(stationId)
   if (!index) return null
 
-  const series = SPECS.map((spec) => trackOne(index, spec)).filter((s) => s.range.days > 0)
+  const series = TICKER_SPECS.map((spec) => trackOne(index, spec)).filter((s) => s.range.days > 0)
 
   return {
     station: stationId,

@@ -17,6 +17,7 @@ import {
   LineChart,
   Landmark,
   LayoutDashboard,
+  Newspaper,
   Layers,
   Leaf,
   Map,
@@ -104,6 +105,7 @@ const LOAD = {
   Retrospect: () => import('./components/Retrospect').then((m) => ({ default: m.Retrospect })),
   National: () =>
     import('./components/National').then((m) => ({ default: m.National })),
+  Newsroom: () => import('./components/Newsroom').then((m) => ({ default: m.Newsroom })),
 }
 
 const MonthlyView = lazy(LOAD.MonthlyView)
@@ -143,6 +145,7 @@ const Nationwide = lazy(LOAD.Nationwide)
 const RecordHistory = lazy(LOAD.RecordHistory)
 const Twins = lazy(LOAD.Twins)
 const Retrospect = lazy(LOAD.Retrospect)
+const Newsroom = lazy(LOAD.Newsroom)
 
 /**
  * Which module a tab renders.
@@ -154,6 +157,7 @@ const Retrospect = lazy(LOAD.Retrospect)
  * would be a wasted request.
  */
 const TAB_MODULE: Record<string, string> = {
+  newsroom: 'Newsroom',
   overview: 'MonthlyView',
   'annual-overview': 'AnnualOverview',
   'day-in-history': 'DayInHistory',
@@ -210,6 +214,7 @@ const FALLBACK_STATIONS: Station[] = [
 
 type TabId =
   | 'dashboard'
+  | 'newsroom'
   | 'overview'
   | 'temp-trend'
   | 'precip-trend'
@@ -264,6 +269,7 @@ interface TabDef {
 
 const TABS: TabDef[] = [
   { id: 'dashboard', label: 'Überblick', icon: LayoutDashboard, group: 'Überblick' },
+  { id: 'newsroom', label: 'Newsroom', icon: Newspaper, group: 'Überblick' },
   { id: 'overview', label: 'Monatsübersicht', icon: CalendarDays, group: 'Messwerte' },
   { id: 'annual-overview', label: 'Jahresübersicht', icon: Table2, group: 'Messwerte' },
   { id: 'day-in-history', label: 'Dieser Tag', icon: CalendarHeart, group: 'Messwerte' },
@@ -533,6 +539,9 @@ export default function App() {
                 fallback. */}
             <Suspense fallback={<Loading message="Ansicht wird geladen …" />}>
             {tab === 'dashboard' && <Dashboard stationName={stationName} />}
+            {tab === 'newsroom' && (
+              <Newsroom stationId={stationId} stationName={stationName} />
+            )}
             {tab === 'overview' && (
               <MonthlyView
                 stationId={stationId}

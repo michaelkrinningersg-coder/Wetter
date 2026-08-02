@@ -109,7 +109,8 @@ letzte Deploy.
 
 ## Analysebereiche
 
-**Überblick** — Startansicht: letzter Messtag gegen das Übliche desselben
+**Überblick** — Newsroom: die Meldungen des Tages, nach Seltenheit gewichtet,
+mit Ausgaben für die letzten 365 Archivtage · Startansicht: letzter Messtag gegen das Übliche desselben
 Kalendertags, laufendes Jahr gegen die Referenzperiode, die vier auffälligsten
 Stationen Deutschlands, Allzeitrekorde des Tages, Pollen, Luft, Strahlung und
 Pegel. Jede Kachel verlinkt in die Ansicht, aus der ihre Zahl stammt.
@@ -207,6 +208,7 @@ server/
   episodes.js          Wetterlagen als Episoden: Dauer, Stärke, Einordnung
   ticker.js            laufende Serien und Pausen gegen ihren Rekord
   month-balance.js     laufender Monat: gemessener Teil und offener Rest
+  newsroom.js          Regelwerk für die Meldungen eines Tages
   distribution.js      Verteilungen dreier Referenzperioden, Kenntage
   nationwide-shape.js  die Form eines Tages über Deutschland, reine Rechnung
   nationwide-csv.js    Jahresarchiv dieser Tagesformen plus Stationsregister
@@ -585,6 +587,36 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   Eingeordnet wird erst ab 25 Messtagen, derselben Regel, nach der auch die
   Monats-Heatmap arbeitet: Der Juli 2026 in Göttingen hat neun Tage ohne
   Messwert und wird deshalb gezeigt, aber nicht bewertet.
+- **Newsroom.** Jede andere Ansicht beantwortet eine Frage, die jemand gestellt
+  hat; diese stellt sie selbst, einmal pro Tag, an jede Quelle des Projekts —
+  und muss auch nein sagen können. **Kein Sprachmodell ist beteiligt:** Die
+  Sätze entstehen aus festen Bausteinen und gemessenen Zahlen, weil die ganze
+  Seite in statische Dateien vorberechnet wird. Ein Modell im Auslieferungspfad
+  machte die Seiten unreproduzierbar, und ein falscher Satz wäre von einem
+  richtigen nicht zu unterscheiden.
+
+  Vergleichbar werden die ungleichen Befunde durch **eine Währung**: Jede Regel
+  meldet, an *wie vielen Tagen im Jahr* eine mindestens so extreme Aussage
+  zutrifft. Veröffentlicht wird, was seltener als an vier Tagen im Jahr
+  vorkommt, sortiert nach Seltenheit — keine gesetzte Rangfolge der Kategorien
+  entscheidet, sondern das Archiv. Die Wahl der Währung war der ganze Aufwand
+  wert und ging zweimal schief: Zuerst wurden Serien je *Lauf* gezählt und
+  Rekorde je *Kalendertag*, und diese Mischung machte den „16. Tag seit dem
+  letzten Eistag" zum Aufmacher einer Ausgabe vom 31. Juli — eine Aussage, die
+  an rund dreihundert Tagen jedes Jahres zutrifft. Die zweite Fassung bedingte
+  alles auf den Kalendertag und machte damit jeden Kalendertagsrekord
+  unerreichbar selten. Erst das Zählen von *Tagen* statt Ereignissen löst
+  beides ohne Sonderregel.
+
+  Ausgaben gibt es für die letzten 365 Archivtage. Von diesen sind für
+  Göttingen **251 still** — an ihnen fand keine der 34 Regeln etwas, das die
+  Schwelle erreicht; dann steht dort, wie viele Kandidaten geprüft wurden und
+  welcher am nächsten kam. Die stärkste Ausgabe des Jahres, der 28. Juni 2026,
+  trägt sechs Meldungen: sechster Hitzetag in Folge, wärmster und mildester
+  28. Juni seit 1858, dazu 119 Allzeitrekorde an deutschen Stationen. Flusspegel,
+  Pollenflug und Ortsdosisleistung bleiben außen vor — diese Reihen sind Tage
+  bis Wochen alt, und ohne Historie lässt sich keine Seltenheit angeben; das
+  steht unter jeder Ausgabe.
 - **Verteilungsverschiebung.** Jeder andere Trend hier gibt einen Mittelwert
   an. Ein Mittelwert kann steigen, weil der kalte Rand kürzer wurde, weil der
   warme Rand wuchs oder weil sich alles gemeinsam verschob — drei verschiedene

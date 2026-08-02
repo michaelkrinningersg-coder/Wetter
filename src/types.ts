@@ -1077,6 +1077,8 @@ export interface DashboardResponse {
   ticker: TickerHeadline[] | null
   /** Where the running month stands, and how much of it is still open. */
   monthBalance: MonthBalanceHeadline | null
+  /** The lead of the day's edition — the rarest thing the rules found. */
+  newsroom: NewsroomHeadline | null
   environment: {
     pollen: {
       issued: string
@@ -2091,6 +2093,78 @@ export interface EpisodesResponse {
   recent: Episode[]
   current: Episode | null
   hint?: string
+}
+
+/* -------------------------------------------------------------------------- */
+/* Newsroom                                                                   */
+/* -------------------------------------------------------------------------- */
+
+export interface NewsItem {
+  key: string
+  category: string
+  categoryLabel: string
+  source: string
+  accent: string
+  /** Days per year on which a statement at least this extreme is true. */
+  perYear: number
+  everyYears: number | null
+  headline: string
+  detail: string
+  link: { tab: string; params: Record<string, string | number> }
+  /** True where the rate rests on an archive of months rather than decades. */
+  shortBase?: boolean
+}
+
+export interface NewsroomResponse {
+  station: string
+  date: string
+  label: string
+  dates: string[]
+  range: { first: string; last: string; years: number }
+  threshold: number
+  items: NewsItem[]
+  dropped: number
+  quiet: boolean
+  /** What came closest without clearing the bar — the proof the rules ran. */
+  nearest: NewsItem | null
+  candidates: number
+  measured: {
+    temp_mean: number | null
+    temp_max: number | null
+    temp_min: number | null
+    precipitation: number | null
+    wind_max: number | null
+    sunshine: number | null
+    snow: number | null
+    pressure: number | null
+    anomaly: number | null
+  }
+  checked: {
+    calendar: number
+    derived: number
+    streaks: number
+    germany: number
+    air: number
+    month: number
+  }
+  sources: { key: string; label: string; from: string; to: string; note: string }[]
+  limits: string[]
+}
+
+export interface NewsroomHeadline {
+  date: string
+  label: string
+  quiet: boolean
+  count: number
+  dropped: number
+  top: {
+    key: string
+    headline: string
+    categoryLabel: string
+    accent: string
+    perYear: number
+    everyYears: number | null
+  }[]
 }
 
 /* -------------------------------------------------------------------------- */

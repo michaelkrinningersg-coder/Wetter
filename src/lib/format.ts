@@ -110,6 +110,20 @@ export function year(value: number | null | undefined): string {
     : String(Math.round(value))
 }
 
+/**
+ * A rate of days per year, said the way a person would.
+ *
+ * The newsroom's one currency: "an einem Tag alle 40 Jahre" beats "0,025/Jahr"
+ * for a reader, and the band around one is spelled out because dividing gives
+ * "alle 1 Jahre".
+ */
+export function rateText(perYear: number | null | undefined): string {
+  if (perYear === null || perYear === undefined || !(perYear > 0)) return 'noch nie'
+  if (perYear >= 1.5) return `an etwa ${num(perYear, perYear >= 10 ? 0 : 1)} Tagen im Jahr`
+  if (Math.round(1 / perYear) <= 1) return 'an etwa einem Tag im Jahr'
+  return `an einem Tag alle ${num(1 / perYear, 0)} Jahre`
+}
+
 export function isoToGerman(iso: string | null | undefined): string {
   if (!iso) return '—'
   const [y, m, d] = iso.split('-')

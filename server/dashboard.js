@@ -10,6 +10,7 @@ import { odlProbes, odlRange } from './odl.js'
 import { twinHeadline } from './twins.js'
 import { tickerHeadlines } from './ticker.js'
 import { monthBalanceHeadline } from './month-balance.js'
+import { newsroomHeadline } from './newsroom.js'
 
 /**
  * One answer for the opening view.
@@ -388,6 +389,8 @@ export function dashboard() {
      * that are still running. Filtered to the rare ones — a five-day dry spell
      * happens eighteen times a year and is not news.
      */
+    /** The lead of the day's edition — the rarest thing the rules found. */
+    newsroom: newsroomHeadline(STATION_ID),
     ticker: tickerHeadlines(STATION_ID),
     /** Where the running month stands, and how much of it is still open. */
     monthBalance: monthBalanceHeadline(STATION_ID),

@@ -2,6 +2,7 @@ import {
   ArrowRight,
   CalendarClock,
   CalendarHeart,
+  Newspaper,
   Fingerprint,
   Flower2,
   Map,
@@ -16,7 +17,7 @@ import type { ComponentType } from 'react'
 import type { LucideProps } from 'lucide-react'
 
 import { useApi } from '../lib/api'
-import { isoToGerman, num, shareOf, signed } from '../lib/format'
+import { isoToGerman, num, rateText, shareOf, signed } from '../lib/format'
 import type { DashboardResponse } from '../types'
 import { type Accent, Card, ErrorState, InfoPanel, Loading, SectionHeading } from './ui'
 
@@ -155,7 +156,7 @@ export function Dashboard({ stationName }: { stationName: string }) {
   if (error) return <ErrorState message={error} />
   if (!data) return null
 
-  const { latest, year, germany, records, today, twin, ticker, monthBalance, environment } = data
+  const { latest, year, germany, records, today, twin, ticker, monthBalance, newsroom, environment } = data
   const pollen = environment.pollen
   const air = environment.air
   const radiation = environment.radiation
@@ -177,6 +178,42 @@ export function Dashboard({ stationName }: { stationName: string }) {
       </InfoPanel>
 
       {/* ---------------------------------------------------------------- */}
+
+      {newsroom && (
+        <Card className="border-brand/25">
+          <SectionHeading
+            icon={Newspaper}
+            title={`Ausgabe vom ${newsroom.label}`}
+            hint={
+              newsroom.quiet
+                ? 'Keine der Regeln hat an diesem Tag etwas gefunden, das selten genug für eine Meldung wäre.'
+                : `${num(newsroom.count, 0)} ${newsroom.count === 1 ? 'Meldung' : 'Meldungen'}, die seltenste zuerst.`
+            }
+          />
+          {newsroom.quiet ? (
+            <p className="text-sm text-ink-muted">
+              Nichts Besonderes — die häufigste aller Ausgaben.
+            </p>
+          ) : (
+            <ul className="space-y-2">
+              {newsroom.top.map((entry) => (
+                <li key={entry.key} className="flex flex-wrap items-baseline justify-between gap-x-3">
+                  <span className="text-sm text-ink">
+                    <span className={`label mr-2 ${ACCENT_TEXT[entry.accent as Accent] ?? 'text-ink-muted'}`}>
+                      {entry.categoryLabel}
+                    </span>
+                    {entry.headline}
+                  </span>
+                  <span className="numeric text-[11px] text-ink-faint">
+                    {rateText(entry.perYear)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <TileLink href={link('newsroom')}>Newsroom</TileLink>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {latest && (

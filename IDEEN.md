@@ -53,15 +53,10 @@ Ideen zurückgestellt wurden (siehe unten).
 | 17 | Episoden statt Tage | `daily` | **fertig** |
 | 18 | Serien-Ticker | `daily` | **fertig** |
 | 19 | Monatsbilanz live | `daily` | **fertig** |
-| 20 | Newsroom: automatische Meldungen | alle | offen |
+| 20 | Newsroom: automatische Meldungen | alle | **fertig** |
 
-### Was die einzelnen Punkte vorhaben
-
-**20 — Newsroom.** Ein Regelwerk, das täglich prüft, ob etwas berichtenswert
-war — Rekord, Fast-Rekord, Serie, Rang, ungewöhnliche Spanne — und daraus
-Sätze formuliert. Deterministisch, aus Satzbausteinen; kein Sprachmodell im
-Auslieferungspfad, sonst wäre die Seite nicht mehr statisch vorberechenbar.
-Muss auch „gestern war nichts Besonderes" sagen können und das begründen.
+Die Roadmap ist abgearbeitet. Was jetzt noch offen ist, steht unter
+„Zurückgestellt" und „Ältere offene Punkte".
 
 ---
 
