@@ -114,7 +114,8 @@ Kalendertags, laufendes Jahr gegen die Referenzperiode, die vier auffälligsten
 Stationen Deutschlands, Allzeitrekorde des Tages, Pollen, Luft, Strahlung und
 Pegel. Jede Kachel verlinkt in die Ansicht, aus der ihre Zahl stammt.
 
-**Messwerte** — Monatsübersicht (Tageswerte, Tagesverlauf, Jahresverlauf) ·
+**Messwerte** — Monatsübersicht (Tageswerte, Tagesverlauf, Jahresverlauf) und
+Monatsbilanz (der Monat gegen alle seine Ausgaben, laufend mit Endrang-Spanne) ·
 Jahresübersicht (Kenndaten und Schwellenwerttage je Kalenderjahr) ·
 Dieser Tag in der Geschichte · Wetterzwillinge: der Tag im Archiv, der einem
 gegebenen am ähnlichsten ist · Rückblick & Kurioses: zehn Tage, die ein Jahr
@@ -205,6 +206,7 @@ server/
   curiosities.js       zwölf Fragen abseits der üblichen Ranglisten
   episodes.js          Wetterlagen als Episoden: Dauer, Stärke, Einordnung
   ticker.js            laufende Serien und Pausen gegen ihren Rekord
+  month-balance.js     laufender Monat: gemessener Teil und offener Rest
   distribution.js      Verteilungen dreier Referenzperioden, Kenntage
   nationwide-shape.js  die Form eines Tages über Deutschland, reine Rechnung
   nationwide-csv.js    Jahresarchiv dieser Tagesformen plus Stationsregister
@@ -563,6 +565,26 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   mit 30 °C —, dann zählt „seit dem letzten Mal" nur den Abstand zur letzten
   Messlücke; gemeldet wurden so 29.571 Tage mit einem „Rekord" von ebenfalls
   29.571.
+- **Monatsbilanz live.** Eine Monatszahl wird sonst erst genannt, wenn der
+  Monat vorbei ist; mitten darin ist sie die meistgestellte und am seltensten
+  beantwortete Frage. Die Antwort hat zwei Teile, und die stehen getrennt. Der
+  **gemessene** Teil wird gegen *dieselben Tage* jedes anderen Jahres gestellt —
+  der 1. bis 15. Juli gegen jeden anderen 1. bis 15. Juli, nie gegen ganze
+  Monate; sonst läge jeder laufende Monat bei den Summen automatisch hinten,
+  einfach weil ihm Tage fehlen. Der **offene** Rest wird aus jedem Jahr
+  nachgespielt, das ihn vollständig gemessen hat, was rund 150 mögliche Ausgänge
+  ergibt. Ein Mitglied muss den Rest lückenlos gemessen haben: eine Teilsumme auf
+  volle Länge hochzurechnen erfände Regen, den niemand aufgezeichnet hat.
+  Die Streuung dieser Ausgänge beantwortet „wie viel kann sich noch
+  verschieben", und sie ist der Grund, warum dieselbe Ansicht am 2. fast nichts
+  sagt und am 28. ziemlich viel — für den Juli 2023 reichte der mögliche
+  Endplatz nach zwei Tagen von 17 bis 136 von 154 und nach achtundzwanzig Tagen
+  von 40 bis 68; der tatsächliche war 47. Mittel und Summen werden getrennt
+  behandelt, weil ein Mittel über zwanzig Tage das Monatsmittel *schätzt*,
+  eine Summe über zwanzig Tage aber sicher kleiner ist als die Monatssumme.
+  Eingeordnet wird erst ab 25 Messtagen, derselben Regel, nach der auch die
+  Monats-Heatmap arbeitet: Der Juli 2026 in Göttingen hat neun Tage ohne
+  Messwert und wird deshalb gezeigt, aber nicht bewertet.
 - **Verteilungsverschiebung.** Jeder andere Trend hier gibt einen Mittelwert
   an. Ein Mittelwert kann steigen, weil der kalte Rand kürzer wurde, weil der
   warme Rand wuchs oder weil sich alles gemeinsam verschob — drei verschiedene

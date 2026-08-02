@@ -1075,6 +1075,8 @@ export interface DashboardResponse {
   twin: TwinHeadline | null
   /** The streaks still running — the only figures here that change daily. */
   ticker: TickerHeadline[] | null
+  /** Where the running month stands, and how much of it is still open. */
+  monthBalance: MonthBalanceHeadline | null
   environment: {
     pollen: {
       issued: string
@@ -2089,6 +2091,101 @@ export interface EpisodesResponse {
   recent: Episode[]
   current: Episode | null
   hint?: string
+}
+
+/* -------------------------------------------------------------------------- */
+/* Running month                                                              */
+/* -------------------------------------------------------------------------- */
+
+export interface BalanceYear {
+  year: number
+  value: number | null
+  days: number
+  of: number
+  /** False below the minimum day count — reported, but not ranked. */
+  rated: boolean
+  rank: number | null
+  total: number
+}
+
+export interface BalanceProjection {
+  members: number
+  restDays: number
+  min: number
+  max: number
+  quantiles: { p: number; value: number }[]
+}
+
+export interface BalanceRankSpread {
+  best: number | null
+  worst: number | null
+  p10: number | null
+  p50: number | null
+  p90: number | null
+}
+
+export interface BalanceLive {
+  year: number
+  /** Day of the month the archive reaches. */
+  cut: number
+  monthLength: number
+  measured: number
+  missing: number
+  needed: number
+  enough: boolean
+  value: number | null
+  /** The same window in every other year — a measurement, not a forecast. */
+  window: { years: number; rank: number | null; total: number }
+  projection: BalanceProjection | null
+  rankSpread: BalanceRankSpread | null
+  complete: boolean
+}
+
+export interface BalanceField {
+  key: string
+  label: string
+  short: string
+  unit: string
+  decimals: number
+  accent: string
+  kind: 'mean' | 'sum'
+  high: string
+  low: string
+  history: BalanceYear[]
+  rated: number
+  live: BalanceLive | null
+}
+
+export interface MonthBalanceResponse {
+  station: string
+  month: number
+  monthName: string
+  reference: string
+  archiveLast: string
+  running: number | null
+  years: number[]
+  minMonthDays: number
+  minWindowShare: number
+  quantiles: number[]
+  fields: BalanceField[]
+}
+
+export interface MonthBalanceHeadline {
+  year: number
+  month: number
+  monthName: string
+  reference: string
+  cut: number
+  monthLength: number
+  measured: number
+  missing: number
+  complete: boolean
+  value: number
+  unit: string
+  decimals: number
+  window: { years: number; rank: number | null; total: number }
+  spread: BalanceRankSpread | null
+  members: number | null
 }
 
 /* -------------------------------------------------------------------------- */

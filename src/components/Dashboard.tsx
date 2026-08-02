@@ -1,5 +1,6 @@
 import {
   ArrowRight,
+  CalendarClock,
   CalendarHeart,
   Fingerprint,
   Flower2,
@@ -154,7 +155,7 @@ export function Dashboard({ stationName }: { stationName: string }) {
   if (error) return <ErrorState message={error} />
   if (!data) return null
 
-  const { latest, year, germany, records, today, twin, ticker, environment } = data
+  const { latest, year, germany, records, today, twin, ticker, monthBalance, environment } = data
   const pollen = environment.pollen
   const air = environment.air
   const radiation = environment.radiation
@@ -298,6 +299,39 @@ export function Dashboard({ stationName }: { stationName: string }) {
               </li>
             </ul>
             <TileLink href={link('spells', { ansicht: 'ticker' })}>Serien-Ticker</TileLink>
+          </Tile>
+        )}
+
+        {monthBalance && (
+          <Tile icon={CalendarClock} title={`${monthBalance.monthName} ${monthBalance.year}`} accent="hot">
+            <p className="numeric mt-2 text-3xl font-semibold tracking-tight text-ink">
+              {num(monthBalance.value, monthBalance.decimals)}{' '}
+              <span className="text-sm font-normal text-ink-muted">{monthBalance.unit}</span>
+            </p>
+            <p className="mt-1.5 text-xs text-ink-muted">
+              Stand nach {num(monthBalance.measured, 0)} von {num(monthBalance.monthLength, 0)}{' '}
+              Tagen{monthBalance.missing > 0 ? ` (${num(monthBalance.missing, 0)} ohne Messwert)` : ''}
+            </p>
+            <ul className="mt-2 space-y-0.5 text-[11px] text-ink-muted">
+              <li>
+                gemessen: Platz{' '}
+                <span className="numeric text-ink">{num(monthBalance.window.rank, 0)}</span> von{' '}
+                {num(monthBalance.window.total, 0)} — gegen dieselben Tage aller Jahre
+              </li>
+              {monthBalance.spread && monthBalance.members ? (
+                <li>
+                  noch offen: Endplatz zwischen{' '}
+                  <span className="numeric text-ink">{num(monthBalance.spread.p90, 0)}</span> und{' '}
+                  <span className="numeric text-ink">{num(monthBalance.spread.p10, 0)}</span> aus{' '}
+                  {num(monthBalance.members, 0)} nachgespielten Jahren
+                </li>
+              ) : (
+                <li className="text-ink-faint">Der Monat ist durch — nichts mehr offen.</li>
+              )}
+            </ul>
+            <TileLink href={link('overview', { ansicht: 'bilanz', monat: monthBalance.month, jahr: monthBalance.year })}>
+              Monatsbilanz
+            </TileLink>
           </Tile>
         )}
 

@@ -52,15 +52,10 @@ Ideen zurückgestellt wurden (siehe unten).
 | 16 | Kuriositätenkabinett | `daily` | **fertig** |
 | 17 | Episoden statt Tage | `daily` | **fertig** |
 | 18 | Serien-Ticker | `daily` | **fertig** |
-| 19 | Monatsbilanz live | `daily` | offen |
+| 19 | Monatsbilanz live | `daily` | **fertig** |
 | 20 | Newsroom: automatische Meldungen | alle | offen |
 
 ### Was die einzelnen Punkte vorhaben
-
-**19 — Monatsbilanz live.** Rang des laufenden Monats unter allen Ausgaben
-desselben Monats, mit Angabe, wie viel sich bis Monatsende noch verschieben
-kann. Am 2. eine schwache Aussage, am 28. eine starke — und das sollte
-dabeistehen.
 
 **20 — Newsroom.** Ein Regelwerk, das täglich prüft, ob etwas berichtenswert
 war — Rekord, Fast-Rekord, Serie, Rang, ungewöhnliche Spanne — und daraus

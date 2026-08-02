@@ -55,6 +55,7 @@ import { yearbook, yearbookYears } from '../server/yearbook.js'
 import { curiosities } from '../server/curiosities.js'
 import { episodes, EPISODE_KEYS } from '../server/episodes.js'
 import { ticker } from '../server/ticker.js'
+import { monthBalance, BALANCE_MONTHS } from '../server/month-balance.js'
 import { NATIONAL_FIELD_KEYS, nationalField, nationalOverview } from '../server/national.js'
 import { pressureAnalysis } from '../server/pressure.js'
 import { frostRiskAll } from '../server/frost.js'
@@ -195,6 +196,14 @@ for (const station of STATIONS) {
 
   for (const kind of SPELL_KINDS) {
     emit(`/api/weather/spells?kind=${kind}&stationId=${id}`, api.spells(id, kind), 'Perioden')
+  }
+
+  for (const month of BALANCE_MONTHS) {
+    emit(
+      `/api/weather/month-balance?monat=${month}&stationId=${id}`,
+      monthBalance(id, month),
+      'Monatsbilanz',
+    )
   }
 
   for (const kind of EPISODE_KEYS) {

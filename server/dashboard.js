@@ -9,6 +9,7 @@ import { AIR_STATIONS, COMPONENT_BY_KEY } from './air-sources.js'
 import { odlProbes, odlRange } from './odl.js'
 import { twinHeadline } from './twins.js'
 import { tickerHeadlines } from './ticker.js'
+import { monthBalanceHeadline } from './month-balance.js'
 
 /**
  * One answer for the opening view.
@@ -388,6 +389,8 @@ export function dashboard() {
      * happens eighteen times a year and is not news.
      */
     ticker: tickerHeadlines(STATION_ID),
+    /** Where the running month stands, and how much of it is still open. */
+    monthBalance: monthBalanceHeadline(STATION_ID),
     environment: {
       pollen: pollenNow(),
       air: airNow(),

@@ -62,8 +62,8 @@ import { Dashboard } from './components/Dashboard'
  * registry would have thrown away.
  */
 const LOAD = {
-  MonthlyOverview: () =>
-    import('./components/MonthlyOverview').then((m) => ({ default: m.MonthlyOverview })),
+  MonthlyView: () =>
+    import('./components/MonthlyView').then((m) => ({ default: m.MonthlyView })),
   TempTrend: () => import('./components/TempTrend').then((m) => ({ default: m.TempTrend })),
   PrecipTrend: () => import('./components/PrecipTrend').then((m) => ({ default: m.PrecipTrend })),
   AnnualMeans: () => import('./components/AnnualMeans').then((m) => ({ default: m.AnnualMeans })),
@@ -106,7 +106,7 @@ const LOAD = {
     import('./components/National').then((m) => ({ default: m.National })),
 }
 
-const MonthlyOverview = lazy(LOAD.MonthlyOverview)
+const MonthlyView = lazy(LOAD.MonthlyView)
 const TempTrend = lazy(LOAD.TempTrend)
 const PrecipTrend = lazy(LOAD.PrecipTrend)
 const AnnualMeans = lazy(LOAD.AnnualMeans)
@@ -148,13 +148,13 @@ const Retrospect = lazy(LOAD.Retrospect)
  * Which module a tab renders.
  *
  * Spelled out rather than derived from the tab id: 'overview' renders
- * MonthlyOverview and 'climate' renders ClimateDiagram, so any rule that turned
+ * MonthlyView and 'climate' renders ClimateDiagram, so any rule that turned
  * one into the other would be a rule with exceptions. The opening view is
  * absent because it is imported eagerly — preloading what is already there
  * would be a wasted request.
  */
 const TAB_MODULE: Record<string, string> = {
-  overview: 'MonthlyOverview',
+  overview: 'MonthlyView',
   'annual-overview': 'AnnualOverview',
   'day-in-history': 'DayInHistory',
   'temp-trend': 'TempTrend',
@@ -534,7 +534,7 @@ export default function App() {
             <Suspense fallback={<Loading message="Ansicht wird geladen …" />}>
             {tab === 'dashboard' && <Dashboard stationName={stationName} />}
             {tab === 'overview' && (
-              <MonthlyOverview
+              <MonthlyView
                 stationId={stationId}
                 stationName={stationName}
                 year={selectedYear}

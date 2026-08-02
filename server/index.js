@@ -42,6 +42,7 @@ import { yearbook } from './yearbook.js'
 import { curiosities } from './curiosities.js'
 import { episodes, EPISODE_KEYS } from './episodes.js'
 import { ticker } from './ticker.js'
+import { monthBalance } from './month-balance.js'
 import { NATIONAL_FIELD_KEYS, nationalField, nationalOverview } from './national.js'
 import { pressureAnalysis } from './pressure.js'
 import { frostRiskAll } from './frost.js'
@@ -250,6 +251,20 @@ app.get(
       })
     }
     res.json(result)
+  }),
+)
+
+app.get(
+  '/api/weather/month-balance',
+  handler((req, res) => {
+    const station = resolveStation(req, res)
+    if (!station) return
+    const now = new Date()
+    const month = Number(req.query.monat ?? now.getMonth() + 1)
+    if (!Number.isInteger(month) || month < 1 || month > 12) {
+      return res.status(400).json({ error: 'Ungültiger Monat.' })
+    }
+    res.json(monthBalance(station.id, month))
   }),
 )
 
