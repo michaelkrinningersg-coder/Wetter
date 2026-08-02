@@ -48,7 +48,7 @@ Ideen zurückgestellt wurden (siehe unten).
 | 13 | Bundesweite Rekordbilanz seit 1881 | `regional_values` | **fertig** |
 | 10 | Fast-Rekorde | `daily` | **fertig** |
 | 14 | Wetterzwillinge (Aussage auch ins Dashboard) | `daily` | **fertig** |
-| 15 | Jahres-Wrapped: zehn markante Tage je Jahr | `daily` | offen |
+| 15 | Jahres-Wrapped: zehn markante Tage je Jahr | `daily` | **fertig** |
 | 16 | Kuriositätenkabinett | `daily` | offen |
 | 17 | Episoden statt Tage | `daily` | offen |
 | 18 | Serien-Ticker | `daily` | offen |
@@ -56,10 +56,6 @@ Ideen zurückgestellt wurden (siehe unten).
 | 20 | Newsroom: automatische Meldungen | alle | offen |
 
 ### Was die einzelnen Punkte vorhaben
-
-**15 — Jahres-Wrapped.** Ein automatisch erzeugter Rückblick: die zehn
-markantesten Tage eines Jahres, nach derselben Logik wie die markanten Tage,
-aber auf ein Jahr eingegrenzt und für jedes der 168 Jahre abrufbar.
 
 **16 — Kuriositätenkabinett.** Systematisch gesuchte Merkwürdigkeiten statt
 reiner Extremwerte: größter Tagesgang, größter Sprung zum Vortag, wärmster

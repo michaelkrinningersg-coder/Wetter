@@ -51,6 +51,7 @@ import { pollenOverview } from '../server/pollen.js'
 import { comboSeries, phenoComboKeys, phenoOverview } from '../server/pheno.js'
 import { dashboard } from '../server/dashboard.js'
 import { TWIN_SETS, weatherTwins } from '../server/twins.js'
+import { yearbook, yearbookYears } from '../server/yearbook.js'
 import { NATIONAL_FIELD_KEYS, nationalField, nationalOverview } from '../server/national.js'
 import { pressureAnalysis } from '../server/pressure.js'
 import { frostRiskAll } from '../server/frost.js'
@@ -400,6 +401,21 @@ if (pheno.range.last) {
 /* -------------------------------------------------------------------------- */
 
 emit('/api/dashboard', dashboard(), 'Dashboard')
+
+/* -------------------------------------------------------------------------- */
+/* Yearbook                                                                   */
+/* -------------------------------------------------------------------------- */
+
+for (const station of STATIONS) {
+  const years = yearbookYears(station.id)
+  for (const year of years) {
+    const payload = yearbook(station.id, year)
+    emit(`/api/weather/yearbook?stationId=${station.id}&jahr=${year}`, payload, 'Jahresrückblick')
+    if (year === years.at(-1)) {
+      emit(`/api/weather/yearbook?stationId=${station.id}`, payload, 'Jahresrückblick')
+    }
+  }
+}
 
 /* -------------------------------------------------------------------------- */
 /* Weather twins                                                              */

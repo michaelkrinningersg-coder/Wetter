@@ -117,7 +117,8 @@ Pegel. Jede Kachel verlinkt in die Ansicht, aus der ihre Zahl stammt.
 **Messwerte** — Monatsübersicht (Tageswerte, Tagesverlauf, Jahresverlauf) ·
 Jahresübersicht (Kenndaten und Schwellenwerttage je Kalenderjahr) ·
 Dieser Tag in der Geschichte · Wetterzwillinge: der Tag im Archiv, der einem
-gegebenen am ähnlichsten ist
+gegebenen am ähnlichsten ist · Jahresrückblick: zehn Tage, die ein Jahr
+beschreiben, für jedes der 167 Jahre
 
 **Trends** — Temperaturtrend · Niederschlagstrend · Jahresmittelwerte,
 Anomalien und Warming Stripes · Mitteltemperatur Year-to-Date · Jahreszeiten ·
@@ -198,6 +199,7 @@ server/
   frost.js             Spätfrostrisiko: Beginn gegen letzten Frost
   calendar-records.js  Rekorde je Kalendertag und ihre Wechsel
   twins.js             nächster Nachbar eines Tages über sieben bis neun Größen
+  yearbook.js          zehn markante Tage je Jahr, gegen den Kalendertag gerankt
   distribution.js      Verteilungen dreier Referenzperioden, Kenntage
   nationwide-shape.js  die Form eines Tages über Deutschland, reine Rechnung
   nationwide-csv.js    Jahresarchiv dieser Tagesformen plus Stationsregister
@@ -475,6 +477,19 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   gehalten: der übliche beste Treffer liegt bei 0,11. Der 13.08.2003 kommt auf
   0,24 und hat damit **kein echtes Gegenstück** — 98 % aller Tage finden einen
   näheren Zwilling, und der nächste ist der 29.07.1911, 92 Jahre entfernt.
+- **Jahresrückblick.** Zehn Tage, die ein Jahr beschreiben, automatisch für
+  jedes der 167 Jahre. Ein Tag gilt als markant, wenn er für *seinen
+  Kalendertag* ungewöhnlich war und nicht für das Jahr — 14 °C am 3. Januar sind
+  bemerkenswert, 14 °C am 3. Juli ebenfalls, nur andersherum. Daraus wird ein
+  nachprüfbarer Satz: „der wärmste 12. August seit 1858". Gewählt wird zuerst
+  der beste Tag jeder der elf Kategorien, dann werden freie Plätze aufgefüllt;
+  nach Punktzahl allein bekäme man dieselbe Hitzewelle fünfmal, und wer es nicht
+  in die zehn schafft, wird benannt statt stillschweigend fallen gelassen. Die
+  Bewertung ist ein **Mittelrang**, nicht der Rang: am 1. Mai liegt die
+  Schneehöhe in 159 von 160 Jahren bei 0 cm, wodurch dieser Tag nach Rang Erster
+  wäre — die erste Fassung meldete tatsächlich „höchste Schneedecke" unter einem
+  Wert von null. Gleichstände halb zu zählen setzt ihn auf 0,50 statt 1,00, und
+  eine Untergrenze von 0,90 hält solche Tage aus der Liste.
 - **Verteilungsverschiebung.** Jeder andere Trend hier gibt einen Mittelwert
   an. Ein Mittelwert kann steigen, weil der kalte Rand kürzer wurde, weil der
   warme Rand wuchs oder weil sich alles gemeinsam verschob — drei verschiedene

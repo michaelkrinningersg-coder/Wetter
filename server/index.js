@@ -38,6 +38,7 @@ import { pollenOverview } from './pollen.js'
 import { comboSeries, phenoOverview } from './pheno.js'
 import { dashboard } from './dashboard.js'
 import { weatherTwins } from './twins.js'
+import { yearbook } from './yearbook.js'
 import { NATIONAL_FIELD_KEYS, nationalField, nationalOverview } from './national.js'
 import { pressureAnalysis } from './pressure.js'
 import { frostRiskAll } from './frost.js'
@@ -380,6 +381,20 @@ app.get(
     if (!day) return res.status(404).json({ error: `Für den ${date} liegen keine Werte vor.` })
 
     res.json({ range, dates: availableDates(), day, shape: shapeForDate(date) })
+  }),
+)
+
+app.get(
+  '/api/weather/yearbook',
+  handler((req, res) => {
+    const station = resolveStation(req, res)
+    if (!station) return
+
+    const requested = req.query.jahr
+    if (requested !== undefined && !/^\d{4}$/.test(String(requested))) {
+      return res.status(400).json({ error: `Ungültiges Jahr "${requested}".` })
+    }
+    res.json(yearbook(station.id, requested ? Number(requested) : null))
   }),
 )
 

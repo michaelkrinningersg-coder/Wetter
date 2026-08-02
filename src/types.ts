@@ -1937,3 +1937,66 @@ export interface TwinHeadline {
   median: number
   fields: number
 }
+
+/* -------------------------------------------------------------------------- */
+/* Yearbook                                                                   */
+/* -------------------------------------------------------------------------- */
+
+export interface YearbookReason {
+  category: string
+  value: number
+  rank: number
+  of: number
+  /** How many other years share this exact value. */
+  ties: number
+  score: number
+  /** True for the headline reason of the day. */
+  leading?: boolean
+}
+
+export interface YearbookDay {
+  date: string
+  month: number
+  day: number
+  label: string
+  values: Record<string, number | null>
+  reasons: YearbookReason[]
+  headlines: YearbookReason[]
+  /** True when the day filled a spare slot rather than winning a category. */
+  filler: boolean
+}
+
+export interface YearbookCategory {
+  key: string
+  label: string
+  field: string
+  direction: 'max' | 'min'
+  unit: string
+  decimals: number
+  accent: string
+}
+
+export interface YearbookSummary {
+  year: number
+  days: number
+  measured: number
+  minDays: number
+  tempMean: number | null
+  precipitation: number | null
+  sunshine: number | null
+  warmthPlace: { place: number; of: number; value: number } | null
+  wetPlace: { place: number; of: number; value: number } | null
+}
+
+export interface YearbookResponse {
+  station: string
+  years: number[]
+  range: { first: string; last: string }
+  year: number
+  hint?: string
+  categories?: YearbookCategory[]
+  highlights?: number
+  summary: YearbookSummary | null
+  days: YearbookDay[]
+  runnersUp?: YearbookDay[]
+}
