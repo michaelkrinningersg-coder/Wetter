@@ -116,7 +116,8 @@ Pegel. Jede Kachel verlinkt in die Ansicht, aus der ihre Zahl stammt.
 
 **Messwerte** — Monatsübersicht (Tageswerte, Tagesverlauf, Jahresverlauf) ·
 Jahresübersicht (Kenndaten und Schwellenwerttage je Kalenderjahr) ·
-Dieser Tag in der Geschichte
+Dieser Tag in der Geschichte · Wetterzwillinge: der Tag im Archiv, der einem
+gegebenen am ähnlichsten ist
 
 **Trends** — Temperaturtrend · Niederschlagstrend · Jahresmittelwerte,
 Anomalien und Warming Stripes · Mitteltemperatur Year-to-Date · Jahreszeiten ·
@@ -196,6 +197,7 @@ server/
   pressure.js          Luftdruck, Sturmlagen, Bezug zum Wind
   frost.js             Spätfrostrisiko: Beginn gegen letzten Frost
   calendar-records.js  Rekorde je Kalendertag und ihre Wechsel
+  twins.js             nächster Nachbar eines Tages über sieben bis neun Größen
   distribution.js      Verteilungen dreier Referenzperioden, Kenntage
   nationwide-shape.js  die Form eines Tages über Deutschland, reine Rechnung
   nationwide-csv.js    Jahresarchiv dieser Tagesformen plus Stationsregister
@@ -457,6 +459,22 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   den 2020ern**, für die Tiefsttemperatur fällt es von 1,48× auf 0,82×. Gezählt
   wird erst ab der zehnten Messung eines Kalendertages; davor ist fast jeder Wert
   nah am Rekord, weil der Rekord noch nichts ist.
+- **Wetterzwillinge.** Jede andere Auswertung zerlegt das Archiv in eine Größe
+  nach der anderen; diese nimmt einen ganzen Tag und sucht seinen nächsten
+  Nachbarn. Verglichen wird in Standardabweichungen, nicht in den Einheiten der
+  Größen — 5 mm Regen und 5 °C sind keine vergleichbaren Mengen —, und der
+  Abstand ist das quadratische Mittel der standardisierten Differenzen. Über die
+  Jahreszeit wird nichts vorgegeben: sie ergibt sich, weil ein Januartag allein
+  in der Temperatur drei Standardabweichungen von einem Julitag entfernt liegt.
+  Zwei Größensätze, weil sich lange Reihe und vollständiges Porträt
+  widersprechen: sieben Größen ab 1885 (48.336 Tage) oder neun mit Wind und
+  Sonne ab 1969 (20.758). Ausgeschlossen sind die sieben Tage vor und nach dem
+  Bezugstag — der Vortag ist immer der ähnlichste und gehört zur selben
+  Wetterlage. Eine einzelne Abstandszahl wäre unlesbar, deshalb wird sie gegen
+  die Verteilung der besten Treffer von 300 gleichmäßig verteilten Tagen
+  gehalten: der übliche beste Treffer liegt bei 0,11. Der 13.08.2003 kommt auf
+  0,24 und hat damit **kein echtes Gegenstück** — 98 % aller Tage finden einen
+  näheren Zwilling, und der nächste ist der 29.07.1911, 92 Jahre entfernt.
 - **Verteilungsverschiebung.** Jeder andere Trend hier gibt einen Mittelwert
   an. Ein Mittelwert kann steigen, weil der kalte Rand kürzer wurde, weil der
   warme Rand wuchs oder weil sich alles gemeinsam verschob — drei verschiedene

@@ -1071,6 +1071,8 @@ export interface DashboardResponse {
       >
     >
   } | null
+  /** The nearest neighbour of the latest day, as one sentence. */
+  twin: TwinHeadline | null
   environment: {
     pollen: {
       issued: string
@@ -1884,4 +1886,54 @@ export interface NearMissesResponse {
   minObservation: number
   list: number
   fields: NearField[]
+}
+
+/* -------------------------------------------------------------------------- */
+/* Weather twins                                                              */
+/* -------------------------------------------------------------------------- */
+
+export interface TwinField {
+  key: string
+  label: string
+  unit: string
+  decimals: number
+  mean: number
+  sd: number
+}
+
+export interface TwinDay {
+  date: string
+  values: Record<string, number>
+  distance: number
+  /** Days apart in the calendar, ignoring the year. */
+  calendarGap: number
+  yearsApart: number
+  differences: { key: string; difference: number; sigma: number }[]
+}
+
+export interface TwinsResponse {
+  station: string
+  set: string
+  sets: { key: string; label: string; note: string }[]
+  fields?: TwinField[]
+  minGapDays?: number
+  requested?: string
+  hint?: string
+  available: { first: string; last: string; days: number }
+  baseline?: { sampled: number; median: number; p10: number; p90: number }
+  reference: { date: string; values: Record<string, number> } | null
+  twins: TwinDay[]
+  /** Share of sampled days whose own best match is closer than this one. */
+  percentile?: number | null
+}
+
+export interface TwinHeadline {
+  date: string
+  twin: string
+  distance: number
+  yearsApart: number
+  calendarGap: number
+  percentile: number | null
+  median: number
+  fields: number
 }

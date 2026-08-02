@@ -9,6 +9,7 @@ import {
   CloudRain,
   Flag,
   Flame,
+  Fingerprint,
   Flower2,
   Gauge,
   Grid3x3,
@@ -99,6 +100,7 @@ const LOAD = {
     import('./components/Nationwide').then((m) => ({ default: m.Nationwide })),
   RecordHistory: () =>
     import('./components/RecordHistory').then((m) => ({ default: m.RecordHistory })),
+  Twins: () => import('./components/Twins').then((m) => ({ default: m.Twins })),
   National: () =>
     import('./components/National').then((m) => ({ default: m.National })),
 }
@@ -138,6 +140,7 @@ const FrostRisk = lazy(LOAD.FrostRisk)
 const Distribution = lazy(LOAD.Distribution)
 const Nationwide = lazy(LOAD.Nationwide)
 const RecordHistory = lazy(LOAD.RecordHistory)
+const Twins = lazy(LOAD.Twins)
 
 /**
  * Which module a tab renders.
@@ -165,6 +168,7 @@ const TAB_MODULE: Record<string, string> = {
   'distribution': 'Distribution',
   'nationwide': 'Nationwide',
   'record-history': 'RecordHistory',
+  'twins': 'Twins',
   'heatmap': 'Heatmap',
   'extremes': 'Extremes',
   'extreme-months': 'ExtremeMonths',
@@ -235,6 +239,7 @@ type TabId =
   | 'national'
   | 'nationwide'
   | 'record-history'
+  | 'twins'
 
 interface TabDef {
   id: TabId
@@ -255,6 +260,7 @@ const TABS: TabDef[] = [
   { id: 'overview', label: 'Monatsübersicht', icon: CalendarDays, group: 'Messwerte' },
   { id: 'annual-overview', label: 'Jahresübersicht', icon: Table2, group: 'Messwerte' },
   { id: 'day-in-history', label: 'Dieser Tag', icon: CalendarHeart, group: 'Messwerte' },
+  { id: 'twins', label: 'Wetterzwillinge', icon: Fingerprint, group: 'Messwerte' },
   { id: 'temp-trend', label: 'Temperaturtrend', icon: TrendingUp, group: 'Trends' },
   { id: 'precip-trend', label: 'Niederschlagstrend', icon: CloudRain, group: 'Trends' },
   { id: 'annual-means', label: 'Jahresmittelwerte', icon: LineChart, group: 'Trends' },
@@ -606,6 +612,8 @@ export default function App() {
             {tab === 'germany' && <Germany />}
 
             {tab === 'germany-map' && <GermanyMap />}
+
+            {tab === 'twins' && <Twins stationId={stationId} stationName={stationName} />}
 
             {tab === 'record-history' && (
               <RecordHistory stationId={stationId} stationName={stationName} />

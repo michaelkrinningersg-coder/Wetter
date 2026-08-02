@@ -7,6 +7,7 @@ import { recordCount, recordDays, recordsForDate } from './records.js'
 import { pollenLatest } from './pollen.js'
 import { AIR_STATIONS, COMPONENT_BY_KEY } from './air-sources.js'
 import { odlProbes, odlRange } from './odl.js'
+import { twinHeadline } from './twins.js'
 
 /**
  * One answer for the opening view.
@@ -374,6 +375,12 @@ export function dashboard() {
     germany: germanyHighlights(),
     records: latestRecords(),
     today: todayInHistory(),
+    /**
+     * One sentence from the twin search: has a day like the latest happened
+     * before? It costs a cached matrix lookup, and it is the only line on the
+     * dashboard that compares a whole day rather than one quantity.
+     */
+    twin: twinHeadline(STATION_ID),
     environment: {
       pollen: pollenNow(),
       air: airNow(),

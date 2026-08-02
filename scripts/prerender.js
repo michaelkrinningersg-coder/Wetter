@@ -50,6 +50,7 @@ import { odlOverview } from '../server/odl.js'
 import { pollenOverview } from '../server/pollen.js'
 import { comboSeries, phenoComboKeys, phenoOverview } from '../server/pheno.js'
 import { dashboard } from '../server/dashboard.js'
+import { TWIN_SETS, weatherTwins } from '../server/twins.js'
 import { NATIONAL_FIELD_KEYS, nationalField, nationalOverview } from '../server/national.js'
 import { pressureAnalysis } from '../server/pressure.js'
 import { frostRiskAll } from '../server/frost.js'
@@ -399,6 +400,43 @@ if (pheno.range.last) {
 /* -------------------------------------------------------------------------- */
 
 emit('/api/dashboard', dashboard(), 'Dashboard')
+
+/* -------------------------------------------------------------------------- */
+/* Weather twins                                                              */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * A file per day and field set would be 48,336 × 2 per station. The view's date
+ * picker is therefore bounded to the last year, which is the window anyone
+ * actually asks about, and the bound is stated in the view rather than left as
+ * a 404 for anything older.
+ */
+const TWIN_DAYS = 365
+
+const twinDatesStmt = db.prepare(
+  `SELECT date FROM daily WHERE station_id = ? ORDER BY date DESC LIMIT ?`,
+)
+
+for (const station of STATIONS) {
+  for (const set of TWIN_SETS) {
+    const latest = weatherTwins(station.id, null, set.key)
+    if (!latest?.available) continue
+
+    for (const { date } of twinDatesStmt.all(station.id, TWIN_DAYS)) {
+      const payload = weatherTwins(station.id, date, set.key)
+      emit(
+        `/api/weather/twins?stationId=${station.id}&datum=${date}&satz=${set.key}`,
+        payload,
+        'Zwillinge',
+      )
+    }
+
+    emit(`/api/weather/twins?stationId=${station.id}&satz=${set.key}`, latest, 'Zwillinge')
+    if (set.key === TWIN_SETS[0].key) {
+      emit(`/api/weather/twins?stationId=${station.id}`, latest, 'Zwillinge')
+    }
+  }
+}
 
 /* -------------------------------------------------------------------------- */
 /* National standing                                                          */

@@ -37,6 +37,7 @@ import { odlOverview } from './odl.js'
 import { pollenOverview } from './pollen.js'
 import { comboSeries, phenoOverview } from './pheno.js'
 import { dashboard } from './dashboard.js'
+import { weatherTwins } from './twins.js'
 import { NATIONAL_FIELD_KEYS, nationalField, nationalOverview } from './national.js'
 import { pressureAnalysis } from './pressure.js'
 import { frostRiskAll } from './frost.js'
@@ -379,6 +380,22 @@ app.get(
     if (!day) return res.status(404).json({ error: `Für den ${date} liegen keine Werte vor.` })
 
     res.json({ range, dates: availableDates(), day, shape: shapeForDate(date) })
+  }),
+)
+
+app.get(
+  '/api/weather/twins',
+  handler((req, res) => {
+    const station = resolveStation(req, res)
+    if (!station) return
+
+    const requested = req.query.datum
+    if (requested !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(String(requested))) {
+      return res.status(400).json({ error: `Ungültiges Datum "${requested}".` })
+    }
+    res.json(
+      weatherTwins(station.id, requested ? String(requested) : null, String(req.query.satz ?? 'kern')),
+    )
   }),
 )
 

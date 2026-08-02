@@ -47,7 +47,7 @@ Ideen zurückgestellt wurden (siehe unten).
 | 12 | Überlebenskurve eines Rekords | `daily` | **fertig** |
 | 13 | Bundesweite Rekordbilanz seit 1881 | `regional_values` | **fertig** |
 | 10 | Fast-Rekorde | `daily` | **fertig** |
-| 14 | Wetterzwillinge (Aussage auch ins Dashboard) | `daily` | offen |
+| 14 | Wetterzwillinge (Aussage auch ins Dashboard) | `daily` | **fertig** |
 | 15 | Jahres-Wrapped: zehn markante Tage je Jahr | `daily` | offen |
 | 16 | Kuriositätenkabinett | `daily` | offen |
 | 17 | Episoden statt Tage | `daily` | offen |
@@ -56,12 +56,6 @@ Ideen zurückgestellt wurden (siehe unten).
 | 20 | Newsroom: automatische Meldungen | alle | offen |
 
 ### Was die einzelnen Punkte vorhaben
-
-**14 — Wetterzwillinge.** Welcher Tag der Vergangenheit ähnelt dem gestrigen
-am meisten, mit Angabe, wie ähnlich er wirklich war. Ergibt Sätze wie „so ein
-2. August war zuletzt 1911" — und wenn kein ähnlicher Tag existiert, ist
-gerade das die Meldung. Die Kernaussage soll zusätzlich auf dem Dashboard
-stehen.
 
 **15 — Jahres-Wrapped.** Ein automatisch erzeugter Rückblick: die zehn
 markantesten Tage eines Jahres, nach derselben Logik wie die markanten Tage,

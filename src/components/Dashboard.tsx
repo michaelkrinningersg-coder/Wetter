@@ -1,6 +1,7 @@
 import {
   ArrowRight,
   CalendarHeart,
+  Fingerprint,
   Flower2,
   Map,
   Radiation as RadiationIcon,
@@ -13,7 +14,7 @@ import type { ComponentType } from 'react'
 import type { LucideProps } from 'lucide-react'
 
 import { useApi } from '../lib/api'
-import { isoToGerman, num, signed } from '../lib/format'
+import { isoToGerman, num, shareOf, signed } from '../lib/format'
 import type { DashboardResponse } from '../types'
 import { type Accent, Card, ErrorState, InfoPanel, Loading, SectionHeading } from './ui'
 
@@ -152,7 +153,7 @@ export function Dashboard({ stationName }: { stationName: string }) {
   if (error) return <ErrorState message={error} />
   if (!data) return null
 
-  const { latest, year, germany, records, today, environment } = data
+  const { latest, year, germany, records, today, twin, environment } = data
   const pollen = environment.pollen
   const air = environment.air
   const radiation = environment.radiation
@@ -270,6 +271,36 @@ export function Dashboard({ stationName }: { stationName: string }) {
             <TileLink href={link('day-in-history', { monat: today.month, tag: today.day })}>
               Dieser Tag in der Geschichte
             </TileLink>
+          </Tile>
+        )}
+
+        {twin && (
+          <Tile icon={Fingerprint} title="Wetterzwilling" accent="brand">
+            <p className="numeric mt-2 text-3xl font-semibold tracking-tight text-ink">
+              {isoToGerman(twin.twin)}
+            </p>
+            <p className="mt-1.5 text-xs text-ink-muted">
+              der Tag, der dem {isoToGerman(twin.date)} am meisten ähnelt —{' '}
+              {num(twin.yearsApart, 0)} Jahre entfernt
+            </p>
+            <ul className="mt-2 space-y-0.5 text-[11px] text-ink-muted">
+              <li>
+                Abstand <span className="numeric text-ink">{num(twin.distance, 2)}</span> σ über{' '}
+                {num(twin.fields, 0)} Größen, üblich sind{' '}
+                <span className="numeric">{num(twin.median, 2)}</span>
+              </li>
+              {twin.percentile !== null && (
+                <li>
+                  <span className="numeric">{shareOf(twin.percentile)}</span> aller Tage haben
+                  einen näheren Zwilling
+                </li>
+              )}
+              <li>
+                im Kalender <span className="numeric">{num(twin.calendarGap, 0)}</span> Tage
+                auseinander
+              </li>
+            </ul>
+            <TileLink href={link('twins')}>Wetterzwillinge</TileLink>
           </Tile>
         )}
       </div>
