@@ -30,6 +30,7 @@ import { pollenOverview } from './pollen.js'
 import { comboSeries, phenoOverview } from './pheno.js'
 import { dashboard } from './dashboard.js'
 import { NATIONAL_FIELD_KEYS, nationalField, nationalOverview } from './national.js'
+import { pressureAnalysis } from './pressure.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -137,6 +138,7 @@ const simple = {
   '/api/weather/records-balance': api.recordBalance,
   '/api/weather/precip-intensity': api.precipIntensity,
   '/api/weather/indices': api.extraIndices,
+  '/api/weather/pressure': pressureAnalysis,
 }
 
 for (const [path, query] of Object.entries(simple)) {

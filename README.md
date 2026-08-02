@@ -122,7 +122,8 @@ Dieser Tag in der Geschichte
 Anomalien und Warming Stripes · Mitteltemperatur Year-to-Date · Jahreszeiten ·
 Vegetationsperiode und Wachstumsgradtage · Starkregenanteil · Weitere
 Kenngrößen (Schneedeckentage, heitere und trübe Tage, Sonnenscheindauer,
-Luftfeuchte, schwüle Tage, Bodenfrosttage)
+Luftfeuchte, schwüle Tage, Bodenfrosttage) · Luftdruck seit 1858 mit dem
+Zusammenhang zur Windstärke
 
 **Rekorde** — Monats-Heatmap · Spitzenwerte (Top-50-Tage) ·
 Spitzenmonate (Top-50-Monate) · Perioden & Serien (längste Hitze-, Trocken-,
@@ -182,6 +183,7 @@ server/
   germany-csv.js       Tagesarchiv, eine CSV je Tag
   germany.js           Superlative, Stationsregister und Kartendaten
   national.js          Rang der Station unter allen DWD-Stationen
+  pressure.js          Luftdruck, Sturmlagen, Bezug zum Wind
   regional-sources.js  amtliche DWD-Gebietsmittel
   regional.js          Gebietsmittel: Reihen und Ranglisten
   records-kinds.js     Rekordkategorien
@@ -339,6 +341,14 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   auf Schwarz leuchtet, ist auf Weiß unsichtbar —, sondern ein eigener Entwurf
   bei rund 50 % Helligkeit. Die Kartenrampen sind ebenfalls getrennt: die
   dunkle läuft in der Mitte auf 86 % Helligkeit, was auf Weiß verschwände.
+- **Luftdruck.** Die DWD-Spalte enthält **Stationsdruck, nicht auf Meereshöhe
+  reduziert** — Göttingen 996,5 hPa auf 167 m, Brocken 882 auf 1141 m, Zugspitze
+  706 auf 2964 m. Die geläufige Schwelle „unter 990 hPa ist ein Sturmtief" gilt
+  für Meereshöhe und wäre hier falsch; statt die Werte mit einer Formel
+  umzurechnen, deren Temperaturannahmen eine weitere Angriffsfläche wären,
+  stammen die Grenzen aus der Reihe der Station selbst: das unterste Prozent von
+  Druck und Tagesänderung. Die Tagesänderung gilt nur, wo der Vortag wirklich
+  der Vortag ist — über eine Lücke hinweg wäre sie ein erfundener Sturm.
 - **Bundesvergleich.** Das Perzentil zählt Stationen unter dem Wert plus die
   Hälfte der gleichen. Diese Halbierung ist keine Pedanterie: der DWD gibt
   Temperaturen auf eine Nachkommastelle aus, an einem ruhigen Tag teilen sich

@@ -1147,3 +1147,49 @@ export interface NationalFieldResponse {
   all: { points: NationalPoint[]; summary: NationalSummary }
   lowland: { points: NationalPoint[]; summary: NationalSummary }
 }
+
+/* -------------------------------------------------------------------------- */
+/* Air pressure                                                               */
+/* -------------------------------------------------------------------------- */
+
+export interface PressureBand {
+  from: number
+  to: number
+  days: number
+  mean: number
+  max: number
+}
+
+export interface PressureExtreme {
+  date: string
+  pressure: number
+  wind_max: number | null
+}
+
+export interface PressureResponse {
+  range: { first: string; last: string; days: number; years: number }
+  /** Always 'station': these readings are not reduced to sea level. */
+  reduction: 'station'
+  note: string
+  tail: number
+  minDaysPerYear: number
+  minDaysPerBand: number
+  monthly: { month: number; label: string; mean: number; min: number; max: number; days: number }[]
+  annual: { year: number; mean: number; min: number; max: number; days: number; deep: number }[]
+  extremes: { lowest: PressureExtreme[]; highest: PressureExtreme[] }
+  wind: {
+    days: number
+    changeDays: number
+    correlation: { pressure: number | null; change: number | null; magnitude: number | null }
+    deep: {
+      limit: number
+      days: number
+      meanGust: number | null
+      otherDays: number
+      otherMeanGust: number | null
+    }
+    fall: { limit: number | null; days: number; meanGust: number | null }
+    byPressure: PressureBand[]
+    byChange: PressureBand[]
+  }
+}

@@ -87,6 +87,7 @@ const LOAD = {
   Pollen: () => import('./components/Pollen').then((m) => ({ default: m.Pollen })),
   Phenology: () => import('./components/Phenology').then((m) => ({ default: m.Phenology })),
   Regional: () => import('./components/Regional').then((m) => ({ default: m.Regional })),
+  Pressure: () => import('./components/Pressure').then((m) => ({ default: m.Pressure })),
   National: () =>
     import('./components/National').then((m) => ({ default: m.National })),
 }
@@ -121,6 +122,7 @@ const Pollen = lazy(LOAD.Pollen)
 const Phenology = lazy(LOAD.Phenology)
 const Regional = lazy(LOAD.Regional)
 const National = lazy(LOAD.National)
+const Pressure = lazy(LOAD.Pressure)
 
 /**
  * Which module a tab renders.
@@ -143,6 +145,7 @@ const TAB_MODULE: Record<string, string> = {
   'vegetation': 'Vegetation',
   'precip-intensity': 'PrecipIntensity',
   'indices': 'Indices',
+  'pressure': 'Pressure',
   'heatmap': 'Heatmap',
   'extremes': 'Extremes',
   'extreme-months': 'ExtremeMonths',
@@ -196,6 +199,7 @@ type TabId =
   | 'record-balance'
   | 'precip-intensity'
   | 'indices'
+  | 'pressure'
   | 'day-in-history'
   | 'gauges'
   | 'air'
@@ -236,6 +240,7 @@ const TABS: TabDef[] = [
   { id: 'vegetation', label: 'Vegetationsperiode', icon: Leaf, group: 'Trends' },
   { id: 'precip-intensity', label: 'Starkregenanteil', icon: Umbrella, group: 'Trends' },
   { id: 'indices', label: 'Weitere Kenngrößen', icon: Snowflake, group: 'Trends' },
+  { id: 'pressure', label: 'Luftdruck', icon: Gauge, group: 'Trends' },
   { id: 'heatmap', label: 'Monats-Heatmap', icon: Grid3x3, group: 'Rekorde' },
   { id: 'extremes', label: 'Spitzenwerte', icon: Flame, group: 'Rekorde' },
   { id: 'extreme-months', label: 'Spitzenmonate', icon: ListOrdered, group: 'Rekorde' },
@@ -551,6 +556,9 @@ export default function App() {
             )}
             {tab === 'forecast' && <Forecast stationId={stationId} />}
             {tab === 'indices' && <Indices stationId={stationId} />}
+            {tab === 'pressure' && (
+              <Pressure stationId={stationId} stationName={stationName} />
+            )}
 
             {tab === 'gauges' && <Gauges />}
 
