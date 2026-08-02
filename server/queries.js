@@ -669,7 +669,6 @@ export function buildForecast(stationId) {
   if (!climatology) return null
 
   const key = (m, d) => m * 100 + d
-  const climByDay = new Map(climatology.days.map((d) => [key(d.month, d.day), d]))
 
   const observed = observedDaysStmt
     .all(stationId, runningYear)

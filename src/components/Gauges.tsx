@@ -85,7 +85,7 @@ export function Gauges() {
 
   useEffect(() => {
     if (!selected && gauges.length > 0) setSelected(gauges[0]!.id)
-  }, [gauges, selected])
+  }, [gauges, selected, setSelected])
 
   const series = useApi<GaugeSeriesResponse>(
     active ? `/api/gauges/${active.id}/series?days=${range}` : null,

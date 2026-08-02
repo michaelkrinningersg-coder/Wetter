@@ -27,7 +27,7 @@ import { regionalMeta, regionalSeries } from './regional.js'
 import { airComponentKeys, airOverview, airProfiles } from './air.js'
 import { odlOverview } from './odl.js'
 import { pollenOverview } from './pollen.js'
-import { comboSeries, phenoComboKeys, phenoOverview } from './pheno.js'
+import { comboSeries, phenoOverview } from './pheno.js'
 import { dashboard } from './dashboard.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -575,7 +575,8 @@ if (existsSync(dist)) {
 
 app.use('/api', (_req, res) => res.status(404).json({ error: 'Unbekannter Endpunkt.' }))
 
-// eslint-disable-next-line no-unused-vars
+// Express erkennt einen Fehlerbehandler an der Stelligkeit — die vier
+// Parameter müssen stehen bleiben, auch wenn zwei ungenutzt sind.
 app.use((error, _req, res, _next) => {
   console.error(error)
   res.status(500).json({

@@ -48,6 +48,14 @@ jobs:
 
       - run: npm ci
 
+      # Der Lauf ist die einzige Stelle, an der Lint und Typprüfung
+      # zwangsläufig ausgeführt werden. Beide sind schnell und beide brechen
+      # den Deploy ab, bevor eine kaputte Fassung veröffentlicht wird.
+      - name: Lint und Typen prüfen
+        run: |
+          npm run lint
+          npm run typecheck
+
       # Die Datenbank liegt bewusst nicht im Repository. Die drei Stationsreihen
       # kommen direkt vom DWD (rund zehn Sekunden), Deutschlandarchiv und
       # Rekordbasis liest der Server beim Start aus den committeten CSV-Dateien.

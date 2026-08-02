@@ -367,14 +367,14 @@ export default function App() {
     } catch {
       /* storage unavailable — selection stays for this session only */
     }
-  }, [])
+  }, [setStationId])
 
   const navigateToMonth = useCallback((year: number, month: number) => {
     setSelectedYear(year)
     setSelectedMonth(month)
     setTab('overview')
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [])
+  }, [setSelectedYear, setSelectedMonth, setTab])
 
   const stationName = station?.name ?? 'Station'
   const isEmpty = status !== null && status.rowCount === 0

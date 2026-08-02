@@ -36,6 +36,14 @@ npm run build
 npm start          # liefert dist/ und die API auf Port 3001
 ```
 
+```bash
+npm run lint       # ESLint 9, Flat Config
+npm run typecheck  # tsc --noEmit
+```
+
+Beide laufen im Pages-Workflow vor dem Build und brechen den Deploy ab, bevor
+eine kaputte Fassung veröffentlicht wird.
+
 ### GitHub Pages
 
 Pages liefert Dateien aus, keine Query-Strings. `npm run build:static` baut
