@@ -1,0 +1,147 @@
+kind,id,name
+phase,1,Ergrünen Beginn
+phase,10,Bestellung Beginn
+phase,11,Pflanzen Beginn
+phase,12,Auflaufen Beginn
+phase,13,Bestand geschlossen
+phase,14,Rosettenbildung Beginn
+phase,15,Schossen Beginn
+phase,16,Blattbildung Beginn
+phase,17,Knospenbildung Beginn
+phase,18,Ährenschieben Beginn
+phase,19,Milchreife Beginn
+phase,2,Erstes Bluten
+phase,20,Teigreife Beginn
+phase,21,Gelbreife Beginn
+phase,22,Vollreife Beginn
+phase,23,Ernte von Hand
+phase,24,Ernte
+phase,25,1. Heuschnitt
+phase,26,1. Silageschnitt
+phase,27,2. Heuschnitt
+phase,28,2. Silageschnitt
+phase,29,Pflückreife Beginn
+phase,3,Austrieb Beginn
+phase,30,Lese
+phase,31,herbstliche Blattverfärbung
+phase,32,herbstlicher Blattfall
+phase,33,Beginn
+phase,34,Ende
+phase,35,1. Heu- oder (!) Silageschnitt
+phase,36,2. Heu- oder (!) Silageschnitt
+phase,37,Narbenfädenschieben Beginn
+phase,38,Körner-Ernte Beginn
+phase,39,Silo-Ernte Beginn
+phase,4,Blattentfaltung Beginn
+phase,40,Lesereife
+phase,41,Blüte Ende im Beobachtungsgebiet
+phase,42,Reife Beginn Weinrebe
+phase,5,Blüte Beginn
+phase,6,Vollblüte
+phase,61,Nadelentfaltung Beginn
+phase,62,erste reife Früchte
+phase,63,herbstliche Nadelverfärbung
+phase,64,herbstlicher Nadelfall
+phase,65,Fahnenschieben Beginn
+phase,66,Rispenschieben Beginn
+phase,67,Längenwachstum Beginn
+phase,7,Blüte Ende
+phase,8,Maitrieb
+phase,9,Johannistrieb
+plant,101,Beifuß
+plant,102,Busch-Windröschen
+plant,103,Eberesche
+plant,104,Esche
+plant,105,Europäische Lärche
+plant,106,Falscher Jasmin
+plant,107,Fichte
+plant,108,Flieder
+plant,109,Forsythie
+plant,110,Goldregen
+plant,111,Birke (alle Arten)
+plant,112,Hänge-Birke
+plant,113,Hasel
+plant,114,Heidekraut
+plant,115,Herbstzeitlose
+plant,116,Huflattich
+plant,117,Hunds-Rose
+plant,118,Kiefer
+plant,119,Kornelkirsche
+plant,120,Löwenzahn
+plant,121,Robinie
+plant,122,Rosskastanie
+plant,123,Rotbuche
+plant,124,Sal-Weide
+plant,125,Schlehe
+plant,126,Schneebeere
+plant,127,Schneeglöckchen
+plant,128,Schwarz-Erle
+plant,129,Schwarzer Holunder
+plant,130,Sommer-Linde
+plant,131,Spitz-Ahorn
+plant,132,Stiel-Eiche
+plant,133,Tanne
+plant,134,Traubenkirsche
+plant,135,Wiesen-Fuchsschwanz
+plant,136,Wiesen-Knäuelgras
+plant,137,Winter-Linde
+plant,138,Zweigriffliger Weißdorn
+plant,139,Erle (alle Arten)
+plant,201,Dauergrünland
+plant,202,Winterweizen
+plant,203,Winterroggen
+plant,204,Wintergerste
+plant,205,Winterraps
+plant,206,Sommerweizen
+plant,207,Sommergerste
+plant,208,Hafer
+plant,209,Sonnenblume
+plant,210,Mais (ohne Sortenangabe)
+plant,215,Mais
+plant,231,Kartoffel
+plant,232,"Frühkartoffel, vorgekeimt"
+plant,233,"Frühkartoffel, nicht vorgekeimt"
+plant,234,Spätkartoffel
+plant,241,Grünpflück-Bohne
+plant,242,Grünpflück-Erbse
+plant,243,Tomate
+plant,244,Weißkohl
+plant,245,Luzerne
+plant,246,Rotklee
+plant,25,Rüben
+plant,250,Sorte unbekannt (Rübe)
+plant,252,Futter-Rübe
+plant,253,Zucker-Rübe
+plant,310,Apfel
+plant,311,"Apfel, frühe Reife"
+plant,312,"Apfel, mittlere Reife"
+plant,313,"Apfel, späte Reife"
+plant,320,Birne
+plant,321,"Birne, frühe Reife"
+plant,322,"Birne, späte Reife"
+plant,330,Süßkirsche
+plant,331,"Süßkirsche, frühe Reife"
+plant,332,"Süßkirsche, späte Reife"
+plant,340,Sauerkirsche
+plant,350,Stachelbeere
+plant,360,Rote Johannisbeere
+plant,361,"Johannisbeere, alle Sorten"
+plant,370,Pflaume
+plant,371,"Pflaume, frühe Reife"
+plant,372,"Pflaume, späte Reife"
+plant,380,Aprikose
+plant,381,Pfirsich
+plant,382,Himbeere
+plant,383,Brombeere
+plant,384,Erdbeere
+plant,410,Weinrebe
+plant,411,"Weinrebe, frühe Reife"
+plant,4111,Müller-Thurgau
+plant,4112,Faber
+plant,412,"Weinrebe, mittelspäte Reife (bevorzugt Silvaner/Weißburgunder)"
+plant,413,"Weinrebe, späte Reife"
+plant,4131,Riesling
+plant,4132,Scheurebe
+plant,414,"Weinrebe, blaue Trauben (bevorzugt Portugieser/Spätburgunder)"
+plant,501,Feldarbeit
+plant,601,Weidegang

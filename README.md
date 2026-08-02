@@ -96,7 +96,9 @@ Hintergrund gegen Verkehr, Wochentags- und Jahresverlauf, Jahresmittel gegen
 die Grenzwerte, Überschreitungen der 39. BImSchV und Ozon gegen die
 Tageshöchsttemperatur derselben Stadt · Ortsdosisleistung der elf BfS-Sonden im
 25-km-Umkreis, eine davon an der Wetterstation selbst · Pollenflug für die
-DWD-Region, acht Arten über drei Vorhersagetage
+DWD-Region, acht Arten über drei Vorhersagetage · Phänologie: die zehn
+phänologischen Jahreszeiten seit 1951, der Kalender aus 191 Pflanze-Phase-Paaren
+und der Vorfrühling gegen die Temperatur der Monate davor
 
 **Deutschland** — Gebietsmittel für Deutschland und die Bundesländer seit 1881
 (Trend je Jahrzehnt, Rangliste, zehn Größen) · Karte aller Stationen mit den
@@ -146,6 +148,9 @@ server/
   pollen-sources.js    DWD-Pollenvorhersage: Region, Arten, Stufen
   pollen-csv.js        Ausgabenarchiv, eine CSV je Ausgabe
   pollen.js            Saisonkalender und Treffsicherheit
+  pheno-sources.js     DWD-Phänologie: Stationswahl, Strom-Filter
+  pheno-csv.js         Beobachtungen, Stationen, Schlüssel
+  pheno.js             Jahreszeiten, Kalender, Temperaturbezug
 ```
 
 Die Datenbank liegt unter `data/weather.sqlite` (per `.gitignore`
@@ -266,6 +271,14 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   eine eigene Kategorie zwischen „1" und „2", keine gerundete 1,5. Sie werden
   deshalb gezählt und nie gemittelt. Die Treffsicherheit der Vorhersage wird
   erst ab zehn Ausgaben ausgewiesen; darunter wäre jede Prozentzahl Theater.
+- **Phänologie.** Ein Jahreswert ist das Mittel über die Stationen, die ihn
+  gemeldet haben; die Zahl der Melder steht an jedem Punkt, damit ein Jahr auf
+  einem einzigen Beobachter erkennbar bleibt. Der Vollfrühling ist gespleißt:
+  bis 1990 führte der DWD einen unaufgeteilten „Apfel", ab 1991 getrennt nach
+  früher und später Reife — zwei Reihen nebeneinander würden ein durchgehendes
+  Phänomen hinter einem Buchführungswechsel verstecken. Der Spätsommer nutzt
+  „Pflückreife Beginn", nicht „erste reife Früchte" wie die Wildarten. In den
+  Kalender kommt nur, was mindestens 20 Jahre trägt.
 - **Flusspegel.** Alle Werte in Zentimeter über Pegelnullpunkt. Die Achse des
   Verlaufs ist auf die Messwerte skaliert, weil die täglichen Schwankungen im
   Zentimeterbereich die eigentliche Information sind; Kennwerte und Meldestufen
@@ -303,6 +316,9 @@ offenes WFS, Layer `opendata:odlinfo_odl_1h_latest` und
 
 **Pollenflug:** [DWD, `s31fg.json`](https://opendata.dwd.de/climate_environment/health/alerts/s31fg.json),
 Vorhersage für 27 Regionen, täglich gegen 11:00 Uhr.
+
+**Phänologie:** [DWD Climate Data Center, Jahresmelder](https://opendata.dwd.de/climate_environment/CDC/observations_germany/phenology/annual_reporters/),
+Gruppen `wild`, `fruit` und `crops`.
 
 ### Deutschlandarchiv
 
@@ -428,6 +444,46 @@ Alle drei Vorhersagehorizonte werden festgehalten, nicht nur der laufende Tag.
 Damit lässt sich später eine Frage beantworten, die die DWD-Datei selbst nicht
 beantworten kann: wie gut das, was zwei Tage im Voraus gesagt wurde, zu dem
 passt, was am Tag selbst galt.
+
+### Phänologie
+
+```bash
+npm run fetch:phenology          # einmalig, rund vier Minuten
+npm run fetch:phenology wild     # eine Gruppe allein
+```
+
+Der phänologische Datenbestand des DWD ist der einzige, der nicht das Wetter
+misst, sondern seine Wirkung: den Tag, an dem eine Hasel blühte, ein Apfel
+pflückreif war, eine Eiche ihr Laub abwarf.
+
+Der Abruf ist unangenehm, aber einmalig. Die Dateien sind auf feste Breite mit
+Leerzeichen aufgefüllt und liegen in **drei Ständen je Art** vor (2018, 2019,
+2024); nur der jüngste wird gelesen. Selbst dann sind es 2,9 GB über 63 Dateien
+in drei Gruppen. Nichts davon landet auf der Platte — jede Datei wird im Strom
+gelesen und zeilenweise verworfen, übrig bleiben **32.964 Beobachtungen** in
+`data/pheno/observations.csv`, gut 1 MB.
+
+Das Ergebnis ist eindeutig, und zwar in beide Richtungen:
+
+| Jahreszeit | Zeigerphase | Trend/Jahrzehnt | erste 10 J. → letzte 10 J. |
+|---|---|---:|---:|
+| Vorfrühling | Hasel, Blüte Beginn | −2,3 d | 1. März → 23. Feb. |
+| Vollfrühling | Apfel, Blüte Beginn | −2,0 d | 6. Mai → 26. Apr. |
+| Frühsommer | Holunder, Blüte Beginn | −2,3 d | 8. Juni → 27. Mai |
+| Spätherbst | Stiel-Eiche, Blattverfärbung | +1,9 d | 10. Okt. → 26. Okt. |
+| Winter | Stiel-Eiche, Blattfall | +3,4 d | 24. Okt. → 10. Nov. |
+
+Die Vegetationszeit hat sich also an beiden Enden gedehnt. Und der Vorfrühling
+folgt der Mitteltemperatur von Januar und Februar mit **−6,3 Tagen je Grad bei
+R² 0,68** über 66 Jahre — gemessen von zwei Quellen, die nichts voneinander
+wissen.
+
+**Diese Reihe wächst nicht mehr.** Von 46 Meldestationen im Umkreis haben nur 14
+je gemeldet, die meisten hörten vor Jahrzehnten auf; die Station an der
+Wetterstation selbst endet 2015, nur eine reicht bis 2023. Die aktuellen
+`recent`-Dateien liefern für diesen Umkreis vier Beobachtungen in zwei Jahren.
+Der Sammler steht deshalb nicht im täglichen Workflow — ein erneuter Lauf lohnt
+nur, wenn der DWD die historischen Dateien überarbeitet.
 
 ### Allzeitrekorde
 

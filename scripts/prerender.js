@@ -37,6 +37,7 @@ import { regionalMeta, regionalPairs, regionalSeries } from '../server/regional.
 import { airComponentKeys, airOverview, airProfiles } from '../server/air.js'
 import { odlOverview } from '../server/odl.js'
 import { pollenOverview } from '../server/pollen.js'
+import { comboSeries, phenoComboKeys, phenoOverview } from '../server/pheno.js'
 import { staticPath } from '../src/lib/static-path.js'
 
 const outDir = process.argv[2] ?? 'dist'
@@ -310,6 +311,24 @@ if (radiation.range.last) {
 
 const pollen = pollenOverview()
 if (pollen.range.last) emit('/api/pollen', pollen, 'Pollenflug')
+
+/* -------------------------------------------------------------------------- */
+/* Phenology                                                                  */
+/* -------------------------------------------------------------------------- */
+
+const pheno = phenoOverview()
+if (pheno.range.last) {
+  emit('/api/phenology', pheno, 'Phänologie')
+  // Only the combinations the overview actually offers — the key list comes
+  // from the query module so the two cannot drift.
+  for (const { plant, phase } of phenoComboKeys()) {
+    emit(
+      `/api/phenology/series?phase=${phase}&plant=${plant}`,
+      comboSeries(plant, phase),
+      'Phänologie',
+    )
+  }
+}
 
 /* -------------------------------------------------------------------------- */
 

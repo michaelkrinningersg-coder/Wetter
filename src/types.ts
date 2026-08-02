@@ -881,3 +881,93 @@ export interface PollenResponse {
   regionNote: string
   hint?: string
 }
+
+/* -------------------------------------------------------------------------- */
+/* Phenology                                                                  */
+/* -------------------------------------------------------------------------- */
+
+export interface PhenoPoint {
+  year: number
+  /** Day of year, averaged over the stations that reported it. */
+  day: number
+  reports: number
+  stations: number
+  earliest?: number
+  latest?: number
+}
+
+export interface PhenoSeason {
+  key: string
+  label: string
+  order: number
+  /** Why this season's definition needed a note, where it did. */
+  note: string | null
+  plants: { id: number; name: string }[]
+  phase: { id: number; name: string }
+  points: PhenoPoint[]
+  first: number | null
+  last: number | null
+  years: number
+}
+
+export interface PhenoCalendarEntry {
+  plant: number
+  plantName: string
+  phase: number
+  phaseName: string
+  years: number
+  reports: number
+  first: number
+  last: number
+  day: number
+}
+
+export interface PhenoStation {
+  id: string
+  name: string
+  lat: number
+  lon: number
+  elevation: number | null
+  distance: number
+  landscape: string
+  reports: number
+  years: number
+  first: number | null
+  last: number | null
+  plants: number
+}
+
+export interface PhenoTemperature {
+  season: { key: string; label: string }
+  dwdStation: string
+  untilMonth: number
+  monthsLabel: string
+  points: { year: number; day: number; temp: number; stations: number }[]
+}
+
+export interface PhenologyResponse {
+  origin: { lat: number; lon: number; station: string }
+  radiusKm: number
+  range: {
+    first: number | null
+    last: number | null
+    reports: number
+    stations: number
+    plants: number
+  }
+  seasons: PhenoSeason[]
+  calendar: PhenoCalendarEntry[]
+  stations: PhenoStation[]
+  temperature: PhenoTemperature | null
+  minYears: number
+  endedNote: string
+  hint?: string
+}
+
+export interface PhenoSeriesResponse {
+  plant: number
+  plantName: string
+  phase: number
+  phaseName: string
+  points: PhenoPoint[]
+}

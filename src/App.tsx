@@ -17,6 +17,7 @@ import {
   MapPin,
   Scale,
   Snowflake,
+  Sprout,
   Umbrella,
   Radio,
   Waves,
@@ -59,6 +60,7 @@ import { Records } from './components/Records'
 import { Air } from './components/Air'
 import { Radiation } from './components/Radiation'
 import { Pollen } from './components/Pollen'
+import { Phenology } from './components/Phenology'
 import { Regional } from './components/Regional'
 
 const FALLBACK_STATIONS: Station[] = [
@@ -91,6 +93,7 @@ type TabId =
   | 'air'
   | 'radiation'
   | 'pollen'
+  | 'phenology'
   | 'germany'
   | 'germany-map'
   | 'records'
@@ -134,6 +137,7 @@ const TABS: TabDef[] = [
   { id: 'air', label: 'Luftqualität', icon: Wind, group: 'Umwelt' },
   { id: 'radiation', label: 'Ortsdosisleistung', icon: Radio, group: 'Umwelt' },
   { id: 'pollen', label: 'Pollenflug', icon: Flower2, group: 'Umwelt' },
+  { id: 'phenology', label: 'Phänologie', icon: Sprout, group: 'Umwelt' },
   { id: 'germany', label: 'Deutschland gestern', icon: Map, group: 'Deutschland' },
   { id: 'germany-map', label: 'Karte', icon: MapPin, group: 'Deutschland' },
   { id: 'records', label: 'Allzeitrekorde', icon: Trophy, group: 'Deutschland' },
@@ -410,6 +414,8 @@ export default function App() {
             {tab === 'radiation' && <Radiation />}
 
             {tab === 'pollen' && <Pollen />}
+
+            {tab === 'phenology' && <Phenology />}
 
             {tab === 'germany' && <Germany />}
 

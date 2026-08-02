@@ -27,6 +27,7 @@ import { regionalMeta, regionalSeries } from './regional.js'
 import { airComponentKeys, airOverview, airProfiles } from './air.js'
 import { odlOverview } from './odl.js'
 import { pollenOverview } from './pollen.js'
+import { comboSeries, phenoComboKeys, phenoOverview } from './pheno.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -507,6 +508,46 @@ app.get(
       })
     }
     res.json(overview)
+  }),
+)
+
+/* -------------------------------------------------------------------------- */
+/* Phenology                                                                  */
+/* -------------------------------------------------------------------------- */
+
+app.get(
+  '/api/phenology',
+  handler((_req, res) => {
+    const overview = phenoOverview()
+    if (!overview.range.last) {
+      return res.json({
+        ...overview,
+        hint:
+          'Noch keine Beobachtungen im Archiv. Einmal `npm run fetch:phenology`' +
+          ' ausführen — das liest die historischen DWD-Dateien im Strom und hält' +
+          ' die Meldungen aus dem Umkreis fest.',
+      })
+    }
+    res.json(overview)
+  }),
+)
+
+app.get(
+  '/api/phenology/series',
+  handler((req, res) => {
+    const plant = Number(req.query.plant)
+    const phase = Number(req.query.phase)
+    if (!Number.isInteger(plant) || !Number.isInteger(phase)) {
+      return res.status(400).json({ error: 'plant und phase müssen ganze Zahlen sein.' })
+    }
+
+    const series = comboSeries(plant, phase)
+    if (!series) {
+      return res.status(404).json({
+        error: `Keine Beobachtungen für Pflanze ${plant} in Phase ${phase}.`,
+      })
+    }
+    res.json(series)
   }),
 )
 
