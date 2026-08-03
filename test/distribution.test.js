@@ -127,3 +127,60 @@ test('threshold counts are per year and carry the whole record behind them', () 
     assert.ok(late.perYear >= early.perYear, 'Sommertage werden bei +3 K nicht seltener')
   }
 })
+
+test('the relative change is left out where its denominator is a single day', () => {
+  // A rarity: exactly one day above 30 °C in the oldest period, four in the
+  // newest. The absolute change is sayable — plus three heat days — but the
+  // percentage would be "+300 %" and would hang entirely on that one day.
+  // This is the Brocken's tropical nights, in miniature.
+  const rows = []
+  for (const period of PERIODS) {
+    for (let year = period.from; year <= period.to; year++) {
+      for (const date of days(`${year}-01-01`, `${year}-12-31`)) {
+        rows.push({ date, temp_max: 10, temp_min: 5 })
+      }
+    }
+  }
+  // One hot day in the first period, four in the last.
+  const hot = [
+    `${PERIODS[0].from + 5}-07-01`,
+    `${PERIODS[2].from + 1}-07-01`,
+    `${PERIODS[2].from + 2}-07-01`,
+    `${PERIODS[2].from + 3}-07-01`,
+    `${PERIODS[2].from + 4}-07-01`,
+  ]
+  for (const row of rows) if (hot.includes(row.date)) row.temp_max = 33
+
+  seed(db, 'RARE', rows)
+  const heat = thresholdShift('RARE').find((s) => s.key === 'hot')
+
+  assert.ok(heat, 'die heißen Tage müssen in der Liste stehen')
+  assert.equal(heat.periods[0].days, 1, 'genau ein Tag in der ältesten Periode')
+  assert.ok(heat.change > 0, 'die absolute Veränderung bleibt sagbar')
+  assert.equal(heat.changePercent, null, 'die relative nicht')
+})
+
+test('the relative change is formed once the base period holds enough days', () => {
+  const rows = []
+  for (const period of PERIODS) {
+    for (let year = period.from; year <= period.to; year++) {
+      for (const date of days(`${year}-01-01`, `${year}-12-31`)) {
+        // Two hot days a year in every period, four in the newest: 60 days of
+        // base, far past the floor, and an exact doubling to check against.
+        const july = date.slice(5, 7) === '07'
+        const day = Number(date.slice(8, 10))
+        const hot = july && (day <= 2 || (period.key === PERIODS[2].key && day <= 4))
+        rows.push({ date, temp_max: hot ? 33 : 10, temp_min: 5 })
+      }
+    }
+  }
+
+  seed(db, 'PLENTY', rows)
+  const heat = thresholdShift('PLENTY').find((s) => s.key === 'hot')
+
+  assert.equal(heat.periods[0].days, 2 * (PERIODS[0].to - PERIODS[0].from + 1))
+  assert.ok(
+    Math.abs(heat.changePercent - 100) < 0.001,
+    `von zwei auf vier Tage ist +100 %, nicht ${heat.changePercent}`,
+  )
+})

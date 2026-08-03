@@ -477,6 +477,7 @@ export function Distribution({
                     </th>
                   ))}
                   <th className="px-2 py-2 text-right font-medium">Veränderung</th>
+                  <th className="px-2 py-2 text-right font-medium">relativ</th>
                 </tr>
               </thead>
               <tbody>
@@ -503,6 +504,27 @@ export function Distribution({
                       }`}
                     >
                       {signed(threshold.change, 1)}
+                    </td>
+                    {/* Deliberately not bold: the absolute change is the
+                        statement, this is the same fact scaled by a starting
+                        point that is itself uncertain. */}
+                    <td
+                      className={`numeric px-2 py-1.5 text-right ${
+                        threshold.changePercent === null
+                          ? 'text-ink-faint'
+                          : threshold.changePercent >= 0
+                            ? 'text-hot'
+                            : 'text-cold'
+                      }`}
+                      title={
+                        threshold.changePercent === null
+                          ? `Der Zeitraum ${data.periods[0]?.label ?? ''} hält dafür zu wenige Tage.`
+                          : undefined
+                      }
+                    >
+                      {threshold.changePercent === null
+                        ? '—'
+                        : `${signed(threshold.changePercent, 0)} %`}
                     </td>
                   </tr>
                 ))}
@@ -533,6 +555,16 @@ export function Distribution({
             heißt, dass er zu selten ist, um sich auf ein Jahr umzurechnen.
             Deshalb steht darüber, wie oft es ihn überhaupt gab. Gezählt wird
             eine Periode nur, wenn sie mindestens 25 Jahre mit Messwerten hat.
+          </p>
+          <p className="mt-1.5 text-[11px] text-ink-faint">
+            Die Spalte <span className="text-ink">relativ</span> misst dieselbe
+            Veränderung an ihrem Ausgangspunkt — und bleibt leer, wo dieser
+            Ausgangspunkt zu klein ist, um geteilt zu werden. Der Zeitraum{' '}
+            {data.periods[0]?.label} muss dafür mindestens{' '}
+            <span className="numeric">{num(data.minBaseDays, 0)}</span> Tage
+            enthalten. Auf dem Brocken etwa hält er eine einzige Tropennacht;
+            die vier der Gegenwart wären „+300 %", eine Zahl, die
+            ausschließlich von dieser einen Nacht abhinge.
           </p>
         </Card>
       )}

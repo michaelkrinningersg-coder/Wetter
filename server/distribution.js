@@ -209,6 +209,27 @@ const THRESHOLDS = [
   },
 ]
 
+/**
+ * How many days the oldest period must hold before a percentage is formed.
+ *
+ * The absolute change is always sayable: minus six ice days is minus six ice
+ * days whatever the starting point. A percentage is not, because it divides by
+ * that starting point — and on the Brocken the oldest period holds exactly one
+ * tropical night. The change to four of them is "+260 %", a number that looks
+ * authoritative and would swing by hundreds of points if that single night had
+ * fallen either side of the period boundary.
+ *
+ * Ten is a floor, not a guarantee of precision: even there a single day moves
+ * the result by ten points. Below it the figure is not shaky but meaningless,
+ * so it is left out rather than qualified.
+ */
+const MIN_BASE_DAYS = 10
+
+function relativeChange(base, now) {
+  if (base.perYear === 0 || base.days < MIN_BASE_DAYS) return null
+  return ((now.perYear - base.perYear) / base.perYear) * 100
+}
+
 export function thresholdShift(stationId) {
   const out = []
 
@@ -234,7 +255,7 @@ export function thresholdShift(stationId) {
         )
 
       if (!row || row.years < 25) continue
-      perPeriod.push({ ...period, perYear: row.hits / row.years, years: row.years })
+      perPeriod.push({ ...period, perYear: row.hits / row.years, days: row.hits, years: row.years })
     }
 
     if (perPeriod.length < 2) continue
@@ -249,10 +270,14 @@ export function thresholdShift(stationId) {
       )
       .get(stationId, threshold.value)
 
+    const base = perPeriod[0]
+    const now = perPeriod.at(-1)
+
     out.push({
       ...threshold,
       periods: perPeriod,
-      change: perPeriod.at(-1).perYear - perPeriod[0].perYear,
+      change: now.perYear - base.perYear,
+      changePercent: relativeChange(base, now),
       ever: { days: ever?.n ?? 0, first: ever?.first ?? null, last: ever?.last ?? null },
     })
   }
@@ -273,6 +298,7 @@ export function distributionOverview(stationId) {
     periods: PERIODS,
     minDays: MIN_DAYS,
     quantiles: QUANTILES,
+    minBaseDays: MIN_BASE_DAYS,
     fields,
     thresholds: thresholdShift(stationId),
   }

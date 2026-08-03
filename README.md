@@ -134,7 +134,7 @@ schreiben.
 
 ### Tests
 
-144 Tests in 22 Dateien, zwei Sorten und beide nötig:
+154 Tests in 23 Dateien, zwei Sorten und beide nötig:
 
 **Regressionstests gegen erfundene Messreihen.** Jede Zahl darin ist von Hand
 nachrechenbar, und keine hängt davon ab, dass der DWD morgen einen Tag
@@ -145,7 +145,8 @@ leeres Archiv. Getestet wird, was schiefgegangen *ist*: null als Rekord, der
 Kalendertag als `%m-%d` statt `%j`, relative gegen absolute
 Fast-Rekord-Abstände, der Mittelrang bei Gleichständen, das Überbrücken in
 Episoden, `never` und `stale` im Ticker, Teilmonat gegen Teilmonat samt
-Ensemble-Vollständigkeit und die Newsroom-Währung.
+Ensemble-Vollständigkeit, die Newsroom-Währung, der Trend, der sich als
+Tagesgang ausgibt, und der Nenner, der zu klein für eine Prozentzahl ist.
 
 **Rauchtests gegen das echte Archiv.** Sie behaupten keinen einzigen Messwert —
 die Sammler schreiben jeden Tag einen Tag dazu, und ein Test, der „der Rekord
@@ -245,7 +246,8 @@ Rekord überlebt und wie oft einer knapp verfehlt wurde
 Jahresprognose
 
 **Umwelt** — Flusspegel Leine (Göttingen), Rhume (Northeim) und Weser
-(Wahmbeck) mit Verlauf, Meldestufen und langjährigen Kennwerten · Luftqualität
+(Wahmbeck) mit Verlauf, Meldestufen und langjährigen Kennwerten, dazu der
+Tagesgang der drei Pegel gegen den Tag um sie herum · Luftqualität
 aus den beiden Göttinger UBA-Stationen: Tagesgang je Messgröße im Vergleich
 Hintergrund gegen Verkehr, Wochentags- und Jahresverlauf, Jahresmittel gegen
 die Grenzwerte, Überschreitungen der 39. BImSchV und Ozon gegen die
@@ -728,7 +730,13 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   der Median nur um 1,00 K — die kältesten Tage haben sich fast viermal so stark
   erwärmt wie der mittlere. Bei den Kenntagen steht neben den Werten je Jahr,
   wie oft es den Tag in der ganzen Reihe überhaupt gab: „0,0 Tropennächte je
-  Jahr" heißt nicht „nie", sondern dreimal seit 1858, zuletzt 1988.
+  Jahr" heißt nicht „nie", sondern dreimal seit 1858, zuletzt 1988. Neben der
+  absoluten Veränderung steht die relative — in Göttingen −29 % Eistage und
+  +112 % heiße Tage —, aber nur, wo der Ausgangszeitraum mindestens zehn Tage
+  hält. Auf dem Brocken enthält er eine einzige Tropennacht; die vier der
+  Gegenwart wären „+300 %", eine Zahl, die ausschließlich von dieser einen
+  Nacht abhinge. Die absolute Veränderung bleibt dort sagbar, die relative
+  nicht.
 - **Luftdruck.** Die DWD-Spalte enthält **Stationsdruck, nicht auf Meereshöhe
   reduziert** — Göttingen 996,5 hPa auf 167 m, Brocken 882 auf 1141 m, Zugspitze
   706 auf 2964 m. Die geläufige Schwelle „unter 990 hPa ist ein Sturmtief" gilt
@@ -794,6 +802,18 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   stünde Göttingen beim 96. Perzentil dafür, exakt Durchschnitt zu sein.
   Luftdruck bleibt außen vor, obwohl die Spalte existiert — er wird auf
   Stationshöhe gemessen, eine bundesweite Rangliste sortierte also die Höhe.
+- **Tagesgang der Pegel.** Ein Wasserstand wandert über Wochen, ein Mittel nach
+  Tageszeit sagt deshalb vor allem, welche Wochen gemessen wurden. Jede Stunde
+  wird darum gegen die 24 Stunden um sie herum gerechnet: Ein voller Tag enthält
+  jede Uhrzeit genau einmal und kann selbst keinen Tagesgang tragen. Der
+  Unterschied ist keine Feinheit — auf einer erfundenen Reihe, die nur fällt,
+  erzeugt der Vergleich gegen das Kalendertagsmittel 1,44 cm Scheinamplitude
+  mit Hoch um Mitternacht, das zentrierte Fenster 0,02 cm. Genau darauf bin ich
+  beim ersten Anlauf hereingefallen; der Fall steht jetzt als Test. Die Weser
+  liefert bei jedem Abruf 30 Tage rückwirkend mit, ihre Messzeitpunkte sind also
+  gleichmäßig verteilt; Leine und Rhume geben nur den aktuellen Wert her, dort
+  existiert ausschließlich, was jemand abgefragt hat. Deshalb nennt jede Stunde,
+  auf wie vielen Messungen und wie vielen Tagen sie beruht.
 - **Flusspegel.** Alle Werte in Zentimeter über Pegelnullpunkt. Die Achse des
   Verlaufs ist auf die Messwerte skaliert, weil die täglichen Schwankungen im
   Zentimeterbereich die eigentliche Information sind; Kennwerte und Meldestufen

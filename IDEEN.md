@@ -81,14 +81,15 @@ Anfrage rechnet.
 
 ## Ältere offene Punkte
 
-**Tests.** 144 Tests in 22 Dateien laufen mit `npm test`
+**Tests.** 154 Tests in 23 Dateien laufen mit `npm test`
 (node:test, keine neue Abhängigkeit) und bei jedem Push in `ci.yml`.
 Abgedeckt sind die Fehler, die dieses Projekt tatsächlich gemacht hat: null als
 Rekord, Kalendertag als `%m-%d` statt `%j`, relative gegen absolute
 Fast-Rekord-Abstände, der Mittelrang bei Gleichständen, das Überbrücken in
 Episoden, `never` und `stale` im Ticker, Teilmonat gegen Teilmonat samt
-Ensemble-Vollständigkeit, die Newsroom-Währung und die Regression des
-Deutschlandtages.
+Ensemble-Vollständigkeit, die Newsroom-Währung, die Regression des
+Deutschlandtages, der Trend, der sich als Tagesgang ausgibt, und der Nenner,
+der zu klein für eine Prozentzahl ist.
 
 Inzwischen abgedeckt sind auch die Stellen, die hier als offen standen: das
 Mittelrang-Perzentil des Bundesvergleichs, die Achtstundenmittel der

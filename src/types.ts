@@ -1348,8 +1348,13 @@ export interface ThresholdShift {
   label: string
   note: string
   value: number
-  periods: { key: string; label: string; perYear: number; years: number }[]
+  periods: { key: string; label: string; perYear: number; days: number; years: number }[]
   change: number
+  /**
+   * The same change relative to the oldest period, in percent — null where the
+   * oldest period holds too few days for the division to mean anything.
+   */
+  changePercent: number | null
   /** The whole record, so a threshold that is simply rare reads as rare. */
   ever: { days: number; first: string | null; last: string | null }
 }
@@ -1359,6 +1364,8 @@ export interface DistributionResponse {
   periods: { key: string; from: number; to: number; label: string }[]
   minDays: number
   quantiles: number[]
+  /** Days the oldest period needs before a percentage is formed at all. */
+  minBaseDays: number
   fields: DistributionField[]
   thresholds: ThresholdShift[]
 }
@@ -2277,6 +2284,8 @@ export interface MonthBalanceResponse {
   minMonthDays: number
   minWindowShare: number
   quantiles: number[]
+  /** Days the oldest period needs before a percentage is formed at all. */
+  minBaseDays: number
   fields: BalanceField[]
 }
 
