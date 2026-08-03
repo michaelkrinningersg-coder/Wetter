@@ -21,15 +21,21 @@ einschließlich Luftfeuchte und Schneehöhe ab 1858 und Bewölkung ab 1860.
 
 ```bash
 npm install
-npm run rebuild:app   # better-sqlite3 gegen die Electron-ABI übersetzen
-npm run app           # baut die Oberfläche und öffnet das Fenster
+npm run app        # baut die Oberfläche und öffnet das Fenster
 ```
 
-Der Rebuild ist einmalig und **schließt sich mit den Tests gegenseitig aus**:
-`better-sqlite3` ist ein nativer Baustein, und Node und Electron haben
-verschiedene ABIs. Vor `npm test` also wieder `npm run rebuild:node`. Das
-Paketieren betrifft das nicht — `electron-builder` übersetzt in seinem eigenen
-Durchgang.
+`better-sqlite3` ist kein JavaScript, sondern eine kompilierte Bibliothek, und
+sie liegt als **eine** Datei im Arbeitsverzeichnis: gegen Node übersetzt spricht
+sie ABI 127, gegen Electron 130. Ein Arbeitsverzeichnis kann also immer nur
+eines von beidem — ein Wechsel von `npm run app` zu `npm test` liefe sonst in
+`ERR_DLOPEN_FAILED`. Da die passende Binärdatei mitgeliefert wird und die
+Umschaltung deshalb unter einer Sekunde dauert, machen die Skripte sie selbst:
+`app` schaltet auf Electron, `test`, `start` und `dev:server` schalten zurück.
+Von Hand geht es mit `npm run rebuild:app` und `npm run rebuild:node`.
+
+Auf einem CI-Läufer stellt sich die Frage nicht — jeder Lauf bekommt sein
+eigenes `node_modules`, und `electron-builder` übersetzt vor dem Paketieren
+ohnehin in einem eigenen Durchgang.
 
 Ein fertiges Windows-Programm baut der Workflow `.github/workflows/release.yml`
 — auf Zuruf oder bei einem Tag `v*`. Er läuft auf einem Windows-Läufer, weil
