@@ -83,7 +83,7 @@ const LOAD = {
   RecordBalance: () => import('./components/RecordBalance').then((m) => ({ default: m.RecordBalance })),
   PrecipIntensity: () => import('./components/PrecipIntensity').then((m) => ({ default: m.PrecipIntensity })),
   DayInHistory: () => import('./components/DayInHistory').then((m) => ({ default: m.DayInHistory })),
-  Gauges: () => import('./components/Gauges').then((m) => ({ default: m.Gauges })),
+  Rivers: () => import('./components/Rivers').then((m) => ({ default: m.Rivers })),
   Germany: () => import('./components/Germany').then((m) => ({ default: m.Germany })),
   GermanyMap: () => import('./components/GermanyMap').then((m) => ({ default: m.GermanyMap })),
   Indices: () => import('./components/Indices').then((m) => ({ default: m.Indices })),
@@ -127,7 +127,7 @@ const Seasons = lazy(LOAD.Seasons)
 const RecordBalance = lazy(LOAD.RecordBalance)
 const PrecipIntensity = lazy(LOAD.PrecipIntensity)
 const DayInHistory = lazy(LOAD.DayInHistory)
-const Gauges = lazy(LOAD.Gauges)
+const Rivers = lazy(LOAD.Rivers)
 const Germany = lazy(LOAD.Germany)
 const GermanyMap = lazy(LOAD.GermanyMap)
 const Indices = lazy(LOAD.Indices)
@@ -188,7 +188,7 @@ const TAB_MODULE: Record<string, string> = {
   'climate': 'ClimateDiagram',
   'comparison': 'Comparison',
   'forecast': 'Forecast',
-  'gauges': 'Gauges',
+  'gauges': 'Rivers',
   'air': 'Air',
   'radiation': 'Radiation',
   'pollen': 'Pollen',
@@ -619,7 +619,7 @@ export default function App() {
               <Distribution stationId={stationId} stationName={stationName} />
             )}
 
-            {tab === 'gauges' && <Gauges />}
+            {tab === 'gauges' && <Rivers />}
 
             {tab === 'air' && <Air />}
 

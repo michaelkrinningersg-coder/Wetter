@@ -16,6 +16,7 @@ import {
   gaugeSummary,
   refreshAll,
 } from './gauges.js'
+import { gaugeCycle } from './gauge-cycle.js'
 import {
   archiveRange,
   availableDates,
@@ -362,6 +363,17 @@ app.get(
     }
     const days = gaugeDays(req)
     res.json({ id: gauge.id, days, readings: gaugeSeries(gauge, days) })
+  }),
+)
+
+app.get(
+  '/api/gauges/:id/cycle',
+  handler((req, res) => {
+    const result = gaugeCycle(req.params.id)
+    if (!result) {
+      return res.status(400).json({ error: `Unbekannter Pegel "${req.params.id}".` })
+    }
+    res.json(result)
   }),
 )
 

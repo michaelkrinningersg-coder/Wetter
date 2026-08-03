@@ -442,6 +442,42 @@ export interface GaugeSeriesResponse {
   readings: { ts: string; value: number }[]
 }
 
+export interface CycleHour {
+  hour: number
+  /** Deviation from the surrounding day, in cm; null where nothing was measured. */
+  mean: number | null
+  readings: number
+  /** Distinct days behind this hour — twelve readings from one day are not twelve days. */
+  days: number
+}
+
+export interface CycleProfile {
+  key?: string
+  label: string
+  hours: CycleHour[]
+  days: number
+  /** How many of the 24 hours of the clock have any measurement at all. */
+  coveredHours: number
+  amplitude: number | null
+  lowHour: number | null
+  highHour: number | null
+}
+
+export interface GaugeCycleResponse {
+  gauge: { id: string; name: string; water: string; source: 'nlwkn' | 'pegelonline' }
+  range: {
+    first: string | null
+    last: string | null
+    readings: number
+    hours: number
+    /** Hours whose surrounding day was complete enough to compare against. */
+    usableHours: number
+  }
+  method: { halfWindow: number; minHoursInWindow: number }
+  splits: CycleProfile[]
+  months: (CycleProfile & { month: number })[]
+}
+
 /* -------------------------------------------------------------------------- */
 /* Germany-wide superlatives                                                  */
 /* -------------------------------------------------------------------------- */
