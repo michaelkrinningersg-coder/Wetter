@@ -17,7 +17,7 @@
     "app": "npm run rebuild:app --silent && npm run build && electron .",
     "rebuild:app": "electron-rebuild -f -w better-sqlite3",
     "rebuild:node": "npm rebuild better-sqlite3",
-    "pack": "npm run build && electron-builder",
+    "pack": "npm run rebuild:app && npm run build && electron-builder",
     "typecheck": "tsc -b --noEmit",
     "pretest": "npm run rebuild:node --silent",
     "test": "node --test \"test/**/*.test.js\"",

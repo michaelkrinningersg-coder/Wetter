@@ -34,6 +34,14 @@ jobs:
       - name: Oberfläche bauen
         run: npm run build
 
+      # Erzwungen, und deshalb ein eigener Schritt: electron-builder ruft
+      # @electron/rebuild von sich aus auf, aber ohne `-f`. Da `npm ci` schon
+      # eine gültig aussehende better_sqlite3.node abgelegt hat — die für Node
+      # — lässt dieser Lauf sie stehen, und im Paket landet ABI 127 statt 130.
+      # Das Fenster öffnete sich dann und blieb schwarz.
+      - name: Nativen Baustein gegen die Electron-ABI übersetzen
+        run: npx electron-rebuild -f -w better-sqlite3
+
       # `--publish never` auch beim Tag: das Release wird unten in einem
       # eigenen Schritt bestückt, damit ein fehlgeschlagener Upload nicht als
       # erfolgreicher Bau durchgeht.

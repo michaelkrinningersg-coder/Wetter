@@ -101,6 +101,16 @@ function createWindow() {
 
   win.loadFile(join(here, 'loading.html'))
 
+  // The page is not ready the moment `loadFile` returns, and the messages
+  // worth reading are exactly the ones that arrive first — a failing import
+  // throws within a second. Without this the error would be written into a
+  // document that does not exist yet, be dropped, and leave a blank window
+  // that says nothing about what went wrong.
+  win.webContents.once('did-finish-load', () => {
+    ready = true
+    if (pendingStage !== null) stage(pendingStage)
+  })
+
   // Links to the DWD, the UBA and the gauge portals belong in the user's
   // browser, not in a window that has no address bar and no back button.
   win.webContents.setWindowOpenHandler(({ url }) => {
@@ -113,9 +123,17 @@ function createWindow() {
   })
 }
 
-/** Write one line into the loading page. Silently ignored once it is gone. */
+let ready = false
+let pendingStage = null
+
+/** Write one line into the loading page, or hold it until the page exists. */
 function stage(text) {
   if (!win || win.isDestroyed()) return
+  if (!ready) {
+    pendingStage = text
+    return
+  }
+  pendingStage = null
   const literal = JSON.stringify(String(text))
   win.webContents
     .executeJavaScript(`{const e=document.getElementById('stage');if(e)e.textContent=${literal}}`)
