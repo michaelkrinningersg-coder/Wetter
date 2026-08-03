@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+
+import { dataDir } from './paths.js'
 
 /**
  * Flat-file archive of the pollen forecast.
@@ -16,9 +17,7 @@ import { fileURLToPath } from 'node:url'
  * them into 1.5 here would be a claim the source does not make.
  */
 
-const here = dirname(fileURLToPath(import.meta.url))
-
-export const POLLEN_DATA_DIR = process.env.POLLEN_DATA_DIR ?? join(here, '..', 'data', 'pollen')
+export const POLLEN_DATA_DIR = dataDir('pollen', process.env.POLLEN_DATA_DIR)
 
 export const DAY_HEADER = 'partregion,pollen,today,tomorrow,dayafter'
 

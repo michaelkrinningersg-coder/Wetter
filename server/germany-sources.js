@@ -21,8 +21,9 @@ import { readMatchingText } from './zip.js'
  * maximum is missed more often than not. Every other category uses `kl` alone,
  * so the station set stays comparable across them.
  *
- * Like `gauge-sources.js`, this module deliberately imports no database — the
- * scheduled workflow runs it with nothing installed.
+ * Like `gauge-sources.js`, this module deliberately imports no database, so
+ * the collector that uses it can run as its own process without loading the
+ * native SQLite binding.
  */
 
 const CDC = 'https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/daily'

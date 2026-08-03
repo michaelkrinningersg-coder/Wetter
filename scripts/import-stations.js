@@ -2,9 +2,10 @@
 /**
  * Import every configured station from the DWD.
  *
- * The static build needs a populated database, and a fresh clone has none —
- * `data/weather.sqlite` is deliberately not in the repository. This is what the
- * Pages workflow runs before prerendering.
+ * A fresh install has no database — `data/weather.sqlite` is deliberately not
+ * in the repository, because everything in it can be rebuilt from the archives
+ * and from the DWD. The app runs the same import itself on first start; this
+ * script exists for a checkout, and for `--force` after a schema change.
  *
  *   node scripts/import-stations.js            # historisches Archiv nur bei leerer Tabelle
  *   node scripts/import-stations.js --force    # immer, für Schemaänderungen

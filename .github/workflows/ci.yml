@@ -1,0 +1,34 @@
+name: Prüfen
+
+# Was von der alten Pages-Pipeline bleibt: Lint, Typen, Tests. Die App wird
+# nicht mehr aus dem Netz ausgeliefert, aber die 149 Tests sollen weiter bei
+# jedem Push laufen — sie sind der einzige Wächter über die Auswertungslogik.
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  pruefen:
+    name: Lint, Typen, Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint und Typen prüfen
+        run: |
+          npm run lint
+          npm run typecheck
+
+      # Die Tests legen sich ihre Archive selbst an (eigenes DATA_DIR je
+      # Datei), also ist weder ein Import noch ein Netzzugriff nötig.
+      - name: Tests
+        run: npm test

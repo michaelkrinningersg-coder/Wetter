@@ -10,7 +10,6 @@ import {
 } from 'lucide-react'
 
 import type { ImportResult, ImportStatus, Station } from '../types'
-import { STATIC } from '../lib/api'
 import { isoToGerman } from '../lib/format'
 import { useTheme } from '../lib/theme'
 
@@ -149,27 +148,19 @@ export function Header({
             </p>
           </div>
 
-          {/* A static build has no server to import into; the button would
-              only ever produce a 405. The data is as fresh as the last deploy,
-              which the date range above already states. */}
           <div className="hidden h-8 w-px bg-line sm:block" aria-hidden />
 
           <ThemeToggle />
 
-          {!STATIC && (
-            <>
-
-              <button
-                type="button"
-                onClick={sync}
-                disabled={busy}
-                className="flex cursor-pointer items-center gap-2 rounded-md bg-brand px-3.5 py-2 text-xs font-semibold text-canvas transition-colors hover:bg-brand-dim disabled:cursor-wait disabled:bg-brand/40 disabled:text-ink-muted"
-              >
-                <RefreshCw className={`size-3.5 ${busy ? 'animate-spin' : ''}`} aria-hidden />
-                {busy ? 'Synchronisiert…' : 'Synchronisieren'}
-              </button>
-            </>
-          )}
+          <button
+            type="button"
+            onClick={sync}
+            disabled={busy}
+            className="flex cursor-pointer items-center gap-2 rounded-md bg-brand px-3.5 py-2 text-xs font-semibold text-canvas transition-colors hover:bg-brand-dim disabled:cursor-wait disabled:bg-brand/40 disabled:text-ink-muted"
+          >
+            <RefreshCw className={`size-3.5 ${busy ? 'animate-spin' : ''}`} aria-hidden />
+            {busy ? 'Synchronisiert…' : 'Synchronisieren'}
+          </button>
         </div>
       </div>
 

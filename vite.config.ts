@@ -4,13 +4,12 @@ import tailwindcss from '@tailwindcss/vite'
 
 const API_TARGET = process.env.API_TARGET ?? 'http://localhost:3001'
 
-// A Pages site lives under /<repo>/, so every asset and every prerendered JSON
-// file has to be addressed relative to that prefix. Set BASE_PATH in the
-// deploy workflow; locally it stays at the root.
-const BASE_PATH = process.env.BASE_PATH ?? '/'
-
 export default defineConfig({
-  base: BASE_PATH,
+  // The bundle is loaded from the app's own server on a port picked at
+  // startup, so every asset must be addressed relative to the document —
+  // an absolute '/' would be right too, but './' also survives being opened
+  // straight from disk while debugging a build.
+  base: './',
   plugins: [react(), tailwindcss()],
   build: {
     // The original bundle shipped a source map to production. Keep it off by
@@ -22,14 +21,11 @@ export default defineConfig({
         /*
          * Split the dependencies away from our own code.
          *
-         * The point is not the first visit — it is every visit after it. This
-         * site republishes after each data run, several times a day, and with
-         * one bundle a single changed line invalidates all 235 kB in the
-         * visitor's cache. Recharts alone is two thirds of that and has not
-         * changed in months.
-         *
          * Measured: recharts 567 kB, icons 35 kB, our code plus React 233 kB.
-         * After a deploy only the last of those has to travel again.
+         * The split predates the local build, where nothing travels over a
+         * network at all — but it still pays: the chart library is loaded
+         * lazily with the views that need it, so the first paint does not
+         * wait for 567 kB to be parsed.
          */
         manualChunks(id) {
           if (!id.includes('node_modules')) return undefined

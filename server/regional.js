@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 
+import { dataDir } from './paths.js'
 import { db } from './db.js'
 import { PARAMETER_BY_KEY, PERIODS, REGIONAL_PARAMETERS } from './regional-sources.js'
 
@@ -14,10 +14,7 @@ import { PARAMETER_BY_KEY, PERIODS, REGIONAL_PARAMETERS } from './regional-sourc
  * daily data cannot reproduce.
  */
 
-const here = dirname(fileURLToPath(import.meta.url))
-
-export const REGIONAL_DATA_DIR =
-  process.env.REGIONAL_DATA_DIR ?? join(here, '..', 'data', 'regional')
+export const REGIONAL_DATA_DIR = dataDir('regional', process.env.REGIONAL_DATA_DIR)
 
 /* -------------------------------------------------------------------------- */
 /* Schema                                                                     */

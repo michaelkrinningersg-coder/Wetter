@@ -1,6 +1,7 @@
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
+
+import { dataDir } from './paths.js'
 
 /**
  * Flat-file archive of gauge readings, one CSV per gauge.
@@ -15,9 +16,7 @@ import { fileURLToPath } from 'node:url'
  * around the clock.
  */
 
-const here = dirname(fileURLToPath(import.meta.url))
-
-export const GAUGE_DATA_DIR = process.env.GAUGE_DATA_DIR ?? join(here, '..', 'data', 'gauges')
+export const GAUGE_DATA_DIR = dataDir('gauges', process.env.GAUGE_DATA_DIR)
 
 const HEADER = 'timestamp,value_cm'
 

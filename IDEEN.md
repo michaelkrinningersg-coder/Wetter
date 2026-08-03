@@ -72,21 +72,23 @@ müssten; ob der DWD sie in dieser Vollständigkeit veröffentlicht, ist ungepr�
 **7 — Zeitraffer der Karte.** Ein Schieberegler über mehrere Tage, damit man
 eine Hitzewelle über Deutschland ziehen sieht. Technisch die vorhandene Karte
 plus Vorladen mehrerer Tage; der Reiz liegt darin, dass Wetter erst in der
-Bewegung erzählt. Zurückgestellt, weil es je Tag eine eigene vorberechnete
-JSON-Datei braucht und die Anzahl der Dateien auf den Pages-Build durchschlägt.
+Bewegung erzählt. Der Grund für die Zurückstellung ist mit dem Umbau auf ein
+lokales Programm entfallen — es gibt keine vorberechneten Dateien mehr, deren
+Anzahl auf einen Build durchschlüge, sondern einen Server, der jeden Tag auf
+Anfrage rechnet.
 
 ---
 
 ## Ältere offene Punkte
 
-**Tests.** 149 Tests in 23 Dateien laufen mit `npm test`
-(node:test, keine neue Abhängigkeit) und hängen als Tor vor dem Pages-Deploy.
+**Tests.** 144 Tests in 22 Dateien laufen mit `npm test`
+(node:test, keine neue Abhängigkeit) und bei jedem Push in `ci.yml`.
 Abgedeckt sind die Fehler, die dieses Projekt tatsächlich gemacht hat: null als
 Rekord, Kalendertag als `%m-%d` statt `%j`, relative gegen absolute
 Fast-Rekord-Abstände, der Mittelrang bei Gleichständen, das Überbrücken in
 Episoden, `never` und `stale` im Ticker, Teilmonat gegen Teilmonat samt
-Ensemble-Vollständigkeit, die Newsroom-Währung, die Dateinamen der statischen
-Vorberechnung und die Regression des Deutschlandtages.
+Ensemble-Vollständigkeit, die Newsroom-Währung und die Regression des
+Deutschlandtages.
 
 Inzwischen abgedeckt sind auch die Stellen, die hier als offen standen: das
 Mittelrang-Perzentil des Bundesvergleichs, die Achtstundenmittel der

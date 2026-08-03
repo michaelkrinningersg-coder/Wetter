@@ -1,7 +1,7 @@
 import { Buffer } from 'node:buffer'
-import unzipper from 'unzipper'
 
 import { db, setImportState } from './db.js'
+import { listEntries, readEntry } from './zip.js'
 import { historicalDirUrl, historicalIndexUrl, recentUrl } from './stations.js'
 
 /** DWD marks missing values with -999. */
@@ -121,20 +121,21 @@ async function fetchBuffer(url, { timeoutMs = 120_000 } = {}) {
   }
 }
 
-/** Extract every `produkt_klima_tag_*.txt` entry from a DWD zip archive. */
-async function extractProductFiles(buffer) {
-  const directory = await unzipper.Open.buffer(buffer)
-  const entries = directory.files.filter((f) =>
-    /produkt_klima_tag_.*\.txt$/i.test(f.path),
-  )
-  const texts = []
-  for (const entry of entries) {
-    const content = await entry.buffer()
+/**
+ * Extract every `produkt_klima_tag_*.txt` entry from a DWD zip archive.
+ *
+ * Read by our own `zip.js` rather than by `unzipper`. The collectors were
+ * already written that way so their workflow needed no install step; with the
+ * app packaged as a program, the argument is a different one — every
+ * dependency is a file that has to be shipped, signed and kept current, and
+ * this one did nothing that forty lines on top of `node:zlib` do not.
+ */
+function extractProductFiles(buffer) {
+  return listEntries(buffer)
+    .filter((entry) => /produkt_klima_tag_.*\.txt$/i.test(entry.name))
     // DWD publishes these as ISO-8859-1; the header contains no umlauts we
     // depend on, but decoding as latin1 avoids replacement characters.
-    texts.push(content.toString('latin1'))
-  }
-  return texts
+    .map((entry) => readEntry(buffer, entry).toString('latin1'))
 }
 
 /** Resolve the current historical archive filename from the DWD directory listing. */

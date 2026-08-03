@@ -2362,3 +2362,34 @@ export interface CuriositiesResponse {
   minMonthRain: number
   sections: CuriositySection[]
 }
+
+/* -------------------------------------------------------------------------- */
+/* The collectors                                                             */
+/* -------------------------------------------------------------------------- */
+
+export interface JobStatus {
+  key: string
+  label: string
+  note: string
+  /** How often the scheduler is willing to run this, in minutes. */
+  everyMinutes: number
+  /** How far this source may trail before it counts as late. */
+  graceDays: number
+  /** The last day this source reaches, or null for an untouched archive. */
+  covered: string | null
+  /** Days between `covered` and yesterday — 0 means up to date. */
+  gapDays: number | null
+  running: boolean
+  lastSuccess: string | null
+  lastFinished: string | null
+  lastError: string | null
+  lastMs: number | null
+  /** When the scheduler will pick this up again; null before the first run. */
+  dueAt: string | null
+}
+
+export interface SystemResponse {
+  dataRoot: string
+  today: string
+  jobs: JobStatus[]
+}

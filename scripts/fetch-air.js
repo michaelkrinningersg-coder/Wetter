@@ -3,9 +3,10 @@
  * Collect hourly air quality for the two Göttingen stations and write it to the
  * CSV archive.
  *
- *   node scripts/fetch-air.js              # the last few days
- *   node scripts/fetch-air.js 2026-07-28   # one specific day
- *   node scripts/fetch-air.js --backfill   # 2016-01-01 to yesterday
+ *   node scripts/fetch-air.js                         # the last few days
+ *   node scripts/fetch-air.js 2026-07-28              # one specific day
+ *   node scripts/fetch-air.js 2026-06-01 2026-07-28   # a range
+ *   node scripts/fetch-air.js --backfill              # 2016-01-01 to yesterday
  *
  * The default is a short rolling window rather than yesterday alone, because
  * the UBA revises recent hours: a value fetched the morning after is
@@ -29,7 +30,16 @@ import { listDays, readDay, writeDay } from '../server/air-csv.js'
 
 const args = process.argv.slice(2)
 const backfill = args.includes('--backfill')
-const explicit = args.find((a) => /^\d{4}-\d{2}-\d{2}$/.test(a))
+
+/*
+ * One date means that day; two mean a range. The range exists for the local
+ * scheduler: after the app was closed for three weeks the routine seven-day
+ * window is too short, and `--backfill` — a decade of hourly values — is a
+ * wildly disproportionate way to recover twenty-one days.
+ */
+const given = args.filter((a) => /^\d{4}-\d{2}-\d{2}$/.test(a)).sort()
+const explicit = given[0]
+const explicitTo = given.length > 1 ? given[given.length - 1] : explicit
 
 /** How many days back the routine run re-reads, to pick up revised values. */
 const WINDOW_DAYS = 7
@@ -44,14 +54,16 @@ function berlinDate(offsetDays = 0) {
   }).format(at)
 }
 
-const to = explicit ?? berlinDate(1)
+const to = explicitTo ?? berlinDate(1)
 const from = explicit ?? (backfill ? ARCHIVE_START : berlinDate(WINDOW_DAYS))
 
 console.log(
   backfill
     ? `Rückfüllung: ${from} bis ${to}`
     : explicit
-      ? `Zieltag: ${to}`
+      ? from === to
+        ? `Zieltag: ${to}`
+        : `Zeitraum: ${from} bis ${to}`
       : `Zeitraum: ${from} bis ${to} (${WINDOW_DAYS} Tage, wegen nachträglicher Prüfung)`,
 )
 

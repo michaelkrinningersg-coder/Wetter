@@ -17,23 +17,53 @@ einschließlich Luftfeuchte und Schneehöhe ab 1858 und Bewölkung ab 1860.
 
 ## Schnellstart
 
+### Als Programm
+
 ```bash
 npm install
+npm run rebuild:app   # better-sqlite3 gegen die Electron-ABI übersetzen
+npm run app           # baut die Oberfläche und öffnet das Fenster
+```
+
+Der Rebuild ist einmalig und **schließt sich mit den Tests gegenseitig aus**:
+`better-sqlite3` ist ein nativer Baustein, und Node und Electron haben
+verschiedene ABIs. Vor `npm test` also wieder `npm run rebuild:node`. Das
+Paketieren betrifft das nicht — `electron-builder` übersetzt in seinem eigenen
+Durchgang.
+
+Ein fertiges Windows-Programm baut der Workflow `.github/workflows/release.yml`
+— auf Zuruf oder bei einem Tag `v*`. Er läuft auf einem Windows-Läufer, weil
+`better-sqlite3` als nativer Baustein gegen die Electron-ABI übersetzt werden
+muss und das nur auf der Zielplattform geht. Herausfallen ein Installer und
+eine portable `.exe`.
+
+Das Paket ist bewusst **ohne asar-Archiv** gebaut: Die Sammler werden als
+eigene Prozesse gestartet und müssen deshalb als echte Dateien auf der Platte
+liegen, und der native SQLite-Baustein ohnehin. Das kostet die portable
+Fassung Startzeit, weil sie sich bei jedem Aufruf entpackt — wer sie regelmäßig
+benutzt, ist mit dem Installer besser bedient.
+
+Beim ersten Start passieren zwei Dinge, die es später nicht mehr gibt: Die
+mitgelieferten CSV-Archive werden in einen beschreibbaren Ordner kopiert
+(`%APPDATA%/Wetterstation/daten`, im Programm unter *Datenstand* nachlesbar),
+und die drei Stationsreihen werden vom DWD geholt. Das Fenster öffnet sich
+vorher; die Statusleiste sagt, was noch läuft.
+
+### Im Entwicklungsbetrieb
+
+```bash
 npm run dev
 ```
 
 - Frontend: http://localhost:5173
 - API: http://localhost:3001
 
-Beim ersten Start ist die Datenbank leer. Oben rechts auf **Synchronisieren**
-klicken — der Erstimport lädt das historische Archiv und die tagesaktuellen
-Werte vom DWD (für Göttingen ca. 10 Sekunden).
-
-### Produktion
+Der Entwicklungsserver sammelt **nicht** — `WETTER_NO_SCHEDULE=1` steht im
+Skript, sonst löste jede gespeicherte Datei eine Runde Downloads aus.
 
 ```bash
 npm run build
-npm start          # liefert dist/ und die API auf Port 3001
+npm start          # liefert dist/ und die API auf Port 3001, mit Sammler
 ```
 
 ```bash
@@ -42,12 +72,63 @@ npm run typecheck  # tsc --noEmit
 npm test           # node:test, keine weitere Abhängigkeit
 ```
 
-Alle drei laufen im Pages-Workflow vor dem Build und brechen den Deploy ab,
-bevor eine kaputte Fassung veröffentlicht wird.
+Alle drei laufen bei jedem Push in `.github/workflows/ci.yml`.
+
+### Wo die Daten liegen
+
+Eine Wurzel, `WETTER_DATA_ROOT`, mit einem Unterordner je Quelle. Vorgabe ist
+`data/` neben den Quellen, also das, was ein Klon bekommt; das gepackte
+Programm zeigt sie auf sein Benutzerverzeichnis. Die neun alten Variablen
+(`DATA_DIR`, `GERMANY_DATA_DIR`, …) haben weiterhin Vorrang — die Tests richten
+sich damit jeweils ein leeres Archiv ein.
+
+In der Wurzel liegen die CSV-Archive und `weather.sqlite`. Die Datenbank ist
+**abgeleitet**: Sie wird beim Start aus den CSVs und aus dem DWD wiederhergestellt
+und ist deshalb weder im Repository noch im Installationspaket.
+
+### Was wann gesammelt wird
+
+Vier Läufe, alle in `server/jobs.js`, alle nur solange das Programm offen ist:
+
+| Lauf | Takt | Quelle |
+|---|---|---|
+| Stationsarchiv | täglich | DWD, die drei Reihen dieser App |
+| Deutschlandwerte | täglich | rund 2.400 DWD-Stationen, dazu die Gebietsmittel |
+| Umweltdaten | täglich | UBA-Luftqualität, BfS-Ortsdosisleistung, DWD-Pollen |
+| Pegelstände | stündlich | PEGELONLINE und NLWKN |
+
+Kein Zeitplan, sondern ein Rückstand: Was zu tun ist, ergibt sich daraus, wie
+weit ein Archiv reicht — nicht daraus, wann ein Wecker zuletzt klingelte. Ein
+Rechner, der drei Wochen aus war, und einer, der nie lief, nehmen denselben Weg.
+
+Deshalb ist auch wichtig, was sich nachholen lässt und was nicht:
+
+| Quelle | rückwirkendes Fenster | Lücke bei ausgeschaltetem Rechner |
+|---|---|---|
+| Stationsarchiv | rund 500 Tage, dazu das historische Archiv | keine |
+| Deutschlandwerte | rund 500 Tage (`--backfill`) | keine, bis rund 18 Monate |
+| Luftqualität | ab 2016 | keine |
+| Gebietsmittel, Phänologie, Rekordbasis | Vollarchive | keine |
+| Weser (PEGELONLINE) | 30 Tage | keine, bis 30 Tage |
+| Leine, Rhume (NLWKN) | nur der aktuelle Wert | dauerhaft |
+| Ortsdosisleistung (BfS) | 7 Tage | dauerhaft ab Tag 8 |
+| Pollenflug (DWD) | nur die aktuelle Ausgabe | jeder verpasste Tag |
+
+Die Statusleiste über den Analysebereichen sagt für jede Quelle, wie weit sie
+reicht, wann sie zuletzt durchlief und was schiefging — und lässt jeden Lauf
+von Hand anstoßen. Jede Quelle bringt dabei ihre eigene Toleranz mit: Der DWD
+prüft seine Stationswerte vor der Veröffentlichung, ein Archiv, das vorgestern
+endet, arbeitet also wie vorgesehen.
+
+Die Sammler, die ohne die Datenbank auskommen, laufen als eigener Prozess. Das
+ist kein Erbe der alten Workflows, sondern der Grund, warum ein abgebrochener
+Download höchstens eine CSV-Datei beschädigen kann und nie die Datenbank.
+Stationsimport und Pegel laufen im Prozess, weil beide ohnehin in die Datenbank
+schreiben.
 
 ### Tests
 
-149 Tests in 23 Dateien, zwei Sorten und beide nötig:
+144 Tests in 22 Dateien, zwei Sorten und beide nötig:
 
 **Regressionstests gegen erfundene Messreihen.** Jede Zahl darin ist von Hand
 nachrechenbar, und keine hängt davon ab, dass der DWD morgen einen Tag
@@ -58,14 +139,13 @@ leeres Archiv. Getestet wird, was schiefgegangen *ist*: null als Rekord, der
 Kalendertag als `%m-%d` statt `%j`, relative gegen absolute
 Fast-Rekord-Abstände, der Mittelrang bei Gleichständen, das Überbrücken in
 Episoden, `never` und `stale` im Ticker, Teilmonat gegen Teilmonat samt
-Ensemble-Vollständigkeit, die Newsroom-Währung und die Dateinamen der
-statischen Vorberechnung.
+Ensemble-Vollständigkeit und die Newsroom-Währung.
 
 **Rauchtests gegen das echte Archiv.** Sie behaupten keinen einzigen Messwert —
-die Sammler schreiben jeden Morgen einen Tag dazu, und ein Test, der „der
-Rekord liegt bei 13 Tagen" festschriebe, ginge von allein rot. Geprüft wird,
-was unabhängig von den Daten gelten muss: Jeder Endpunkt antwortet, **keine
-Zahl ist NaN** (`JSON.stringify` macht daraus stillschweigend `null`, und im
+die Sammler schreiben jeden Tag einen Tag dazu, und ein Test, der „der Rekord
+liegt bei 13 Tagen" festschriebe, ginge von allein rot. Geprüft wird, was
+unabhängig von den Daten gelten muss: Jeder Endpunkt antwortet, **keine Zahl
+ist NaN** (`JSON.stringify` macht daraus stillschweigend `null`, und im
 Diagramm sähe eine Division durch null wie eine Messlücke aus), kein Rang liegt
 außerhalb seines Feldes, und der Newsroom veröffentlicht nichts über seiner
 eigenen Schwelle.
@@ -93,16 +173,7 @@ Die Tests haben beim Schreiben vier Fehler gefunden:
 
 Alle vier sind repariert und stehen jetzt als Test da.
 
-### GitHub Pages
-
-Pages liefert Dateien aus, keine Query-Strings. `npm run build:static` baut
-deshalb das Frontend im statischen Modus **und** schreibt jede API-Antwort als
-JSON-Datei:
-
-```bash
-npm run import:stations   # Datenbank füllen (die drei Stationen vom DWD)
-npm run build:static      # dist/ mit 7.673 Dateien, 144 MB
-```
+### Oberfläche
 
 Das JavaScript ist aufgeteilt: 34 Chunks statt einer Datei. Der Erstaufruf lädt
 **65 kB gzip** (Gerüst, React, Icons) statt 235 — die Diagrammbibliothek ist mit
@@ -119,42 +190,17 @@ verlinken lässt:
 ?bereich=day-in-history&monat=3&tag=15         der 15. März in der Geschichte
 ```
 
-Ausschließlich über den Query-String, nie über den Pfad — Pages liefert Dateien
-aus und hat keine Rewrite-Regel: `/Wetter/?bereich=air` ist weiterhin eine
-Anfrage nach `/Wetter/`, `/Wetter/air` wäre ein 404. Ein Bereichswechsel legt
-einen Verlaufseintrag an und räumt die Parameter des vorigen Bereichs weg; alles
-innerhalb eines Bereichs ersetzt den Eintrag nur, damit die Zurück-Taste nicht
-unter zwanzig Reglerbewegungen begraben wird. Unbekannte Werte fallen still auf
-die Vorgabe zurück.
-
-Wohin welche Antwort geschrieben wird, entscheidet `src/lib/static-path.js` —
-und dieselbe Funktion benutzt das Frontend, um zu lesen. Eine zweite
-Implementierung würde auseinanderlaufen, und der Fehler wäre ein 404 im
-Browser statt ein Übersetzungsfehler.
-
-| Gruppe | Dateien | Größe |
-|---|---:|---:|
-| Deutschland (Top 50 je Tag) | 552 | 57,9 MB |
-| Karte (Register + ein Tag je Datei) | 553 | 32,1 MB |
-| Monatsansicht | 5.020 | 30,3 MB |
-| Dieser Tag | 1.116 | 17,3 MB |
-| Gebietsmittel | 60 | 3,3 MB |
-| übrige (inkl. Umweltdaten) | 175 | 2,3 MB |
-
-Der Workflow `.github/workflows/pages.yml` veröffentlicht nach jedem Datenlauf.
-Damit er greifen kann, muss in den Repository-Einstellungen unter **Pages** als
-Quelle **GitHub Actions** eingestellt sein.
+Ausschließlich über den Query-String, nie über den Pfad. Ein Bereichswechsel
+legt einen Verlaufseintrag an und räumt die Parameter des vorigen Bereichs weg;
+alles innerhalb eines Bereichs ersetzt den Eintrag nur, damit die Zurück-Taste
+nicht unter zwanzig Reglerbewegungen begraben wird. Unbekannte Werte fallen
+still auf die Vorgabe zurück.
 
 Die Oberfläche kennt einen hellen und einen dunklen Farbsatz, umschaltbar oben
 rechts. Dunkel bleibt die Vorgabe; die Wahl wird gespeichert und vor dem ersten
 Bildaufbau von einem Inline-Skript gesetzt, damit die Seite nicht kurz dunkel
 aufblitzt. Sämtliche Farben sind CSS-Variablen — auch die der Diagramme, weil
 recharts sie in SVG-Präsentationsattribute schreibt, wo `var()` aufgelöst wird.
-
-Zwei Dinge kann eine statische Auslieferung nicht, und sie täuscht es auch
-nicht vor: den DWD-Import auf Knopfdruck und das Nachladen der Pegel beim
-Aufruf. Beide Schalter sind ausgeblendet; die Daten sind so frisch wie der
-letzte Deploy.
 
 ## Analysebereiche
 
@@ -639,10 +685,10 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
 - **Newsroom.** Jede andere Ansicht beantwortet eine Frage, die jemand gestellt
   hat; diese stellt sie selbst, einmal pro Tag, an jede Quelle des Projekts —
   und muss auch nein sagen können. **Kein Sprachmodell ist beteiligt:** Die
-  Sätze entstehen aus festen Bausteinen und gemessenen Zahlen, weil die ganze
-  Seite in statische Dateien vorberechnet wird. Ein Modell im Auslieferungspfad
-  machte die Seiten unreproduzierbar, und ein falscher Satz wäre von einem
-  richtigen nicht zu unterscheiden.
+  Sätze entstehen aus festen Bausteinen und gemessenen Zahlen. Ein Modell im
+  Auslieferungspfad hätte zwei Kosten, die keine Formulierung wert ist:
+  Dieselbe Frage an dasselbe Archiv ergäbe zweimal verschiedene Ausgaben, und
+  ein falscher Satz wäre von einem richtigen nicht zu unterscheiden.
 
   Vergleichbar werden die ungleichen Befunde durch **eine Währung**: Jede Regel
   meldet, an *wie vielen Tagen im Jahr* eine mindestens so extreme Aussage
@@ -796,9 +842,8 @@ unter `weather_reports` sind Strahlungsdaten. Ganz Deutschland heißt daher rund
 | [`daily/kl`](https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/daily/kl/recent/) | 576 | Temperatur, Wind, Niederschlag, Sonne, Bewölkung, Druck, Feuchte, Schnee |
 | [`daily/more_precip`](https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/daily/more_precip/recent/) | 2319 | nur Niederschlag und Schnee |
 
-483 Stationen liegen in beiden Netzen; dort gilt der Klimadatensatz. Ein
-täglicher Workflow (`.github/workflows/deutschland.yml`) holt den Vortag und
-legt ihn ab:
+483 Stationen liegen in beiden Netzen; dort gilt der Klimadatensatz. Der
+tägliche Lauf `deutschland` holt den Vortag und legt ihn ab:
 
 ```
 data/germany/stations.csv          Register: Name, Bundesland, Lage, Höhe
@@ -811,7 +856,7 @@ station,temp_mean,temp_max,temp_min,precipitation,wind_max,wind_mean,sunshine,cl
 ```
 
 Ein Tag umfasst rund 2300 Stationen (53 KB, gepackt 15 KB), das Jahr also etwa
-5 MB im Repository. Der Server liest das Archiv beim Start in die Datenbank.
+5 MB. Der Server liest das Archiv beim Start in die Datenbank.
 
 ```bash
 npm run fetch:germany                 # Vortag
@@ -820,9 +865,12 @@ npm run fetch:germany -- --backfill   # alles, was die Archive hergeben
 ```
 
 `--backfill` lohnt einmalig: jedes Stationsarchiv reicht etwa 500 Tage zurück,
-ein Lauf füllt also rund anderthalb Jahre auf einmal. Wie beim Pegelarchiv
-braucht der Workflow kein `npm ci` — die ZIPs werden über `node:zlib` entpackt
-(`server/zip.js`), geprüft byte-identisch gegen `unzipper`.
+ein Lauf füllt also rund anderthalb Jahre auf einmal. Genau davon lebt das
+Nachholen — ein Rückstand von mehr als drei Tagen wird nicht Tag für Tag
+aufgeholt, sondern mit einem einzigen Durchlauf über das ganze rollierende
+Archiv. Die ZIPs entpackt `server/zip.js` über `node:zlib`, geprüft
+byte-identisch gegen `unzipper`, das dafür aus den Abhängigkeiten verschwunden
+ist.
 
 ### Gebietsmittel
 
@@ -832,7 +880,7 @@ npm run fetch:regional
 
 58 Dateien, 115.000 Werte, 38 Sekunden. Abgelegt als `data/regional/annual.csv`,
 `monthly.csv` und `seasonal.csv` — eine Zeile je Gebiet, Größe, Zeitraum und
-Jahr. Der tägliche Workflow ruft sie mit ab: der DWD korrigiert auch
+Jahr. Der tägliche Lauf ruft sie mit ab: der DWD korrigiert auch
 zurückliegende Jahre, wenn sich Messnetz oder Interpolation ändern, weshalb ein
 reines „schon vorhanden" nicht genügt.
 
@@ -945,8 +993,8 @@ wissen.
 je gemeldet, die meisten hörten vor Jahrzehnten auf; die Station an der
 Wetterstation selbst endet 2015, nur eine reicht bis 2023. Die aktuellen
 `recent`-Dateien liefern für diesen Umkreis vier Beobachtungen in zwei Jahren.
-Der Sammler steht deshalb nicht im täglichen Workflow — ein erneuter Lauf lohnt
-nur, wenn der DWD die historischen Dateien überarbeitet.
+Der Sammler steht deshalb nicht auf dem täglichen Zeitplan — ein erneuter Lauf
+lohnt nur, wenn der DWD die historischen Dateien überarbeitet.
 
 ### Allzeitrekorde
 
@@ -968,7 +1016,8 @@ Alles nach dem Stichtag spielt der Server beim Start aus dem Tagesarchiv nach �
 Tag für Tag, in der richtigen Reihenfolge, sodass ein Wert nur zählt, wenn er
 schlägt, was **vor** ihm stand. Damit liegen die Rekordmeldungen rückwirkend
 für den gesamten Archivzeitraum vor und nicht erst ab Inbetriebnahme. Der
-tägliche Workflow braucht dafür keinen Zusatzschritt.
+tägliche Lauf braucht dafür keinen Zusatzschritt: Er stößt das Nachspielen
+selbst an, sobald neue Deutschlandtage im Archiv liegen.
 
 **Flusspegel:** zwei Quellen, weil die Pegel an unterschiedlichen Gewässern
 liegen.
@@ -990,8 +1039,8 @@ NLWKN.
 ### Pegelarchiv
 
 Weil die Quellen keine Historie herausgeben, sammelt das Projekt sie selbst.
-Ein stündlicher GitHub-Workflow (`.github/workflows/pegel.yml`) ruft die
-aktuellen Werte ab und hängt sie an eine CSV je Pegel unter `data/gauges/` an:
+Stündlich, solange das Programm läuft, ruft es die aktuellen Werte ab und hängt
+sie an eine CSV je Pegel unter `data/gauges/` an:
 
 ```
 data/gauges/leine-goettingen.csv
@@ -1004,8 +1053,9 @@ timestamp,value_cm
 2026-07-31T22:15:00+02:00,35
 ```
 
-Der Server liest dieses Archiv beim Start in die Datenbank ein — ein frischer
-Klon hat die gesammelte Historie also sofort im Diagramm. Manuell:
+Der Server liest dieses Archiv beim Start in die Datenbank ein — eine frische
+Installation hat die mitgelieferte Historie also sofort im Diagramm. Von Hand,
+ohne die App zu starten:
 
 ```bash
 npm run fetch:gauges
@@ -1013,20 +1063,18 @@ npm run fetch:gauges
 
 Drei Eigenschaften, die den Lauf robust halten:
 
-- **Keine Abhängigkeiten.** Das Skript nutzt nur die Node-Standardbibliothek,
-  der Workflow braucht daher kein `npm ci` und keinen nativen Build von
-  better-sqlite3. Ein Lauf dauert Sekunden.
+- **Keine Abhängigkeiten.** Das Skript nutzt nur die Node-Standardbibliothek
+  und keinen nativen Baustein. Ein Lauf dauert Sekunden.
 - **Append-only.** Geschrieben werden ausschließlich Messwerte, die neuer sind
-  als der letzte Eintrag. Das hält die git-Diffs klein — bei stündlichen
-  Commits ist das der Unterschied zwischen wenigen Zeilen und einem neuen Blob
-  pro Lauf.
+  als der letzte Eintrag. Ein doppelter Lauf erzeugt also keine doppelte Zeile.
 - **Teiltoleranz.** Fällt ein Portal aus, werden die übrigen Pegel trotzdem
   gespeichert. Der Lauf scheitert nur, wenn keine einzige Quelle erreichbar ist.
 
-Zwei Dinge, die man über geplante Workflows wissen sollte: Sie laufen nur auf
-dem **Standard-Branch**, und GitHub deaktiviert sie in öffentlichen
-Repositories nach 60 Tagen ohne Aktivität. Da der Workflow selbst committet,
-hält er sich in der Regel am Leben.
+Der stündliche Lauf im Programm nimmt einen anderen Weg als dieses Skript: Er
+schreibt in einem Zug in die CSV **und** in die Datenbank, damit das Diagramm
+den neuen Wert ohne Neustart zeigt. Die Weser bringt bei jedem Abruf ihre
+letzten 30 Tage mit, füllt also auch eine Nacht auf, in der niemand am Rechner
+war; Leine und Rhume nicht — dort existiert nur, was jemand abgefragt hat.
 
 Historische Pegelzeitreihen sind online nirgends frei abrufbar. Die Daten
 existieren (Leine ab 1958, Weser ab 1973, Rhume ab 1993), werden aber nur auf

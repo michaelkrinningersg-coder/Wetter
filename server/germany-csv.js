@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 
+import { dataDir } from './paths.js'
 import { FIELDS } from './germany-sources.js'
 
 /**
@@ -21,10 +21,7 @@ import { FIELDS } from './germany-sources.js'
  * actually added or its details change, which is a few times a year.
  */
 
-const here = dirname(fileURLToPath(import.meta.url))
-
-export const GERMANY_DATA_DIR =
-  process.env.GERMANY_DATA_DIR ?? join(here, '..', 'data', 'germany')
+export const GERMANY_DATA_DIR = dataDir('germany', process.env.GERMANY_DATA_DIR)
 
 /* -------------------------------------------------------------------------- */
 /* Daily files                                                                */

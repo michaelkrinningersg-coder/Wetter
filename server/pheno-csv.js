@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { dirname } from 'node:path'
-import { fileURLToPath } from 'node:url'
+
+import { dataDir } from './paths.js'
 
 /**
  * Flat-file archive of the phenological observations.
@@ -16,9 +16,7 @@ import { fileURLToPath } from 'node:url'
  * across a hundred files would buy nothing and cost a hundred reads.
  */
 
-const here = dirname(fileURLToPath(import.meta.url))
-
-export const PHENO_DATA_DIR = process.env.PHENO_DATA_DIR ?? join(here, '..', 'data', 'pheno')
+export const PHENO_DATA_DIR = dataDir('pheno', process.env.PHENO_DATA_DIR)
 
 const quote = (value) => {
   const text = value === null || value === undefined ? '' : String(value)

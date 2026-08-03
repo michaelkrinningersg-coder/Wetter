@@ -2,7 +2,8 @@
  * The record categories, shared by the collector and the server.
  *
  * Kept in its own module so `scripts/fetch-records.js` can import it without
- * pulling in the database — the scheduled workflow runs with nothing installed.
+ * pulling in the database, which is what lets that collector run as its own
+ * process.
  */
 export const RECORD_KINDS = [
   {

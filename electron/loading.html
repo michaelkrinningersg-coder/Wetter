@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <title>Wetterstation</title>
+    <style>
+      /*
+       * Deliberately self-contained and free of the app's stylesheet: this
+       * page is shown before the server exists, so nothing may be loaded over
+       * HTTP. It also has to look right in both themes without any script.
+       */
+      :root {
+        color-scheme: dark light;
+        --canvas: #0b0f14;
+        --ink: #e6edf3;
+        --muted: #8b949e;
+        --line: #21262d;
+        --brand: #58a6ff;
+      }
+      @media (prefers-color-scheme: light) {
+        :root {
+          --canvas: #ffffff;
+          --ink: #1f2328;
+          --muted: #656d76;
+          --line: #d8dee4;
+          --brand: #0969da;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--canvas);
+        color: var(--ink);
+        font: 14px/1.5 system-ui, -apple-system, 'Segoe UI', sans-serif;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      main { width: 26rem; max-width: 88vw; text-align: center; }
+      h1 { margin: 0 0 0.35rem; font-size: 1.05rem; font-weight: 600; }
+      p { margin: 0; color: var(--muted); font-size: 0.8rem; }
+      #stage {
+        margin-top: 1.5rem;
+        min-height: 1.2rem;
+        font-variant-numeric: tabular-nums;
+        color: var(--ink);
+        font-size: 0.78rem;
+        word-break: break-word;
+      }
+      .bar {
+        margin-top: 0.9rem;
+        height: 2px;
+        border-radius: 2px;
+        background: var(--line);
+        overflow: hidden;
+      }
+      /* Indeterminate on purpose: the work behind it is a dozen archives of
+         very different sizes, and a percentage would be invented. */
+      .bar::after {
+        content: '';
+        display: block;
+        height: 100%;
+        width: 34%;
+        background: var(--brand);
+        animation: slide 1.4s ease-in-out infinite;
+      }
+      @keyframes slide {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(300%); }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Wetterstation</h1>
+      <p>Die Archive werden gelesen.</p>
+      <div id="stage">Einen Moment …</div>
+      <div class="bar"></div>
+    </main>
+  </body>
+</html>

@@ -3,11 +3,11 @@ import { inflateRawSync } from 'node:zlib'
 /**
  * Minimal ZIP reader, just enough for the DWD archives.
  *
- * The alternative is a dependency, and a dependency is exactly what the
- * scheduled workflow must not need: `npm ci` would drag in the native build of
- * better-sqlite3 and turn a ten-second run into a multi-minute one that can
- * fail for reasons having nothing to do with the weather. Everything below
- * uses `node:zlib`, which ships with Node.
+ * The alternative is a dependency, and a dependency is one more thing that has
+ * to be shipped inside the program, kept current and trusted — for forty lines
+ * of work that `node:zlib` already does. It also keeps the collectors free of
+ * anything that needs installing, which is what lets them run as their own
+ * processes. Everything below uses `node:zlib`, which ships with Node.
  *
  * Scope is deliberately narrow — no Zip64, no encryption, no multi-disk. DWD
  * archives are single-disk, a few hundred kilobytes, and use the two methods

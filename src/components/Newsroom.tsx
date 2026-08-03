@@ -97,12 +97,13 @@ export function Newsroom({ stationId, stationName }: { stationId: string; statio
         </p>
         <p>
           <strong className="text-ink">Kein Sprachmodell ist beteiligt.</strong> Die
-          Sätze entstehen aus festen Bausteinen und gemessenen Zahlen, weil die
-          ganze Seite in statische Dateien vorberechnet wird: Ein Modell im
-          Auslieferungspfad machte die Seiten unreproduzierbar, und ein falscher
-          Satz wäre von einem richtigen nicht zu unterscheiden. Jede Aussage
-          unten lässt sich aus dem Archiv nachrechnen — der Link unter jeder
-          Meldung führt in die Ansicht, die es zeigt.
+          Sätze entstehen aus festen Bausteinen und gemessenen Zahlen. Ein Modell
+          im Auslieferungspfad hätte zwei Kosten, die keine Formulierung wert
+          ist: Dieselbe Frage an dasselbe Archiv ergäbe zweimal verschiedene
+          Ausgaben, und ein falscher Satz wäre von einem richtigen nicht zu
+          unterscheiden. Jede Aussage unten lässt sich aus dem Archiv
+          nachrechnen — der Link unter jeder Meldung führt in die Ansicht, die
+          es zeigt.
         </p>
         <p>
           <strong className="text-ink">Eine Währung für Ungleiches.</strong> Ein

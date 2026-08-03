@@ -11,7 +11,7 @@
  * whole: each file is streamed and discarded as it goes, so the run needs
  * bandwidth but almost no space.
  *
- * It is not in the daily workflow because there is nothing daily to collect.
+ * It is not on the daily schedule because there is nothing daily to collect.
  * The reporter network in this area has thinned to a handful of observations a
  * year, and the DWD revises the historical files perhaps once a year. Re-running
  * this after such a revision is the only reason to run it again.

@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+
+import { dataDir } from './paths.js'
 
 /**
  * Flat-file archive of the gamma dose rate.
@@ -12,12 +13,10 @@ import { fileURLToPath } from 'node:url'
  * never rewritten afterwards, so git stores each day exactly once.
  *
  * This archive is the only copy that will exist. The BfS keeps seven days;
- * everything older here was kept because this workflow ran.
+ * everything older here was kept because the app was open on that day.
  */
 
-const here = dirname(fileURLToPath(import.meta.url))
-
-export const ODL_DATA_DIR = process.env.ODL_DATA_DIR ?? join(here, '..', 'data', 'odl')
+export const ODL_DATA_DIR = dataDir('odl', process.env.ODL_DATA_DIR)
 
 export const DAY_HEADER = 'probe,hour,value'
 

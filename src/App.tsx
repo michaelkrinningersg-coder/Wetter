@@ -42,6 +42,7 @@ import { apiGet } from './lib/api'
 import { readParam, setTabParam, useUrlNumber, useUrlState } from './lib/url-state'
 import type { ImportStatus, Station } from './types'
 import { Header } from './components/Header'
+import { SystemBar } from './components/SystemBar'
 import { Loading } from './components/ui'
 import { Dashboard } from './components/Dashboard'
 
@@ -448,6 +449,8 @@ export default function App() {
           onStationChange={changeStation}
           onImported={refreshStatus}
         />
+
+        <SystemBar />
 
         {isEmpty && (
           <div className="mt-6 rounded-card border border-brand/30 bg-brand/[0.06] p-5">

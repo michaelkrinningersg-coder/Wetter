@@ -25,8 +25,9 @@
  * so shifting the hours here would be inventing a precision this module does
  * not have.
  *
- * Like the other collectors, this module imports no database — the scheduled
- * workflow runs it on a bare Node install.
+ * Like the other collectors, this module imports no database. That is what
+ * lets the scheduler run it as its own process, where a failed download can
+ * damage a CSV file at worst and never the database.
  */
 
 const BASE = 'https://luftdaten.umweltbundesamt.de/api/air-data/v3'

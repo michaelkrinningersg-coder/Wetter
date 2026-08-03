@@ -21,7 +21,7 @@ import tseslint from 'typescript-eslint'
 export default tseslint.config(
   {
     // Build output, dependencies and the committed data archives.
-    ignores: ['dist/**', 'node_modules/**', 'data/**'],
+    ignores: ['dist/**', 'release/**', 'node_modules/**', 'data/**'],
   },
 
   /* ------------------------------------------------------------------ */
@@ -57,10 +57,16 @@ export default tseslint.config(
   },
 
   /* ------------------------------------------------------------------ */
-  /* Server and collectors: plain Node                                  */
+  /* Server, collectors and shell: plain Node                           */
   /* ------------------------------------------------------------------ */
   {
-    files: ['server/**/*.js', 'scripts/**/*.js', 'test/**/*.js', 'vite.config.ts'],
+    files: [
+      'server/**/*.js',
+      'scripts/**/*.js',
+      'test/**/*.js',
+      'electron/**/*.js',
+      'vite.config.ts',
+    ],
     extends: [js.configs.recommended],
     languageOptions: {
       ecmaVersion: 2022,

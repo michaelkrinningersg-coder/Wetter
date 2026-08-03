@@ -1,14 +1,9 @@
-import { mkdirSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 import Database from 'better-sqlite3'
 
-const here = dirname(fileURLToPath(import.meta.url))
-const dataDir = process.env.DATA_DIR ?? join(here, '..', 'data')
+import { dataDir } from './paths.js'
 
-mkdirSync(dataDir, { recursive: true })
-
-export const db = new Database(join(dataDir, 'weather.sqlite'))
+export const db = new Database(join(dataDir(null, process.env.DATA_DIR), 'weather.sqlite'))
 
 db.pragma('journal_mode = WAL')
 db.pragma('synchronous = NORMAL')

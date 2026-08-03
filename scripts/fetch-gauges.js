@@ -3,10 +3,10 @@
  * Fetch the current water level of every configured gauge and append it to the
  * CSV archive.
  *
- * Written for a scheduled GitHub Action, so it deliberately depends on nothing
- * beyond the Node standard library — no `npm ci`, no native build of
- * better-sqlite3, no install step at all. That keeps a run at a few seconds and
- * removes the most common reason for a nightly job to start failing.
+ * Depends on nothing beyond the Node standard library, like every collector
+ * here. The running app does not use this script — `server/jobs.js` refreshes
+ * the gauges in-process, because that path writes to the database as well —
+ * but it stays as the way to collect a reading without starting the app.
  *
  *   node scripts/fetch-gauges.js
  *

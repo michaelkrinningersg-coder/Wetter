@@ -51,9 +51,9 @@ const readMeta = db.prepare('SELECT payload, fetched_at FROM gauge_meta WHERE ga
 /**
  * Load the committed archive on startup.
  *
- * The scheduled workflow collects readings around the clock and commits them
- * as CSV. Without this step a fresh clone would show an empty chart for the
- * two state gauges even though months of history sit right there in the repo.
+ * The readings are collected around the clock and written as CSV. Without this
+ * step a fresh install would show an empty chart for the two state gauges even
+ * though months of history sit right there in the shipped archive.
  */
 export function importArchive() {
   const summary = []
@@ -98,8 +98,8 @@ export async function refreshGauge(gauge) {
   }
 
   insertMany(gauge.id, readings)
-  // Keep the on-disk archive in step, so a locally running instance
-  // contributes the same history the workflow collects.
+  // Keep the on-disk archive in step: the database can be rebuilt from the
+  // CSV files, so they and not it are the record.
   const appended = appendReadings(gauge.id, readings)
 
   upsertMeta.run(gauge.id, JSON.stringify(meta), new Date().toISOString())

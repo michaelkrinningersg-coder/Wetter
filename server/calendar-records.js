@@ -430,8 +430,9 @@ const MONTHS = [
  * A record's age, in the two units that mean something.
  *
  * Years for reading, days for sorting. Measured against the last day of the
- * series rather than the wall clock, so the page says the same thing whenever
- * it is rendered and the prerendered files do not drift from the live server.
+ * series rather than the wall clock, so a record does not silently age by a
+ * year while the archive stands still — which it does whenever the collectors
+ * have not run, and on a local install that is every day the machine is off.
  */
 function ageOf(date, last) {
   const days = daysBetween(date, last)

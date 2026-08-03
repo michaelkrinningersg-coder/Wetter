@@ -4,8 +4,9 @@
  * write them to the CSV archive.
  *
  * Like `fetch-gauges.js`, this depends on nothing outside the Node standard
- * library, so the scheduled workflow needs no install step at all — the ZIP
- * archives are unpacked by `server/zip.js` on top of `node:zlib`.
+ * library — the ZIP archives are unpacked by `server/zip.js` on top of
+ * `node:zlib`. The scheduler therefore runs it as its own process, out of
+ * reach of the database.
  *
  *   node scripts/fetch-germany.js              # yesterday
  *   node scripts/fetch-germany.js 2026-07-28   # one specific day

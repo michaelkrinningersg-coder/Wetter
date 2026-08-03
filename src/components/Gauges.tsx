@@ -20,7 +20,7 @@ import {
   Waves,
 } from 'lucide-react'
 
-import { STATIC, useApi } from '../lib/api'
+import { useApi } from '../lib/api'
 import { useUrlState } from '../lib/url-state'
 import { isoToGerman, num } from '../lib/format'
 import type { GaugeSeriesResponse, GaugeSummary, GaugesResponse } from '../types'
@@ -166,10 +166,11 @@ export function Gauges() {
         rollierenden 30 Tagen im 15-Minuten-Takt. Leine und Rhume sind Landesgewässer;
         das <strong>NLWKN-Portal</strong> veröffentlicht dort nur den aktuellen Wert,
         keine Zeitreihe. Für diese beiden baut die App ihre Reihe daher selbst auf:
-        Ein stündlicher GitHub-Workflow holt die aktuellen Werte und legt sie als CSV
-        im Repository ab, der Server liest dieses Archiv beim Start ein. Die Historie
-        wächst also mit der Laufzeit des Projekts. Alle Angaben in Zentimeter über
-        Pegelnullpunkt.
+        Sie holt die aktuellen Werte stündlich, solange sie läuft, und schreibt sie als
+        CSV mit. Daraus folgt eine Eigenheit dieser beiden Kurven, die die Weser nicht
+        hat: Was gemessen wurde, während das Programm geschlossen war, existiert nicht
+        und lässt sich auch nicht nachholen — die Weser dagegen liefert ihre letzten 30
+        Tage bei jedem Abruf mit. Alle Angaben in Zentimeter über Pegelnullpunkt.
       </InfoPanel>
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
@@ -202,17 +203,15 @@ export function Gauges() {
                   onChange={setRange}
                   size="sm"
                 />
-                {!STATIC && (
-                  <button
-                    type="button"
-                    onClick={refreshNow}
-                    disabled={refreshing}
-                    className="flex cursor-pointer items-center gap-1.5 rounded-md border border-line bg-raised px-2.5 py-1 text-[11px] text-ink-muted transition-colors hover:border-brand hover:text-brand disabled:cursor-wait"
-                  >
-                    <RefreshCw className={`size-3 ${refreshing ? 'animate-spin' : ''}`} aria-hidden />
-                    Aktualisieren
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={refreshNow}
+                  disabled={refreshing}
+                  className="flex cursor-pointer items-center gap-1.5 rounded-md border border-line bg-raised px-2.5 py-1 text-[11px] text-ink-muted transition-colors hover:border-brand hover:text-brand disabled:cursor-wait"
+                >
+                  <RefreshCw className={`size-3 ${refreshing ? 'animate-spin' : ''}`} aria-hidden />
+                  Aktualisieren
+                </button>
               </div>
             }
           />

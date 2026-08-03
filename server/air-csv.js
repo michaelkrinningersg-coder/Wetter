@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 
+import { dataDir } from './paths.js'
 import { FIELDS } from './air-sources.js'
 
 /**
@@ -19,9 +19,7 @@ import { FIELDS } from './air-sources.js'
  * that cell empty, which is not the same as a zero and must not be filled in.
  */
 
-const here = dirname(fileURLToPath(import.meta.url))
-
-export const AIR_DATA_DIR = process.env.AIR_DATA_DIR ?? join(here, '..', 'data', 'air')
+export const AIR_DATA_DIR = dataDir('air', process.env.AIR_DATA_DIR)
 
 export const DAY_HEADER = ['station', 'hour', ...FIELDS].join(',')
 

@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
+
+import { dataDir } from './paths.js'
 
 /**
  * Flat-file archive of the daily nationwide shape.
@@ -22,10 +23,7 @@ import { fileURLToPath } from 'node:url'
  * digits that are noise.
  */
 
-const here = dirname(fileURLToPath(import.meta.url))
-
-export const NATIONWIDE_DATA_DIR =
-  process.env.NATIONWIDE_DATA_DIR ?? join(here, '..', 'data', 'nationwide')
+export const NATIONWIDE_DATA_DIR = dataDir('nationwide', process.env.NATIONWIDE_DATA_DIR)
 
 /** Column, and how many decimals it survives with. Order defines the file. */
 export const COLUMNS = [

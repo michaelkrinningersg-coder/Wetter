@@ -1,10 +1,12 @@
 import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { existsSync } from 'node:fs'
 import express from 'express'
 
 import * as api from './queries.js'
 import { getImportState, isImporting } from './db.js'
+import { DATA_ROOT } from './paths.js'
+import { berlinDate, JOB_BY_KEY, jobStatus, runJob, startScheduler } from './jobs.js'
 import { importStation } from './dwd.js'
 import { STATIONS, findStation, recentUrl } from './stations.js'
 import {
@@ -735,7 +737,44 @@ app.get(
 )
 
 /* -------------------------------------------------------------------------- */
-/* Static build (production)                                                  */
+/* The collectors                                                             */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * What the four workflows used to say, now said by the app about itself: how
+ * far each source reaches, when it last ran, and what went wrong if anything
+ * did. Without this the views would be indistinguishable whether the data is
+ * from this morning or from three weeks ago.
+ */
+app.get(
+  '/api/system',
+  handler((_req, res) => {
+    res.json({
+      dataRoot: DATA_ROOT,
+      today: berlinDate(0),
+      jobs: jobStatus(),
+    })
+  }),
+)
+
+app.post(
+  '/api/system/run',
+  handler(async (req, res) => {
+    const key = String(req.query.job ?? '')
+    if (!JOB_BY_KEY.has(key)) {
+      return res.status(400).json({
+        error: `Unbekannter Lauf "${key}". Erlaubt: ${[...JOB_BY_KEY.keys()].join(', ')}.`,
+      })
+    }
+    // The answer waits for the run: these take seconds to minutes, and a
+    // button that returns before anything happened would report success for a
+    // download that later failed.
+    res.json({ result: await runJob(key), jobs: jobStatus() })
+  }),
+)
+
+/* -------------------------------------------------------------------------- */
+/* The built interface                                                        */
 /* -------------------------------------------------------------------------- */
 
 const dist = join(here, '..', 'dist')
@@ -757,7 +796,37 @@ app.use((error, _req, res, _next) => {
   })
 })
 
-const port = Number(process.env.PORT ?? 3001)
-app.listen(port, () => {
-  console.log(`Wetterstation-API läuft auf http://localhost:${port}`)
-})
+/* -------------------------------------------------------------------------- */
+/* Start                                                                      */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Listen, and say where.
+ *
+ * Port 0 means "any free one", which is what the packaged app asks for: a
+ * fixed 3001 collides with a development server, with a second copy of the
+ * app, and with whatever else on the machine claimed it first. The shell
+ * needs the resolved number to point the window at it, so it is returned
+ * rather than only printed.
+ */
+export function startServer({ port = Number(process.env.PORT ?? 3001), schedule = true } = {}) {
+  return new Promise((resolve, reject) => {
+    const server = app.listen(port, '127.0.0.1')
+    server.once('error', reject)
+    server.once('listening', () => {
+      const actual = server.address().port
+      console.log(`Wetterstation-API läuft auf http://127.0.0.1:${actual}`)
+      if (schedule) startScheduler()
+      resolve({ server, port: actual, url: `http://127.0.0.1:${actual}` })
+    })
+  })
+}
+
+export { app }
+
+// Started directly (`npm start`), not imported by the Electron shell.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  // The watching development server restarts on every saved file; without the
+  // opt-out each save would kick off a round of downloads.
+  await startServer({ schedule: process.env.WETTER_NO_SCHEDULE !== '1' })
+}

@@ -9,9 +9,9 @@
  *
  * The reason to collect it daily is not that it changes quickly. It is that the
  * BfS keeps **only seven days**: the hourly series rolls forward and what falls
- * off the back is gone from the interface. Every day this workflow does not run
- * is a day that cannot be recovered later, which is the opposite of the DWD
- * archives, where a missed run costs nothing.
+ * off the back is gone from the interface. Every day this does not run is a day
+ * that cannot be recovered later, which is the opposite of the DWD archives,
+ * where a missed run costs nothing.
  *
  * Timestamps are UTC — the service marks them so explicitly — and are stored
  * unconverted. Day boundaries in this archive are therefore UTC days, not

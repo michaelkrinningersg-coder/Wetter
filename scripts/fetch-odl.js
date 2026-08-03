@@ -6,7 +6,7 @@
  *
  * There is no backfill option and there cannot be one: the BfS publishes a
  * seven-day window and nothing behind it. Whatever this archive holds beyond
- * those seven days exists because the workflow ran that day. The upside of the
+ * those seven days exists because the app was open that day. The upside of the
  * window is that a single missed run costs nothing — the next run still sees
  * the day and fills it in.
  *
