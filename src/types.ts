@@ -2516,6 +2516,18 @@ export interface SoilResponse {
       /** Where today sits among the same time of year since 1991, in percent. */
       percentile: number | null
       samples: number
+      /** The same date in every year, without the ±7-day widening. */
+      sameDate: {
+        years: number
+        drier: number
+        wetter: number
+        /** Place counted from the dry end, 1 being the driest. */
+        place: number
+        percentile: number | null
+        median: number | null
+        driest: number
+        wettest: number
+      } | null
     } | null
   } | null
   temperature: {

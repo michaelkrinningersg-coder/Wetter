@@ -199,3 +199,26 @@ test('the database mirrors the archive', () => {
   const n = db.prepare('SELECT COUNT(*) AS n FROM soil_moisture').get().n
   assert.equal(n, soilRange('moisture').days)
 })
+
+test('the rank among years counts from the dry end and shares ties', () => {
+  const standing = soilOverview({ days: 400 }).moisture.today.sameDate
+
+  // Ten years, each flat at its own level, 2025 the wettest: the last day is
+  // the wettest of its date, so tenth from the dry end.
+  assert.equal(standing.years, 10)
+  assert.equal(standing.place, 10)
+  assert.equal(standing.drier, 9)
+  assert.equal(standing.wetter, 0)
+  assert.equal(standing.driest, 10)
+  assert.equal(standing.wettest, 100)
+})
+
+test('the narrow and the wide comparison agree on the direction', () => {
+  const today = soilOverview({ days: 400 }).moisture.today
+
+  // They must not be the same number — one ranks 10 years, the other about
+  // 150 days — but a value in the driest third of one cannot sit in the
+  // wettest third of the other, or one of the two is measuring something else.
+  assert.ok(today.percentile > 50)
+  assert.ok(today.sameDate.percentile > 50)
+})

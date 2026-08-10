@@ -234,6 +234,42 @@ export function soilOverview({ days = 365 } = {}) {
   })
 
   const latest = moistureWindow.at(-1) ?? null
+
+  /**
+   * The same date in every year, without the ±7-day widening.
+   *
+   * The widened window is the better *percentile* — 533 comparisons instead of
+   * 36 — but it cannot say "the fifth-driest 9 August", and that sentence is
+   * the one a reader can picture. Both are reported: the rank among years for
+   * grasp, the percentile for precision. They agree here to within a point and
+   * a half, which is itself worth being able to check.
+   */
+  function sameDateStanding(row) {
+    if (!row || row.bf_total === null) return null
+    const md = row.date.slice(5)
+    const values = moistureRows
+      .filter((r) => r.date.slice(5) === md && r.bf_total !== null)
+      .map((r) => r.bf_total)
+    if (values.length === 0) return null
+
+    const drier = values.filter((v) => v < row.bf_total).length
+    const wetter = values.filter((v) => v > row.bf_total).length
+    const sorted = [...values].sort((a, b) => a - b)
+
+    return {
+      years: values.length,
+      drier,
+      wetter,
+      // Counted from the dry end, ties sharing the better place — the same
+      // convention the yearbook uses for its ranks.
+      place: drier + 1,
+      percentile: percentile(values, row.bf_total),
+      median: quantile(sorted, 0.5),
+      driest: sorted[0],
+      wettest: sorted[sorted.length - 1],
+    }
+  }
+
   const today = latest
     ? {
         date: latest.date,
@@ -244,6 +280,7 @@ export function soilOverview({ days = 365 } = {}) {
             ? null
             : percentile(totalWindows.get(latest.date.slice(5)), latest.bf_total),
         samples: totalWindows.get(latest.date.slice(5)).length,
+        sameDate: sameDateStanding(latest),
       }
     : null
 

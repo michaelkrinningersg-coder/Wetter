@@ -194,12 +194,46 @@ export function Soil() {
                 {today.total === null ? '—' : `${num(today.total, 0)} %`}
               </p>
               <p className={`mt-1 text-sm font-medium ${state.tone}`}>{state.text}</p>
+              {/* The rank first, because it is the sentence a reader can
+                  picture; the percentile after it, because it is the one that
+                  rests on 533 comparisons instead of 36. */}
+              {today.sameDate && (
+                <p className="mt-2 text-xs text-ink-muted">
+                  <span className="numeric text-ink">
+                    Platz {num(today.sameDate.place, 0)} von{' '}
+                    {num(today.sameDate.years, 0)}
+                  </span>{' '}
+                  {today.sameDate.years === 1 ? 'Jahr' : 'Jahren'} — von trocken nach
+                  nass, für genau dieses Datum. Der Median dieses Tages liegt bei{' '}
+                  <span className="numeric text-ink">
+                    {num(today.sameDate.median, 0)} %
+                  </span>
+                  , die Spanne reicht von {num(today.sameDate.driest, 0)} bis{' '}
+                  {num(today.sameDate.wettest, 0)} %.
+                </p>
+              )}
               {today.percentile !== null && (
                 <p className="mt-2 text-xs text-ink-muted">
-                  Nur{' '}
-                  <span className="numeric text-ink">{num(today.percentile, 0)} %</span>{' '}
-                  der vergleichbaren Tage seit{' '}
-                  {data.range.moisture.first?.slice(0, 4)} waren trockener.
+                  {/* Direction-aware: "nur 90 % waren trockener" would use the
+                      word "nur" to claim the opposite of its own number. */}
+                  {today.percentile <= 50 ? (
+                    <>
+                      Nur{' '}
+                      <span className="numeric text-ink">
+                        {num(today.percentile, 0)} %
+                      </span>{' '}
+                      der vergleichbaren Tage waren trockener
+                    </>
+                  ) : (
+                    <>
+                      <span className="numeric text-ink">
+                        {num(100 - today.percentile, 0)} %
+                      </span>{' '}
+                      der vergleichbaren Tage waren nasser
+                    </>
+                  )}{' '}
+                  — {num(today.samples, 0)} Vergleichstage seit{' '}
+                  {data.range.moisture.first?.slice(0, 4)}.
                 </p>
               )}
               <p className="mt-2 text-[11px] text-ink-faint">
