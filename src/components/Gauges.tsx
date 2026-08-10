@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
+  Area,
   CartesianGrid,
+  ComposedChart,
   Legend,
   Line,
-  LineChart,
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
@@ -36,10 +37,17 @@ import {
   SectionHeading,
 } from './ui'
 
+/**
+ * From a year on, the server answers with one row per day rather than every
+ * reading — the chart then draws the day's range as a band and its mean as the
+ * line. `alle` is the whole archive, which grows for as long as the app runs.
+ */
 const RANGES = [
   { value: '1', label: '24 Stunden' },
   { value: '7', label: '7 Tage' },
   { value: '30', label: '30 Tage' },
+  { value: '365', label: 'Jahr' },
+  { value: 'alle', label: 'Alles' },
 ] as const
 
 type Range = (typeof RANGES)[number]['value']
@@ -75,7 +83,12 @@ export function Gauges() {
   const [selected, setSelected] = useUrlState<string>('pegel', null)
   const [refreshing, setRefreshing] = useState(false)
 
-  const { data, loading, error, reload } = useApi<GaugesResponse>('/api/gauges?days=30')
+  // The cards summarise the same window the chart draws — otherwise "Alles"
+  // would show an all-time curve above a thirty-day minimum.
+  const { data, loading, error, reload } = useApi<GaugesResponse>(
+    `/api/gauges?days=${range}`,
+    [range],
+  )
 
   const gauges = useMemo(() => data?.gauges ?? [], [data])
   const active = useMemo(
@@ -92,15 +105,58 @@ export function Gauges() {
     [active?.id, range],
   )
 
-  const points = useMemo(
-    () =>
-      (series.data?.readings ?? []).map((r) => ({
-        ts: r.ts,
-        label: shortTime(r.ts),
-        value: r.value,
-      })),
-    [series.data],
-  )
+  const daily = series.data?.mode === 'daily'
+  const rangeLabel = { '1': '24 Std.', '7': '7 T.', '30': '30 T.', '365': 'Jahr', alle: 'gesamt' }[
+    range
+  ]
+
+  /**
+   * One shape for both answers.
+   *
+   * A raw reading has a single value; a day has a lowest, a mean and a highest.
+   * Giving both the same `value` — the reading itself, or the day's mean — lets
+   * the reference-level arithmetic and the tooltip stay as they were, while
+   * `low` and `high` exist only in the daily case and carry the band.
+   */
+  const points = useMemo(() => {
+    if (!series.data) return []
+    if (series.data.mode === 'daily') {
+      return series.data.daily.map((d) => ({
+        ts: d.date,
+        label: isoToGerman(d.date),
+        value: d.mean,
+        low: d.min,
+        high: d.max,
+        // Recharts stacks an Area on top of its base, so the band is drawn as
+        // "lowest" plus "how far up the highest reaches".
+        span: d.max - d.min,
+        count: d.count,
+      }))
+    }
+    return series.data.readings.map((r) => ({
+      ts: r.ts,
+      label: shortTime(r.ts),
+      value: r.value,
+      low: undefined as number | undefined,
+      high: undefined as number | undefined,
+      span: undefined as number | undefined,
+      count: 1,
+    }))
+  }, [series.data])
+
+  /**
+   * The band's own extent, as an explicit axis domain.
+   *
+   * `['dataMin', 'dataMax']` cannot be used once the band is drawn: a stacked
+   * area has zero as its base, so recharts pulls the axis down to 0 cm and a
+   * river that moved between 88 and 163 cm is squashed into the top sixth of
+   * the chart.
+   */
+  const bounds = useMemo(() => {
+    if (points.length === 0) return null
+    const values = points.flatMap((p) => [p.low ?? p.value, p.high ?? p.value])
+    return [Math.min(...values), Math.max(...values)] as const
+  }, [points])
 
   /**
    * Which reference levels actually fall inside the plotted range.
@@ -114,9 +170,7 @@ export function Gauges() {
   const levels = useMemo(() => {
     if (!active || points.length === 0) return { inside: [], outside: [] }
 
-    const values = points.map((p) => p.value)
-    const min = Math.min(...values)
-    const max = Math.max(...values)
+    const [min, max] = bounds ?? [0, 0]
 
     const candidates: { label: string; cm: number; color: string; dash: string }[] = []
     for (const mark of MARKS) {
@@ -140,7 +194,7 @@ export function Gauges() {
         .filter((c) => c.cm < min || c.cm > max)
         .sort((a, b) => a.cm - b.cm),
     }
-  }, [active, points])
+  }, [active, points, bounds])
 
   async function refreshNow() {
     setRefreshing(true)
@@ -231,7 +285,7 @@ export function Gauges() {
           ) : (
             <ChartFrame height={380}>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={points} margin={{ top: 8, right: 8, left: -14, bottom: 4 }}>
+                <ComposedChart data={points} margin={{ top: 8, right: 8, left: -14, bottom: 4 }}>
                   <CartesianGrid stroke={CHART.grid} strokeDasharray="3 3" />
                   <XAxis
                     dataKey="label"
@@ -246,7 +300,8 @@ export function Gauges() {
                     tickLine={false}
                     unit=" cm"
                     width={62}
-                    domain={['dataMin', 'dataMax']}
+                    domain={bounds ? [bounds[0], bounds[1]] : ['dataMin', 'dataMax']}
+                    allowDataOverflow
                   />
                   <Tooltip content={<GaugeTooltip gauge={active} />} />
                   <Legend verticalAlign="top" height={30} wrapperStyle={{ fontSize: 11 }} />
@@ -266,8 +321,36 @@ export function Gauges() {
                     />
                   ))}
 
+                  {/* The band is two stacked areas: an invisible one up to the
+                      day's lowest reading, and a visible one as tall as the
+                      day's swing. Recharts has no ranged area, and this is the
+                      standard way to get one. */}
+                  {daily && (
+                    <>
+                      <Area
+                        stackId="band"
+                        dataKey="low"
+                        stroke="none"
+                        fill="none"
+                        legendType="none"
+                        tooltipType="none"
+                        isAnimationActive={false}
+                      />
+                      <Area
+                        name="Tagesspanne"
+                        stackId="band"
+                        dataKey="span"
+                        stroke="none"
+                        fill={CHART.colors.cool}
+                        fillOpacity={0.18}
+                        tooltipType="none"
+                        isAnimationActive={false}
+                      />
+                    </>
+                  )}
+
                   <Line
-                    name="Wasserstand"
+                    name={daily ? 'Tagesmittel' : 'Wasserstand'}
                     type="monotone"
                     dataKey="value"
                     stroke={CHART.colors.cool}
@@ -275,7 +358,7 @@ export function Gauges() {
                     dot={points.length < 60 ? { r: 2 } : false}
                     isAnimationActive={false}
                   />
-                </LineChart>
+                </ComposedChart>
               </ResponsiveContainer>
             </ChartFrame>
           )}
@@ -300,19 +383,19 @@ export function Gauges() {
           {active.window.count > 1 && (
             <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-line pt-3 text-xs sm:grid-cols-4">
               <div>
-                <dt className="label">Niedrigster Wert (30 T.)</dt>
+                <dt className="label">Niedrigster Wert ({rangeLabel})</dt>
                 <dd className="numeric mt-0.5 font-semibold text-cool">
                   {cm(active.window.min)}
                 </dd>
               </div>
               <div>
-                <dt className="label">Höchster Wert (30 T.)</dt>
+                <dt className="label">Höchster Wert ({rangeLabel})</dt>
                 <dd className="numeric mt-0.5 font-semibold text-wet">
                   {cm(active.window.max)}
                 </dd>
               </div>
               <div>
-                <dt className="label">Mittel (30 T.)</dt>
+                <dt className="label">Mittel ({rangeLabel})</dt>
                 <dd className="numeric mt-0.5 font-semibold text-ink">
                   {cm(active.window.mean, 1)}
                 </dd>
@@ -555,7 +638,15 @@ function GaugeTooltip({
   gauge,
 }: {
   active?: boolean
-  payload?: { payload: { ts: string; value: number } }[]
+  payload?: {
+    payload: {
+      ts: string
+      value: number
+      low?: number
+      high?: number
+      count: number
+    }
+  }[]
   gauge: GaugeSummary
 }) {
   const p = payload?.[0]?.payload
@@ -563,12 +654,25 @@ function GaugeTooltip({
 
   const datum = gauge.gaugeDatum
   const reached = (gauge.thresholds ?? []).filter((t) => p.value >= t.cm).pop()
+  const isDay = p.low !== undefined && p.high !== undefined
 
   return (
     <ChartTooltip
-      title={shortTime(p.ts)}
+      title={isDay ? isoToGerman(p.ts) : shortTime(p.ts)}
       rows={[
-        { label: 'Wasserstand', value: cm(p.value), className: 'text-cool' },
+        {
+          label: isDay ? 'Tagesmittel' : 'Wasserstand',
+          value: cm(p.value, isDay ? 1 : 0),
+          className: 'text-cool',
+        },
+        // A day whose lowest and highest coincide had one reading, and saying
+        // "35 bis 35 cm" would dress that up as a measured range.
+        ...(isDay && p.high! > p.low!
+          ? [{ label: 'Tiefst- bis Höchstwert', value: `${cm(p.low)} – ${cm(p.high)}` }]
+          : []),
+        ...(isDay
+          ? [{ label: 'Messwerte', value: num(p.count, 0) }]
+          : []),
         ...(datum
           ? [{ label: 'Absolut', value: `NN + ${num(datum + p.value / 100, 2)} m` }]
           : []),

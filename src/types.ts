@@ -432,14 +432,33 @@ export interface GaugeSummary {
 }
 
 export interface GaugesResponse {
-  days: number
+  days: number | null
+  /** From this window on the series comes as one row per day. */
+  dailyFromDays: number
   gauges: GaugeSummary[]
+}
+
+export interface GaugeDay {
+  date: string
+  min: number
+  mean: number
+  max: number
+  /** Readings behind the day — one reading makes lowest, mean and highest equal. */
+  count: number
 }
 
 export interface GaugeSeriesResponse {
   id: string
-  days: number
+  /** Days requested; null means the whole archive. */
+  days: number | null
+  /**
+   * Which of the two arrays carries the answer. Stated rather than guessed
+   * from which one is empty — a window without readings and a window that was
+   * never asked for would otherwise look the same.
+   */
+  mode: 'readings' | 'daily'
   readings: { ts: string; value: number }[]
+  daily: GaugeDay[]
 }
 
 export interface CycleHour {

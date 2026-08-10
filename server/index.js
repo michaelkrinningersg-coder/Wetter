@@ -15,6 +15,7 @@ import {
   gaugeSeries,
   gaugeSummary,
   refreshAll,
+  DAILY_FROM_DAYS,
 } from './gauges.js'
 import { gaugeCycle } from './gauge-cycle.js'
 import {
@@ -334,10 +335,19 @@ app.get(
 /* River gauges                                                               */
 /* -------------------------------------------------------------------------- */
 
-/** Days of history the gauge views may request. */
+/**
+ * Days of history the gauge views may request; null means the whole archive.
+ *
+ * There used to be a cap of a year, because every reading travelled to the
+ * browser and a longer window would have shipped tens of thousands of points.
+ * From `DAILY_FROM_DAYS` on the answer is one row per day, so the payload
+ * grows by a row a day and the cap has nothing left to protect.
+ */
 function gaugeDays(req) {
-  const days = Number(req.query.days ?? 30)
-  return Number.isFinite(days) ? Math.min(365, Math.max(1, Math.round(days))) : 30
+  const raw = String(req.query.days ?? '30')
+  if (raw === 'alle') return null
+  const days = Number(raw)
+  return Number.isFinite(days) ? Math.max(1, Math.round(days)) : 30
 }
 
 app.get(
@@ -350,7 +360,7 @@ app.get(
       await refreshAll({ force: req.query.refresh === 'force' })
     }
     const days = gaugeDays(req)
-    res.json({ days, gauges: GAUGES.map((g) => gaugeSummary(g, days)) })
+    res.json({ days, dailyFromDays: DAILY_FROM_DAYS, gauges: GAUGES.map((g) => gaugeSummary(g, days)) })
   }),
 )
 
@@ -362,7 +372,7 @@ app.get(
       return res.status(400).json({ error: `Unbekannter Pegel "${req.params.id}".` })
     }
     const days = gaugeDays(req)
-    res.json({ id: gauge.id, days, readings: gaugeSeries(gauge, days) })
+    res.json({ id: gauge.id, days, ...gaugeSeries(gauge, days) })
   }),
 )
 
