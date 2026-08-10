@@ -81,7 +81,7 @@ Anfrage rechnet.
 
 ## Ältere offene Punkte
 
-**Tests.** 154 Tests in 23 Dateien laufen mit `npm test`
+**Tests.** 167 Tests in 25 Dateien laufen mit `npm test`
 (node:test, keine neue Abhängigkeit) und bei jedem Push in `ci.yml`.
 Abgedeckt sind die Fehler, die dieses Projekt tatsächlich gemacht hat: null als
 Rekord, Kalendertag als `%m-%d` statt `%j`, relative gegen absolute

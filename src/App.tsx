@@ -84,6 +84,7 @@ const LOAD = {
   PrecipIntensity: () => import('./components/PrecipIntensity').then((m) => ({ default: m.PrecipIntensity })),
   DayInHistory: () => import('./components/DayInHistory').then((m) => ({ default: m.DayInHistory })),
   Rivers: () => import('./components/Rivers').then((m) => ({ default: m.Rivers })),
+  Soil: () => import('./components/Soil').then((m) => ({ default: m.Soil })),
   Germany: () => import('./components/Germany').then((m) => ({ default: m.Germany })),
   GermanyMap: () => import('./components/GermanyMap').then((m) => ({ default: m.GermanyMap })),
   Indices: () => import('./components/Indices').then((m) => ({ default: m.Indices })),
@@ -128,6 +129,7 @@ const RecordBalance = lazy(LOAD.RecordBalance)
 const PrecipIntensity = lazy(LOAD.PrecipIntensity)
 const DayInHistory = lazy(LOAD.DayInHistory)
 const Rivers = lazy(LOAD.Rivers)
+const Soil = lazy(LOAD.Soil)
 const Germany = lazy(LOAD.Germany)
 const GermanyMap = lazy(LOAD.GermanyMap)
 const Indices = lazy(LOAD.Indices)
@@ -189,6 +191,7 @@ const TAB_MODULE: Record<string, string> = {
   'comparison': 'Comparison',
   'forecast': 'Forecast',
   'gauges': 'Rivers',
+  'soil': 'Soil',
   'air': 'Air',
   'radiation': 'Radiation',
   'pollen': 'Pollen',
@@ -239,6 +242,7 @@ type TabId =
   | 'distribution'
   | 'day-in-history'
   | 'gauges'
+  | 'soil'
   | 'air'
   | 'radiation'
   | 'pollen'
@@ -297,6 +301,7 @@ const TABS: TabDef[] = [
   { id: 'comparison', label: 'Referenzperioden', icon: Layers, group: 'Klimatologie' },
   { id: 'forecast', label: 'Prognose', icon: Sparkles, group: 'Klimatologie' },
   { id: 'gauges', label: 'Flusspegel', icon: Waves, group: 'Umwelt' },
+  { id: 'soil', label: 'Boden', icon: Layers, group: 'Umwelt' },
   { id: 'air', label: 'Luftqualität', icon: Wind, group: 'Umwelt' },
   { id: 'radiation', label: 'Ortsdosisleistung', icon: Radio, group: 'Umwelt' },
   { id: 'pollen', label: 'Pollenflug', icon: Flower2, group: 'Umwelt' },
@@ -620,6 +625,8 @@ export default function App() {
             )}
 
             {tab === 'gauges' && <Rivers />}
+
+            {tab === 'soil' && <Soil />}
 
             {tab === 'air' && <Air />}
 

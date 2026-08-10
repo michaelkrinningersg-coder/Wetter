@@ -38,6 +38,7 @@ import {
 import { regionalBalance, regionalMeta, regionalSeries } from './regional.js'
 import { airComponentKeys, airOverview, airProfiles } from './air.js'
 import { odlOverview } from './odl.js'
+import { soilOverview } from './soil.js'
 import { pollenOverview } from './pollen.js'
 import { comboSeries, phenoOverview } from './pheno.js'
 import { dashboard } from './dashboard.js'
@@ -663,6 +664,21 @@ app.get(
       })
     }
     res.json(overview)
+  }),
+)
+
+/* -------------------------------------------------------------------------- */
+/* Soil                                                                       */
+/* -------------------------------------------------------------------------- */
+
+app.get(
+  '/api/soil',
+  handler((req, res) => {
+    // The window only governs the plotted series; the comparison behind it
+    // always uses the whole archive, which is the point of having one.
+    const requested = Number(req.query.tage)
+    const days = Number.isFinite(requested) ? Math.min(Math.max(requested, 30), 3660) : 365
+    res.json(soilOverview({ days }))
   }),
 )
 

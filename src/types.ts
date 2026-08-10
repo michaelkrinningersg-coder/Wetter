@@ -2457,3 +2457,79 @@ export interface SystemResponse {
   today: string
   jobs: JobStatus[]
 }
+
+/* -------------------------------------------------------------------------- */
+/* Soil                                                                       */
+/* -------------------------------------------------------------------------- */
+
+export interface SoilLayer {
+  key: string
+  column: string
+  from: number
+  to: number
+}
+
+export interface SoilDepth {
+  key: string
+  column: string
+  depth: number
+}
+
+export interface SoilRange {
+  days: number
+  first: string | null
+  last: string | null
+}
+
+export interface SoilClimatologyDay {
+  md: string
+  p10: number | null
+  p50: number | null
+  p90: number | null
+  samples: number
+}
+
+export interface SoilCycle extends SoilDepth {
+  /** Warmest minus coldest day of the averaged year, in K. */
+  amplitude: number | null
+  /** `MM-DD` of the warmest and the coldest day. */
+  peak: string | null
+  trough: string | null
+  cycle: { md: string; value: number | null; samples: number }[]
+  samples: number
+}
+
+export interface SoilResponse {
+  station: { id: string; derivedId: string; name: string }
+  window?: number
+  range: { moisture: SoilRange; temperature: SoilRange }
+  method?: { calendarWindow: number }
+  hint?: string
+  moisture: {
+    layers: SoilLayer[]
+    series: ({ date: string; bf_total: number | null } & Record<string, number | null | string>)[]
+    climatology: SoilClimatologyDay[]
+    today: {
+      date: string
+      layers: Record<string, number | null>
+      total: number | null
+      /** Where today sits among the same time of year since 1991, in percent. */
+      percentile: number | null
+      samples: number
+    } | null
+  } | null
+  temperature: {
+    depths: SoilDepth[]
+    series: ({ date: string } & Record<string, number | null | string>)[]
+    cycles: SoilCycle[]
+  } | null
+  evaporation: {
+    series: {
+      date: string
+      potential: number | null
+      real: number | null
+      deficit: number | null
+    }[]
+    monthly: { month: number; potential: number; real: number; deficit: number; days: number }[]
+  } | null
+}

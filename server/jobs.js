@@ -12,6 +12,7 @@ import { loadNationwide } from './nationwide.js'
 import { airOverview, importAir } from './air.js'
 import { importOdl } from './odl.js'
 import { importPollen } from './pollen.js'
+import { importSoil } from './soil.js'
 import { refreshAll } from './gauges.js'
 
 /**
@@ -229,6 +230,28 @@ export const JOBS = [
       importAir()
       importOdl()
       importPollen()
+    },
+  },
+  {
+    key: 'boden',
+    label: 'Bodendaten',
+    note: 'Bodenfeuchte, Verdunstung und gemessene Bodentemperatur, nur Göttingen.',
+    everyMinutes: 24 * 60,
+    // The modelled series is published with the same delay as the readings it
+    // is computed from, and the measured soil temperature is quality-checked
+    // before publication like every other observation.
+    graceDays: 3,
+    covered: () =>
+      db.prepare('SELECT MAX(date) AS last FROM soil_moisture').get().last ?? null,
+    /*
+     * The routine run refetches the current year, which is what the DWD's
+     * `recent` directory holds — that also picks up the revisions the service
+     * makes to days already published. Only an empty archive needs the full
+     * history, and that is two requests for 35 years.
+     */
+    plan: (gap) => [{ file: 'fetch-soil.js', args: gap === null ? ['--backfill'] : [] }],
+    after: () => {
+      importSoil({ force: true })
     },
   },
   {

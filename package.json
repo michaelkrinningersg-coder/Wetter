@@ -26,6 +26,7 @@
     "fetch:gauges": "node scripts/fetch-gauges.js",
     "fetch:odl": "node scripts/fetch-odl.js",
     "fetch:pollen": "node scripts/fetch-pollen.js",
+    "fetch:soil": "node scripts/fetch-soil.js",
     "fetch:phenology": "node scripts/fetch-phenology.js",
     "fetch:germany": "node scripts/fetch-germany.js",
     "fetch:records": "node scripts/fetch-records.js",

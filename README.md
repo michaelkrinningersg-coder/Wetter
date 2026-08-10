@@ -134,7 +134,7 @@ schreiben.
 
 ### Tests
 
-154 Tests in 23 Dateien, zwei Sorten und beide nötig:
+167 Tests in 25 Dateien, zwei Sorten und beide nötig:
 
 **Regressionstests gegen erfundene Messreihen.** Jede Zahl darin ist von Hand
 nachrechenbar, und keine hängt davon ab, dass der DWD morgen einen Tag
@@ -146,7 +146,9 @@ Kalendertag als `%m-%d` statt `%j`, relative gegen absolute
 Fast-Rekord-Abstände, der Mittelrang bei Gleichständen, das Überbrücken in
 Episoden, `never` und `stale` im Ticker, Teilmonat gegen Teilmonat samt
 Ensemble-Vollständigkeit, die Newsroom-Währung, der Trend, der sich als
-Tagesgang ausgibt, und der Nenner, der zu klein für eine Prozentzahl ist.
+Tagesgang ausgibt, der Nenner, der zu klein für eine Prozentzahl ist, der
+Hochwasserscheitel, der eine Verdichtung überleben muss, und das Perzentil, das
+gegen dieselbe Jahreszeit statt gegen das ganze Archiv gerechnet wird.
 
 **Rauchtests gegen das echte Archiv.** Sie behaupten keinen einzigen Messwert —
 die Sammler schreiben jeden Tag einen Tag dazu, und ein Test, der „der Rekord
@@ -247,7 +249,10 @@ Jahresprognose
 
 **Umwelt** — Flusspegel Leine (Göttingen), Rhume (Northeim) und Weser
 (Wahmbeck) mit Verlauf, Meldestufen und langjährigen Kennwerten, dazu der
-Tagesgang der drei Pegel gegen den Tag um sie herum · Luftqualität
+Tagesgang der drei Pegel gegen den Tag um sie herum · Boden: Bodenfeuchte nach
+Tiefe gegen den üblichen Bereich derselben Jahreszeit, gemessene Bodentemperatur
+in fünf Tiefen und die Lücke zwischen möglicher und tatsächlicher Verdunstung ·
+Luftqualität
 aus den beiden Göttinger UBA-Stationen: Tagesgang je Messgröße im Vergleich
 Hintergrund gegen Verkehr, Wochentags- und Jahresverlauf, Jahresmittel gegen
 die Grenzwerte, Überschreitungen der 39. BImSchV und Ozon gegen die
@@ -802,6 +807,19 @@ ausgeschlossen, Pfad über `DATA_DIR` änderbar).
   stünde Göttingen beim 96. Perzentil dafür, exakt Durchschnitt zu sein.
   Luftdruck bleibt außen vor, obwohl die Spalte existiert — er wird auf
   Stationshöhe gemessen, eine bundesweite Rangliste sortierte also die Höhe.
+- **Boden.** Die Bodenfeuchte ist die einzige Größe hier, die niemand misst:
+  Der DWD rechnet sie mit den agrarmeteorologischen Modellen AMBAV und AMBETI
+  aus Temperatur, Taupunkt, Wind, Niederschlag und Strahlung, weil sie
+  „normalerweise messtechnisch nicht erfasst" wird. Angegeben als Prozent der
+  nutzbaren Feldkapazität, 1991 bis heute, in sechs Schichten bis 60 cm. Der
+  Wert allein sagt nichts — 43 % ist im April alarmierend und im August
+  gewöhnlich —, deshalb steht daneben das Perzentil desselben Kalendertages
+  ±7 Tage über alle 35 Jahre: Am 9. August 2026 waren nur 11 % der
+  vergleichbaren Tage trockener. Die Bodentemperatur dagegen ist gemessen, seit
+  1981, und zeigt, was Tiefe mit einem Jahr macht: von 5 auf 50 cm verliert der
+  Jahresgang 3,4 K an Amplitude und kommt fünf Tage später an. **Nur Göttingen**
+  — Brocken und Zugspitze stehen in keinem der beiden Datensätze, das ist keine
+  Auswahl, sondern die Datenlage.
 - **Tagesgang der Pegel.** Ein Wasserstand wandert über Wochen, ein Mittel nach
   Tageszeit sagt deshalb vor allem, welche Wochen gemessen wurden. Jede Stunde
   wird darum gegen die 24 Stunden um sie herum gerechnet: Ein voller Tag enthält
