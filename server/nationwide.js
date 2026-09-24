@@ -1,5 +1,7 @@
 import { db } from './db.js'
+import { tableStamp } from './coverage.js'
 import { listDays } from './germany-csv.js'
+import { remembered } from './memo.js'
 import { listYears, readAll, readStations } from './nationwide-csv.js'
 import { addReading, finishShape, LOWLAND_LIMIT, MIN_FOR_FIT } from './nationwide-shape.js'
 
@@ -445,7 +447,20 @@ export function nationwideOverview() {
   return range.days === 0 ? null : { range, lowlandLimit: LOWLAND_LIMIT }
 }
 
-export function spanAnalysis() {
+/**
+ * The four analyses below read 93,000 nationwide days and, for the most recent
+ * stretch, the 1.28 million rows of the station archive. Both tables are
+ * written by one collector run a day, and neither is written by anything else,
+ * so the pair of dates below is the whole of what could make an answer wrong.
+ *
+ * Four analyses, one stamp each, and room for both sides of a collector run.
+ */
+const archiveStamp = () => `${tableStamp('nationwide_daily')}|${tableStamp('germany_daily')}`
+const perArchive = (compute) => remembered(archiveStamp, compute, { limit: 2 })
+
+export const spanAnalysis = perArchive(computeSpan)
+
+function computeSpan() {
   const range = nationwideRange()
   if (range.counted === 0) return null
 
@@ -540,7 +555,9 @@ const withLapseStations = (row) => ({
   absLoStation: stationOf(row.absLoStation),
 })
 
-export function lapseAnalysis() {
+export const lapseAnalysis = perArchive(computeLapse)
+
+function computeLapse() {
   const range = nationwideRange()
   if (range.counted === 0) return null
 
@@ -729,7 +746,9 @@ const withGradStations = (row) => ({
   absLoStation: stationOf(row.absLoStation),
 })
 
-export function gradientAnalysis() {
+export const gradientAnalysis = perArchive(computeGradient)
+
+function computeGradient() {
   const range = nationwideRange()
   if (range.counted === 0) return null
 
@@ -910,7 +929,9 @@ function decadesFor(column) {
     }))
 }
 
-export function extremePoints() {
+export const extremePoints = perArchive(computeExtremePoints)
+
+function computeExtremePoints() {
   const range = nationwideRange()
   if (range.counted === 0) return null
 

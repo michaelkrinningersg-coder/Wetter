@@ -1,5 +1,5 @@
-import type { ComponentType, ReactNode } from 'react'
-import { AlertTriangle, Inbox, type LucideProps } from 'lucide-react'
+import { useSyncExternalStore, type ComponentType, type ReactNode } from 'react'
+import { AlertTriangle, ChevronDown, Inbox, type LucideProps } from 'lucide-react'
 
 /* -------------------------------------------------------------------------- */
 /* Layout primitives                                                          */
@@ -35,7 +35,10 @@ export function SectionHeading({
   actions?: ReactNode
 }) {
   return (
-    <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    /* `last:mb-0`: several views use a heading as a card's only child — a
+       filter row with its explanation — and the trailing margin then sat
+       inside the card as 20 pixels of nothing. */
+    <div className="mb-5 flex flex-col gap-3 last:mb-0 sm:flex-row sm:items-start sm:justify-between">
       <div className="min-w-0">
         <h2 className="flex items-center gap-2 text-sm font-semibold text-ink">
           {Icon && <Icon className="size-4 shrink-0 text-brand" aria-hidden />}
@@ -52,11 +55,60 @@ export function SectionHeading({
   )
 }
 
+/** Whether the explanations start open. Remembered across sessions. */
+const EXPLAIN_KEY = 'explanations_open'
+
+function readExplain(): boolean {
+  try {
+    return localStorage.getItem(EXPLAIN_KEY) === 'true'
+  } catch {
+    // Private mode and sandboxed iframes throw on access rather than
+    // returning null, and an explanatory paragraph is not worth a white page.
+    return false
+  }
+}
+
 /**
- * The explanatory blocks that head most tabs. In the original these were
- * `text-[10px] uppercase tracking-wider` paragraphs of 60+ words — technically
- * present but effectively unreadable. Same copy, readable typography.
+ * The paragraph that says what a view is actually measuring — folded away.
+ *
+ * Almost every view opens with one of these, and they earn their place: the
+ * centred window in the gauge cycle, the ±7-day window in the soil percentile,
+ * the 330-day rule in the trends. They are also 90 to 140 pixels each, at the
+ * top of the screen, saying the same thing to the same reader on every visit.
+ *
+ * So the title stays and the body folds. Opening one opens them everywhere and
+ * the choice is remembered, because somebody who wants the method in front of
+ * them wants it in front of them in all 41 views, not once per view.
+ *
+ * `useSyncExternalStore` rather than local state for the same reason: two
+ * panels are occasionally on screen together, and one of them silently
+ * disagreeing with the other about a setting they share would be worse than
+ * either default.
  */
+const explainListeners = new Set<() => void>()
+
+function setExplain(open: boolean) {
+  try {
+    localStorage.setItem(EXPLAIN_KEY, String(open))
+  } catch {
+    /* storage unavailable — the choice holds for this session only */
+  }
+  explainCache = open
+  for (const notify of explainListeners) notify()
+}
+
+let explainCache: boolean | null = null
+
+function subscribeExplain(notify: () => void) {
+  explainListeners.add(notify)
+  return () => explainListeners.delete(notify)
+}
+
+function explainSnapshot(): boolean {
+  explainCache ??= readExplain()
+  return explainCache
+}
+
 export function InfoPanel({
   icon: Icon,
   title,
@@ -66,21 +118,35 @@ export function InfoPanel({
   title: string
   children: ReactNode
 }) {
+  const open = useSyncExternalStore(subscribeExplain, explainSnapshot, () => false)
+
   return (
-    <Card className="border-brand/20 bg-gradient-to-br from-brand/[0.05] to-transparent">
-      <div className="flex gap-4">
-        {Icon && (
-          <div className="hidden size-9 shrink-0 place-items-center rounded-lg border border-brand/25 bg-brand/10 text-brand sm:grid">
-            <Icon className="size-4" aria-hidden />
-          </div>
-        )}
-        <div className="min-w-0">
-          <h2 className="text-sm font-semibold text-ink">{title}</h2>
-          <div className="mt-2 max-w-4xl text-xs leading-relaxed text-ink-muted [&_strong]:font-semibold [&_strong]:text-brand">
-            {children}
-          </div>
+    <Card
+      padded={false}
+      className="border-brand/20 bg-gradient-to-br from-brand/[0.05] to-transparent"
+    >
+      <button
+        type="button"
+        onClick={() => setExplain(!open)}
+        aria-expanded={open}
+        className="flex w-full cursor-pointer items-center gap-2.5 px-4 py-2.5 text-left"
+      >
+        {Icon && <Icon className="size-4 shrink-0 text-brand" aria-hidden />}
+        <h2 className="min-w-0 truncate text-sm font-semibold text-ink">{title}</h2>
+        <span className="ml-auto flex shrink-0 items-center gap-1 text-[11px] text-brand">
+          {open ? 'ausblenden' : 'was heißt das?'}
+          <ChevronDown
+            className={`size-3.5 transition-transform ${open ? 'rotate-180' : ''}`}
+            aria-hidden
+          />
+        </span>
+      </button>
+
+      {open && (
+        <div className="max-w-4xl px-4 pb-4 text-xs leading-relaxed text-ink-muted [&_strong]:font-semibold [&_strong]:text-brand">
+          {children}
         </div>
-      </div>
+      )}
     </Card>
   )
 }

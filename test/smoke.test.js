@@ -118,7 +118,19 @@ test('der Newsroom veröffentlicht nichts über seiner eigenen Schwelle', { skip
         `${edition.date}: „${item.headline}" mit ${item.perYear} Tagen im Jahr`,
       )
     }
-    if (edition.quiet) assert.ok(edition.nearest, `${edition.date}: stille Ausgabe ohne Begründung`)
+    // A quiet edition has to justify itself: either the near miss that came
+    // closest to the bar, or the admission that the day was never measured.
+    // Göttingen has seven such days in July 2026, and until the flag existed
+    // they were published as "nothing special happened".
+    if (edition.quiet) {
+      assert.ok(
+        edition.nearest || edition.unmeasured,
+        `${edition.date}: stille Ausgabe ohne Begründung`,
+      )
+    }
+    if (edition.unmeasured) {
+      assert.equal(edition.candidates, 0, `${edition.date}: ungemessen, aber Regeln haben gegriffen`)
+    }
   }
 })
 

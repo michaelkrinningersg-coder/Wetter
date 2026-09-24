@@ -200,7 +200,24 @@ export function Newsroom({ stationId, stationName }: { stationId: string; statio
         </Card>
       )}
 
-      {data.quiet && (
+      {data.quiet && data.unmeasured && (
+        <Card>
+          <SectionHeading icon={Inbox} title="Nichts gemessen" />
+          <p className="text-sm text-ink">
+            Für diesen Tag hat der DWD keine Werte veröffentlicht — keine
+            Temperatur, keinen Niederschlag, nichts. Es ist also nicht so, dass
+            nichts passiert wäre; es ist nicht aufgezeichnet.
+          </p>
+          <p className="mt-3 text-xs text-ink-muted">
+            Solche Lücken kommen in den Messreihen vor und schließen sich
+            manchmal später, wenn die Nachprüfung des DWD durch ist. Die {num(rules, 0)}{' '}
+            Regeln sind gelaufen und hatten nichts, worauf sie hätten anwenden
+            können.
+          </p>
+        </Card>
+      )}
+
+      {data.quiet && !data.unmeasured && (
         <Card>
           <SectionHeading icon={Inbox} title="Nichts Besonderes" />
           <p className="text-sm text-ink">

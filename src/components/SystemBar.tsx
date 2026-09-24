@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { AlertTriangle, Check, Loader2, RefreshCw } from 'lucide-react'
 
 import { useApi } from '../lib/api'
@@ -13,6 +13,16 @@ import type { JobStatus, SystemResponse } from '../types'
  * claim and a variable one: a machine that was off for a week shows a week-old
  * newsroom, and nothing else in the interface would give that away. So each
  * source states how far it reaches and when it last succeeded.
+ *
+ * It used to state all five permanently, as a full-width strip under the
+ * header. That is a lot of room for a sentence that reads "everything is fine"
+ * on most days, so the strip is now one word in the header — "aktuell", or how
+ * many sources are behind — and the five lines are one click away.
+ *
+ * The poll behind it is the reason `covered()` in `server/jobs.js` has to stay
+ * a single `MAX`: once a minute, forever, is a bad place for an analysis. Two
+ * of them used to build a whole overview to read one date, and this bar was
+ * costing three quarters of a second of server time every sixty seconds.
  */
 
 /** Poll while a run is going; otherwise the bar only needs a value per minute. */
@@ -51,6 +61,30 @@ export function SystemBar() {
   const { data, reload } = useApi<SystemResponse>('/api/system')
   const [busy, setBusy] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
+  const box = useRef<HTMLDivElement>(null)
+
+  /*
+   * A panel that floats over the page has to be dismissible without hitting
+   * the one button that opened it — it covers a third of the dashboard, and
+   * the reflex for that is a click anywhere else, or Escape.
+   */
+  useEffect(() => {
+    if (!open) return
+
+    const away = (event: MouseEvent) => {
+      if (!box.current?.contains(event.target as Node)) setOpen(false)
+    }
+    const key = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false)
+    }
+
+    document.addEventListener('mousedown', away)
+    document.addEventListener('keydown', key)
+    return () => {
+      document.removeEventListener('mousedown', away)
+      document.removeEventListener('keydown', key)
+    }
+  }, [open])
 
   const anyRunning = data?.jobs.some((job) => job.running) ?? false
 
@@ -75,47 +109,52 @@ export function SystemBar() {
   if (!data) return null
 
   const stale = data.jobs.filter((job) => (behind(job) ?? 1) > 0 || job.lastError)
+  const running = data.jobs.filter((job) => job.running)
+
+  const summary =
+    running.length > 0
+      ? `${running.length === 1 ? running[0]!.label : `${running.length} Quellen`} läuft …`
+      : stale.length === 0
+        ? 'aktuell'
+        : `${stale.length} von ${data.jobs.length} veraltet`
 
   return (
-    <section className="mt-4 rounded-card border border-line bg-surface">
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 px-4 py-2.5">
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-          className="cursor-pointer text-[11px] font-medium text-ink-muted transition-colors hover:text-ink"
-        >
-          Datenstand{' '}
-          {stale.length === 0 ? (
-            <Check className="inline size-3 text-good" aria-hidden />
-          ) : (
-            <AlertTriangle className="inline size-3 text-warm" aria-hidden />
-          )}
-        </button>
-
-        {data.jobs.map((job) => {
-          const tone = toneOf(job)
-          return (
-            <span key={job.key} className="flex items-center gap-1.5 text-[11px]">
-              <span className={`size-1.5 rounded-full ${tone.dot}`} aria-hidden />
-              <span className="text-ink-faint">{job.label}</span>
-              <span className={`numeric ${tone.text}`}>
-                {job.running ? 'läuft …' : coverText(job)}
-              </span>
-            </span>
-          )
-        })}
-      </div>
+    <div ref={box} className="relative shrink-0">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        title="Datenstand der fünf Quellen"
+        className="flex cursor-pointer items-center gap-1.5 rounded-md px-1.5 py-1 text-[11px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+      >
+        {running.length > 0 ? (
+          <Loader2 className="size-3 animate-spin text-brand" aria-hidden />
+        ) : stale.length === 0 ? (
+          <Check className="size-3 text-good" aria-hidden />
+        ) : (
+          <AlertTriangle className="size-3 text-warm" aria-hidden />
+        )}
+        <span className="hidden sm:inline">{summary}</span>
+      </button>
 
       {open && (
-        <div className="border-t border-line px-4 py-3">
+        /* Anchored to the button rather than pushing the page down: the panel
+           is 300 pixels tall and the interface underneath it should not jump
+           every time somebody checks whether the collectors ran. */
+        <div className="absolute right-0 top-9 z-20 w-[min(30rem,calc(100vw-2rem))] rounded-card border border-line bg-surface px-4 py-3 shadow-2xl shadow-black/40">
           <ul className="space-y-2">
             {data.jobs.map((job) => (
               <li key={job.key} className="flex flex-wrap items-baseline justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="text-xs font-medium text-ink">
+                  <p className="flex items-center gap-1.5 text-xs font-medium text-ink">
+                    <span
+                      className={`size-1.5 shrink-0 rounded-full ${toneOf(job).dot}`}
+                      aria-hidden
+                    />
                     {job.label}
-                    <span className="ml-2 text-[11px] font-normal text-ink-faint">{job.note}</span>
+                    <span className={`numeric text-[11px] font-normal ${toneOf(job).text}`}>
+                      {job.running ? 'läuft …' : coverText(job)}
+                    </span>
                   </p>
                   <p className="mt-0.5 text-[11px] text-ink-muted">
                     {job.covered === null
@@ -160,6 +199,6 @@ export function SystemBar() {
           </p>
         </div>
       )}
-    </section>
+    </div>
   )
 }

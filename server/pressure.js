@@ -1,4 +1,5 @@
 import { db } from './db.js'
+import { perStation } from './memo.js'
 
 /**
  * Air pressure, and what it does to the wind.
@@ -165,7 +166,9 @@ function correlation(pairs) {
 /* The assembled answer                                                       */
 /* -------------------------------------------------------------------------- */
 
-export function pressureAnalysis(stationId) {
+export const pressureAnalysis = perStation(computePressure)
+
+function computePressure(stationId) {
   const rows = dailyWithChange(stationId)
   if (rows.length === 0) return null
 

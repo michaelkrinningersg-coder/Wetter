@@ -34,6 +34,18 @@ jobs:
       - name: Oberfläche bauen
         run: npm run build
 
+      # Die Datenbank hier bauen statt auf jedem Rechner beim ersten Start.
+      # Gemessen: 59,6 Sekunden und 938 MB Arbeitsspeicher — einmal auf dem
+      # Läufer, oder einmal bei jedem, der das Programm installiert.
+      - name: Datenbank aufbauen
+        run: npm run build:db
+
+      # Beides gepackt in `vorlage/`: 4.669 CSV-Dateien als ein .tar.gz (12 MB
+      # statt 65) und die Datenbank als .gz (34 MB statt 157). Das Programm
+      # entpackt sie beim ersten Start in 5,3 Sekunden.
+      - name: Vorlagen packen
+        run: npm run vorlage
+
       # Erzwungen, und deshalb ein eigener Schritt: electron-builder ruft
       # @electron/rebuild von sich aus auf, aber ohne `-f`. Da `npm ci` schon
       # eine gültig aussehende better_sqlite3.node abgelegt hat — die für Node

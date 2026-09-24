@@ -3,7 +3,6 @@ import {
   AlertTriangle,
   CheckCircle2,
   CloudSun,
-  Database,
   Moon,
   RefreshCw,
   Sun,
@@ -12,14 +11,21 @@ import {
 import type { ImportResult, ImportStatus, Station } from '../types'
 import { isoToGerman } from '../lib/format'
 import { useTheme } from '../lib/theme'
+import { SystemBar } from './SystemBar'
 
 /**
- * Light or dark, by hand.
+ * One line, because everything below it is the point.
  *
- * Dark is the default and stays it — this app was designed dark. The switch
- * exists for the visitor who opens the link outdoors, and the choice is
- * remembered. Rendered as a two-state button rather than a checkbox so the
- * icon can say what pressing it will do.
+ * This header used to be a card 170 pixels tall, with the station name at
+ * 20 px, a second line repeating the altitude, a boxed station picker, and a
+ * panel of three statistics. Under it sat a data-freshness strip, an
+ * introductory paragraph and a teaser card. Together they filled 500 of the
+ * 1000 pixels a laptop shows before a single measurement appeared: the first
+ * row of figures started at y≈570 and the second was cut off.
+ *
+ * Nothing here was wrong, only expensive. The name, the station, the extent of
+ * the archive and the two buttons all still exist — on one 48-pixel row, in
+ * the order one reads them.
  */
 function ThemeToggle() {
   const [theme, setTheme] = useTheme()
@@ -31,12 +37,12 @@ function ThemeToggle() {
       onClick={() => setTheme(next)}
       title={next === 'light' ? 'Helle Darstellung' : 'Dunkle Darstellung'}
       aria-label={next === 'light' ? 'Zu heller Darstellung wechseln' : 'Zu dunkler Darstellung wechseln'}
-      className="flex size-9 cursor-pointer items-center justify-center rounded-md border border-line bg-raised text-ink-muted transition-colors hover:border-line-strong hover:text-ink"
+      className="flex size-7 cursor-pointer items-center justify-center rounded-md border border-line bg-raised text-ink-muted transition-colors hover:border-line-strong hover:text-ink"
     >
       {theme === 'dark' ? (
-        <Sun className="size-4" aria-hidden />
+        <Sun className="size-3.5" aria-hidden />
       ) : (
-        <Moon className="size-4" aria-hidden />
+        <Moon className="size-3.5" aria-hidden />
       )}
     </button>
   )
@@ -93,132 +99,112 @@ export function Header({
   }
 
   return (
-    <header className="overflow-hidden rounded-card border border-line bg-surface">
-      <div className="h-0.5 bg-gradient-to-r from-brand via-hot to-brand" aria-hidden />
+    <header className="border-b border-line bg-surface">
+      <div className="mx-auto flex h-12 max-w-[1560px] items-center gap-3 px-4 sm:px-6">
+        <CloudSun className="size-[18px] shrink-0 text-brand" aria-hidden />
+        <h1 className="shrink-0 text-sm font-semibold tracking-tight text-ink">
+          Wetterstation
+        </h1>
 
-      <div className="flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2.5">
-            <CloudSun className="size-5 shrink-0 text-brand" aria-hidden />
-            <h1 className="truncate text-lg font-semibold tracking-tight text-ink sm:text-xl">
-              Wetterstation {station?.name ?? '…'}
-            </h1>
-            <span className="numeric rounded border border-line bg-raised px-1.5 py-0.5 text-[10px] text-ink-faint">
-              #{stationId}
-            </span>
-          </div>
-          <p className="mt-1 text-xs text-ink-muted">
-            DWD-Klimadatenanalyse · {station?.altitude ?? '—'} m ü. NHN
-          </p>
-
-          <label className="mt-3 inline-flex items-center gap-2 rounded-md border border-line bg-raised px-2.5 py-1.5">
-            <span className="label">Station</span>
-            <select
-              value={stationId}
-              onChange={(e) => onStationChange(e.target.value)}
-              className="cursor-pointer bg-transparent text-xs font-medium text-brand focus:outline-none"
-            >
-              {stations.map((s) => (
-                <option key={s.id} value={s.id} className="bg-canvas text-ink">
-                  {s.name} ({s.altitude} m)
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-4 rounded-card border border-line bg-raised p-3">
-          <div className="flex items-center gap-2.5">
-            <Database className="size-4 text-brand" aria-hidden />
-            <div>
-              <p className="label">Datensätze</p>
-              <p className="numeric text-xs font-semibold text-ink">
-                {status ? status.rowCount.toLocaleString('de-DE') : '…'}
-              </p>
-            </div>
-          </div>
-
-          <div className="hidden h-8 w-px bg-line sm:block" aria-hidden />
-
-          <div>
-            <p className="label">Zeitraum</p>
-            <p className="numeric text-xs text-ink">
-              {status ? isoToGerman(status.minDate) : '…'} –{' '}
-              {status ? isoToGerman(status.maxDate) : '…'}
-            </p>
-          </div>
-
-          <div className="hidden h-8 w-px bg-line sm:block" aria-hidden />
-
-          <ThemeToggle />
-
-          <button
-            type="button"
-            onClick={sync}
-            disabled={busy}
-            className="flex cursor-pointer items-center gap-2 rounded-md bg-brand px-3.5 py-2 text-xs font-semibold text-canvas transition-colors hover:bg-brand-dim disabled:cursor-wait disabled:bg-brand/40 disabled:text-ink-muted"
+        {/* The picker is the station name: a separate heading repeating it was
+            one line of the old header that said nothing the select did not. */}
+        <label className="flex shrink-0 items-center gap-1.5 rounded-md border border-line px-2 py-1">
+          <span className="sr-only">Station</span>
+          <select
+            value={stationId}
+            onChange={(e) => onStationChange(e.target.value)}
+            className="cursor-pointer bg-transparent text-xs font-medium text-ink focus:outline-none"
           >
-            <RefreshCw className={`size-3.5 ${busy ? 'animate-spin' : ''}`} aria-hidden />
-            {busy ? 'Synchronisiert…' : 'Synchronisieren'}
-          </button>
-        </div>
+            {stations.map((s) => (
+              <option key={s.id} value={s.id} className="bg-canvas text-ink">
+                {s.name}
+              </option>
+            ))}
+          </select>
+          <span className="numeric text-[10px] text-ink-faint">
+            {station?.altitude ?? '—'} m
+          </span>
+        </label>
+
+        <div className="flex-1" />
+
+        <p className="numeric hidden text-[11px] text-ink-faint xl:block">
+          {status ? status.rowCount.toLocaleString('de-DE') : '…'} Messtage ·{' '}
+          {status ? isoToGerman(status.minDate) : '…'} –{' '}
+          {status ? isoToGerman(status.maxDate) : '…'}
+        </p>
+
+        <SystemBar />
+        <ThemeToggle />
+
+        <button
+          type="button"
+          onClick={sync}
+          disabled={busy}
+          className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md bg-brand px-3 py-1.5 text-[11px] font-semibold text-canvas transition-colors hover:bg-brand-dim disabled:cursor-wait disabled:bg-brand/40 disabled:text-ink-muted"
+        >
+          <RefreshCw className={`size-3 ${busy ? 'animate-spin' : ''}`} aria-hidden />
+          {busy ? 'Synchronisiert…' : 'Synchronisieren'}
+        </button>
       </div>
 
       {/* Status messages, announced to assistive tech as they appear. */}
       <div aria-live="polite" className="empty:hidden">
         {result && (
-          <div className="border-t border-line px-5 py-3.5 sm:px-6">
+          <div className="border-t border-line px-4 py-2.5 sm:px-6">
             {result.success ? (
-              <div className="flex gap-2.5 text-xs">
-                <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-good" aria-hidden />
-                <div>
-                  <p className="font-semibold text-good">
-                    Synchronisierung abgeschlossen
-                  </p>
-                  <p className="mt-0.5 text-ink-muted">
-                    {result.newRecordsCount && result.newRecordsCount > 0 ? (
-                      <>
-                        {result.newRecordsCount.toLocaleString('de-DE')} neue Messtage
-                        importiert. Datenbestand jetzt bis{' '}
-                        <span className="numeric text-ink">
-                          {isoToGerman(result.newMaxDate)}
-                        </span>
-                        .
-                      </>
-                    ) : (
-                      'Der Datenbestand war bereits aktuell — keine neuen Messtage beim DWD verfügbar.'
-                    )}
-                  </p>
-                </div>
+              <div className="mx-auto flex max-w-[1560px] gap-2 text-xs">
+                <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-good" aria-hidden />
+                <p className="text-ink-muted">
+                  <span className="font-semibold text-good">
+                    Synchronisierung abgeschlossen —{' '}
+                  </span>
+                  {result.newRecordsCount && result.newRecordsCount > 0 ? (
+                    <>
+                      {result.newRecordsCount.toLocaleString('de-DE')} neue Messtage,
+                      jetzt bis{' '}
+                      <span className="numeric text-ink">
+                        {isoToGerman(result.newMaxDate)}
+                      </span>
+                      .
+                    </>
+                  ) : (
+                    'der Datenbestand war bereits aktuell.'
+                  )}
+                </p>
               </div>
             ) : (
-              <div className="flex gap-2.5 text-xs">
-                <AlertTriangle className="mt-0.5 size-4 shrink-0 text-bad" aria-hidden />
-                <div>
-                  <p className="font-semibold text-bad">Synchronisierung fehlgeschlagen</p>
-                  <p className="mt-0.5 text-ink-muted">
-                    {result.error ?? 'Der DWD-Server war nicht erreichbar.'}
-                  </p>
-                </div>
+              <div className="mx-auto flex max-w-[1560px] gap-2 text-xs">
+                <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-bad" aria-hidden />
+                <p className="text-ink-muted">
+                  <span className="font-semibold text-bad">
+                    Synchronisierung fehlgeschlagen —{' '}
+                  </span>
+                  {result.error ?? 'Der DWD-Server war nicht erreichbar.'}
+                </p>
               </div>
             )}
           </div>
         )}
 
         {status?.lastError && (
-          <div className="flex gap-2.5 border-t border-line bg-bad/[0.06] px-5 py-3 text-xs sm:px-6">
-            <AlertTriangle className="mt-0.5 size-4 shrink-0 text-bad" aria-hidden />
-            <p className="text-ink-muted">
-              <span className="font-semibold text-bad">Letzter Systemfehler:</span>{' '}
-              {status.lastError}
+          <div className="border-t border-line bg-bad/[0.06] px-4 py-2 text-xs sm:px-6">
+            <p className="mx-auto flex max-w-[1560px] gap-2 text-ink-muted">
+              <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-bad" aria-hidden />
+              <span>
+                <span className="font-semibold text-bad">Letzter Systemfehler:</span>{' '}
+                {status.lastError}
+              </span>
             </p>
           </div>
         )}
 
         {status?.importInProgress && (
-          <div className="flex items-center gap-2.5 border-t border-line bg-brand/[0.06] px-5 py-3 text-xs text-ink-muted sm:px-6">
-            <span className="size-1.5 animate-ping rounded-full bg-brand" aria-hidden />
-            DWD-Klimadaten werden geladen und in die lokale Datenbank importiert…
+          <div className="border-t border-line bg-brand/[0.06] px-4 py-2 text-xs text-ink-muted sm:px-6">
+            <p className="mx-auto flex max-w-[1560px] items-center gap-2">
+              <span className="size-1.5 animate-ping rounded-full bg-brand" aria-hidden />
+              DWD-Klimadaten werden geladen und in die lokale Datenbank importiert…
+            </p>
           </div>
         )}
       </div>

@@ -1,4 +1,6 @@
 import { db } from './db.js'
+import { tableStamp } from './coverage.js'
+import { remembered } from './memo.js'
 import { readSoil } from './soil-csv.js'
 import { DERIVED_FIELDS, MOISTURE_LAYERS, SOIL_STATION, TEMPERATURE_DEPTHS } from './soil-sources.js'
 
@@ -195,7 +197,21 @@ function annualCycle(rows, column) {
   })
 }
 
-export function soilOverview({ days = 365 } = {}) {
+/**
+ * Every call reads both archives whole — thirty thousand days — and rebuilds
+ * the 366 calendar windows the climatology rests on. That is the right way to
+ * compute it and the wrong way to serve it: the DWD publishes once a day, and
+ * it revises days it has already published, which is why the stamp is the last
+ * date rather than a row count.
+ */
+export const soilOverview = remembered(
+  ({ days = 365 } = {}) =>
+    `${tableStamp('soil_moisture')}|${tableStamp('soil_temperature')}|${days}`,
+  computeSoilOverview,
+  { limit: 4 },
+)
+
+function computeSoilOverview({ days = 365 } = {}) {
   const moistureRange = rangeOf('soil_moisture')
   const temperatureRange = rangeOf('soil_temperature')
 

@@ -17,7 +17,9 @@
     "app": "npm run rebuild:app --silent && npm run build && electron .",
     "rebuild:app": "electron-rebuild -f -w better-sqlite3",
     "rebuild:node": "npm rebuild better-sqlite3",
-    "pack": "npm run rebuild:app && npm run build && electron-builder",
+    "build:db": "npm run rebuild:node --silent && node scripts/build-database.js",
+    "vorlage": "npm run rebuild:node --silent && node scripts/build-vorlage.js",
+    "pack": "npm run vorlage && npm run rebuild:app && npm run build && electron-builder",
     "typecheck": "tsc -b --noEmit",
     "pretest": "npm run rebuild:node --silent",
     "test": "node --test \"test/**/*.test.js\"",
@@ -74,18 +76,23 @@
       "scripts/**",
       "electron/**",
       "node_modules/**",
-      "package.json"
+      "package.json",
+      "!node_modules/better-sqlite3/deps/**",
+      "!node_modules/better-sqlite3/src/**",
+      "!node_modules/better-sqlite3/build/Release/obj/**",
+      "!node_modules/better-sqlite3/build/**/*.{o,a,mk,gypi,Makefile}"
     ],
     "extraResources": [
       {
-        "from": "data",
-        "to": "daten-vorlage",
-        "filter": [
-          "**/*",
-          "!weather.sqlite*"
-        ]
+        "from": "vorlage/daten-vorlage.tar.gz",
+        "to": "daten-vorlage.tar.gz"
+      },
+      {
+        "from": "vorlage/weather.sqlite.gz",
+        "to": "weather.sqlite.gz"
       }
     ],
+    "afterPack": "build/after-pack.cjs",
     "asar": false,
     "win": {
       "target": [

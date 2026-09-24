@@ -2187,6 +2187,8 @@ export interface NewsroomResponse {
   items: NewsItem[]
   dropped: number
   quiet: boolean
+  /** True when the station reported nothing at all — not the same as a quiet day. */
+  unmeasured: boolean
   /** What came closest without clearing the bar — the proof the rules ran. */
   nearest: NewsItem | null
   candidates: number
@@ -2217,6 +2219,7 @@ export interface NewsroomHeadline {
   date: string
   label: string
   quiet: boolean
+  unmeasured: boolean
   count: number
   dropped: number
   top: {

@@ -185,14 +185,18 @@ export function Dashboard({ stationName }: { stationName: string }) {
             icon={Newspaper}
             title={`Ausgabe vom ${newsroom.label}`}
             hint={
-              newsroom.quiet
-                ? 'Keine der Regeln hat an diesem Tag etwas gefunden, das selten genug für eine Meldung wäre.'
-                : `${num(newsroom.count, 0)} ${newsroom.count === 1 ? 'Meldung' : 'Meldungen'}, die seltenste zuerst.`
+              newsroom.unmeasured
+                ? 'Für diesen Tag hat der DWD keine Werte veröffentlicht.'
+                : newsroom.quiet
+                  ? 'Keine der Regeln hat an diesem Tag etwas gefunden, das selten genug für eine Meldung wäre.'
+                  : `${num(newsroom.count, 0)} ${newsroom.count === 1 ? 'Meldung' : 'Meldungen'}, die seltenste zuerst.`
             }
           />
           {newsroom.quiet ? (
             <p className="text-sm text-ink-muted">
-              Nichts Besonderes — die häufigste aller Ausgaben.
+              {newsroom.unmeasured
+                ? 'Nichts gemessen — die Messreihe hat hier eine Lücke.'
+                : 'Nichts Besonderes — die häufigste aller Ausgaben.'}
             </p>
           ) : (
             <ul className="space-y-2">

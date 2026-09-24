@@ -20,7 +20,9 @@ import {
   Newspaper,
   Layers,
   Leaf,
-  Map,
+  // `Map` collides with the built-in: `new Map(...)` below would build a
+  // lucide icon and TypeScript would report it as a type nobody wrote.
+  Map as MapIcon,
   MapPin,
   Scale,
   Snowflake,
@@ -42,7 +44,6 @@ import { apiGet } from './lib/api'
 import { readParam, setTabParam, useUrlNumber, useUrlState } from './lib/url-state'
 import type { ImportStatus, Station } from './types'
 import { Header } from './components/Header'
-import { SystemBar } from './components/SystemBar'
 import { Loading } from './components/ui'
 import { Dashboard } from './components/Dashboard'
 
@@ -306,7 +307,7 @@ const TABS: TabDef[] = [
   { id: 'radiation', label: 'Ortsdosisleistung', icon: Radio, group: 'Umwelt' },
   { id: 'pollen', label: 'Pollenflug', icon: Flower2, group: 'Umwelt' },
   { id: 'phenology', label: 'Phänologie', icon: Sprout, group: 'Umwelt' },
-  { id: 'germany', label: 'Deutschland gestern', icon: Map, group: 'Deutschland' },
+  { id: 'germany', label: 'Deutschland gestern', icon: MapIcon, group: 'Deutschland' },
   { id: 'germany-map', label: 'Karte', icon: MapPin, group: 'Deutschland' },
   { id: 'nationwide', label: 'Deutschlandtage', icon: ArrowLeftRight, group: 'Deutschland' },
   { id: 'records', label: 'Allzeitrekorde', icon: Trophy, group: 'Deutschland' },
@@ -326,6 +327,11 @@ const GROUPS = [
 ] as const
 
 const TAB_IDS = TABS.map((t) => t.id)
+
+/** The views of each group, in the order the tab strip shows them. */
+const BY_GROUP = new Map<TabDef['group'], TabDef[]>(
+  GROUPS.map((group) => [group, TABS.filter((t) => t.group === group)]),
+)
 
 const STORAGE_KEY = 'selected_station_id'
 
@@ -444,25 +450,90 @@ export default function App() {
   const stationName = station?.name ?? 'Station'
   const isEmpty = status !== null && status.rowCount === 0
 
+  /*
+   * The group follows the view, it is not a second piece of state.
+   * Every link ever shared carries `bereich=` and nothing else, and a group
+   * kept beside it could disagree with it — a link to the Temperaturtrend
+   * opening with "Überblick" underlined.
+   */
+  const activeGroup = TABS.find((t) => t.id === tab)?.group ?? GROUPS[0]
+
   return (
     <div className="min-h-screen">
-      <div className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
-        <Header
-          status={status}
-          stations={stations}
-          stationId={stationId}
-          onStationChange={changeStation}
-          onImported={refreshStatus}
-        />
+      <Header
+        status={status}
+        stations={stations}
+        stationId={stationId}
+        onStationChange={changeStation}
+        onImported={refreshStatus}
+      />
 
-        <SystemBar />
+      {/*
+        Two rows instead of a 256-pixel column.
+        The sidebar listed all 41 views at once, which was taller than the
+        screen and pushed the content into two thirds of the width. Here the
+        seven groups are the first row and only the chosen group's views are
+        the second, so the navigation costs 68 pixels of height and no width at
+        all — and the structure is the same one the sub-navigation inside
+        Flusspegel and Rückblick already uses.
+      */}
+      <nav aria-label="Bereiche" className="border-b border-line">
+        <div className="mx-auto flex max-w-[1560px] gap-1 overflow-x-auto px-4 sm:px-6">
+          {GROUPS.map((group) => {
+            const active = group === activeGroup
+            return (
+              <button
+                key={group}
+                type="button"
+                aria-current={active ? 'page' : undefined}
+                onClick={() => setTab(BY_GROUP.get(group)![0]!.id)}
+                onMouseEnter={() => preload(BY_GROUP.get(group)![0]!.id)}
+                className={`shrink-0 cursor-pointer whitespace-nowrap border-b-2 px-3.5 py-2 text-xs transition-colors ${
+                  active
+                    ? 'border-brand font-semibold text-brand'
+                    : 'border-transparent text-ink-muted hover:text-ink'
+                }`}
+              >
+                {group}
+              </button>
+            )
+          })}
+        </div>
+      </nav>
 
+      <nav aria-label="Auswertungen" className="border-b border-line bg-surface/40">
+        <div className="mx-auto flex max-w-[1560px] flex-wrap gap-1.5 px-4 py-2 sm:px-6">
+          {(BY_GROUP.get(activeGroup) ?? []).map((t) => {
+            const active = t.id === tab
+            return (
+              <button
+                key={t.id}
+                type="button"
+                aria-current={active ? 'page' : undefined}
+                onClick={() => setTab(t.id)}
+                onMouseEnter={() => preload(t.id)}
+                onFocus={() => preload(t.id)}
+                className={`flex shrink-0 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1 text-[11.5px] transition-colors ${
+                  active
+                    ? 'bg-brand font-semibold text-canvas'
+                    : 'border border-line text-ink-muted hover:border-line-strong hover:text-ink'
+                }`}
+              >
+                <t.icon className="size-3.5" aria-hidden />
+                {t.label}
+              </button>
+            )
+          })}
+        </div>
+      </nav>
+
+      <div className="mx-auto max-w-[1560px] px-4 py-5 sm:px-6">
         {isEmpty && (
-          <div className="mt-6 rounded-card border border-brand/30 bg-brand/[0.06] p-5">
+          <div className="mb-5 rounded-card border border-brand/30 bg-brand/[0.06] px-4 py-3">
             <h2 className="text-sm font-semibold text-brand">
               Für {stationName} sind noch keine Daten importiert
             </h2>
-            <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-ink-muted">
+            <p className="mt-1 max-w-2xl text-xs leading-relaxed text-ink-muted">
               Klicke oben auf <strong className="text-ink">Synchronisieren</strong>, um
               die historischen und tagesaktuellen Messreihen vom DWD Open-Data-Server
               zu laden. Der erste Import dauert je nach Station einige Sekunden.
@@ -470,78 +541,8 @@ export default function App() {
           </div>
         )}
 
-        <div className="mt-6 flex flex-col gap-6 lg:flex-row lg:items-start">
-          {/* Desktop: persistent grouped sidebar. The original rendered all
-              twelve sections as a wrapping row of pill buttons that reflowed
-              into three ragged lines and gave no sense of structure. */}
-          <nav
-            aria-label="Analysebereiche"
-            className="hidden w-56 shrink-0 lg:block lg:sticky lg:top-6"
-          >
-            {GROUPS.map((group) => (
-              <div key={group} className="mb-5 last:mb-0">
-                <p className="label mb-1.5 px-2">{group}</p>
-                <ul className="space-y-0.5">
-                  {TABS.filter((t) => t.group === group).map((t) => {
-                    const active = t.id === tab
-                    return (
-                      <li key={t.id}>
-                        <button
-                          type="button"
-                          aria-current={active ? 'page' : undefined}
-                          onClick={() => setTab(t.id)}
-                          onMouseEnter={() => preload(t.id)}
-                          onFocus={() => preload(t.id)}
-                          className={`flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-xs font-medium transition-colors ${
-                            active
-                              ? 'bg-brand/15 text-brand'
-                              : 'text-ink-muted hover:bg-raised hover:text-ink'
-                          }`}
-                        >
-                          <t.icon className="size-4 shrink-0" aria-hidden />
-                          <span className="truncate">{t.label}</span>
-                        </button>
-                      </li>
-                    )
-                  })}
-                </ul>
-              </div>
-            ))}
-          </nav>
-
-          {/* Mobile / tablet: a horizontally scrollable strip keeps the nav to
-              one line instead of consuming a third of the viewport. */}
-          <nav
-            aria-label="Analysebereiche"
-            className="-mx-4 overflow-x-auto px-4 lg:hidden"
-          >
-            <ul className="flex w-max gap-1.5 pb-1">
-              {TABS.map((t) => {
-                const active = t.id === tab
-                return (
-                  <li key={t.id}>
-                    <button
-                      type="button"
-                      aria-current={active ? 'page' : undefined}
-                      onClick={() => setTab(t.id)}
-                      onTouchStart={() => preload(t.id)}
-                      onFocus={() => preload(t.id)}
-                      className={`flex cursor-pointer items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-xs font-medium transition-colors ${
-                        active
-                          ? 'bg-brand text-canvas'
-                          : 'border border-line bg-surface text-ink-muted'
-                      }`}
-                    >
-                      <t.icon className="size-3.5" aria-hidden />
-                      {t.label}
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
-          </nav>
-
-          <main className="min-w-0 flex-1 space-y-6">
+        <div>
+          <main className="min-w-0 space-y-6">
             {/* One boundary for all views: only ever one is mounted, so a
                 boundary per view would be twenty-eight copies of the same
                 fallback. */}
@@ -663,7 +664,7 @@ export default function App() {
           </main>
         </div>
 
-        <footer className="mt-12 rounded-card border border-line bg-surface px-5 py-4">
+        <footer className="mt-10 rounded-card border border-line bg-surface px-5 py-3.5">
           <div className="flex flex-col items-center justify-between gap-3 text-center sm:flex-row sm:text-left">
             <p className="text-[11px] text-ink-faint">
               Datenquelle:{' '}

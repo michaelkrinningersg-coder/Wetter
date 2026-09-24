@@ -3,13 +3,14 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { db } from './db.js'
+import { lastDay, lastValue } from './coverage.js'
 import { STATIONS } from './stations.js'
 import { importStation } from './dwd.js'
-import { archiveRange, importArchive as importGermany } from './germany.js'
+import { importArchive as importGermany } from './germany.js'
 import { buildEvents } from './records.js'
 import { importRegional } from './regional.js'
 import { loadNationwide } from './nationwide.js'
-import { airOverview, importAir } from './air.js'
+import { importAir } from './air.js'
 import { importOdl } from './odl.js'
 import { importPollen } from './pollen.js'
 import { importSoil } from './soil.js'
@@ -148,6 +149,11 @@ function runScript(file, args = [], onLine = null) {
  * between that and yesterday into the argument list of an actual run, and
  * `after` folds new files back into the running database so the views change
  * without a restart.
+ *
+ * `covered` must stay a single `MAX` — see `coverage.js`. The system bar polls
+ * it every minute, so anything it touches is touched every minute forever; two
+ * of these used to reach for a whole overview to read one date out of it, and
+ * that alone cost three quarters of a second per poll.
  */
 export const JOBS = [
   {
@@ -158,8 +164,7 @@ export const JOBS = [
     // The DWD's quality control runs before publication, so the station
     // archive routinely trails by a day or two even when everything works.
     graceDays: 3,
-    covered: () =>
-      db.prepare('SELECT MAX(date) AS last FROM daily').get().last ?? null,
+    covered: () => lastValue('daily'),
     // Nothing to plan: `importStation` reads the DWD's rolling archive, which
     // covers roughly the last 500 days regardless of when it last ran.
     run: async (report) => {
@@ -176,7 +181,7 @@ export const JOBS = [
     note: 'Rund 2400 Stationen, dazu die amtlichen Gebietsmittel.',
     everyMinutes: 24 * 60,
     graceDays: 1,
-    covered: () => archiveRange().last ?? null,
+    covered: () => lastValue('germany_daily'),
     /*
      * A single day is fetched by date. Beyond three, one pass over the whole
      * rolling archive is cheaper than one full download per missing day — and
@@ -212,7 +217,7 @@ export const JOBS = [
     everyMinutes: 24 * 60,
     // The UBA publishes the hours of a day over the course of the next one.
     graceDays: 2,
-    covered: () => airOverview().range.last ?? null,
+    covered: () => lastValue('air_daily'),
     plan: (gap) => [
       // The UBA revises recent hours, so the routine run always re-reads a
       // seven-day window; only a longer absence needs an explicit range.
@@ -241,8 +246,7 @@ export const JOBS = [
     // is computed from, and the measured soil temperature is quality-checked
     // before publication like every other observation.
     graceDays: 3,
-    covered: () =>
-      db.prepare('SELECT MAX(date) AS last FROM soil_moisture').get().last ?? null,
+    covered: () => lastValue('soil_moisture'),
     /*
      * The routine run refetches the current year, which is what the DWD's
      * `recent` directory holds — that also picks up the revisions the service
@@ -260,8 +264,7 @@ export const JOBS = [
     note: 'Drei Pegel, stündlich, solange das Fenster offen ist.',
     everyMinutes: 60,
     graceDays: 1,
-    covered: () =>
-      db.prepare('SELECT MAX(ts) AS last FROM gauge_readings').get().last?.slice(0, 10) ?? null,
+    covered: () => lastDay('gauge_readings', 'ts'),
     /*
      * The only source with a retroactive window: PEGELONLINE hands out the
      * last 30 days on every call, so an hour of downtime costs nothing and a

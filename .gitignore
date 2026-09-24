@@ -10,3 +10,4 @@ data/*.sqlite-shm
 .DS_Store
 *.log
 tsconfig.tsbuildinfo
+vorlage/

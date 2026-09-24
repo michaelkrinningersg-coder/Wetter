@@ -1,7 +1,10 @@
-import { cpSync, existsSync, mkdirSync, readdirSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { gunzipSync } from 'node:zlib'
 import { app, BrowserWindow, shell } from 'electron'
+
+import { extract } from '../server/tar.js'
 
 /**
  * The shell around the app.
@@ -16,9 +19,10 @@ import { app, BrowserWindow, shell } from 'electron'
  *     `server/` is imported — those modules open the database and read their
  *     archives at import time, and a program directory under Windows is not
  *     writable.
- *  2. Copy the shipped archives there on first start.
- *  3. Show a window immediately. Reading 1.3 million rows out of the CSV
- *     archives takes long enough that a silent taskbar icon reads as a crash.
+ *  2. Unpack the shipped archives there on first start.
+ *  3. Show a window immediately. Even with the database shipped ready-made,
+ *     the first start has a couple of seconds of unpacking to do, and a silent
+ *     taskbar icon reads as a crash.
  *  4. Only then import the server, start it on a free port, and point the
  *     window at it.
  */
@@ -63,16 +67,54 @@ function prepareDataRoot() {
   const root = join(app.getPath('userData'), 'daten')
   mkdirSync(root, { recursive: true })
   process.env.WETTER_DATA_ROOT = root
+  return root
+}
 
-  // The CSV archives ride along as a resource. They are copied rather than
-  // read in place because the collectors append to them daily, and a resource
-  // directory beside the executable may well be read-only.
-  const seed = join(process.resourcesPath, 'daten-vorlage')
-  if (existsSync(seed) && readdirSync(root).length === 0) {
-    cpSync(seed, root, { recursive: true })
+/**
+ * Unpack what the installer carried, once.
+ *
+ * Both archives are unpacked rather than read in place: the collectors append
+ * to the CSVs daily and the database is written continuously, while a resource
+ * directory beside the executable may well be read-only.
+ *
+ * They ride along packed because of what the numbers were. The CSV archive is
+ * 4,669 files, which cost 65 MB in the package against 12 MB as one stream;
+ * and the database was not shipped at all, so every first start rebuilt it out
+ * of those CSVs — 59.6 seconds and 938 MB of memory, measured. Unpacking both
+ * takes 5.3 seconds. It does hold the 157 MB database in memory while it
+ * writes it, which is a lot for one buffer and still a fifth of what the
+ * rebuild it replaces needed.
+ *
+ * Nothing happens on a directory that already has files in it. An interrupted
+ * first start leaves some behind, and unpacking over them would undo whatever
+ * the collectors had already managed.
+ *
+ * Asynchronous only so the two messages below reach the window: the work
+ * itself is synchronous, and without a pause the renderer would paint both
+ * of them after the unpacking had already finished.
+ *
+ * @param {(text: string) => void} report Progress, for the loading window.
+ */
+async function unpackSeed(root, report) {
+  if (!root || readdirSync(root).length > 0) return
+
+  const paint = () => new Promise((resolve) => setTimeout(resolve, 60))
+
+  const seed = join(process.resourcesPath, 'daten-vorlage.tar.gz')
+  if (existsSync(seed)) {
+    report('Archiv wird entpackt …')
+    await paint()
+    const files = extract(gunzipSync(readFileSync(seed)), root)
+    console.log(`Archivvorlage entpackt: ${files} Dateien`)
   }
 
-  return root
+  const seedDb = join(process.resourcesPath, 'weather.sqlite.gz')
+  if (existsSync(seedDb)) {
+    report('Datenbank wird entpackt …')
+    await paint()
+    writeFileSync(join(root, 'weather.sqlite'), gunzipSync(readFileSync(seedDb)))
+    console.log('Datenbank entpackt')
+  }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -145,10 +187,14 @@ function stage(text) {
 /* -------------------------------------------------------------------------- */
 
 app.whenReady().then(async () => {
-  prepareDataRoot()
+  // The root has to be named before anything under `server/` is imported; the
+  // unpacking that fills it can wait until there is a window to report into.
+  const root = prepareDataRoot()
   createWindow()
 
   try {
+    await unpackSeed(root, stage)
+
     stage('Archive werden gelesen …')
     // Dynamic, not top-level: the import itself is the slow step, and the
     // window has to exist before it starts.

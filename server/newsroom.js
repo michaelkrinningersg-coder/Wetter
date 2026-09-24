@@ -798,6 +798,23 @@ export function newsroom(stationId, date = null) {
   // got.
   const nearest = candidates.find((c) => !newsworthy(c.perYear)) ?? null
 
+  /*
+   * A day nobody measured is not a quiet day.
+   *
+   * The DWD's archive has gaps — Göttingen has seven of them in July 2026
+   * alone, where the station reported no temperature, no rain, no sunshine and
+   * no wind. Every rule then has nothing to rule on, so no candidate is
+   * produced, not even a near miss, and the edition came out reading "nothing
+   * special happened". It did not: nothing was recorded, which is a different
+   * sentence and the one the reader needs.
+   */
+  const unmeasured =
+    candidates.length === 0 &&
+    row.temp_mean === null &&
+    row.temp_max === null &&
+    row.temp_min === null &&
+    row.precipitation === null
+
   // What the day looked like in plain numbers, so the edition stands on its own.
   const measured = {
     temp_mean: row.temp_mean,
@@ -821,6 +838,7 @@ export function newsroom(stationId, date = null) {
     items,
     dropped: Math.max(published.length - items.length, 0),
     quiet: items.length === 0,
+    unmeasured,
     nearest,
     candidates: candidates.length,
     measured,
@@ -874,6 +892,7 @@ export function newsroomHeadline(stationId) {
     date: edition.date,
     label: edition.label,
     quiet: edition.quiet,
+    unmeasured: edition.unmeasured,
     count: edition.items.length,
     dropped: edition.dropped,
     top: edition.items.slice(0, 3).map((entry) => ({

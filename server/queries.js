@@ -1,4 +1,5 @@
 import { db } from './db.js'
+import { perStation } from './memo.js'
 
 /** DWD practice: a year only counts once ≥90 % of its days carry a value. */
 const COVERAGE = 0.9
@@ -1010,7 +1011,9 @@ const recordDaysStmt = db.prepare(`
  * Ties go to the earlier year — the later occurrence merely equalled the record,
  * it did not set it.
  */
-export function recordBalance(stationId) {
+export const recordBalance = perStation(computeRecordBalance)
+
+function computeRecordBalance(stationId) {
   const rows = recordDaysStmt.all(stationId)
 
   const warm = new Map()
@@ -1133,7 +1136,9 @@ const precipCoverageStmt = db.prepare(`
   FROM daily WHERE station_id = ? GROUP BY year
 `)
 
-export function precipIntensity(stationId) {
+export const precipIntensity = perStation(computePrecipIntensity)
+
+function computePrecipIntensity(stationId) {
   const rows = precipDaysStmt.all(stationId)
   const coverage = new Map(
     precipCoverageStmt.all(stationId).map((r) => [r.year, r.valid_days ?? 0]),
@@ -1297,7 +1302,9 @@ const vegetationStmt = db.prepare(`
  *
  * Growing degree days accumulate max(0, Tmean − 5) over the whole year.
  */
-export function vegetation(stationId) {
+export const vegetation = perStation(computeVegetation)
+
+function computeVegetation(stationId) {
   const rows = vegetationStmt.all(stationId)
 
   const byYear = new Map()
@@ -1389,7 +1396,9 @@ const VARIABLES = [
   ['wind_max', 'Windspitze'],
 ]
 
-export function coverage(stationId) {
+export const coverage = perStation(computeCoverage)
+
+function computeCoverage(stationId) {
   const total = db
     .prepare('SELECT COUNT(*) AS n FROM daily WHERE station_id = ?')
     .get(stationId).n

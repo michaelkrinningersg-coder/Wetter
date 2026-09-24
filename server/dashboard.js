@@ -1,4 +1,6 @@
 import { db } from './db.js'
+import { lastValue } from './coverage.js'
+import { remembered } from './memo.js'
 import * as api from './queries.js'
 import { findStation } from './stations.js'
 import { GAUGES, gaugeSummary } from './gauges.js'
@@ -366,7 +368,35 @@ function todayInHistory() {
 /* The assembled answer                                                       */
 /* -------------------------------------------------------------------------- */
 
-export function dashboard() {
+/**
+ * The page the app opens on, and therefore the one that decides how the app
+ * feels: a second of server work before the first number appears.
+ *
+ * It draws on seven archives, so its stamp names all seven. That is the whole
+ * cost of the check — seven `MAX` queries, about twenty milliseconds against a
+ * second of assembling — and it is the only honest way to hold the answer: a
+ * stamp that named only the station archive would keep showing yesterday's
+ * pollen forecast after the collector had already replaced it.
+ *
+ * The gauges move hourly, which is what makes the cached answer expire
+ * soonest, and that is correct: the dashboard prints a gauge reading.
+ */
+export const dashboard = remembered(
+  () =>
+    [
+      lastValue('daily'),
+      lastValue('germany_daily'),
+      lastValue('record_events'),
+      lastValue('gauge_readings', 'ts'),
+      lastValue('air_daily'),
+      lastValue('odl_hourly'),
+      lastValue('pollen_forecast', 'issued'),
+    ].join('|'),
+  computeDashboard,
+  { limit: 2 },
+)
+
+function computeDashboard() {
   const station = findStation(STATION_ID)
 
   return {

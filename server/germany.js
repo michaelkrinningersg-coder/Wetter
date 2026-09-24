@@ -1,6 +1,8 @@
 import { db } from './db.js'
+import { lastValue, tableStamp } from './coverage.js'
 import { FIELDS } from './germany-sources.js'
 import { listDays, readDay, readStations } from './germany-csv.js'
+import { remembered } from './memo.js'
 
 /**
  * Nationwide daily superlatives.
@@ -24,7 +26,21 @@ db.exec(`
     elevation REAL
   );
 
-  CREATE TABLE IF NOT EXISTS germany_daily (
+`)
+
+/**
+ * The largest table in the app, and the one that decides the file size.
+ *
+ * `WITHOUT ROWID` is not a micro-optimisation here. An ordinary table stores
+ * every row twice: once in the hidden rowid table and once in the unique index
+ * that enforces `PRIMARY KEY (date, station_id)`. Measured on the real archive
+ * that second copy is 34.9 MB of a 210 MB database, and it answers no question
+ * the first copy cannot. Without it the table *is* its primary key, which is
+ * the order every ranking reads it in anyway.
+ *
+ * 128.7 MB for table and indexes together, down to 86.2 MB.
+ */
+const GERMANY_DAILY_COLUMNS = `
     date          TEXT NOT NULL,
     station_id    TEXT NOT NULL,
     temp_mean     REAL,
@@ -39,8 +55,11 @@ db.exec(`
     humidity      REAL,
     snow          REAL,
     -- Date first: every ranking is "one day, all stations".
-    PRIMARY KEY (date, station_id)
-  );
+    PRIMARY KEY (date, station_id)`
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS germany_daily (${GERMANY_DAILY_COLUMNS}
+  ) WITHOUT ROWID;
 
   -- The other direction: one station across every day. The national standing
   -- asks that question, and without this index it scans all 1.28 million rows
@@ -48,6 +67,53 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_germany_daily_station
     ON germany_daily (station_id, date);
 `)
+
+/**
+ * Rebuild a database that predates the line above.
+ *
+ * `CREATE TABLE IF NOT EXISTS` leaves an existing table exactly as it was, so
+ * without this an archive built by an earlier version would keep its second
+ * copy of every row forever. Measured on the real archive the rebuild takes
+ * 3.6 seconds, once: the copy, the index and a `VACUUM` — which is what
+ * actually hands the pages back to the file system rather than leaving them
+ * free inside a file that is still 210 MB. It came out at 164.9 MB.
+ *
+ * It runs at import, before anything reads the table, and it is skipped by the
+ * single question that distinguishes the two shapes.
+ */
+function migrateGermanyDaily() {
+  const ddl = db
+    .prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'germany_daily'")
+    .get()?.sql
+  if (!ddl || /WITHOUT\s+ROWID/i.test(ddl)) return
+
+  const before = db.prepare('SELECT COUNT(*) AS n FROM germany_daily').get().n
+  process.stdout.write(`Deutschlandarchiv wird einmalig umgebaut (${before.toLocaleString('de-DE')} Zeilen) … `)
+
+  // Inside a transaction, so an interrupted migration leaves the old table in
+  // place rather than half a new one.
+  db.transaction(() => {
+    db.exec('DROP INDEX IF EXISTS idx_germany_daily_station')
+    db.exec('ALTER TABLE germany_daily RENAME TO germany_daily_old')
+    db.exec(`CREATE TABLE germany_daily (${GERMANY_DAILY_COLUMNS}
+    ) WITHOUT ROWID`)
+    db.exec(
+      `INSERT INTO germany_daily (date, station_id, ${FIELDS.join(', ')})
+       SELECT date, station_id, ${FIELDS.join(', ')} FROM germany_daily_old`,
+    )
+    db.exec('DROP TABLE germany_daily_old')
+    db.exec('CREATE INDEX idx_germany_daily_station ON germany_daily (station_id, date)')
+  })()
+
+  const after = db.prepare('SELECT COUNT(*) AS n FROM germany_daily').get().n
+  if (after !== before) throw new Error(`Umbau verlor Zeilen: ${before} -> ${after}`)
+
+  // Outside the transaction: VACUUM cannot run inside one.
+  db.exec('VACUUM')
+  console.log('fertig.')
+}
+
+migrateGermanyDaily()
 
 /* -------------------------------------------------------------------------- */
 /* Archive -> database                                                        */
@@ -212,9 +278,17 @@ export const LOWLAND_LIMIT = 1000
 /* Reads                                                                      */
 /* -------------------------------------------------------------------------- */
 
-const rangeStmt = db.prepare(
-  'SELECT COUNT(DISTINCT date) AS days, MIN(date) AS first, MAX(date) AS last FROM germany_daily',
-)
+/*
+ * How far the archive reaches — three separate statements, deliberately.
+ *
+ * As one query it cost 320 ms, and every view that prints "552 Tage,
+ * 27.01.2025 bis 01.08.2026" paid it. SQLite answers `MIN(date)` and
+ * `MAX(date)` from the ends of the primary-key index in no measurable time,
+ * but only when each is alone in its statement; put them together with a
+ * `COUNT(DISTINCT)` and all three fall back to one scan of 1.28 million rows.
+ */
+const firstStmt = db.prepare('SELECT MIN(date) AS first FROM germany_daily')
+const daysStmt = db.prepare('SELECT COUNT(DISTINCT date) AS days FROM germany_daily')
 
 const dayStmt = db.prepare(`
   SELECT d.*, s.name, s.state, s.elevation, s.lat, s.lon, s.network
@@ -223,10 +297,24 @@ const dayStmt = db.prepare(`
   WHERE d.date = ?
 `)
 
-export function archiveRange() {
-  const r = rangeStmt.get()
-  return { days: r?.days ?? 0, first: r?.first ?? null, last: r?.last ?? null }
-}
+/**
+ * The distinct-day count is the part that still costs something — 68 ms, and
+ * no index makes it cheaper, because counting distinct values is a scan.
+ *
+ * The stamp is therefore `tableStamp`, which pairs the last date with the row
+ * count. The last date alone would miss a backfill: `fetch-germany.js
+ * --backfill` fills in days behind the newest one, so the archive can gain a
+ * hundred days without its last date moving by one.
+ */
+export const archiveRange = remembered(
+  () => tableStamp('germany_daily'),
+  () => ({
+    days: daysStmt.get().days ?? 0,
+    first: firstStmt.get().first ?? null,
+    last: lastValue('germany_daily'),
+  }),
+  { limit: 2 },
+)
 
 /**
  * Every archived date, newest first — the view offers these for selection.
@@ -579,7 +667,21 @@ export function recordRichDays(limit = 15) {
  * Nine categories of fifteen days is a few hundred rows — small enough that
  * splitting it per category would cost a request per click and gain nothing.
  */
-export function notableOverview(limit = 15) {
+/**
+ * Eleven categories, each a ranking over every day in the archive, and a
+ * twelfth pass for the record-rich days: 1.7 seconds, unchanged from one
+ * request to the next, for a table the collector touches once a day.
+ *
+ * The record tally comes from `record_events`, which the same collector run
+ * rebuilds, so it cannot go stale behind the archive's own date.
+ */
+export const notableOverview = remembered(
+  (limit = 15) => `${tableStamp('germany_daily')}|${limit}`,
+  computeNotableOverview,
+  { limit: 4 },
+)
+
+function computeNotableOverview(limit = 15) {
   const categories = NOTABLE_KEYS.map((key) => notableDays(key, limit)).filter(Boolean)
 
   return {

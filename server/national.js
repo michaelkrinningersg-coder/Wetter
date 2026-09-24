@@ -1,5 +1,7 @@
 import { db } from './db.js'
-import { LOWLAND_LIMIT } from './germany.js'
+import { tableStamp } from './coverage.js'
+import { archiveRange, LOWLAND_LIMIT } from './germany.js'
+import { remembered } from './memo.js'
 import { findStation } from './stations.js'
 
 /**
@@ -110,8 +112,22 @@ export const FIELD_BY_KEY = new Map(NATIONAL_FIELDS.map((f) => [f.key, f]))
  * scan with no sort at all. Counting the lowland ranking in the same pass
  * rather than repeating the query halves what is left. 6.8 s, then 12.5 s, now
  * 1.4 s for all six fields.
+ *
+ * It has since grown back to 4.5 s, because the archive grew: the query is
+ * linear in the days it holds and the collector adds one a day. No shape of
+ * SQL fixes that. What fixes it is not running the query again for a table
+ * that only changes once a day — the view was paying four and a half seconds
+ * per visit for rows that had not moved since the morning.
  */
-function standingFor(field) {
+const standingFor = remembered(
+  // Six fields, and the archive gains a day once every twenty-four hours: a
+  // dozen entries carry all of them across a collector run.
+  (field) => `${tableStamp('germany_daily')}|${field}`,
+  computeStanding,
+  { limit: 12 },
+)
+
+function computeStanding(field) {
   const rows = db
     .prepare(
       `WITH me AS (
@@ -220,14 +236,11 @@ function summarise(points) {
 /* Public queries                                                             */
 /* -------------------------------------------------------------------------- */
 
-const rangeStmt = db.prepare(
-  'SELECT MIN(date) AS first, MAX(date) AS last, COUNT(DISTINCT date) AS days FROM germany_daily',
-)
-
-export function nationalRange() {
-  const row = rangeStmt.get()
-  return { first: row?.first ?? null, last: row?.last ?? null, days: row?.days ?? 0 }
-}
+/**
+ * The same archive as the Germany views, so the same answer — it used to be a
+ * second copy of the query, and a second 320 ms on every request.
+ */
+export const nationalRange = archiveRange
 
 /** One field, both rankings, with their summaries. */
 export function nationalField(fieldKey) {

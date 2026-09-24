@@ -1,4 +1,6 @@
 import { db } from './db.js'
+import { tableStamp } from './coverage.js'
+import { remembered } from './memo.js'
 import { AIR_STATIONS, COMPONENTS, COMPONENT_BY_KEY, FIELDS, STATION_BY_ID } from './air-sources.js'
 import { listDays, readDay } from './air-csv.js'
 
@@ -437,7 +439,25 @@ const SEASONS = [
  * at a road and ozone in the background are close to mirror images of one
  * another over a day, and a daily mean shows neither.
  */
-export function airProfiles(componentKey) {
+/*
+ * Both answers below are built from the whole archive — ten years of daily
+ * means for the overview, 183,000 hourly readings for the profiles — and the
+ * UBA publishes once a day. Half a second each, repeated on every visit,
+ * because the air view asks for both at once.
+ *
+ * The hourly table is what the profiles read and the daily table is what the
+ * overview reads, and the collector writes them in that order, so naming both
+ * keeps an answer from being served between the two writes.
+ */
+const airStamp = () => `${tableStamp('air_hourly')}|${tableStamp('air_daily')}`
+
+export const airProfiles = remembered(
+  (componentKey) => `${airStamp()}|${componentKey}`,
+  computeAirProfiles,
+  { limit: 8 },
+)
+
+function computeAirProfiles(componentKey) {
   const component = COMPONENT_BY_KEY.get(componentKey)
   if (!component) return null
 
@@ -594,7 +614,9 @@ export function airOzoneHeat() {
 /* The assembled answer                                                       */
 /* -------------------------------------------------------------------------- */
 
-export function airOverview() {
+export const airOverview = remembered(airStamp, computeAirOverview, { limit: 2 })
+
+function computeAirOverview() {
   return {
     range: airRange(),
     stations: publicStations(),

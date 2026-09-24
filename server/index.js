@@ -847,6 +847,33 @@ app.use((error, _req, res, _next) => {
  * needs the resolved number to point the window at it, so it is returned
  * rather than only printed.
  */
+/**
+ * Compute the opening view before anybody asks for it.
+ *
+ * Everything expensive is now held until the archive moves, which makes the
+ * second visit to a view cost nothing and leaves the first one paying the
+ * whole bill. For most views that is the right trade. For the dashboard it is
+ * not, because it is the view the app opens on: measured, the first visit
+ * costs 3.4 seconds and every later one 90 milliseconds.
+ *
+ * So it is computed here instead, in the seconds the window spends loading its
+ * own JavaScript. Scheduled rather than awaited — the server has to answer
+ * before this finishes, or the window would wait for it after all — and
+ * wrapped, because a dashboard that cannot be built is a reason to show an
+ * error in the view, not to fail the start.
+ */
+function warmUp() {
+  setTimeout(() => {
+    const started = Date.now()
+    try {
+      dashboard()
+      console.log(`Überblick vorbereitet (${Date.now() - started} ms)`)
+    } catch (error) {
+      console.warn('Überblick konnte nicht vorbereitet werden:', error)
+    }
+  }, 200).unref?.()
+}
+
 export function startServer({ port = Number(process.env.PORT ?? 3001), schedule = true } = {}) {
   return new Promise((resolve, reject) => {
     const server = app.listen(port, '127.0.0.1')
@@ -855,6 +882,7 @@ export function startServer({ port = Number(process.env.PORT ?? 3001), schedule 
       const actual = server.address().port
       console.log(`Wetterstation-API läuft auf http://127.0.0.1:${actual}`)
       if (schedule) startScheduler()
+      warmUp()
       resolve({ server, port: actual, url: `http://127.0.0.1:${actual}` })
     })
   })
