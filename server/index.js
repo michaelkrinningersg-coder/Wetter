@@ -26,7 +26,15 @@ import {
   notableOverview,
   superlatives,
 } from './germany.js'
-import { recordCount, recordDays, recordRange, recordSpread, recordsForDate } from './records.js'
+import {
+  level,
+  LEVELS,
+  recordCount,
+  recordDays,
+  recordRange,
+  recordSpread,
+  recordsForDate,
+} from './records.js'
 import {
   extremePoints,
   gradientAnalysis,
@@ -518,12 +526,20 @@ for (const [path, query] of [
 app.get(
   '/api/records',
   handler((req, res) => {
-    const range = recordRange()
-    const days = recordDays()
+    /*
+     * `top` is how deep the page is looking: 1 for records alone, up to 10 for
+     * every near miss the baseline can account for. An unknown value falls
+     * back to 1 rather than failing — this is a view setting, and a link with
+     * a typo in it should show the page, not an error.
+     */
+    const top = level(req.query.top)
+    const range = recordRange(top)
+    const days = recordDays(400, top)
 
     if (days.length === 0) {
       return res.json({
         range,
+        levels: LEVELS,
         days: [],
         day: null,
         hint:
@@ -537,11 +553,21 @@ app.get(
       return res.status(400).json({ error: `Ungültiges Datum "${requested}".` })
     }
 
-    // Without a date the newest day that actually saw a record is shown —
-    // landing on an empty page would be the common case otherwise.
-    const date = String(requested ?? days[0].date)
-    const events = recordsForDate(date)
-    res.json({ range, days, day: { date, events, spread: recordSpread(events) } })
+    /*
+     * Without a date the newest day that saw something is shown — landing on
+     * an empty page would be the common case otherwise. A date that was
+     * chosen at one level and no longer qualifies at a narrower one falls back
+     * the same way, rather than showing a day with nothing on it.
+     */
+    const asked = requested === undefined ? null : String(requested)
+    const date = asked && days.some((d) => d.date === asked) ? asked : days[0].date
+    const events = recordsForDate(date, top)
+    res.json({
+      range,
+      levels: LEVELS,
+      days,
+      day: { date, events, spread: recordSpread(events) },
+    })
   }),
 )
 

@@ -566,13 +566,23 @@ export interface RecordEvent {
   unit: string
   decimals: number
   direction: 'max' | 'min'
+  /** The place this value took that day: 1 is a record, 4 a fourth place. */
+  rank: number
   value: number
+  /** What stood at that place before it. Equal to `value` when the place is shared. */
   previous: number
   previousDate: string
+  /** Whether the place was shared rather than taken — a record equalled, not broken. */
+  shared: boolean
+  /** The station's own best for this parameter at the time of the event. */
+  best: number
+  bestDate: string
   since: string
   /** Days with a valid reading for this parameter, at the time of the event. */
   days: number
   years: number
+  /** How deep this series may be read, by its length: 1, 3, 5 or 10. */
+  deepest: number
 }
 
 export interface RecordsResponse {
@@ -582,8 +592,15 @@ export interface RecordsResponse {
     first: string | null
     last: string | null
     cutoff: string | null
+    /** The place the response was built for. */
+    top: number
+    /** How deep the baseline reaches at all. */
+    deepest: number
   }
-  days: { date: string; count: number }[]
+  /** The places the view can be switched to. */
+  levels: number[]
+  /** `best` is the highest place reached that day. */
+  days: { date: string; count: number; best: number }[]
   day: { date: string; events: RecordEvent[]; spread: RecordSpread | null } | null
   hint?: string
 }

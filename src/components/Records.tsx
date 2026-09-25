@@ -112,6 +112,20 @@ function EventRow({ event }: { event: RecordEvent }) {
         </div>
       </div>
 
+      {/* The place, as a badge: one number that says what the row is. A record
+          keeps the brand colour it always had; a fourth place is a quieter
+          thing and looks like one. */}
+      <div className="shrink-0 sm:w-12">
+        <p
+          className={`numeric grid size-7 place-items-center rounded text-[11px] font-bold ${
+            event.rank === 1 ? 'bg-brand text-canvas' : 'bg-inset text-ink-muted'
+          }`}
+          title={`Platz ${event.rank} der eigenen Messreihe`}
+        >
+          {event.rank}.
+        </p>
+      </div>
+
       <div className="shrink-0 sm:w-44">
         <p className="text-[10px] font-medium uppercase tracking-wider text-ink-faint">
           {event.label}
@@ -122,15 +136,28 @@ function EventRow({ event }: { event: RecordEvent }) {
         {secondary && <p className="numeric text-[11px] text-ink-faint">{secondary}</p>}
       </div>
 
+      {/* What stood at this place before. When the value only equalled it, the
+          place is shared rather than taken — "Rekord eingestellt", not
+          "gebrochen", and the margin below would be a zero pretending to be a
+          measurement. */}
       <div className="shrink-0 sm:w-52">
         <p className="text-[10px] font-medium uppercase tracking-wider text-ink-faint">
-          bisher
+          {event.shared ? 'eingestellt' : event.rank === 1 ? 'bisher' : 'verdrängt'}
         </p>
         <p className="numeric text-xs text-ink-muted">
           {value(event, event.previous)}
           <span className="ml-1.5 text-ink-faint">am {isoToGerman(event.previousDate)}</span>
         </p>
-        <p className="text-[11px] text-ink-faint">+{margin(event)}</p>
+        {event.shared ? (
+          <p className="text-[11px] text-ink-faint">gleicher Wert, Platz geteilt</p>
+        ) : (
+          <p className="text-[11px] text-ink-faint">+{margin(event)}</p>
+        )}
+        {event.rank > 1 && (
+          <p className="text-[11px] text-ink-faint">
+            Rekord {value(event, event.best)} am {isoToGerman(event.bestDate)}
+          </p>
+        )}
       </div>
 
       {/* The series is what separates an event from a footnote: beating 1947
@@ -246,16 +273,51 @@ const VIEWS = [
   { value: 'karte', label: 'Karte', icon: MapPin },
 ] as const
 
+/**
+ * How deep to look, as the switch offers it.
+ *
+ * "Rekord" rather than "Top 1", because that is what it is called: a value no
+ * day at that station ever reached. The deeper levels are near misses, and
+ * they are far more common — 974 first places against 2,803 placements in
+ * total across the archived period.
+ */
+const TOPS = [
+  { value: '1', label: 'Rekord' },
+  { value: '3', label: 'Top 3' },
+  { value: '5', label: 'Top 5' },
+  { value: '10', label: 'Top 10' },
+]
+
+/** The heading for a level: one record, or a place among many. */
+const placeLabel = (top: number) => (top === 1 ? 'Rekorde' : `Platzierungen bis Platz ${top}`)
+
 export function Records() {
   const [date, setDate] = useUrlState<string>('datum', null)
   const [view, setView] = useUrlState<string>('ansicht', 'liste')
   const [kind, setKind] = useUrlState<string>('art', 'alle')
+  const [top, setTop] = useUrlState<string>('top', '1')
   const [showAll, setShowAll] = useState(false)
 
   const { data, loading, error } = useApi<RecordsResponse>(
-    `/api/records${date ? `?date=${date}` : ''}`,
-    [date],
+    `/api/records?top=${top}${date ? `&date=${date}` : ''}`,
+    [date, top],
   )
+
+  /*
+   * Switching the level drops the chosen day.
+   *
+   * A day picked while looking at the top ten often holds nothing at all once
+   * the view narrows to records, and the server would then quietly show a
+   * different day than the URL names. Clearing the date says plainly that the
+   * view moved to the newest day that qualifies.
+   */
+  const changeTop = (next: string) => {
+    setTop(next)
+    setDate(null)
+    setShowAll(false)
+  }
+
+  const level = Number(top) || 1
   // Only the map needs the register, and it is 2.400 stations of coordinates.
   const register = useApi<GermanyStationRegister>(
     view === 'karte' ? '/api/germany/stations' : null,
@@ -306,7 +368,37 @@ export function Records() {
           Jahren misst, bricht ihren Rekord sehr viel leichter als eine, die seit
           1881 läuft; ohne die Reihenlänge stünde Bedeutungsloses gleichrangig
           neben Bemerkenswertem. Sortiert ist deshalb nach Länge der Reihe, die
-          gewichtigsten Meldungen oben.
+          gewichtigsten Meldungen oben — und nicht nach Platz: ein dritter Platz
+          in den 240 Jahren des Hohenpeißenbergs wiegt schwerer als ein erster
+          an einer Station, die 2004 eröffnet hat.
+        </p>
+        <p>
+          <strong>Platz 1 bis 10.</strong> Der Schalter fragt nicht nur nach
+          Rekorden, sondern nach knappen Verfehlungen: ein Tag, der es in die
+          eigenen besten drei, fünf oder zehn geschafft hat. Die sind viel
+          häufiger als Rekorde und sagen etwas, das ein Rekord nicht sagt — ein
+          Sommer mit vier vierten Plätzen an einer Station ist eine andere
+          Aussage als einer ohne, und in einer Rekordliste taucht keiner von
+          beiden auf.
+        </p>
+        <p>
+          Wie tief eine Reihe gelesen werden darf, entscheidet ihre Länge, denn
+          ein Platz unter den besten zehn ist nicht überall dasselbe. Eine
+          Station mit zwei Jahren hat 730 Messtage — ihre besten zehn sind das
+          obere 1,4 %, eine gewöhnliche Sommerwoche reicht hin. Eine Station mit
+          120 Jahren hat 44.000 Messtage, und ihre besten zehn sind das obere
+          0,02 %. Deshalb gilt: unter 10 Jahren zählt nur Platz 1, ab 10 Jahren
+          bis Platz 3, ab 20 Jahren bis Platz 5, und bis Platz 10 nur, was seit
+          mindestens 50 Jahren misst. Eine kurze Reihe erscheint in den tieferen
+          Stufen also gar nicht, statt dort billig aufzutauchen.
+        </p>
+        <p>
+          Der DWD veröffentlicht auf eine Nachkommastelle, deshalb gibt es
+          Gleichstände. Wer denselben Wert erreicht wie der bisherige Dritte,
+          hat Platz 3 erreicht und steht hier — beide tun es, und in der Zeile
+          steht dann <em>eingestellt</em> statt <em>verdrängt</em>. Von den 974
+          ersten Plätzen im Archiv sind 79 eingestellte, keine gebrochenen
+          Rekorde.
         </p>
         <p>
           Grundlage sind die historischen DWD-Archive der Klimastationen bis zum{' '}
@@ -326,16 +418,17 @@ export function Records() {
       <Card>
         <SectionHeading
           icon={Trophy}
-          title={`Rekorde am ${isoToGerman(day.date)}`}
-          hint={`${num(data.range.events, 0)} Rekorde an ${num(
+          title={`${level === 1 ? 'Rekorde' : `Top ${level}`} am ${isoToGerman(day.date)}`}
+          hint={`${num(data.range.events, 0)} ${placeLabel(level)} an ${num(
             data.range.stations,
             0,
           )} Stationen seit ${isoToGerman(data.range.first)} · ${num(
             days.length,
             0,
-          )} Tage mit mindestens einem Rekord.`}
+          )} Tage mit mindestens einem Eintrag.`}
           actions={
-            <div className="flex items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <ChoiceGroup label="Platz" value={top} choices={TOPS} onChange={changeTop} size="sm" />
               <button
                 type="button"
                 disabled={!older}
@@ -380,12 +473,18 @@ export function Records() {
         />
 
         {day.events.length === 0 ? (
-          <EmptyState message="An diesem Tag wurde kein Allzeitrekord gebrochen." />
+          <EmptyState
+            message={
+              level === 1
+                ? 'An diesem Tag wurde kein Allzeitrekord gebrochen.'
+                : `An diesem Tag kam keine Station in ihre eigenen besten ${level}.`
+            }
+          />
         ) : (
           <>
             <StatGrid>
               <StatTile
-                label="Rekorde an diesem Tag"
+                label={level === 1 ? 'Rekorde an diesem Tag' : 'Platzierungen an diesem Tag'}
                 value={num(day.events.length, 0)}
                 caption={[...byKind.entries()].map(([k, n]) => `${n}× ${k}`).join(' · ')}
                 accent="brand"
@@ -402,7 +501,7 @@ export function Records() {
                 accent="warm"
               />
               <StatTile
-                label="Ältester verdrängter Rekord"
+                label={level === 1 ? 'Ältester verdrängter Rekord' : 'Ältester verdrängter Wert'}
                 value={
                   day.events.length > 0
                     ? isoToGerman(
@@ -568,7 +667,8 @@ export function Records() {
                     onClick={() => setShowAll(true)}
                     className="mt-4 w-full cursor-pointer rounded-md border border-line bg-raised px-3 py-2 text-xs font-medium text-ink-muted transition-colors hover:border-line-strong hover:text-ink"
                   >
-                    Alle {num(day.events.length, 0)} Rekorde anzeigen
+                    Alle {num(day.events.length, 0)}{' '}
+                    {level === 1 ? 'Rekorde' : 'Platzierungen'} anzeigen
                     <span className="ml-1.5 text-ink-faint">
                       — {num(day.events.length - PAGE, 0)} weitere, nach Reihenlänge absteigend
                     </span>
