@@ -291,16 +291,31 @@ const TOPS = [
 /** The heading for a level: one record, or a place among many. */
 const placeLabel = (top: number) => (top === 1 ? 'Rekorde' : `Platzierungen bis Platz ${top}`)
 
+/**
+ * The two orders, because the list answers two questions.
+ *
+ * By place is what the heading promises and where the page opens. By series
+ * length is the other reading, and on a busy day a different list: 27 June
+ * 2026 holds 886 placements of which 405 are records, so by place the near
+ * misses start four hundred rows down — while by series the longest histories
+ * come first whatever place they took.
+ */
+const SORTS = [
+  { value: 'platz', label: 'nach Platz' },
+  { value: 'reihe', label: 'nach Reihenlänge' },
+]
+
 export function Records() {
   const [date, setDate] = useUrlState<string>('datum', null)
   const [view, setView] = useUrlState<string>('ansicht', 'liste')
   const [kind, setKind] = useUrlState<string>('art', 'alle')
   const [top, setTop] = useUrlState<string>('top', '1')
+  const [sort, setSort] = useUrlState<string>('sortierung', 'platz')
   const [showAll, setShowAll] = useState(false)
 
   const { data, loading, error } = useApi<RecordsResponse>(
-    `/api/records?top=${top}${date ? `&date=${date}` : ''}`,
-    [date, top],
+    `/api/records?top=${top}&sortierung=${sort}${date ? `&date=${date}` : ''}`,
+    [date, top, sort],
   )
 
   /*
@@ -367,10 +382,13 @@ export function Records() {
           Diese drei Angaben sind der Punkt. Eine Station, die seit neunzehn
           Jahren misst, bricht ihren Rekord sehr viel leichter als eine, die seit
           1881 läuft; ohne die Reihenlänge stünde Bedeutungsloses gleichrangig
-          neben Bemerkenswertem. Sortiert ist deshalb nach Länge der Reihe, die
-          gewichtigsten Meldungen oben — und nicht nach Platz: ein dritter Platz
-          in den 240 Jahren des Hohenpeißenbergs wiegt schwerer als ein erster
-          an einer Station, die 2004 eröffnet hat.
+          neben Bemerkenswertem. Die Liste lässt sich deshalb in beide Ordnungen
+          bringen: <strong>nach Platz</strong>, wie die Überschrift es verspricht,
+          oder <strong>nach Reihenlänge</strong>, wo die längsten Geschichten
+          oben stehen, gleich welchen Platz sie erreicht haben — ein dritter
+          Platz in den 240 Jahren des Hohenpeißenbergs wiegt schwerer als ein
+          erster an einer Station, die 2004 eröffnet hat. An einem vollen Tag
+          sind das zwei sehr verschiedene Listen.
         </p>
         <p>
           <strong>Platz 1 bis 10.</strong> Der Schalter fragt nicht nur nach
@@ -429,6 +447,16 @@ export function Records() {
           actions={
             <div className="flex flex-wrap items-center gap-2">
               <ChoiceGroup label="Platz" value={top} choices={TOPS} onChange={changeTop} size="sm" />
+              <ChoiceGroup
+                label="Sortierung"
+                value={sort}
+                choices={SORTS}
+                onChange={(next) => {
+                  setSort(next)
+                  setShowAll(false)
+                }}
+                size="sm"
+              />
               <button
                 type="button"
                 disabled={!older}
@@ -670,7 +698,8 @@ export function Records() {
                     Alle {num(day.events.length, 0)}{' '}
                     {level === 1 ? 'Rekorde' : 'Platzierungen'} anzeigen
                     <span className="ml-1.5 text-ink-faint">
-                      — {num(day.events.length - PAGE, 0)} weitere, nach Reihenlänge absteigend
+                      — {num(day.events.length - PAGE, 0)} weitere,{' '}
+                      {sort === 'platz' ? 'nach Platz' : 'nach Reihenlänge absteigend'}
                     </span>
                   </button>
                 )}

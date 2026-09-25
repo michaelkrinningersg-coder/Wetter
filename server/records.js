@@ -260,24 +260,50 @@ export function level(value) {
   return LEVELS.includes(asked) ? asked : 1
 }
 
-const eventsForDateStmt = db.prepare(`
-  SELECT e.*, s.name, s.state, s.elevation, s.lat, s.lon
-  FROM record_events e
-  JOIN germany_stations s ON s.id = e.station_id
-  WHERE e.date = ? AND e.rank <= ?
-  /*
-   * Length of the series first, place second — the order the page has always
-   * used, and the reason it survived the levels.
-   *
-   * Ordering by place instead looked tidier and was worse: on 27 June 2026 the
-   * archive holds 886 placements, of which 405 are records, so "top ten" would
-   * open on four hundred rows the reader had already seen and bury every near
-   * miss behind them. And the premise is wrong anyway — a third place in
-   * Hohenpeißenberg's 240-year series is a larger thing than a first place at
-   * a station that opened in 2004.
-   */
-  ORDER BY e.days DESC, e.rank, e.station_id
-`)
+/**
+ * Two orders, because the list answers two questions.
+ *
+ * By place: what happened first, records above near misses. That is what the
+ * heading promises and the order the page opens in.
+ *
+ * By series: what weighs most, longest history first whatever place it took —
+ * a third place in Hohenpeißenberg's 240 years is a larger thing than a first
+ * at a station that opened in 2004. On a busy day the difference is real: 27
+ * June 2026 holds 886 placements, 405 of them records, so ordering by place
+ * puts four hundred rows ahead of every near miss.
+ *
+ * The other key is always the tiebreak, so neither order throws away what the
+ * other one sorts by, and the station id closes it so the same day always
+ * comes back in the same sequence.
+ */
+const ORDERS = {
+  platz: 'e.rank, e.days DESC, e.station_id',
+  reihe: 'e.days DESC, e.rank, e.station_id',
+}
+
+export const SORTS = Object.keys(ORDERS)
+
+/** Clamp a requested order to one that exists. */
+export function sortOrder(value) {
+  const asked = String(value ?? '')
+  return Object.hasOwn(ORDERS, asked) ? asked : 'platz'
+}
+
+// One statement per order rather than one with a `CASE`: the order is a
+// literal from the table above, never a request parameter, and SQLite plans a
+// fixed ORDER BY better than a computed one.
+const eventsForDateStmt = Object.fromEntries(
+  Object.entries(ORDERS).map(([key, order]) => [
+    key,
+    db.prepare(`
+      SELECT e.*, s.name, s.state, s.elevation, s.lat, s.lon
+      FROM record_events e
+      JOIN germany_stations s ON s.id = e.station_id
+      WHERE e.date = ? AND e.rank <= ?
+      ORDER BY ${order}
+    `),
+  ]),
+)
 
 const daysWithEventsStmt = db.prepare(`
   SELECT date, COUNT(*) AS n, MIN(rank) AS best FROM record_events
@@ -329,8 +355,8 @@ export function recordDays(limit = 400, top = 1) {
   }))
 }
 
-export function recordsForDate(date, top = 1) {
-  return eventsForDateStmt.all(date, top).map((e) => {
+export function recordsForDate(date, top = 1, sort = 'platz') {
+  return eventsForDateStmt[sortOrder(sort)].all(date, top).map((e) => {
     const kind = KIND_BY_KEY.get(e.kind)
     return {
       station_id: e.station_id,

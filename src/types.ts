@@ -599,6 +599,10 @@ export interface RecordsResponse {
   }
   /** The places the view can be switched to. */
   levels: number[]
+  /** The orders the list can be sorted in. */
+  sorts: string[]
+  /** The order this response was built in. */
+  sort?: string
   /** `best` is the highest place reached that day. */
   days: { date: string; count: number; best: number }[]
   day: { date: string; events: RecordEvent[]; spread: RecordSpread | null } | null

@@ -157,3 +157,32 @@ test('the day list follows the level it is asked for', () => {
   assert.equal(deep[0].count, 2)
   assert.equal(deep[0].best, 4, 'der höchste an diesem Tag erreichte Platz')
 })
+
+test('the list can be read by place or by how long the series is', () => {
+  /*
+   * The two orders have to disagree, or one of them is decoration.
+   *
+   * The fixture is built for exactly that: LANG has the longest series but
+   * only reaches fifth place here, while MITTE is shorter and reaches the
+   * same place — so place puts them side by side and series length decides
+   * which comes first. Give LANG a worse place than MITTE and the two orders
+   * must swap them.
+   */
+  db.prepare('DELETE FROM germany_daily').run()
+  // 26.5 is fifth for everyone; then LANG alone is pushed to a sixth place by
+  // giving it a value one step lower.
+  insertDay.run(DAY, 'LANG', 25.5) // sixth, 240 years
+  insertDay.run(DAY, 'MITTE', 26.5) // fifth, 30 years
+  buildEvents({ force: true })
+
+  const byPlace = recordsForDate(DAY, 10, 'platz').map((e) => e.station_id)
+  const bySeries = recordsForDate(DAY, 10, 'reihe').map((e) => e.station_id)
+
+  assert.deepEqual(byPlace, ['MITTE', 'LANG'], 'der bessere Platz zuerst')
+  assert.deepEqual(bySeries, ['LANG', 'MITTE'], 'die längere Reihe zuerst')
+
+  // An unknown order is not an error — it falls back to the default rather
+  // than taking the page down over a view setting.
+  assert.deepEqual(recordsForDate(DAY, 10, 'unsinn').map((e) => e.station_id), byPlace)
+  assert.deepEqual(recordsForDate(DAY, 10).map((e) => e.station_id), byPlace, 'Platz ist der Standard')
+})

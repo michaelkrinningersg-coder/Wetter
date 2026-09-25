@@ -34,6 +34,8 @@ import {
   recordRange,
   recordSpread,
   recordsForDate,
+  sortOrder,
+  SORTS,
 } from './records.js'
 import {
   extremePoints,
@@ -533,6 +535,12 @@ app.get(
      * a typo in it should show the page, not an error.
      */
     const top = level(req.query.top)
+    /*
+     * And in which order. Both are view settings, so an unknown value falls
+     * back rather than failing — a link with a typo in it should show the
+     * page, not an error.
+     */
+    const sort = sortOrder(req.query.sortierung)
     const range = recordRange(top)
     const days = recordDays(400, top)
 
@@ -540,6 +548,7 @@ app.get(
       return res.json({
         range,
         levels: LEVELS,
+        sorts: SORTS,
         days: [],
         day: null,
         hint:
@@ -561,10 +570,12 @@ app.get(
      */
     const asked = requested === undefined ? null : String(requested)
     const date = asked && days.some((d) => d.date === asked) ? asked : days[0].date
-    const events = recordsForDate(date, top)
+    const events = recordsForDate(date, top, sort)
     res.json({
       range,
       levels: LEVELS,
+      sorts: SORTS,
+      sort,
       days,
       day: { date, events, spread: recordSpread(events) },
     })
