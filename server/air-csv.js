@@ -51,7 +51,7 @@ export function readDay(date, dir = AIR_DATA_DIR) {
   const file = dayPath(date, dir)
   if (!existsSync(file)) return []
 
-  const lines = readFileSync(file, 'utf8').split('\n')
+  const lines = readFileSync(file, 'utf8').split(/\r?\n/)
   const header = lines[0]?.trim().split(',') ?? []
   const fieldAt = FIELDS.map((f) => header.indexOf(f))
   const rows = []

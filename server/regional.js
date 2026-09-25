@@ -59,7 +59,7 @@ function readCsv(period) {
   if (!existsSync(file)) return []
 
   const rows = []
-  for (const line of readFileSync(file, 'utf8').split('\n')) {
+  for (const line of readFileSync(file, 'utf8').split(/\r?\n/)) {
     const trimmed = line.trim()
     if (!trimmed || trimmed.startsWith('region,')) continue
     const [region, parameter, per, year, value] = trimmed.split(',')

@@ -27,7 +27,7 @@ export function readReadings(gaugeId, dir = GAUGE_DATA_DIR) {
   if (!existsSync(file)) return []
 
   const rows = []
-  for (const line of readFileSync(file, 'utf8').split('\n')) {
+  for (const line of readFileSync(file, 'utf8').split(/\r?\n/)) {
     const trimmed = line.trim()
     if (!trimmed || trimmed === HEADER) continue
     const comma = trimmed.indexOf(',')

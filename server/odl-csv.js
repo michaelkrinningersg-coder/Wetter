@@ -42,7 +42,7 @@ export function readDay(date, dir = ODL_DATA_DIR) {
   if (!existsSync(file)) return []
 
   const rows = []
-  for (const line of readFileSync(file, 'utf8').split('\n').slice(1)) {
+  for (const line of readFileSync(file, 'utf8').split(/\r?\n/).slice(1)) {
     const trimmed = line.trim()
     if (!trimmed) continue
     const [probe, hour, value] = trimmed.split(',')
@@ -125,7 +125,7 @@ export function readProbes(dir = ODL_DATA_DIR) {
   const file = probesPath(dir)
   if (!existsSync(file)) return new Map()
 
-  const lines = readFileSync(file, 'utf8').split('\n')
+  const lines = readFileSync(file, 'utf8').split(/\r?\n/)
   const header = splitCsvLine(lines[0] ?? '')
   const out = new Map()
 

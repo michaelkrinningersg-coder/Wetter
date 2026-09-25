@@ -41,7 +41,7 @@ export function readBaseline(dir = GERMANY_DATA_DIR) {
 
   let cutoff = null
   const rows = []
-  for (const line of readFileSync(file, 'utf8').split('\n')) {
+  for (const line of readFileSync(file, 'utf8').split(/\r?\n/)) {
     const trimmed = line.trim()
     if (!trimmed) continue
     if (trimmed.startsWith('#')) {

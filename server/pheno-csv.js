@@ -51,7 +51,7 @@ function readTable(file) {
   const path = join(PHENO_DATA_DIR, file)
   if (!existsSync(path)) return []
 
-  const lines = readFileSync(path, 'utf8').split('\n')
+  const lines = readFileSync(path, 'utf8').split(/\r?\n/)
   const header = splitCsvLine(lines[0] ?? '')
   const out = []
   for (const line of lines.slice(1)) {

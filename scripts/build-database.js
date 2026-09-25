@@ -45,5 +45,67 @@ for (const station of STATIONS) {
   }
 }
 
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Check the result before it is shipped.
+ *
+ * The first release built this way went out with a table quietly short of a
+ * year and a half: git checks out this repository's CSVs with CRLF endings on
+ * Windows, `readStations` kept the carriage return in the last column name, so
+ * every station's altitude landed as null — and the nationwide loader, which
+ * needs an altitude, dropped all 552 recent days without a word. Every step
+ * reported success.
+ *
+ * Nothing above can be trusted to fail loudly, so the counts are checked here.
+ * A release that has lost a table is a worse outcome than a release that did
+ * not happen.
+ */
+const { db } = await import('../server/db.js')
+
+const EXPECTED = [
+  ['daily', 150_000, 'Stationsarchive'],
+  ['germany_daily', 1_000_000, 'Deutschlandwerte'],
+  ['germany_stations', 2_000, 'Stationsregister'],
+  ['nationwide_daily', 93_000, 'Deutschlandtage'],
+  ['regional_values', 100_000, 'Gebietsmittel'],
+  ['record_events', 500, 'Allzeitrekorde'],
+  ['air_hourly', 150_000, 'Luftqualität'],
+  ['soil_moisture', 12_000, 'Bodenfeuchte'],
+  ['soil_temperature', 15_000, 'Bodentemperatur'],
+  ['pheno_observations', 30_000, 'Phänologie'],
+]
+
+console.log('\nUmfang:')
+const missing = []
+for (const [table, least, label] of EXPECTED) {
+  const n = db.prepare(`SELECT COUNT(*) AS n FROM ${table}`).get().n
+  const ok = n >= least
+  console.log(
+    `  ${ok ? '·' : '!'} ${label.padEnd(18)} ${n.toLocaleString('de-DE').padStart(11)}` +
+      (ok ? '' : `  — erwartet mindestens ${least.toLocaleString('de-DE')}`),
+  )
+  if (!ok) missing.push(label)
+}
+
+/*
+ * The altitudes are checked separately because their loss is what caused the
+ * incident: the row count was right, the column was empty, and the damage
+ * appeared two tables away.
+ */
+const withoutElevation = db
+  .prepare('SELECT COUNT(*) AS n FROM germany_stations WHERE elevation IS NULL')
+  .get().n
+const stations = db.prepare('SELECT COUNT(*) AS n FROM germany_stations').get().n
+if (withoutElevation > stations / 2) {
+  console.log(`  ! Stationshöhen       ${withoutElevation.toLocaleString('de-DE')} von ${stations} ohne Höhe`)
+  missing.push('Stationshöhen')
+}
+
+if (missing.length > 0) {
+  console.error(`\nAbbruch: ${missing.join(', ')} unvollständig.`)
+  process.exit(1)
+}
+
 console.log(`\nDatenbank aufgebaut in ${((Date.now() - started) / 1000).toFixed(1)} s`)
 process.exit(0)

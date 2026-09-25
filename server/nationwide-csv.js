@@ -110,7 +110,7 @@ export function readYear(year, dir = NATIONWIDE_DATA_DIR) {
   const file = yearPath(year, dir)
   if (!existsSync(file)) return []
 
-  const lines = readFileSync(file, 'utf8').split('\n')
+  const lines = readFileSync(file, 'utf8').split(/\r?\n/)
   const header = lines[0]?.trim().split(',') ?? []
   const rows = []
   for (const line of lines.slice(1)) {
@@ -181,7 +181,7 @@ export function readStations(dir = NATIONWIDE_DATA_DIR) {
   if (!existsSync(file)) return []
 
   const rows = []
-  for (const line of readFileSync(file, 'utf8').split('\n').slice(1)) {
+  for (const line of readFileSync(file, 'utf8').split(/\r?\n/).slice(1)) {
     const trimmed = line.trim()
     if (!trimmed) continue
     const [id, name, state, lat, lon, elevation, from, until] = trimmed.split(',')

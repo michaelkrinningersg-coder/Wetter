@@ -53,7 +53,7 @@ export function readDay(date, dir = GERMANY_DATA_DIR) {
   if (!existsSync(file)) return []
 
   const rows = []
-  const lines = readFileSync(file, 'utf8').split('\n')
+  const lines = readFileSync(file, 'utf8').split(/\r?\n/)
   const header = lines[0]?.trim().split(',') ?? []
   const fieldAt = FIELDS.map((f) => header.indexOf(f))
 
@@ -135,7 +135,7 @@ export function readStations(dir = GERMANY_DATA_DIR) {
   const file = stationsPath(dir)
   if (!existsSync(file)) return new Map()
 
-  const lines = readFileSync(file, 'utf8').split('\n')
+  const lines = readFileSync(file, 'utf8').split(/\r?\n/)
   const header = splitCsvLine(lines[0] ?? '')
   const out = new Map()
 

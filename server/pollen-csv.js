@@ -42,7 +42,7 @@ export function readDay(date, dir = POLLEN_DATA_DIR) {
   if (!existsSync(file)) return []
 
   const rows = []
-  for (const line of readFileSync(file, 'utf8').split('\n').slice(1)) {
+  for (const line of readFileSync(file, 'utf8').split(/\r?\n/).slice(1)) {
     const trimmed = line.trim()
     if (!trimmed) continue
     const [partregion, pollen, today, tomorrow, dayafter] = trimmed.split(',')

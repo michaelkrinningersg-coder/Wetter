@@ -41,7 +41,7 @@ export function readSoil(kind, dir = SOIL_DATA_DIR) {
   const file = soilPath(kind, dir)
   if (!existsSync(file)) return []
 
-  const lines = readFileSync(file, 'utf8').trim().split('\n')
+  const lines = readFileSync(file, 'utf8').trim().split(/\r?\n/)
   if (lines.length < 2) return []
 
   const header = lines[0].split(',')

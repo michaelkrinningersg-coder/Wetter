@@ -1,0 +1,18 @@
+# The archives under data/ are records, not source code.
+#
+# Git's default on Windows is core.autocrlf=true: every file it considers text
+# is checked out with CRLF line endings. The release runner is a Windows
+# machine, and that conversion cost real data — `readStations` split the last
+# column of stations.csv without stripping the carriage return, so the column
+# name came out as "elevation\r", every station's altitude was stored as null,
+# and the 552 most recent nationwide days silently failed the "needs an
+# altitude" filter. The shipped database went out missing a year and a half.
+#
+# The readers no longer care either way (they split on /\r?\n/), but these
+# files should not be rewritten on their way out of the repository in the first
+# place: they are byte-for-byte archives, their checksums should match across
+# platforms, and nothing in them is edited by hand.
+data/** -text
+
+# Scripts that are executed rather than read. CRLF breaks a shebang.
+*.sh text eol=lf
