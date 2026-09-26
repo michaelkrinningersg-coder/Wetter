@@ -5,6 +5,11 @@ name: Windows-Programm bauen
 # nativer Baustein gegen die Electron-ABI übersetzt werden muss — das kann
 # electron-builder nur auf der Zielplattform.
 #
+# Gebaut wird ausschließlich die portable Fassung — eine .exe, die man
+# hinlegt und startet. Der NSIS-Installer entstand hier früher mit, und
+# niemand hat ihn benutzt: er verdoppelte das Artefakt auf 255 MB, obwohl
+# beide Dateien dieselbe Anwendung enthalten.
+#
 # Ohne Tag läuft der Bau auf Zuruf und legt das Ergebnis als Artefakt ab;
 # mit einem Tag `v*` hängt er es zusätzlich an ein Release.
 on:
@@ -17,7 +22,7 @@ permissions:
 
 jobs:
   windows:
-    name: Portable .exe und Installer
+    name: Portable .exe
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -54,25 +59,41 @@ jobs:
       - name: Nativen Baustein gegen die Electron-ABI übersetzen
         run: npx electron-rebuild -f -w better-sqlite3
 
+      # `portable` ausdrücklich, statt alles zu bauen, was in der package.json
+      # unter `win.target` steht: dort bleibt der Installer für einen lokalen
+      # `npm run pack` stehen, hier soll nur die portable Fassung entstehen.
+      #
       # `--publish never` auch beim Tag: das Release wird unten in einem
       # eigenen Schritt bestückt, damit ein fehlgeschlagener Upload nicht als
       # erfolgreicher Bau durchgeht.
       - name: Programm paketieren
-        run: npx electron-builder --win --publish never
+        run: npx electron-builder --win portable --publish never
 
+      # Meldet die Größe und besteht darauf, dass genau eine .exe entstanden
+      # ist. Zwei wären ein zurückgekehrter Installer, null ein Bau, der
+      # erfolgreich aussieht und nichts abgelegt hat — upload-artifact fiele
+      # das zwar auch auf, aber erst einen Schritt später und ohne zu sagen,
+      # was stattdessen da war.
       - name: Umfang melden
         shell: bash
         run: |
+          count=0
           echo "### Gebaut" >> "$GITHUB_STEP_SUMMARY"
           for f in release/*.exe; do
             [ -e "$f" ] || continue
+            count=$((count + 1))
             size=$(du -m "$f" | cut -f1)
             echo "- \`$(basename "$f")\` — ${size} MB" >> "$GITHUB_STEP_SUMMARY"
           done
+          if [ "$count" -ne 1 ]; then
+            echo "Erwartet wurde genau eine portable .exe, gefunden: $count" >&2
+            ls -la release/ >&2
+            exit 1
+          fi
 
       - uses: actions/upload-artifact@v4
         with:
-          name: wetterstation-windows
+          name: wetterstation-portabel
           path: release/*.exe
           if-no-files-found: error
 
