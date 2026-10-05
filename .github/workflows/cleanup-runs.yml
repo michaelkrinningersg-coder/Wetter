@@ -1,0 +1,62 @@
+name: Läufe aufräumen
+
+# Die Laufliste dieses Repositories ist überwiegend Archäologie: von 163
+# Läufen gehörten 134 zu vier Workflows, die es nicht mehr gibt — der
+# Pages-Bau und die drei Sammler, alle entfallen, als die App ein lokales
+# Programm wurde. Sie kosten nichts und begraben die beiden Workflows, auf
+# die es noch ankommt.
+#
+# Behalten wird, was eine der beiden Regeln erfüllt: unter den neuesten fünf
+# Läufen seines eigenen Workflows zu sein, oder jünger als vierzehn Tage.
+# Je Workflow, nicht insgesamt — sonst verliert ein Repository mit einem
+# nächtlichen Job jeden Release-Lauf, sobald die Nacht fünfmal durch ist.
+#
+# Ohne fremde Action, weil die Schreibrechte auf die Laufliste dieses
+# Repositories braucht und zwanzig eigene Zeilen leichter zu überblicken
+# sind als eine Abhängigkeit mit dieser Berechtigung.
+on:
+  schedule:
+    # Montags um 4 Uhr UTC. Die Zeit ist beliebig, der Wochentag auch; nur
+    # soll es nicht zur vollen Stunde laufen, wo GitHub die meiste Last hat.
+    - cron: '17 4 * * 1'
+  workflow_dispatch:
+    inputs:
+      keep:
+        description: 'Wie viele Läufe je Workflow bleiben'
+        default: '5'
+      days:
+        description: 'Alles aus so vielen Tagen bleibt zusätzlich'
+        default: '14'
+      # Unterstrich, kein Bindestrich: in einem GitHub-Ausdruck wäre
+      # `inputs.dry-run` eine Subtraktion, und der Probelauf liefe nie.
+      dry_run:
+        description: 'Nur anzeigen, nichts löschen'
+        type: boolean
+        default: false
+
+# Nur dieses eine Recht, und es ist genau das, was das Skript tut.
+permissions:
+  actions: write
+
+jobs:
+  cleanup:
+    name: Alte Läufe löschen
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Kein `npm ci`: das Skript hängt an nichts außerhalb der
+      # Node-Standardbibliothek, und eine Aufräumaufgabe sollte nicht an einer
+      # Abhängigkeit scheitern können, die sie nicht benutzt.
+      - name: Aufräumen
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node scripts/cleanup-runs.js \
+            --keep ${{ inputs.keep || 5 }} \
+            --days ${{ inputs.days || 14 }} \
+            ${{ inputs.dry_run && '--dry-run' || '' }}
