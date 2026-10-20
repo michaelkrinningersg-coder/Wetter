@@ -87,6 +87,7 @@ jobs:
           --collect-all pythonnet
           --collect-all clr_loader
           --collect-all duckdb
+          --collect-all truststore
           --hidden-import clr
           --exclude-module tkinter
           --exclude-module _tkinter
@@ -123,6 +124,16 @@ jobs:
           if ($code -ne 0) { throw "Selbsttest fehlgeschlagen (Exit $code)" }
           Get-Content "dist\Wetter\selbsttest.log" | ForEach-Object { "    $_" } >> $env:GITHUB_STEP_SUMMARY
           Remove-Item "dist\Wetter\selbsttest.log"
+
+      # Die exe prüft Zertifikate anders als der Python-Quelltext; v1.0.3
+      # scheiterte beim Anwender mit CERTIFICATE_VERIFY_FAILED.
+      - name: Netztest der fertigen exe (Abruf beim DWD)
+        run: |
+          $proc = Start-Process -FilePath "dist\Wetter\Wetter.exe" -ArgumentList "--netztest" -Wait -PassThru
+          Get-Content "dist\Wetter\netztest.log"
+          Get-Content "dist\Wetter\netztest.log" | ForEach-Object { "- $_" } >> $env:GITHUB_STEP_SUMMARY
+          Remove-Item "dist\Wetter\netztest.log"
+          if ($proc.ExitCode -ne 0) { throw "Netztest fehlgeschlagen" }
 
       # So kommt der Ordner beim Anwender an: aus dem Browser geladen und
       # mit dem Explorer entpackt trägt jede Datei die Markierung "aus dem

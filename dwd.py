@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import io
 import re
+import ssl
 import urllib.request
 import zipfile
 from concurrent.futures import ThreadPoolExecutor
@@ -42,12 +43,37 @@ class Abruffehler(Exception):
     """Der DWD war nicht erreichbar oder lieferte etwas Unerwartetes."""
 
 
+def _tls() -> ssl.SSLContext:
+    """Zertifikate prüft das Betriebssystem, nicht eine eigene Liste.
+
+    Python bringt in der exe seine eigene Zertifikatsprüfung mit. Die kennt
+    weder Zwischenzertifikate, die Windows bei Bedarf nachlädt, noch die
+    Zertifikate eines Firmen-Proxys, die nur im Windows-Speicher stehen -
+    v1.0.3 scheiterte daran mit CERTIFICATE_VERIFY_FAILED, wo der Browser
+    dieselbe Seite ohne Murren öffnet. truststore reicht die Prüfung an
+    Windows weiter (wie pip es tut); geprüft wird also weiterhin, nur mit
+    dem Urteil, dem auch Edge folgt.
+    """
+    try:
+        import truststore
+        return truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    except Exception:                                    # noqa: BLE001
+        return ssl.create_default_context()
+
+
+_KONTEXT = None
+
+
 def holen(pfad: str) -> bytes:
     """Eine Datei vom DWD-Server, als Bytes."""
+    global _KONTEXT
+    if _KONTEXT is None:
+        _KONTEXT = _tls()
     url = BASIS + pfad
     anfrage = urllib.request.Request(url, headers={"User-Agent": "Wetter/1.0"})
     try:
-        with urllib.request.urlopen(anfrage, timeout=WARTEZEIT) as antwort:
+        with urllib.request.urlopen(anfrage, timeout=WARTEZEIT,
+                                    context=_KONTEXT) as antwort:
             return antwort.read()
     except Exception as fehler:                          # noqa: BLE001
         raise Abruffehler(f"{url}: {fehler}") from fehler

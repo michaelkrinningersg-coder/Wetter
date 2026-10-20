@@ -24,6 +24,7 @@ Startpunkte
 -----------
     python wetter.py               das Fenster (Windows: WebView2)
     python wetter.py --selbsttest  Bestandteile prüfen, ohne Fenster
+    python wetter.py --netztest    ein Abruf beim DWD (Zertifikate)
     python wetter.py --dienst 8766 dieselbe Seite im Browser - für die
                                    Entwicklung
 """
@@ -517,10 +518,36 @@ def fenster_starten(api: Api):
                   debug=bool(os.environ.get("WETTER_DEBUG")))
 
 
+def netztest() -> int:
+    """Ein echter Abruf beim DWD aus der fertigen exe - prüft vor allem die
+    Zertifikate, die im Quelltext anders geprüft werden als in der exe."""
+    try:
+        t = time.perf_counter()
+        verzeichnis = dwd.hist_verzeichnis()
+        text = (f"Netztest: {len(verzeichnis)} hist-Archive beim DWD "
+                f"in {time.perf_counter() - t:.1f} s")
+        code = 0 if verzeichnis else 1
+    except Exception as fehler:                          # noqa: BLE001
+        text, code = f"Netztest FEHLER: {fehler}", 1
+    try:
+        print(text, flush=True)
+    except Exception:                                    # noqa: BLE001
+        pass
+    try:
+        with open(os.path.join(config.protokollordner(), "netztest.log"),
+                  "w", encoding="utf-8") as datei:
+            datei.write(text + "\n")
+    except OSError:
+        pass
+    return code
+
+
 def main(argumente=None) -> int:
     argumente = list(sys.argv[1:] if argumente is None else argumente)
     if "--selbsttest" in argumente:
         return selbsttest()
+    if "--netztest" in argumente:
+        return netztest()
     api = Api()
     if "--dienst" in argumente:
         logging.basicConfig(level=logging.INFO)
