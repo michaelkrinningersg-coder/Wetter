@@ -34,7 +34,9 @@ from __future__ import annotations
 import datetime as dt
 import heapq
 
+# Vergleichszeitraum: 30 Jahre ab nv, wählbar je 10 Jahre früher
 NORMAL_VON, NORMAL_BIS = 1991, 2020
+NORMALE = (1991, 1981, 1971, 1961)
 JAHR_MIN = 330
 PROGNOSE_JAHRE = 30
 MONATSANFANG = [0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335]
@@ -148,12 +150,12 @@ def rekorde(s: Spalten) -> dict:
 
 
 # --------------------------------------------- Normal je Kalendertag (+-7)
-def tagesnormal(s: Spalten, spalte="tmk") -> dict:
+def tagesnormal(s: Spalten, spalte="tmk", nv: int = NORMAL_VON) -> dict:
     """k -> (Mittel, 10 %, 90 %) der Tageswerte 1991-2020 im Fenster +-7."""
     werte = getattr(s, spalte)
     pool: dict[int, list] = {}
     for i in range(s.n):
-        if not NORMAL_VON <= s.jahr[i] <= NORMAL_BIS or werte[i] is None:
+        if not nv <= s.jahr[i] <= nv + 29 or werte[i] is None:
             continue
         for o in range(-7, 8):
             pool.setdefault((s.k[i] + o + 366) % 366, []).append(werte[i])
@@ -165,12 +167,12 @@ def tagesnormal(s: Spalten, spalte="tmk") -> dict:
 
 
 # ------------------------------------------------ Heute in der Geschichte
-def geschichte(s: Spalten, datum: dt.date | None = None) -> dict:
+def geschichte(s: Spalten, datum: dt.date | None = None, nv: int = NORMAL_VON) -> dict:
     li = s.letzter()
     if li < 0:
         return {"leer": True}
     tag = datum or s.datum(li)
-    normal = {sp: tagesnormal(s, sp) for sp in ("tmk", "txk", "tnk")}
+    normal = {sp: tagesnormal(s, sp, nv) for sp in ("tmk", "txk", "tnk")}
     k = MONATSANFANG[tag.month - 1] + tag.day - 1
     groessen = []
     jahre = {}
@@ -198,7 +200,7 @@ def geschichte(s: Spalten, datum: dt.date | None = None) -> dict:
 
 
 # --------------------------------------------------------------- Kenntage
-def kenntage(s: Spalten) -> dict:
+def kenntage(s: Spalten, nv: int = NORMAL_VON) -> dict:
     proj: dict[int, dict] = {}
     for i in range(s.n):
         e = proj.setdefault(s.jahr[i], {"t": 0, "n": 0, "g": 0, **{k: 0 for k, *_ in KENNTAGE}})
@@ -220,16 +222,16 @@ def kenntage(s: Spalten) -> dict:
     normal = {}
     for key, _, sp, _ in KENNTAGE:
         feld = {"txk": "tage_x", "tnk": "tage_n", "tgk": "tage_g"}[sp]
-        voll = [z[key] for z in zeilen if NORMAL_VON <= z["jahr"] <= NORMAL_BIS and z[feld] >= JAHR_MIN]
+        voll = [z[key] for z in zeilen if nv <= z["jahr"] <= nv + 29 and z[feld] >= JAHR_MIN]
         normal[key] = _r(_mittel(voll))
     return {"arten": [[k, t] for k, t, *_ in KENNTAGE], "jahre": zeilen, "normal": normal,
             "min_tage": JAHR_MIN}
 
 
 # ----------------------------------------------------------------- Wellen
-def wellen(s: Spalten, art="normal", heiss=30.0, kalt=0.0, min_tage=3) -> dict:
+def wellen(s: Spalten, art="normal", heiss=30.0, kalt=0.0, min_tage=3, nv: int = NORMAL_VON) -> dict:
     if art == "normal":
-        tn = tagesnormal(s, "tmk")
+        tn = tagesnormal(s, "tmk", nv)
         werte, min_tage = s.tmk, 5
 
         def ist_heiss(i):
@@ -288,13 +290,13 @@ def wellen(s: Spalten, art="normal", heiss=30.0, kalt=0.0, min_tage=3) -> dict:
 
 
 # ----------------------------------------------------------- Klimastreifen
-def klimastreifen(s: Spalten) -> dict:
+def klimastreifen(s: Spalten, nv: int = NORMAL_VON) -> dict:
     proj: dict[int, list] = {}
     for i in range(s.n):
         if s.tmk[i] is not None:
             proj.setdefault(s.jahr[i], []).append(s.tmk[i])
     jahre = [(j, sum(w) / len(w)) for j, w in sorted(proj.items()) if len(w) >= JAHR_MIN]
-    ref = [m for j, m in jahre if NORMAL_VON <= j <= NORMAL_BIS]
+    ref = [m for j, m in jahre if nv <= j <= nv + 29]
     bezug = _mittel(ref)
     return {"bezug": _r(bezug, 2), "bezug_jahre": len(ref),
             "jahre": [[j, _r(m, 2), _r(m - bezug, 2) if bezug is not None else None]
@@ -302,7 +304,7 @@ def klimastreifen(s: Spalten) -> dict:
 
 
 # ----------------------------------------------- Summen: Niederschlag, Sonne
-def summen(s: Spalten, spalte: str, jahr: int | None = None) -> dict:
+def summen(s: Spalten, spalte: str, jahr: int | None = None, nv: int = NORMAL_VON) -> dict:
     """Niederschlag (rsk) oder Sonne (sdk): Jahr kumuliert gegen das Normal,
     Monatssummen, Rangliste der Jahre, beim Niederschlag Trockenperioden."""
     werte = getattr(s, spalte)
@@ -352,7 +354,7 @@ def summen(s: Spalten, spalte: str, jahr: int | None = None) -> dict:
     rang = sorted(voll, key=lambda z: -z["summe"])
     for p, z in enumerate(rang):
         z["platz"] = p + 1
-    normal_jahre = [z for z in voll if NORMAL_VON <= z["jahr"] <= NORMAL_BIS]
+    normal_jahre = [z for z in voll if nv <= z["jahr"] <= nv + 29]
 
     # ein Durchlauf: je Jahr die Tageswerte nach Kalendertag, je Monat Summe/Tage
     tage_j: dict[int, list] = {}
@@ -389,7 +391,7 @@ def summen(s: Spalten, spalte: str, jahr: int | None = None) -> dict:
         if (jahr, mo) not in monat_j:
             continue
         nm = []
-        for j in range(NORMAL_VON, NORMAL_BIS + 1):
+        for j in range(nv, nv + 30):
             sm, n = monat_j.get((j, mo), (0.0, 0))
             tage_m = (dt.date(j + (mo == 12), mo % 12 + 1, 1) - dt.date(j, mo, 1)).days
             if n and n >= 0.9 * tage_m:
@@ -404,7 +406,7 @@ def summen(s: Spalten, spalte: str, jahr: int | None = None) -> dict:
 
 
 # ------------------------------------------------------------------ Schnee
-def schnee(s: Spalten) -> dict:
+def schnee(s: Spalten, nv: int = NORMAL_VON) -> dict:
     """Je Winter (1. Okt. bis 30. Apr., benannt nach dem Januar)."""
     proj: dict[int, dict] = {}
     for i in range(s.n):
@@ -426,12 +428,12 @@ def schnee(s: Spalten) -> dict:
             e["max"], e["max_datum"] = v, s.iso(i)
     winter = [{**e, "max": _r(e["max"], 0)} for _, e in sorted(proj.items())]
     voll = [w for w in winter if w["tage"] >= 0.9 * 212]
-    normal = [w["schneetage"] for w in voll if NORMAL_VON <= w["winter"] <= NORMAL_BIS]
+    normal = [w["schneetage"] for w in voll if nv <= w["winter"] <= nv + 29]
     return {"winter": winter, "normal": _r(_mittel(normal)), "min_tage": 0.9 * 212}
 
 
 # -------------------------------------------------------------------- Wind
-def wind(s: Spalten) -> dict:
+def wind(s: Spalten, nv: int = NORMAL_VON) -> dict:
     proj: dict[int, dict] = {}
     for i in range(s.n):
         e = proj.setdefault(s.jahr[i], {"jahr": s.jahr[i], "tage": 0, "sturm": 0, "orkan": 0,
@@ -448,12 +450,12 @@ def wind(s: Spalten) -> dict:
             e["max"], e["max_datum"] = v, s.iso(i)
     jahre = [{**e, "max": _r(e["max"] * 3.6) if e["max"] is not None else None}
              for _, e in sorted(proj.items())]
-    normal = [j["sturm"] for j in jahre if NORMAL_VON <= j["jahr"] <= NORMAL_BIS and j["tage"] >= JAHR_MIN]
+    normal = [j["sturm"] for j in jahre if nv <= j["jahr"] <= nv + 29 and j["tage"] >= JAHR_MIN]
     return {"jahre": jahre, "normal": _r(_mittel(normal))}
 
 
 # ------------------------------------------------------------------- Frost
-def frost(s: Spalten) -> dict:
+def frost(s: Spalten, nv: int = NORMAL_VON) -> dict:
     """Je Jahr letzter Frost vor dem 1. Juli, erster ab dem 1. Juli - in der
     Luft (Tiefstwert 2 m) und am Boden (5 cm) - und die frostfreie Zeit."""
     proj: dict[int, dict] = {}
@@ -483,7 +485,7 @@ def frost(s: Spalten) -> dict:
         jahre.append(z)
 
     def normal(feld):
-        w = [z[feld] for z in jahre if NORMAL_VON <= z["jahr"] <= NORMAL_BIS and z[feld] is not None
+        w = [z[feld] for z in jahre if nv <= z["jahr"] <= nv + 29 and z[feld] is not None
              and z[feld.split("_")[0] + "_tage"] >= JAHR_MIN]
         return _r(_mittel(w))
     return {"jahre": jahre, "normal": {"luft_frei": normal("luft_frei"), "boden_frei": normal("boden_frei")}}

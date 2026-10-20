@@ -27,13 +27,17 @@ def test_start_ohne_netz(api):
     assert r["einstellungen"] == {"station": 1691, "qn": "alle", "ansicht": "uebersicht",
                                   "vmodell": "icon_d2", "rang_modus": "heute",
                                   "rang_prognose": True, "favoriten": [], "wellen": {},
-                                  "thema": "system"}
+                                  "thema": "system", "normal": 1991}
 
 
 def test_einstellungen_bleiben(api):
     assert api.einstellung("qn", "nur10") == {"ok": True}
     assert api.einstellung("unsinn", 1)["fehler"].startswith("Unbekannte")
     assert api.start()["einstellungen"]["qn"] == "nur10"
+    assert api.einstellung("normal", 1961) == {"ok": True}
+    assert api.start()["einstellungen"]["normal"] == 1961
+    api.einstellung("normal", 1955)  # kein gültiger Zeitraum -> Vorgabe
+    assert api.start()["einstellungen"]["normal"] == 1991
 
 
 def test_ungeladene_station_ohne_netz_ist_ein_hinweis(api):

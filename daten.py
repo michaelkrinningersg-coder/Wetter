@@ -57,6 +57,18 @@ CREATE TABLE IF NOT EXISTS meta (k VARCHAR PRIMARY KEY, v VARCHAR);
 # Nur Jahre mit so vielen Tageswerten zählen als Jahr.
 JAHR_MIN_TAGE = 330
 NORMAL_VON, NORMAL_BIS = 1991, 2020
+# wählbare Vergleichszeiträume: immer 30 Jahre, je 10 Jahre früher
+NORMALE = (1991, 1981, 1971, 1961)
+
+
+def normal_zeitraum(von=None) -> tuple[int, int]:
+    """Gewählter Vergleichszeitraum als (von, bis); Unbekanntes -> 1991."""
+    try:
+        v = int(von)
+    except (TypeError, ValueError):
+        v = NORMAL_VON
+    v = v if v in NORMALE else NORMAL_VON
+    return v, v + 29
 GLAETTUNG = 15                  # Jahre je Seite: Mittel über 31 Jahre
 SPALTEN = {"m": "tmk", "x": "txk", "n": "tnk"}
 PROGNOSE_JAHRE = 30             # Vergleichsjahre vor dem laufenden
@@ -267,13 +279,14 @@ class Daten:
             WHERE tmk IS NOT NULL OR txk IS NOT NULL OR tnk IS NOT NULL
             ORDER BY 1 DESC""", [sid]).fetchall()]
 
-    def jahresband(self, sid, jahr: int | None, stufe) -> dict:
-        """Ein Jahr Tag für Tag, gegen das Normal 1991-2020.
+    def jahresband(self, sid, jahr: int | None, stufe, normal=None) -> dict:
+        """Ein Jahr Tag für Tag, gegen das Normal (Vorgabe 1991-2020).
 
-        Normal je Kalendertag: alle Tage 1991-2020 im Fenster +-7 Tage,
+        Normal je Kalendertag: alle Tage des Zeitraums im Fenster +-7 Tage,
         daraus das mittlere Tief, Mittel und Hoch sowie das 10. und 90.
         Perzentil der Tagesmittel.
         """
+        nv, nb = normal_zeitraum(normal)
         c = self._c()
         r = plausibel.rein(stufe, "station = ?")
         letzter = c.execute(f"SELECT max(datum) FROM {r} WHERE tmk IS NOT NULL",
@@ -290,14 +303,14 @@ class Daten:
 
         normal_jahre = c.execute(f"""
             SELECT count(DISTINCT year(datum)) FROM {r}
-            WHERE year(datum) BETWEEN {NORMAL_VON} AND {NORMAL_BIS}
+            WHERE year(datum) BETWEEN {nv} AND {nb}
               AND tmk IS NOT NULL""", [sid]).fetchone()[0]
         normal = []
         if normal_jahre:
             zeilen = c.execute(f"""
                 WITH b AS (
                     SELECT {_tag_index('datum')} AS k, tmk, txk, tnk FROM {r}
-                    WHERE year(datum) BETWEEN {NORMAL_VON} AND {NORMAL_BIS}),
+                    WHERE year(datum) BETWEEN {nv} AND {nb}),
                 p AS (SELECT (k + o + 366) % 366 AS k, tmk, txk, tnk
                       FROM b, range(-7, 8) t(o))
                 SELECT k, avg(tmk), avg(txk), avg(tnk),
@@ -311,7 +324,7 @@ class Daten:
             WITH j AS (SELECT month(datum) mo, avg(tmk) m, count(tmk) n
                        FROM {r} WHERE year(datum) = ? GROUP BY 1),
                  nm AS (SELECT month(datum) mo, avg(tmk) m FROM {r}
-                        WHERE year(datum) BETWEEN {NORMAL_VON} AND {NORMAL_BIS}
+                        WHERE year(datum) BETWEEN {nv} AND {nb}
                         GROUP BY 1)
             SELECT j.mo, j.m, j.n, nm.m FROM j LEFT JOIN nm USING (mo)
             ORDER BY j.mo""", [sid, jahr, sid]).fetchall()
@@ -410,15 +423,17 @@ class Daten:
                 "rest_tage": rest}
 
     # ---------------------------------------------------------- Rangliste
-    def rangliste(self, sid, modus: str, mit_prognose: bool, stufe) -> dict:
+    def rangliste(self, sid, modus: str, mit_prognose: bool, stufe,
+                  normal=None) -> dict:
         """Alle Jahre nach Mittel, wärmstes zuerst.
 
         modus "heute": jedes Jahr vom 1.1. bis zum selben Kalendertag wie
         der letzte Messtag (mindestens 90 % gemessen).
         modus "jahr": ganze Jahre (mindestens 330 Tage). Das laufende Jahr
         ist dann nur mit Prognose dabei - als Mitte des Bands.
-        Abweichung gegen das Mittel derselben Spanne 1991-2020.
+        Abweichung gegen das Mittel derselben Spanne im Vergleichszeitraum.
         """
+        nv, nb = normal_zeitraum(normal)
         c = self._c()
         r = plausibel.rein(stufe, "station = ?")
         letzter = c.execute(f"SELECT max(datum) FROM {r} WHERE tmk IS NOT NULL",
@@ -450,7 +465,7 @@ class Daten:
                               "tief": prognose["tief"],
                               "hoch": prognose["hoch"]})
         normale = [z["m"] for z in liste
-                   if NORMAL_VON <= z["jahr"] <= NORMAL_BIS]
+                   if nv <= z["jahr"] <= nb]
         normal = sum(normale) / len(normale) if normale else None
         liste.sort(key=lambda z: -z["m"])
         for i, z in enumerate(liste):
@@ -462,15 +477,17 @@ class Daten:
                 "normal_jahre": len(normale), "prognose": prognose}
 
     # -------------------------------------------------------------- Monat
-    def monat(self, sid, jahr, monat, stufe) -> dict:
+    def monat(self, sid, jahr, monat, stufe, normal=None) -> dict:
         """Ein Monat Tag für Tag mit allen Größen, dazu Summe und Normal.
 
         Summe: Mittel über die Tage, bei Niederschlag und Sonne die Summe.
-        Normal: derselbe Monat 1991-2020, und zwar dieselben Tage - im
+        Normal: derselbe Monat im Vergleichszeitraum (Vorgabe 1991-2020),
+        und zwar dieselben Tage - im
         laufenden Monat bis zum letzten Messtag, sonst hinkt die Summe des
         halben Monats gegen die eines ganzen.
         Wind kommt vom DWD in m/s und geht hier als km/h hinaus.
         """
+        nv, nb = normal_zeitraum(normal)
         c = self._c()
         r = plausibel.rein(stufe, "station = ?")
         z = c.execute(f"SELECT min(datum), max(datum) FROM {r} "
@@ -487,10 +504,10 @@ class Daten:
             WHERE year(datum) = ? AND month(datum) = ? ORDER BY datum""",
                          [sid, jahr, monat]).fetchall()
         bis_tag = max((t[0] for t in tage), default=31)
-        # Tagesnormal des Mittels für die Farbe: +-7 Tage, 1991-2020
+        # Tagesnormal des Mittels für die Farbe: +-7 Tage im Vergleichszeitraum
         normal_tag = dict(c.execute(f"""
             WITH b AS (SELECT {_tag_index('datum')} AS k, tmk FROM {r}
-                       WHERE year(datum) BETWEEN {NORMAL_VON} AND {NORMAL_BIS}),
+                       WHERE year(datum) BETWEEN {nv} AND {nb}),
             p AS (SELECT (k + o + 366) % 366 AS k, tmk FROM b, range(-7, 8) t(o))
             SELECT k, avg(tmk) FROM p WHERE k IN (SELECT unnest(?::INTEGER[]))
             GROUP BY k""", [sid, [t[1] for t in tage]]).fetchall())
@@ -510,7 +527,7 @@ class Daten:
 
         normal = c.execute(f"""
             WITH b AS (SELECT * FROM {r}
-                       WHERE year(datum) BETWEEN {NORMAL_VON} AND {NORMAL_BIS}
+                       WHERE year(datum) BETWEEN {nv} AND {nb}
                          AND month(datum) = ? AND day(datum) <= ?),
             j AS (SELECT year(datum) y,
                          {", ".join(f"sum({s}) AS {s}, count({s}) AS n_{s}"
@@ -617,8 +634,10 @@ class Daten:
             self._spalten[schluessel] = auswertung.Spalten(zeilen, namen)
         return self._spalten[schluessel]
 
-    def auswertung(self, sid, art: str, stufe, optionen: dict | None = None) -> dict:
+    def auswertung(self, sid, art: str, stufe, optionen: dict | None = None,
+                   normal=None) -> dict:
         """Eine der Auswertungen aus auswertung.py für eine Station."""
+        nv, _ = normal_zeitraum(normal)
         s = self.spalten(sid, stufe)
         o = optionen or {}
         if not s.n:
@@ -627,22 +646,22 @@ class Daten:
             return auswertung.rekorde(s)
         if art == "geschichte":
             d = o.get("datum")
-            return auswertung.geschichte(s, dt.date.fromisoformat(d) if d else None)
+            return auswertung.geschichte(s, dt.date.fromisoformat(d) if d else None, nv)
         if art == "kenntage":
-            return auswertung.kenntage(s)
+            return auswertung.kenntage(s, nv)
         if art == "wellen":
             return auswertung.wellen(s, o.get("art", "normal"), o.get("heiss", 30),
-                                     o.get("kalt", 0), o.get("min_tage", 3))
+                                     o.get("kalt", 0), o.get("min_tage", 3), nv)
         if art == "streifen":
-            return auswertung.klimastreifen(s)
+            return auswertung.klimastreifen(s, nv)
         if art in ("niederschlag", "sonne"):
-            return auswertung.summen(s, "rsk" if art == "niederschlag" else "sdk", o.get("jahr"))
+            return auswertung.summen(s, "rsk" if art == "niederschlag" else "sdk", o.get("jahr"), nv)
         if art == "schnee":
-            return auswertung.schnee(s)
+            return auswertung.schnee(s, nv)
         if art == "wind":
-            return auswertung.wind(s)
+            return auswertung.wind(s, nv)
         if art == "frost":
-            return auswertung.frost(s)
+            return auswertung.frost(s, nv)
         if art == "prognose_verlauf":
             return auswertung.prognose_verlauf(s, heute())
         raise ValueError(f"Unbekannte Auswertung: {art}")

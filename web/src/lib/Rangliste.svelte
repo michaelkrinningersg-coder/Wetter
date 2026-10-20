@@ -2,6 +2,7 @@
   // Alle Jahre nach ihrem Mittel, wärmstes zuerst - sortierbar nach jeder
   // Spalte. "bis heute": jedes Jahr vom 1.1. bis zum selben Kalendertag.
   // "bis Jahresende": ganze Jahre, das laufende als Prognose mit Band.
+  import { normalText } from "./zeitraum.svelte.js";
   import { tick } from "svelte";
   import { datum, de, mitVorzeichen } from "./format.js";
 
@@ -113,7 +114,7 @@
     </table>
   </div>
   <div class="leise fuss">
-    Abweichung gegen das Mittel derselben Spanne 1991–2020 ({de(liste.normal, 2)} °C, {liste.normal_jahre} Jahre) ·
+    Abweichung gegen das Mittel derselben Spanne {normalText()} ({de(liste.normal, 2)} °C, {liste.normal_jahre} Jahre) ·
     {liste.modus === "heute"
       ? "nur Jahre mit mindestens 90 % gemessener Tage"
       : "nur Jahre mit mindestens 330 gemessenen Tagen"}

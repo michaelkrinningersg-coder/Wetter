@@ -133,6 +133,15 @@ AUFRUFE = (
         ("sonne", {}), ("sonne", {"jahr": 1997}), ("schnee", {}), ("wind", {}),
         ("frost", {}), ("prognose_verlauf", {}))
        for st in ("alle", "nur10")]
+    # anderer Vergleichszeitraum (Reihe beginnt 1985: 1981 fast, 1961 kaum gedeckt)
+    + [("jahresband", [j, "alle", n]) for j in (None, 1990) for n in (1981, 1961)]
+    + [("monat", [j, m, "alle", n]) for j, m in ((None, None), (1997, 7)) for n in (1981, 1971)]
+    + [("rangliste", [m, True, "alle", n]) for m in ("heute", "jahr") for n in (1981, 1961)]
+    + [("auswertung", [a, "alle", o, n]) for a, o in (
+        ("geschichte", {}), ("kenntage", {}), ("wellen", {}), ("streifen", {}),
+        ("niederschlag", {}), ("sonne", {"jahr": 1997}), ("schnee", {}), ("wind", {}),
+        ("frost", {})) for n in (1981, 1961)]
+    + [("auswertung", ["streifen", "alle", {}, 1955])]  # ungültig -> 1991
 )
 
 

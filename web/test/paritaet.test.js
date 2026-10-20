@@ -23,12 +23,12 @@ const reihe = R.reihe(zusammenfuehren(produktLesen(lies("hist.txt")), produktLes
 const AUFRUFE = {
   bilanz: (s) => R.bilanz(reihe, s),
   jahre: (s) => R.jahre(reihe, s),
-  jahresband: (j, s) => R.jahresband(reihe, j, s, heute),
-  monat: (j, m, s) => R.monat(reihe, j, m, s),
-  rangliste: (m, p, s) => R.rangliste(reihe, m, p, s, heute),
+  jahresband: (j, s, n) => R.jahresband(reihe, j, s, heute, n),
+  monat: (j, m, s, n) => R.monat(reihe, j, m, s, n),
+  rangliste: (m, p, s, n) => R.rangliste(reihe, m, p, s, heute, n),
   zeitreihe: (g, a, s) => R.zeitreihe(reihe, g, a, s),
   zeitraum: () => R.zeitraum(reihe),
-  auswertung: (art, s, o) => auswertung(reihe, art, s, o, heute),
+  auswertung: (art, s, o, n) => auswertung(reihe, art, s, o, heute, n),
 };
 
 /**

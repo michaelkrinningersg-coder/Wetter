@@ -2,7 +2,8 @@
   // Ein Monat Tag für Tag mit allem, was der DWD je Tag liefert. Das
   // Tagesmittel ist gefärbt nach der Abweichung vom Normal (wie im
   // Jahresband). Unten: der Monat (Mittel bzw. Summe), dasselbe Stück des
-  // Monats im Normal 1991-2020 und die Abweichung.
+  // Monats im Normal (Vergleichszeitraum) und die Abweichung.
+  import { normalText } from "./zeitraum.svelte.js";
   import { MONATE, abweichungsfarbeThema, de, mitVorzeichen } from "./format.js";
 
   let { monat } = $props();
@@ -127,7 +128,7 @@
   </div>
   <div class="leise fuss">
     Monat: Mittel der Tage, bei Niederschlag und Sonne die Summe{#if teilweise}&nbsp;bis zum {monat.bis_tag}.{/if}
-    · Normal: dieselben Tage 1991–2020 ({monat.normal_jahre} Jahre){#if monat.zeilen.length}&nbsp;· * nicht an jedem Tag
+    · Normal: dieselben Tage {normalText()} ({monat.normal_jahre} Jahre){#if monat.zeilen.length}&nbsp;· * nicht an jedem Tag
       gemessen{/if}
   </div>
 </div>

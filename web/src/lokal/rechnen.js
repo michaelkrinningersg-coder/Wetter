@@ -10,7 +10,28 @@ import { QN_STUFEN, bereinigen } from "./plausibel.js";
 
 export const JAHR_MIN_TAGE = 330;
 export const NORMAL_VON = 1991;
-export const NORMAL_BIS = 2020;
+// wählbare Vergleichszeiträume: immer 30 Jahre, je 10 Jahre früher
+export const NORMALE = [1991, 1981, 1971, 1961];
+
+/** Gewählter Vergleichszeitraum (Startjahr); Unbekanntes -> 1991, wie daten.normal_zeitraum. */
+export function normalVon(v) {
+  const n = Number(v);
+  return NORMALE.includes(n) ? n : NORMAL_VON;
+}
+
+// Der Zeitraum gilt für einen ganzen Aufruf; die Rechnungen sind synchron.
+let nv = NORMAL_VON;
+export function mitNormal(normal, arbeit) {
+  const alt = nv;
+  nv = normalVon(normal);
+  try {
+    return arbeit();
+  } finally {
+    nv = alt;
+  }
+}
+export const imNormal = (j) => j >= nv && j <= nv + 29;
+export const normalSpanne = () => [nv, nv + 29];
 export const GLAETTUNG = 15;
 export const PROGNOSE_JAHRE = 30;
 export const MONAT_SPALTEN = ["tmk", "txk", "tnk", "tgk", "fm", "fx", "rsk", "rskf", "sdk", "shk", "nm", "upm", "vpm", "pm"];
@@ -146,7 +167,6 @@ function letzterTag(r, c, spalten = ["tmk"]) {
   return -1;
 }
 
-const imNormal = (j) => j >= NORMAL_VON && j <= NORMAL_BIS;
 
 /** Tagesnormal: je Kalendertag alle Tage 1991-2020 im Fenster +-7 Tage. */
 function tagesnormal(r, c, nurMittel = false) {
@@ -171,7 +191,11 @@ function tagesnormal(r, c, nurMittel = false) {
   return anzahl;
 }
 
-export function jahresband(r, jahrWahl, stufe, heute) {
+export function jahresband(r, jahrWahl, stufe, heute, normal) {
+  return mitNormal(normal, () => jahresbandRechnen(r, jahrWahl, stufe, heute));
+}
+
+function jahresbandRechnen(r, jahrWahl, stufe, heute) {
   const c = rein(r, stufe);
   const li = letzterTag(r, c);
   if (li < 0) return { leer: true };
@@ -322,7 +346,11 @@ function vollJahre(r, c, ohne, mitJahr = false) {
   return mitJahr ? aus.map(([y, [s, n]]) => [y, s / n, n]) : aus.map(([, [s, n]]) => s / n);
 }
 
-export function rangliste(r, modus, mitPrognose, stufe, heute) {
+export function rangliste(r, modus, mitPrognose, stufe, heute, normal) {
+  return mitNormal(normal, () => ranglisteRechnen(r, modus, mitPrognose, stufe, heute));
+}
+
+function ranglisteRechnen(r, modus, mitPrognose, stufe, heute) {
   const c = rein(r, stufe);
   const li = letzterTag(r, c);
   if (li < 0) return { zeilen: [] };
@@ -361,7 +389,11 @@ export function rangliste(r, modus, mitPrognose, stufe, heute) {
   return { zeilen: liste, modus, letzter: iso(letzter), jahr: lj, normal: runden(normal, 2), normal_jahre: normale.length, prognose: p };
 }
 
-export function monat(r, jahrWahl, monatWahl, stufe) {
+export function monat(r, jahrWahl, monatWahl, stufe, normal) {
+  return mitNormal(normal, () => monatRechnen(r, jahrWahl, monatWahl, stufe));
+}
+
+function monatRechnen(r, jahrWahl, monatWahl, stufe) {
   const c = rein(r, stufe);
   let erster = -1;
   for (let i = 0; i < r.n; i++) if (!fehlt(c.tmk[i]) || !fehlt(c.rsk[i])) { erster = i; break; }

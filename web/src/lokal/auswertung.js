@@ -2,10 +2,8 @@
 // Schleife für Schleife. web/test/paritaet.test.js vergleicht beide.
 // Grenzen und Begriffe stehen oben in auswertung.py.
 
-import { iso, quantil, rein, runden } from "./rechnen.js";
+import { imNormal, iso, mitNormal, normalSpanne, quantil, rein, runden } from "./rechnen.js";
 
-const NORMAL_VON = 1991;
-const NORMAL_BIS = 2020;
 const JAHR_MIN = 330;
 const PROGNOSE_JAHRE = 30;
 const STURM = 75 / 3.6;
@@ -31,7 +29,6 @@ const KENNTAGE = [
 
 const fehlt = (v) => v == null || Number.isNaN(v);
 const mittel = (w) => (w.length ? w.reduce((a, b) => a + b, 0) / w.length : null);
-const imNormal = (j) => j >= NORMAL_VON && j <= NORMAL_BIS;
 const holen = (m, k, neu) => (m.has(k) ? m.get(k) : (m.set(k, neu()), m.get(k)));
 const tageZwischen = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 86400000);
 
@@ -281,7 +278,8 @@ export function summen(r, stufe, spalte, jahrWahl = null) {
   for (let mo = 1; mo <= 12; mo++) {
     if (!monatJ.has(jahr * 100 + mo)) continue;
     const nm = [];
-    for (let j = NORMAL_VON; j <= NORMAL_BIS; j++) {
+    const [nv, nb] = normalSpanne();
+    for (let j = nv; j <= nb; j++) {
       const [sm, n] = monatJ.get(j * 100 + mo) ?? [0, 0];
       const tageM = new Date(Date.UTC(j, mo, 0)).getUTCDate();
       if (n && n >= 0.9 * tageM) nm.push(sm);
@@ -418,7 +416,11 @@ export function prognoseVerlauf(r, stufe, heute) {
 }
 
 /** Wie Daten.auswertung in Python: eine Auswertung nach Namen. */
-export function auswertung(r, art, stufe, optionen = {}, heute) {
+export function auswertung(r, art, stufe, optionen = {}, heute, normal) {
+  return mitNormal(normal, () => auswertungRechnen(r, art, stufe, optionen, heute));
+}
+
+function auswertungRechnen(r, art, stufe, optionen, heute) {
   if (!r.n) return { leer: true };
   const o = optionen ?? {};
   switch (art) {

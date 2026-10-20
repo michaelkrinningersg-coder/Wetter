@@ -1,6 +1,7 @@
 <script>
-  // Ein Wert je Jahr als Balken, dazu das Normal 1991-2020 als Linie.
+  // Ein Wert je Jahr als Balken, dazu das Normal (Vergleichszeitraum) als Linie.
   // Für Kenntage, Wellen, Schnee, Wind, Frost.
+  import { normalText } from "./zeitraum.svelte.js";
   import { de, schritte } from "./format.js";
 
   let { punkte, normal = null, farbe = "var(--akzent)", einheit = "", hoehe = 220 } = $props(); // punkte: [[jahr, wert, blass?]]
@@ -45,7 +46,7 @@
       {#if Number.isInteger(j)}<text x={xs(j)} y={hoehe - 5} text-anchor="middle">{j}</text>{/if}
     {/each}
   </svg>
-  {#if normal != null}<div class="leise">Linie: Mittel 1991–2020 ({de(normal)} {einheit}) · blass: Jahr nicht vollständig gemessen</div>{/if}
+  {#if normal != null}<div class="leise">Linie: Mittel {normalText()} ({de(normal)} {einheit}) · blass: Jahr nicht vollständig gemessen</div>{/if}
 </div>
 
 <style>

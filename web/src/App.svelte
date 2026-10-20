@@ -16,6 +16,7 @@
   import { aufDemHandy, rufe } from "./lib/api.js";
   import { MONATE, datum, tausend } from "./lib/format.js";
   import Symbol from "./lib/Symbol.svelte";
+  import { NORMALE, normalText, vergleich } from "./lib/zeitraum.svelte.js";
   import { AUFRUF, AUSWERTUNGEN, DATEN_OPTIONEN, HANDY_NAV, HAUPT, IST_AUSWERTUNG, OPTIONEN, TITEL } from "./lib/ansichten.js";
   import Uebersicht from "./lib/Uebersicht.svelte";
   import Vorhersage from "./lib/Vorhersage.svelte";
@@ -123,9 +124,9 @@
     if (ansicht === "uebersicht") {
       // alles gleichzeitig; die Vorhersage braucht das Netz und kommt zuletzt
       const [b, m, g] = await Promise.all([
-        rufe("jahresband", id, null, qn),
-        rufe("monat", id, null, null, qn),
-        rufe("auswertung", id, "geschichte", qn, {}),
+        rufe("jahresband", id, null, qn, vergleich.von),
+        rufe("monat", id, null, null, qn, vergleich.von),
+        rufe("auswertung", id, "geschichte", qn, {}, vergleich.von),
       ]);
       if (!b.fehler) band = b;
       if (!m.fehler) monat = m;
@@ -134,18 +135,18 @@
     } else if (ansicht === "vorhersage") {
       await vorhersageLaden();
     } else if (ansicht === "band") {
-      const r = await sicher(() => rufe("jahresband", id, jahr, qn));
+      const r = await sicher(() => rufe("jahresband", id, jahr, qn, vergleich.von));
       if (!r.fehler) band = r;
     } else if (ansicht === "monat") {
-      const r = await sicher(() => rufe("monat", id, monatWahl?.[0] ?? null, monatWahl?.[1] ?? null, qn));
+      const r = await sicher(() => rufe("monat", id, monatWahl?.[0] ?? null, monatWahl?.[1] ?? null, qn, vergleich.von));
       if (!r.fehler) monat = r;
     } else if (IST_AUSWERTUNG.has(ansicht)) {
       const art = ansicht;
       const o = Object.fromEntries((DATEN_OPTIONEN[art] ?? []).map((k) => [k, optionen[art][k]]));
-      const r = await sicher(() => rufe("auswertung", id, AUFRUF[art], qn, o));
+      const r = await sicher(() => rufe("auswertung", id, AUFRUF[art], qn, o, vergleich.von));
       if (!r.fehler && ansicht === art) auswertung = r;
     } else if (ansicht === "rang") {
-      const r = await sicher(() => rufe("rangliste", id, rangModus, rangPrognose, qn));
+      const r = await sicher(() => rufe("rangliste", id, rangModus, rangPrognose, qn, vergleich.von));
       if (!r.fehler) liste = r;
     } else {
       const r = await sicher(() => rufe("zeitreihe", id, groesse, aufloesung, qn));
@@ -153,7 +154,7 @@
     }
     // die Bilanz der Bereinigung steht im Jahresband - auch für die Fußzeile
     if (ansicht !== "band" && !band) {
-      const r = await rufe("jahresband", id, null, qn);
+      const r = await rufe("jahresband", id, null, qn, vergleich.von);
       if (!r.fehler) band = r;
     }
   }
@@ -163,6 +164,7 @@
     if (was === "ansicht") ((ansicht = wert), (auswertung = null), (mehr = false), rufe("einstellung", "ansicht", wert));
     // QN gilt nur bis zum nächsten Start - jeder Start beginnt mit "alle"
     if (was === "qn") ((qn = wert), (band = null));
+    if (was === "normal") ((vergleich.von = wert), (band = null), (geschichteKurz = null), rufe("einstellung", "normal", wert));
     if (was === "jahr") jahr = wert;
     if (was === "groesse") groesse = wert;
     if (was === "aufloesung") aufloesung = wert;
@@ -189,6 +191,16 @@
     optionen[ansicht][name] = wert;
     if (ansicht === "wellen") rufe("einstellung", "wellen", $state.snapshot(optionen.wellen));
     if ((DATEN_OPTIONEN[ansicht] ?? []).includes(name)) ansichtLaden();
+  }
+
+  // PC: die Auswertungen klappen unter ihrem Knopf auf (das Band selbst
+  // schneidet Aufklappendes ab, daher fest positioniert)
+  let auswPos = $state({ x: 0, y: 0 });
+  const aktiveAuswertung = $derived(AUSWERTUNGEN.find((a) => a[0] === ansicht));
+  function auswertungenAuf(e) {
+    const r = e.currentTarget.getBoundingClientRect();
+    auswPos = { x: r.left, y: r.bottom + 4 };
+    menue = menue === "auswertungen" ? "" : "auswertungen";
   }
 
   function favoritUmschalten() {
@@ -242,6 +254,7 @@
     if (r.einstellungen.wellen) optionen.wellen = { ...optionen.wellen, ...r.einstellungen.wellen };
     if (r.einstellungen.vmodell) vmodell = r.einstellungen.vmodell;
     if (r.einstellungen.thema) thema = r.einstellungen.thema;
+    if (NORMALE.includes(r.einstellungen.normal)) vergleich.von = r.einstellungen.normal;
     rangModus = r.einstellungen.rang_modus === "jahr" ? "jahr" : "heute";
     rangPrognose = r.einstellungen.rang_prognose !== false;
     qn = "alle"; // so entschieden: immer mit allen Qualitätsstufen beginnen
@@ -288,6 +301,8 @@
       <button class="chip" disabled={schluessel(vor) < ab} onclick={() => setze("monat", vor)} title="Monat davor">‹</button>
       <span class="chip an monat-name">{MONATE[m - 1]} {j}</span>
       <button class="chip" disabled={schluessel(nach) > bis} onclick={() => setze("monat", nach)} title="Monat danach">›</button>
+    </div>
+    <div class="gruppe">
       <select class="chip" value={j} onchange={(e) => setze("monat", [Number(e.currentTarget.value), m])} title="Jahr">
         {#each Array.from({ length: Number(bis.slice(0, 4)) - Number(ab.slice(0, 4)) + 1 }, (_, i) => Number(bis.slice(0, 4)) - i) as y}
           <option value={y}>{y}</option>
@@ -295,6 +310,7 @@
       </select>
       <button class="chip" onclick={() => setze("monat", null)} title="Zum letzten Monat mit Daten">aktuell</button>
     </div>
+    {#if handy}<div class="gruppe" title="Vergleichszeitraum">{@render normalWahl()}</div>{/if}
   {:else if ansicht === "rang"}
     <div class="gruppe">
       <button class="chip" class:an={rangModus === "heute"} onclick={() => setze("rangModus", "heute")}>bis heute</button>
@@ -352,6 +368,18 @@
       {/each}
     </div>
   {/if}
+{/snippet}
+
+{#snippet normalWahl()}
+  <select
+    class="chip"
+    class:an={vergleich.von !== NORMALE[0]}
+    value={vergleich.von}
+    onchange={(e) => setze("normal", Number(e.currentTarget.value))}
+    title="Vergleichszeitraum (Normal): immer 30 Jahre"
+  >
+    {#each NORMALE as n}<option value={n}>{normalText(n)}</option>{/each}
+  </select>
 {/snippet}
 
 {#snippet qnSchalter()}
@@ -455,6 +483,8 @@
         </div>
         <div class="lbl">Qualitätsniveau (QN)</div>
         {@render qnSchalter()}
+        <div class="lbl">Vergleichszeitraum (Normal)</div>
+        <div class="gruppe">{@render normalWahl()}</div>
         <div class="lbl">Farben</div>
         <div class="gruppe">
           {#each THEMEN as [t, t2]}
@@ -512,6 +542,10 @@
                 {#each QN as [q, t2]}
                   <button class:an={qn === q} onclick={() => setze("qn", q)}>QN {t2}</button>
                 {/each}
+                <div class="eintrag-leise">Vergleichszeitraum</div>
+                {#each NORMALE as n}
+                  <button class:an={vergleich.von === n} onclick={() => setze("normal", n)}>Normal {normalText(n)}</button>
+                {/each}
               {:else}
                 <button onclick={() => ((menue = ""), (hilfe = true))}>Regeln und Daten …</button>
                 <div class="eintrag-leise">Wetter {version}</div>
@@ -546,20 +580,20 @@
         <div class="b-titel">Ansicht</div>
       </div>
       <div class="b-gruppe">
-        <div class="b-inhalt b-raster">
-          {#each AUSWERTUNGEN as [k, t, , s, kurz]}
-            <button class="b-klein" class:an={ansicht === k} onclick={() => setze("ansicht", k)} title={t}><span><Symbol name={s} /></span>{kurz}</button>
-          {/each}
+        <div class="b-inhalt">
+          <button class="b-knopf" class:an={IST_AUSWERTUNG.has(ansicht)} onclick={auswertungenAuf} title="Auswertung wählen">
+            <span><Symbol name={aktiveAuswertung?.[3] ?? "rekorde"} /></span>{aktiveAuswertung?.[4] ?? "Auswertungen"} ▾
+          </button>
         </div>
-        <div class="b-titel">Auswertungen</div>
+        <div class="b-titel">Auswertung</div>
       </div>
       <div class="b-gruppe">
-        <div class="b-inhalt">{@render steuerung()}</div>
+        <div class="b-inhalt b-stapel">{@render steuerung()}</div>
         <div class="b-titel">{ansicht === "monat" ? "Zeitraum" : ansicht === "band" ? "Jahr" : ansicht === "rang" ? "Vergleich" : ansicht === "reihe" ? "Größe" : "Optionen"}</div>
       </div>
       <div class="b-gruppe">
-        <div class="b-inhalt">{@render qnSchalter()}</div>
-        <div class="b-titel">Qualität (QN)</div>
+        <div class="b-inhalt b-stapel">{@render qnSchalter()}{@render normalWahl()}</div>
+        <div class="b-titel">QN · Normal</div>
       </div>
       <div class="b-gruppe">
         <div class="b-inhalt">
@@ -568,6 +602,14 @@
         <div class="b-titel">Daten</div>
       </div>
     </div>
+
+    {#if menue === "auswertungen"}
+      <div class="aufklapp ausw-liste" style:left="{auswPos.x}px" style:top="{auswPos.y}px">
+        {#each AUSWERTUNGEN as [k, t, , s]}
+          <button class:an={ansicht === k} onclick={() => setze("ansicht", k)}><Symbol name={s} /> {t}</button>
+        {/each}
+      </div>
+    {/if}
 
     <main>{@render inhalt()}</main>
 
@@ -649,6 +691,16 @@
     padding: 4px;
     display: grid;
   }
+  .ausw-liste {
+    position: fixed;
+    z-index: 30;
+    --symbol-akzent: var(--akzent);
+  }
+  .ausw-liste button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
   .aufklapp button {
     text-align: left;
     background: none;
@@ -706,7 +758,7 @@
     flex-direction: column;
     align-items: center;
     gap: 3px;
-    padding: 0 14px;
+    padding: 0 9px;
     border-right: 1px solid rgb(255 255 255 / 10%);
   }
   .b-inhalt {
@@ -724,7 +776,7 @@
     flex-direction: column;
     align-items: center;
     gap: 1px;
-    padding: 4px 9px;
+    padding: 4px 6px;
     border: 0;
     border-radius: 6px;
     background: none;
@@ -765,6 +817,30 @@
     color: var(--graphit-text);
     font-size: 12px;
     cursor: pointer;
+  }
+  /* schmalere Bildschirme: Station ohne Nummer und Höhe, Knöpfe enger */
+  @media (max-width: 1400px) {
+    .band :global(.wahl small) {
+      display: none;
+    }
+    .b-gruppe {
+      padding: 0 6px;
+    }
+    .b-knopf {
+      padding: 4px 4px;
+    }
+  }
+  .b-stapel {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 4px;
+  }
+  .b-stapel > :global(.gruppe) {
+    justify-content: center;
+  }
+  .b-stapel select {
+    font-size: 12px;
   }
   .b-klein span {
     display: flex;

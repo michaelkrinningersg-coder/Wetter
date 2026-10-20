@@ -1,7 +1,8 @@
 <script>
   // Ein Jahr Tag für Tag: je Tag ein Balken vom Tiefst- zum Höchstwert,
   // gefärbt nach der Abweichung des Mittels vom Normal; dahinter grau das
-  // übliche Band 1991-2020. Rechts das Jahr bisher und die Monate.
+  // übliche Band im Vergleichszeitraum. Rechts das Jahr bisher und die Monate.
+  import { normalText } from "./zeitraum.svelte.js";
   import {
     MONATE,
     MONATSANFANG,
@@ -68,9 +69,9 @@
       <span class="leise">
         Balken: Tiefst- bis Höchstwert, Farbe: Mittel gegen normal ·
         {#if band.normal_jahre}
-          grau: übliches Band 1991–2020 ({band.normal_jahre} Jahre)
+          grau: übliches Band {normalText()} ({band.normal_jahre} Jahre)
         {:else}
-          kein Normal - die Reihe deckt 1991–2020 nicht ab
+          kein Normal - die Reihe deckt {normalText()} nicht ab
         {/if}
       </span>
       <span class="raum"></span>
@@ -176,7 +177,7 @@
           {/each}
         </tbody>
       </table>
-      <div class="leise">Monatsmittel; normal = derselbe Monat 1991–2020</div>
+      <div class="leise">Monatsmittel; normal = derselbe Monat {normalText()}</div>
     </div>
   </div>
 </div>

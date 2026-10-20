@@ -182,7 +182,8 @@ class Api:
                 "rang_prognose": db.meta("rang_prognose", "1") != "0",
                 "favoriten": _liste(db.meta("favoriten", "[]")),
                 "wellen": _objekt(db.meta("wellen", "{}")),
-                "thema": db.meta("thema", "system")}
+                "thema": db.meta("thema", "system"),
+                "normal": daten.normal_zeitraum(db.meta("normal", daten.NORMAL_VON))[0]}
 
     def _verzeichnis(self, neu=False) -> dict[int, str]:
         """Stationsnummer -> hist-Archiv; gemerkt, einmal am Tag neu."""
@@ -282,7 +283,7 @@ class Api:
         def arbeit():
             if name not in ("station", "qn", "ansicht", "rang_modus",
                             "rang_prognose", "favoriten", "wellen", "vmodell",
-                            "thema"):
+                            "thema", "normal"):
                 raise Hinweis(f"Unbekannte Einstellung: {name}")
             if isinstance(wert, bool):
                 text = "1" if wert else "0"
@@ -336,30 +337,32 @@ class Api:
             self._status(laeuft="")
 
     # --------------------------------------------------------- Ansichten
-    def jahresband(self, sid, jahr=None, qn=plausibel.QN_VORGABE) -> dict:
+    def jahresband(self, sid, jahr=None, qn=plausibel.QN_VORGABE,
+                   normal=None) -> dict:
         def arbeit():
             db = self._daten()
-            band = db.jahresband(int(sid), jahr, qn)
+            band = db.jahresband(int(sid), jahr, qn, normal)
             band["jahre"] = db.jahre(int(sid), qn)
             band["bilanz"] = db.bilanz(int(sid), qn)
             return band
         return self._sicher(arbeit)
 
     def monat(self, sid, jahr=None, monat=None,
-              qn=plausibel.QN_VORGABE) -> dict:
+              qn=plausibel.QN_VORGABE, normal=None) -> dict:
         return self._sicher(lambda: self._daten().monat(
-            int(sid), jahr, monat, qn))
+            int(sid), jahr, monat, qn, normal))
 
     def rangliste(self, sid, modus="heute", prognose=True,
-                  qn=plausibel.QN_VORGABE) -> dict:
+                  qn=plausibel.QN_VORGABE, normal=None) -> dict:
         return self._sicher(lambda: self._daten().rangliste(
-            int(sid), modus, bool(prognose), qn))
+            int(sid), modus, bool(prognose), qn, normal))
 
-    def auswertung(self, sid, art, qn=plausibel.QN_VORGABE, optionen=None) -> dict:
+    def auswertung(self, sid, art, qn=plausibel.QN_VORGABE, optionen=None,
+                   normal=None) -> dict:
         """Rekorde, Geschichte, Kenntage, Wellen, Klimastreifen,
         Niederschlag, Sonne, Schnee, Wind, Frost, Prognose im Verlauf."""
         return self._sicher(lambda: self._daten().auswertung(
-            int(sid), art, qn, optionen))
+            int(sid), art, qn, optionen, normal))
 
     def vorhersage(self, sid, neu=False) -> dict:
         """Aktuelles Wetter (Bright Sky) und alle Modelle für die Station -

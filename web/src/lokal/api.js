@@ -284,6 +284,7 @@ export const lokal = {
         ansicht: await meta("ansicht", "uebersicht"),
         vmodell: await meta("vmodell", "icon_d2"),
         thema: await meta("thema", "system"),
+        normal: R.normalVon(await meta("normal", R.NORMAL_VON)),
         rang_modus: await meta("rang_modus", "heute"),
         rang_prognose: (await meta("rang_prognose", true)) !== false,
         favoriten: (await meta("favoriten", [])) ?? [],
@@ -323,10 +324,10 @@ export const lokal = {
       const text = await laden(Number(id));
       return { meldung: text, zeitraum: R.zeitraum(await reiheVon(Number(id))) };
     }),
-  jahresband: (id, jahr = null, qn = "alle") =>
+  jahresband: (id, jahr = null, qn = "alle", normal = null) =>
     sicher(() =>
       mitReihe(id, (r) => {
-        const band = R.jahresband(r, jahr, qn, heute());
+        const band = R.jahresband(r, jahr, qn, heute(), normal);
         if (!band.leer) {
           band.jahre = R.jahre(r, qn);
           band.bilanz = R.bilanz(r, qn);
@@ -334,8 +335,9 @@ export const lokal = {
         return band;
       }),
     ),
-  monat: (id, jahr = null, monat = null, qn = "alle") => sicher(() => mitReihe(id, (r) => R.monat(r, jahr, monat, qn))),
-  rangliste: (id, modus = "heute", prognose = true, qn = "alle") => sicher(() => mitReihe(id, (r) => R.rangliste(r, modus, !!prognose, qn, heute()))),
+  monat: (id, jahr = null, monat = null, qn = "alle", normal = null) => sicher(() => mitReihe(id, (r) => R.monat(r, jahr, monat, qn, normal))),
+  rangliste: (id, modus = "heute", prognose = true, qn = "alle", normal = null) =>
+    sicher(() => mitReihe(id, (r) => R.rangliste(r, modus, !!prognose, qn, heute(), normal))),
   vorhersage: (id, neu = false) =>
     sicher(async () => {
       id = Number(id);
@@ -347,6 +349,7 @@ export const lokal = {
       vorhersagen.set(id, [Date.now(), antwort]);
       return antwort;
     }),
-  auswertung: (id, art, qn = "alle", optionen = {}) => sicher(() => mitReihe(id, (r) => auswertung(r, art, qn, optionen, heute()))),
+  auswertung: (id, art, qn = "alle", optionen = {}, normal = null) =>
+    sicher(() => mitReihe(id, (r) => auswertung(r, art, qn, optionen, heute(), normal))),
   zeitreihe: (id, groesse = "m", aufloesung = "jahr", qn = "alle") => sicher(() => mitReihe(id, (r) => R.zeitreihe(r, groesse, aufloesung, qn))),
 };

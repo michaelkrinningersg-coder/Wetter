@@ -1,6 +1,7 @@
 <script>
   // Die Auswertungen über die ganze Reihe einer Station - eine Ansicht je
   // `art`. Die Zahlen kommen fertig aus auswertung.py bzw. lokal/auswertung.js.
+  import { normalText } from "./zeitraum.svelte.js";
   import Balken from "./Balken.svelte";
   import Tabelle from "./Tabelle.svelte";
   import { TITEL } from "./ansichten.js";
@@ -79,13 +80,13 @@
       <span class="leise">Sommertag ≥ 25 °C · heißer Tag ≥ 30 °C · Tropennacht Tiefstwert ≥ 20 °C · Frosttag Tiefstwert &lt; 0 °C · Eistag Höchstwert &lt; 0 °C · Bodenfrost 5 cm &lt; 0 °C</span>
     {:else if art === "wellen"}
       <span class="leise">
-        {#if d.art === "normal"}mind. 5 Tage Tagesmittel über dem 90-%- bzw. unter dem 10-%-Wert des Normals 1991–2020
+        {#if d.art === "normal"}mind. 5 Tage Tagesmittel über dem 90-%- bzw. unter dem 10-%-Wert des Normals {normalText()}
         {:else}mind. {d.min_tage} Tage Höchstwert ≥ {de(d.heiss)} °C bzw. &lt; {de(d.kalt)} °C{/if}
       </span>
     {:else if art === "streifen"}
-      <span class="leise">Jahresmittel gegen das Mittel 1991–2020 ({de(d.bezug, 2)} °C) · nur Jahre mit mind. 330 Tagen</span>
+      <span class="leise">Jahresmittel gegen das Mittel {normalText()} ({de(d.bezug, 2)} °C) · nur Jahre mit mind. 330 Tagen</span>
     {:else if art === "niederschlag" || art === "sonne"}
-      <span class="leise">{d.jahr} aufsummiert (orange) gegen 1991–2020: Median gestrichelt, grau 10–90 %</span>
+      <span class="leise">{d.jahr} aufsummiert (orange) gegen {normalText()}: Median gestrichelt, grau 10–90 %</span>
     {:else if art === "schnee"}
       <span class="leise">Winter 1. Okt. – 30. Apr. · Schneetag ≥ 1 cm Schneehöhe</span>
     {:else if art === "wind"}
@@ -182,7 +183,7 @@
           spalten={[{ key: "jahr", titel: "Jahr" }, ...d.arten.map(([k, t]) => ({ key: k, titel: t }))]}
           zeilen={d.jahre.map((z) => ({ ...z, _blass: z.tage_x < d.min_tage && z.tage_n < d.min_tage }))}
         />
-        <div class="leise">Mittel 1991–2020: {d.arten.map(([k, t]) => `${t} ${de(d.normal[k])}`).join(" · ")}</div>
+        <div class="leise">Mittel {normalText()}: {d.arten.map(([k, t]) => `${t} ${de(d.normal[k])}`).join(" · ")}</div>
       </div>
 
     <!-- ============================================================= Wellen -->
@@ -262,7 +263,7 @@
             {@const k = d.kumuliert.at(-1)[0]}
             <div>normal bis {tagText(k)}: {de(d.band[k][2])} {einheit} (Median)</div>
           {/if}
-          <div class="leise">Jahressumme normal 1991–2020: {de(d.normal)} {einheit}</div>
+          <div class="leise">Jahressumme normal {normalText()}: {de(d.normal)} {einheit}</div>
           <table class="klein">
             <tbody>
               {#each d.monate as mo}
@@ -365,7 +366,7 @@
           ]}
           zeilen={d.jahre.filter((z) => z.luft_tage || z.boden_tage)}
         />
-        <div class="leise">Mittel 1991–2020 frostfrei: Luft {de(d.normal.luft_frei)} Tage · Boden {de(d.normal.boden_frei)} Tage</div>
+        <div class="leise">Mittel {normalText()} frostfrei: Luft {de(d.normal.luft_frei)} Tage · Boden {de(d.normal.boden_frei)} Tage</div>
       </div>
 
     <!-- ===================================================== Prognose-Verlauf -->
