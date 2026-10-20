@@ -407,7 +407,7 @@
     </div>
   {/if}
   {#if ansicht === "uebersicht" && station}
-    <Uebersicht name={station.station.name} {band} {monat} geschichte={geschichteKurz} {vorhersage} modell={vmodell} gehe={(a) => setze("ansicht", a)} />
+    <Uebersicht name={station.station.name} {band} {monat} geschichte={geschichteKurz} {vorhersage} gehe={(a) => setze("ansicht", a)} />
   {:else if ansicht === "vorhersage" && vorhersage}
     <Vorhersage v={vorhersage} modell={vmodell} waehle={(m) => ((vmodell = m), rufe("einstellung", "vmodell", m))} />
   {:else if ansicht === "band" && band && !band.leer}
