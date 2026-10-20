@@ -132,7 +132,10 @@ jobs:
       - name: Dateien wie aus dem Internet markieren
         run: |
           $n = 0
-          Get-ChildItem dist\Wetter -Recurse -File | ForEach-Object {
+          # Nur _internal: die markierte Wetter.exe selbst löst beim Start die
+          # Abfrage "Datei öffnen?" aus, die der Anwender wegklickt - auf dem
+          # Läufer klickt niemand, und der Start gilt als abgebrochen.
+          Get-ChildItem dist\Wetter\_internal -Recurse -File | ForEach-Object {
             Set-Content -Path $_.FullName -Stream Zone.Identifier -Value "[ZoneTransfer]`r`nZoneId=3"
             $n++
           }
