@@ -124,6 +124,21 @@ jobs:
           Get-Content "dist\Wetter\selbsttest.log" | ForEach-Object { "    $_" } >> $env:GITHUB_STEP_SUMMARY
           Remove-Item "dist\Wetter\selbsttest.log"
 
+      # So kommt der Ordner beim Anwender an: aus dem Browser geladen und
+      # mit dem Explorer entpackt trägt jede Datei die Markierung "aus dem
+      # Internet" (Zone.Identifier, ZoneId=3). .NET lädt solche DLLs nicht
+      # - v1.0.1 scheiterte genau daran. Der Starttest läuft deshalb mit
+      # markierten Dateien.
+      - name: Dateien wie aus dem Internet markieren
+        run: |
+          $n = 0
+          Get-ChildItem dist\Wetter -Recurse -File | ForEach-Object {
+            Set-Content -Path $_.FullName -Stream Zone.Identifier -Value "[ZoneTransfer]`r`nZoneId=3"
+            $n++
+          }
+          Write-Host "$n Dateien markiert"
+          Get-Item dist\Wetter\_internal\pythonnet\runtime\Python.Runtime.dll -Stream * | Format-Table Stream, Length
+
       # Fängt ab, was erst beim Öffnen des Fensters schiefgeht. Gewartet
       # wird, bis die Seite Python erreicht hat - höchstens 60 s.
       - name: Startet die Oberfläche wirklich?
@@ -161,6 +176,9 @@ jobs:
           }
           Write-Host "Fenster offen und Seite mit Python verbunden nach $sekunden s"
           "- Kaltstart bis Seite verbunden: $sekunden s (Läufer, erster Start)" >> $env:GITHUB_STEP_SUMMARY
+          if (-not (Select-String -Path $log -Pattern "Sperre aus dem Internet" -Quiet)) {
+            throw "Die Markierung wurde nicht entfernt - der Test prüft nicht, was er soll"
+          }
           # Was der Startversuch hinterlassen hat, gehört nicht ins Paket
           Remove-Item -Recurse -Force "$ordner\daten", $log -ErrorAction SilentlyContinue
 

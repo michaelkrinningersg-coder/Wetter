@@ -463,11 +463,48 @@ def _net_fehler_merken():
         traceback.print_exc()
 
 
+# Die Ordner mit .NET-Bibliotheken: pythonnet, die WebView2-Anbindung
+NET_ORDNER = ("pythonnet", "clr_loader", "webview")
+
+
+def _freigeben() -> int:
+    """Hebt die Windows-Sperre "aus dem Internet" von den .NET-Bibliotheken.
+
+    Wer die zip aus dem Browser lädt und mit dem Explorer entpackt, erbt
+    an jeder Datei die Markierung Zone.Identifier (Mark of the Web). .NET
+    lädt solche Bibliotheken nicht - pythonnet scheitert dann mit "Failed
+    to resolve Python.Runtime.Loader.Initialize", bevor ein Fenster
+    aufgeht. Der Serientrenner kennt das nicht: eine onefile-exe packt
+    sich selbst aus, und was sie auspackt, trägt keine Markierung.
+
+    Entfernt wird nur dieser eine Datenstrom an DLLs im Programmordner -
+    dasselbe wie "Zulassen" in den Dateieigenschaften.
+    """
+    if sys.platform != "win32":
+        return 0
+    basis = ressource()
+    frei = 0
+    for ordner in NET_ORDNER:
+        for wurzel, _, dateien in os.walk(os.path.join(basis, ordner)):
+            for name in dateien:
+                if not name.lower().endswith((".dll", ".exe")):
+                    continue
+                try:
+                    os.remove(os.path.join(wurzel, name) + ":Zone.Identifier")
+                    frei += 1
+                except OSError:
+                    pass        # keine Markierung oder kein Schreibrecht
+    return frei
+
+
 def fenster_starten(api: Api):
+    frei = _freigeben()
     import webview
 
     _protokoll_einrichten()
     log.info("%s %s gestartet (%s-bit)", APP_TITEL, programmversion(), BITNESS)
+    if frei:
+        log.info("Sperre aus dem Internet von %d Bibliotheken entfernt", frei)
     _net_fehler_merken()
 
     seite = ressource(WEBORDNER, "index.html")
