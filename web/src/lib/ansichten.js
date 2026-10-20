@@ -28,7 +28,10 @@ export const AUSWERTUNGEN = [
   ["verlauf", "Prognose im Verlauf", "prognose_verlauf", "verlauf", "Prognose"],
 ];
 
-export const TITEL = Object.fromEntries([...HAUPT, ...AUSWERTUNGEN].map(([k, t]) => [k, t]));
+// Über alle Stationen - gleicher Aufbau wie AUSWERTUNGEN (ohne Aufruf)
+export const DEUTSCHLAND = [["rekorde_de", "Rekorde Deutschland", null, "rekorde_de", "Rekorde DE"]];
+
+export const TITEL = Object.fromEntries([...HAUPT, ...AUSWERTUNGEN, ...DEUTSCHLAND].map(([k, t]) => [k, t]));
 export const IST_AUSWERTUNG = new Set(AUSWERTUNGEN.map(([k]) => k));
 export const AUFRUF = Object.fromEntries(AUSWERTUNGEN.map(([k, , a]) => [k, a]));
 

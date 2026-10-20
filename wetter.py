@@ -47,6 +47,7 @@ import config
 import daten
 import dwd
 import plausibel
+import rekorde_de
 import vorhersage
 
 APP_TITEL = "Wetter"
@@ -147,6 +148,8 @@ class Api:
         self._hintergrund: threading.Thread | None = None
         self._vorhersage: dict = {}        # Station -> (Zeit, Antwort)
         self._radar: dict = {}             # Ausschnitt -> (Zeit, Antwort)
+        self._rekorde: tuple | None = None # (Zeit, Antwort von GitHub)
+        self._rekorde_lauf: threading.Thread | None = None
 
     # ------------------------------------------------------------ Hilfen
     def _sicher(self, arbeit):
@@ -382,6 +385,82 @@ class Api:
                        **vorhersage.abrufen(s["lat"], s["lon"])}
             self._vorhersage[sid_] = (time.time(), antwort)
             return antwort
+        return self._sicher(arbeit)
+
+    # ------------------------------------------------ Rekorde Deutschland
+    def _rekorde_datei(self, art: str) -> str:
+        return os.path.join(os.path.dirname(self._daten().pfad), f"rekorde_de_{art}.json")
+
+    @staticmethod
+    def _json_datei(pfad):
+        try:
+            with open(pfad, encoding="utf-8") as datei:
+                return json.load(datei)
+        except (OSError, ValueError):
+            return None
+
+    def _rekorde_netz(self, neu: bool):
+        """rekorde_de.json von GitHub - eine Stunde gemerkt, als Datei für
+        die Zeit ohne Netz aufgehoben."""
+        if self._rekorde and not neu and time.time() - self._rekorde[0] < 3600:
+            return self._rekorde[1]
+        pfad = self._rekorde_datei("netz")
+        if self._netz:
+            try:
+                d = vorhersage._json(rekorde_de.ADRESSE)
+                if d.get("eintraege") is not None:
+                    with open(pfad + ".neu", "w", encoding="utf-8") as datei:
+                        json.dump(d, datei, ensure_ascii=False)
+                    os.replace(pfad + ".neu", pfad)
+                    self._rekorde = (time.time(), d)
+                    return d
+            except Exception as fehler:                  # noqa: BLE001
+                log.warning("Rekorde Deutschland: %s", fehler)
+        return self._json_datei(pfad)
+
+    def rekorde_de(self, neu=False) -> dict:
+        """Die neuen Rekorde aller Stationen: von GitHub (täglich gerechnet)
+        oder, wenn neuer, die am PC selbst gerechneten."""
+        def arbeit():
+            kandidaten = [(d, q) for d, q in (
+                (self._rekorde_netz(bool(neu)), "GitHub"),
+                (self._json_datei(self._rekorde_datei("selbst")), "am PC gerechnet")) if d]
+            laeuft = bool(self._rekorde_lauf and self._rekorde_lauf.is_alive())
+            if not kandidaten:
+                return {"leer": True, "eintraege": [], "selbst": True, "rechnet": laeuft}
+            d, quelle = max(kandidaten, key=lambda x: (x[0].get("stand", ""), x[0].get("erstellt", "")))
+            return {**d, "quelle": quelle, "selbst": True, "rechnet": laeuft}
+        return self._sicher(arbeit)
+
+    def rekorde_de_rechnen(self) -> dict:
+        """Alle aktiven Stationen laden und die Rekorde selbst rechnen - im
+        Hintergrund; die historischen Archive bleiben im Datenordner, das
+        nächste Mal kommen nur die recent-Archive neu."""
+        def lauf():
+            try:
+                ordner = os.path.join(os.path.dirname(self._daten().pfad), "dwd-hist")
+                d = rekorde_de.berechnen(
+                    zwischenspeicher=ordner,
+                    fortschritt=lambda t: self._status(laeuft=f"Rekorde Deutschland: {t}"))
+                pfad = self._rekorde_datei("selbst")
+                with open(pfad + ".neu", "w", encoding="utf-8") as datei:
+                    json.dump(d, datei, ensure_ascii=False)
+                os.replace(pfad + ".neu", pfad)
+                self._status(meldung=f"Rekorde Deutschland gerechnet: {len(d['eintraege'])} "
+                                     f"Rekorde, Stand {d['stand']}", geaendert=True)
+            except Exception as fehler:                  # noqa: BLE001
+                log.exception("Rekorde Deutschland")
+                self._status(meldung=f"Rekorde Deutschland: {fehler}")
+            finally:
+                self._status(laeuft="")
+
+        def arbeit():
+            if not self._netz:
+                raise Hinweis("Ohne Netz lässt sich nichts rechnen")
+            if not (self._rekorde_lauf and self._rekorde_lauf.is_alive()):
+                self._rekorde_lauf = threading.Thread(target=lauf, daemon=True)
+                self._rekorde_lauf.start()
+            return {"ok": True}
         return self._sicher(arbeit)
 
     def radar(self, bbox, neu=False) -> dict:

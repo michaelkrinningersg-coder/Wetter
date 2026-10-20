@@ -103,6 +103,8 @@ async function mitgeliefert(name) {
 const reihen = new Map(); // id -> R.reihe(...)
 const vorhersagen = new Map(); // id -> [Zeit, Antwort]
 let radarGemerkt = null; // [Ausschnitt, Zeit, Antwort]
+let rekordeGemerkt = null; // [Zeit, Antwort]
+const REKORDE_ADRESSE = "https://github.com/michaelkrinningersg-coder/Wetter/releases/download/rekorde-de/rekorde_de.json";
 const zustand = { laeuft: "", meldung: "", stand: 0 };
 let stationsliste = null;
 let laufend = Promise.resolve();
@@ -339,6 +341,25 @@ export const lokal = {
   monat: (id, jahr = null, monat = null, qn = "alle", normal = null) => sicher(() => mitReihe(id, (r) => R.monat(r, jahr, monat, qn, normal))),
   rangliste: (id, modus = "heute", prognose = true, qn = "alle", normal = null) =>
     sicher(() => mitReihe(id, (r) => R.rangliste(r, modus, !!prognose, qn, heute(), normal))),
+  // Rekorde Deutschland: täglich auf GitHub gerechnet (rekorde_de.py); am
+  // Handy nur laden - eine Stunde gemerkt, der letzte Stand bleibt für ohne Netz
+  rekorde_de: (neu = false) =>
+    sicher(async () => {
+      if (!neu && rekordeGemerkt && Date.now() - rekordeGemerkt[0] < 3600 * 1000) return rekordeGemerkt[1];
+      let d = null;
+      try {
+        d = await holenJson(REKORDE_ADRESSE);
+        if (d?.eintraege) await schreiben("meta", "rekorde_de", d);
+        else d = null;
+      } catch {
+        d = null;
+      }
+      d = d ?? (await meta("rekorde_de", null));
+      if (!d) return { leer: true, eintraege: [], selbst: false };
+      const antwort = { ...d, quelle: "GitHub", selbst: false };
+      rekordeGemerkt = [Date.now(), antwort];
+      return antwort;
+    }),
   radar: (bbox, neu = false) =>
     sicher(async () => {
       const [o, l, u, r] = bbox.map((v) => Math.round(v));

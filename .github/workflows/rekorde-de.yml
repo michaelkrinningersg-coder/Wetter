@@ -1,0 +1,66 @@
+name: Rekorde Deutschland
+
+# Jeden Tag die neuen Rekorde aller aktiven DWD-Stationen der letzten 12
+# Monate (rekorde_de.py) und als rekorde_de.json an die Freigabe
+# "rekorde-de" hängen. App und PC laden von dort:
+#   https://github.com/michaelkrinningersg-coder/Wetter/releases/download/rekorde-de/rekorde_de.json
+# Die historischen Archive ändern sich selten und bleiben im Cache; täglich
+# neu kommen nur die recent-Archive.
+
+on:
+  schedule:
+    - cron: "37 10 * * *"   # der DWD stellt die recent-Archive morgens bereit
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rekorde-de
+  cancel-in-progress: false
+
+jobs:
+  rechnen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Abhängigkeiten
+        run: pip install duckdb==1.5.6 truststore==0.10.5 pytest
+
+      - name: Tests der Regel
+        run: python -m pytest -q tests/test_rekorde_de.py
+
+      - name: Monat
+        id: monat
+        run: echo "m=$(date +%Y-%m)" >> "$GITHUB_OUTPUT"
+
+      - name: Historische Archive aus dem Cache (einmal je Monat neu gesichert)
+        uses: actions/cache@v4
+        with:
+          path: hist
+          key: dwd-hist-${{ steps.monat.outputs.m }}
+          restore-keys: dwd-hist-
+
+      - name: Rechnen
+        run: python rekorde_de.py rekorde_de.json --zwischenspeicher hist
+
+      - name: Freigabe rekorde-de aktualisieren
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view rekorde-de >/dev/null 2>&1 || \
+            gh release create rekorde-de --prerelease --target "${{ github.sha }}" \
+              --title "Rekorde Deutschland (Daten)" \
+              --notes "Täglich neu gerechnet von .github/workflows/rekorde-de.yml - keine Programmversion."
+          gh release upload rekorde-de rekorde_de.json --clobber
+          python - <<'EOF' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          d = json.load(open("rekorde_de.json", encoding="utf-8"))
+          print(f"Stand {d['stand']} · {d['stationen']} Stationen · {len(d['eintraege'])} Rekorde · {len(d['ausfaelle'])} Stationen nicht geladen")
+          EOF

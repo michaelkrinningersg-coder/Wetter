@@ -9,20 +9,21 @@
   let { rekorde, gehe } = $props();
 
   const kurz = (iso) => `${iso.slice(8, 10)}.${iso.slice(5, 7)}.`;
-  const eintraege = $derived.by(() => {
-    const e = rekorde?.eintraege ?? [];
-    if (!e.length) return [];
-    const neuester = e.reduce((m, x) => (x.datum > m ? x.datum : m), e[0].datum);
-    const grenze = new Date(Date.parse(`${neuester}T12:00:00Z`) - 6 * 86400000).toISOString().slice(0, 10);
-    return e.filter((x) => x.datum >= grenze).sort((a, b) => b.datum.localeCompare(a.datum) || a.platz - b.platz);
-  });
+  // die 7 Tage bis zum Stand der Daten (meist gestern)
+  const grenze = $derived(rekorde?.stand ? new Date(Date.parse(`${rekorde.stand}T12:00:00Z`) - 6 * 86400000).toISOString().slice(0, 10) : "");
+  const eintraege = $derived(
+    (rekorde?.eintraege ?? []).filter((x) => x.datum >= grenze).sort((a, b) => b.datum.localeCompare(a.datum) || a.platz - b.platz),
+  );
   // Geschwindigkeit: rund 60 px je Sekunde, gleich wie lang die Liste ist
   const dauer = $derived(Math.max(20, eintraege.length * 4.5));
 </script>
 
-{#if eintraege.length}
+{#if rekorde?.stand}
   <button class="laufband karte" onclick={gehe} title="Alle Rekorde Deutschland">
-    <span class="kopf"><Symbol name="rekorde" /> Rekorde</span>
+    <span class="kopf"><Symbol name="rekorde_de" /> Rekorde</span>
+    {#if !eintraege.length}
+      <span class="leise">keine neuen Rekorde in Deutschland in den 7 Tagen bis {kurz(rekorde.stand)} – alle der letzten 12 Monate ›</span>
+    {:else}
     <span class="fenster">
       <span class="lauf" style:animation-duration="{dauer}s">
         {#each [0, 1] as runde}
@@ -39,6 +40,7 @@
         {/each}
       </span>
     </span>
+    {/if}
   </button>
 {/if}
 

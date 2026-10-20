@@ -17,10 +17,11 @@
   import { MONATE, datum, tausend } from "./lib/format.js";
   import Symbol from "./lib/Symbol.svelte";
   import { NORMALE, normalText, vergleich } from "./lib/zeitraum.svelte.js";
-  import { AUFRUF, AUSWERTUNGEN, DATEN_OPTIONEN, HANDY_NAV, HAUPT, IST_AUSWERTUNG, OPTIONEN, TITEL } from "./lib/ansichten.js";
+  import { AUFRUF, AUSWERTUNGEN, DATEN_OPTIONEN, DEUTSCHLAND, HANDY_NAV, HAUPT, IST_AUSWERTUNG, OPTIONEN, TITEL } from "./lib/ansichten.js";
   import Uebersicht from "./lib/Uebersicht.svelte";
   import Vorhersage from "./lib/Vorhersage.svelte";
   import Radar from "./lib/Radar.svelte";
+  import RekordeDE from "./lib/RekordeDE.svelte";
   import Auswertung from "./lib/Auswertung.svelte";
   import Jahresband from "./lib/Jahresband.svelte";
   import Monat from "./lib/Monat.svelte";
@@ -48,6 +49,7 @@
   let reihe = $state(null);
   let auswertung = $state(null); // Ergebnis der gerade gezeigten Auswertung
   let vorhersage = $state(null);
+  let rekordeDe = $state(null); // Rekorde Deutschland (für Seite und Laufband)
   let geschichteKurz = $state(null); // für die Übersicht
   let vmodell = $state("icon_d2");
   let thema = $state("system"); // system, hell, dunkel
@@ -82,8 +84,8 @@
     ["ab5", "ab 5"],
     ["nur10", "nur 10"],
   ];
-  const ANSICHTEN = HAUPT.map(([k, t, , s]) => [k, t, s]);
-  const ALLE = [...ANSICHTEN, ...AUSWERTUNGEN.map(([k, t, , s]) => [k, t, s])];
+  const ANSICHTEN = HAUPT.map(([k, t, kurz, s]) => [k, t, s, kurz]);
+  const ALLE = [...ANSICHTEN, ...AUSWERTUNGEN.map(([k, t, , s]) => [k, t, s]), ...DEUTSCHLAND.map(([k, t, , s]) => [k, t, s])];
 
   async function sicher(arbeit) {
     try {
@@ -133,10 +135,13 @@
       if (!m.fehler) monat = m;
       if (!g.fehler) geschichteKurz = g;
       vorhersageLaden();
+      if (!rekordeDe) rekordeLaden();
     } else if (ansicht === "vorhersage") {
       await vorhersageLaden();
     } else if (ansicht === "radar") {
       // lädt selbst (Radar.svelte)
+    } else if (ansicht === "rekorde_de") {
+      await rekordeLaden();
     } else if (ansicht === "band") {
       const r = await sicher(() => rufe("jahresband", id, jahr, qn, vergleich.von));
       if (!r.fehler) band = r;
@@ -177,6 +182,15 @@
     ansichtLaden();
   }
 
+  async function rekordeLaden(neu = false) {
+    const r = await rufe("rekorde_de", neu);
+    if (!r.fehler) rekordeDe = r;
+  }
+
+  async function stationOeffnen(id) {
+    if (await stationLaden(id)) setze("ansicht", "rekorde");
+  }
+
   async function vorhersageLaden(neu = false) {
     if (!station) return;
     const id = station.station.id;
@@ -199,7 +213,7 @@
   // PC: die Auswertungen klappen unter ihrem Knopf auf (das Band selbst
   // schneidet Aufklappendes ab, daher fest positioniert)
   let auswPos = $state({ x: 0, y: 0 });
-  const aktiveAuswertung = $derived(AUSWERTUNGEN.find((a) => a[0] === ansicht));
+  const aktiveAuswertung = $derived([...AUSWERTUNGEN, ...DEUTSCHLAND].find((a) => a[0] === ansicht));
   function auswertungenAuf(e) {
     const r = e.currentTarget.getBoundingClientRect();
     auswPos = { x: r.left, y: r.bottom + 4 };
@@ -410,7 +424,9 @@
     </div>
   {/if}
   {#if ansicht === "uebersicht" && station}
-    <Uebersicht name={station.station.name} {band} {monat} geschichte={geschichteKurz} {vorhersage} gehe={(a) => setze("ansicht", a)} />
+    <Uebersicht name={station.station.name} {band} {monat} geschichte={geschichteKurz} {vorhersage} rekorde={rekordeDe} gehe={(a) => setze("ansicht", a)} />
+  {:else if ansicht === "rekorde_de"}
+    <RekordeDE daten={rekordeDe} oeffnen={stationOeffnen} neu={() => rekordeLaden(true)} rechnen={async () => { await rufe("rekorde_de_rechnen"); rekordeLaden(); }} />
   {:else if ansicht === "radar" && station}
     <Radar station={station.station} {stationen} />
   {:else if ansicht === "vorhersage" && vorhersage}
@@ -467,7 +483,7 @@
         <button class:an={ansicht === k} onclick={() => setze("ansicht", k)}><span><Symbol name={h[3]} /></span>{h[2]}</button>
       {/each}
       <button class:an={mehr || weitere} onclick={() => (mehr = !mehr)}>
-        <span><Symbol name={weitere ? (HAUPT.find((a) => a[0] === ansicht)?.[3] ?? ansicht) : "mehr"} /></span>{weitere ? (AUSWERTUNGEN.find((a) => a[0] === ansicht)?.[4] ?? HAUPT.find((a) => a[0] === ansicht)?.[2]) : "Mehr"}
+        <span><Symbol name={weitere ? ([...HAUPT, ...DEUTSCHLAND].find((a) => a[0] === ansicht)?.[3] ?? ansicht) : "mehr"} /></span>{weitere ? ([...AUSWERTUNGEN, ...DEUTSCHLAND].find((a) => a[0] === ansicht)?.[4] ?? HAUPT.find((a) => a[0] === ansicht)?.[2]) : "Mehr"}
       </button>
     </nav>
     {#if mehr}
@@ -483,6 +499,12 @@
         <div class="lbl">Auswertungen</div>
         <div class="h-raster">
           {#each AUSWERTUNGEN as [k, t, , s]}
+            <button class:an={ansicht === k} onclick={() => setze("ansicht", k)}><span><Symbol name={s} /></span>{t}</button>
+          {/each}
+        </div>
+        <div class="lbl">Deutschland</div>
+        <div class="h-raster">
+          {#each DEUTSCHLAND as [k, t, , s]}
             <button class:an={ansicht === k} onclick={() => setze("ansicht", k)}><span><Symbol name={s} /></span>{t}</button>
           {/each}
         </div>
@@ -538,6 +560,10 @@
                 {#each AUSWERTUNGEN as [a, t2]}
                   <button class:an={ansicht === a} onclick={() => setze("ansicht", a)}>{t2}</button>
                 {/each}
+                <div class="eintrag-leise">Deutschland</div>
+                {#each DEUTSCHLAND as [a, t2]}
+                  <button class:an={ansicht === a} onclick={() => setze("ansicht", a)}>{t2}</button>
+                {/each}
                 <div class="eintrag-leise">Farben</div>
                 {#each THEMEN as [t, t2]}
                   <button class:an={thema === t} onclick={() => themaSetzen(t)}>{t2}</button>
@@ -578,15 +604,15 @@
       </div>
       <div class="b-gruppe">
         <div class="b-inhalt">
-          {#each ANSICHTEN as [k, t, s]}
-            <button class="b-knopf" class:an={ansicht === k} onclick={() => setze("ansicht", k)}><span><Symbol name={s} /></span>{t}</button>
+          {#each ANSICHTEN as [k, t, s, kurz]}
+            <button class="b-knopf" class:an={ansicht === k} onclick={() => setze("ansicht", k)} title={t}><span><Symbol name={s} /></span><i class="lang">{t}</i><i class="kurz">{kurz}</i></button>
           {/each}
         </div>
         <div class="b-titel">Ansicht</div>
       </div>
       <div class="b-gruppe">
         <div class="b-inhalt">
-          <button class="b-knopf" class:an={IST_AUSWERTUNG.has(ansicht)} onclick={auswertungenAuf} title="Auswertung wählen">
+          <button class="b-knopf" class:an={!!aktiveAuswertung} onclick={auswertungenAuf} title="Auswertung wählen">
             <span><Symbol name={aktiveAuswertung?.[3] ?? "rekorde"} /></span>{aktiveAuswertung?.[4] ?? "Auswertungen"} ▾
           </button>
         </div>
@@ -611,6 +637,10 @@
     {#if menue === "auswertungen"}
       <div class="aufklapp ausw-liste" style:left="{auswPos.x}px" style:top="{auswPos.y}px">
         {#each AUSWERTUNGEN as [k, t, , s]}
+          <button class:an={ansicht === k} onclick={() => setze("ansicht", k)}><Symbol name={s} /> {t}</button>
+        {/each}
+        <div class="eintrag-leise">Deutschland</div>
+        {#each DEUTSCHLAND as [k, t, , s]}
           <button class:an={ansicht === k} onclick={() => setze("ansicht", k)}><Symbol name={s} /> {t}</button>
         {/each}
       </div>
@@ -822,6 +852,21 @@
     color: var(--graphit-text);
     font-size: 12px;
     cursor: pointer;
+  }
+  .b-knopf i {
+    font-style: normal;
+  }
+  .b-knopf .kurz {
+    display: none;
+  }
+  /* bis 1.600 px: Ansichten mit Kurznamen */
+  @media (max-width: 1600px) {
+    .b-knopf .lang {
+      display: none;
+    }
+    .b-knopf .kurz {
+      display: inline;
+    }
   }
   /* schmalere Bildschirme: Station ohne Nummer und Höhe, Knöpfe enger */
   @media (max-width: 1400px) {

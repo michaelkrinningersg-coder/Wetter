@@ -24,7 +24,7 @@
 </script>
 
 <div class="uebersicht">
-  {#if rekorde?.eintraege?.length}
+  {#if rekorde?.stand}
     <div class="band-zeile"><Laufband {rekorde} gehe={() => gehe("rekorde_de")} /></div>
   {/if}
 
