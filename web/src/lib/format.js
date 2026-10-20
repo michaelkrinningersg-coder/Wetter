@@ -97,13 +97,7 @@ export function suchen(stationen, text, grenze = 60) {
   return treffer.slice(0, grenze).map((t) => t[1]);
 }
 
-// Wettersymbole der Vorhersage (gemeinsame Namen aus vorhersage.py)
-const SYMBOLE = {
-  klar: ["☀️", "🌙"], heiter: ["🌤️", "🌙"], wolkig: ["⛅", "☁️"], bedeckt: ["☁️", "☁️"],
-  nebel: ["🌫️", "🌫️"], niesel: ["🌦️", "🌧️"], regen: ["🌧️", "🌧️"], starkregen: ["🌧️", "🌧️"],
-  schauer: ["🌦️", "🌧️"], schneeregen: ["🌨️", "🌨️"], schnee: ["❄️", "❄️"], schneeschauer: ["🌨️", "🌨️"],
-  gewitter: ["⛈️", "⛈️"], glatteis: ["🧊", "🧊"], wind: ["💨", "💨"],
-};
+// Namen der Wettersymbole (gemeinsame Schlüssel aus vorhersage.py, gezeichnet in symbole.js)
 export const SYMBOL_TEXT = {
   klar: "klar", heiter: "heiter", wolkig: "wolkig", bedeckt: "bedeckt", nebel: "Nebel", niesel: "Niesel",
   regen: "Regen", starkregen: "Starkregen", schauer: "Schauer", schneeregen: "Schneeregen", schnee: "Schnee",
@@ -137,11 +131,4 @@ export function istTag(tag, iso, ort) {
   if (ort?.lat != null && ort?.lon != null && !Number.isNaN(ms)) return sonnenhoehe(ms + 1800000, ort.lat, ort.lon) > -0.833;
   const h = new Date(ms).getHours();
   return h >= 7 && h < 19;
-}
-
-/** Symbol für eine Stunde (Tag/Nacht siehe istTag). */
-export function wetterSymbol(symbol, tag, iso, ort) {
-  const s = SYMBOLE[symbol];
-  if (!s) return "·";
-  return istTag(tag, iso, ort) ? s[0] : s[1];
 }

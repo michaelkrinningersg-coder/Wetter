@@ -3,6 +3,7 @@
   // die Suche über alle Stationen der DWD-Liste. Gesucht wird hier in der
   // Seite - 1.386 Zeilen sind schneller durchsucht als ein Aufruf dauert.
   import { suchen, tausend } from "./format.js";
+  import Symbol from "./Symbol.svelte";
 
   let { stationen = [], favoriten = [], aktuell = null, wahl, vollbild = false } = $props();
 
@@ -84,7 +85,7 @@
             onmouseenter={() => (markiert = i)}
             onclick={() => nehmen(s)}
           >
-            <span class="name">{favoriten.includes(id) ? "★ " : ""}{name}</span>
+            <span class="name">{#if favoriten.includes(id)}<Symbol name="favorit_an" groesse="1em" /> {/if}{name}</span>
             <span class="num klein">{String(id).padStart(5, "0")}</span>
             <span class="klein">{land}</span>
             <span class="num klein rechts">{von}–{aktiv ? "heute" : bis?.slice(0, 4)}</span>
@@ -95,7 +96,7 @@
         {/each}
       </div>
       <div class="leise fuss">
-        {tausend(stationen.length)} Stationen · ★ Favorit · grau: keine aktuellen Daten mehr · mit Tagen: schon geladen
+        {tausend(stationen.length)} Stationen · <Symbol name="favorit_an" groesse="1em" /> Favorit · grau: keine aktuellen Daten mehr · mit Tagen: schon geladen
       </div>
     </div>
   {/if}

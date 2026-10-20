@@ -1,29 +1,30 @@
-// Alle Ansichten der App: Schlüssel, Titel, Kurzname, Symbol - für das
-// Menüband, das Menü "Ansicht" und die Navigation auf dem Handy.
+// Alle Ansichten der App: Schlüssel, Titel, Kurzname, Symbol (Name in
+// symbole.js) - für das Menüband, das Menü "Ansicht" und die Navigation
+// auf dem Handy.
 
 export const HAUPT = [
-  ["uebersicht", "Übersicht", "Start", "⌂"],
-  ["vorhersage", "Vorhersage", "Wetter", "⛅"],
-  ["band", "Jahresband", "Jahr", "▥"],
-  ["monat", "Monat", "Monat", "▦"],
-  ["rang", "Rangliste", "Rang", "≡"],
-  ["reihe", "Zeitreihe", "Reihe", "⌇"],
+  ["uebersicht", "Übersicht", "Start", "uebersicht"],
+  ["vorhersage", "Vorhersage", "Wetter", "vorhersage"],
+  ["band", "Jahresband", "Jahr", "band"],
+  ["monat", "Monat", "Monat", "monat"],
+  ["rang", "Rangliste", "Rang", "rang"],
+  ["reihe", "Zeitreihe", "Reihe", "reihe"],
 ];
 
 // Auswertungen über die ganze Reihe: Schlüssel, Titel, Name beim Aufruf,
-// Symbol, Kurzname fürs Menüband
+// Symbol (Name in symbole.js), Kurzname fürs Menüband
 export const AUSWERTUNGEN = [
-  ["rekorde", "Rekorde", "rekorde", "🏆", "Rekorde"],
-  ["geschichte", "Heute in der Geschichte", "geschichte", "📅", "Heute"],
-  ["kenntage", "Kenntage", "kenntage", "☀", "Kenntage"],
-  ["wellen", "Hitze- und Kältewellen", "wellen", "〰", "Wellen"],
-  ["streifen", "Klimastreifen", "streifen", "▮", "Streifen"],
-  ["niederschlag", "Niederschlag", "niederschlag", "☂", "Regen"],
-  ["sonne", "Sonnenschein", "sonne", "☼", "Sonne"],
-  ["schnee", "Schnee", "schnee", "❄", "Schnee"],
-  ["wind", "Wind und Sturm", "wind", "≋", "Wind"],
-  ["frost", "Frost", "frost", "✱", "Frost"],
-  ["verlauf", "Prognose im Verlauf", "prognose_verlauf", "↗", "Prognose"],
+  ["rekorde", "Rekorde", "rekorde", "rekorde", "Rekorde"],
+  ["geschichte", "Heute in der Geschichte", "geschichte", "geschichte", "Heute"],
+  ["kenntage", "Kenntage", "kenntage", "kenntage", "Kenntage"],
+  ["wellen", "Hitze- und Kältewellen", "wellen", "wellen", "Wellen"],
+  ["streifen", "Klimastreifen", "streifen", "streifen", "Streifen"],
+  ["niederschlag", "Niederschlag", "niederschlag", "niederschlag", "Regen"],
+  ["sonne", "Sonnenschein", "sonne", "sonne", "Sonne"],
+  ["schnee", "Schnee", "schnee", "schnee", "Schnee"],
+  ["wind", "Wind und Sturm", "wind", "wind", "Wind"],
+  ["frost", "Frost", "frost", "frost", "Frost"],
+  ["verlauf", "Prognose im Verlauf", "prognose_verlauf", "verlauf", "Prognose"],
 ];
 
 export const TITEL = Object.fromEntries([...HAUPT, ...AUSWERTUNGEN].map(([k, t]) => [k, t]));

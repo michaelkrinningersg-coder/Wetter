@@ -15,6 +15,7 @@
   import { onMount } from "svelte";
   import { aufDemHandy, rufe } from "./lib/api.js";
   import { MONATE, datum, tausend } from "./lib/format.js";
+  import Symbol from "./lib/Symbol.svelte";
   import { AUFRUF, AUSWERTUNGEN, DATEN_OPTIONEN, HANDY_NAV, HAUPT, IST_AUSWERTUNG, OPTIONEN, TITEL } from "./lib/ansichten.js";
   import Uebersicht from "./lib/Uebersicht.svelte";
   import Vorhersage from "./lib/Vorhersage.svelte";
@@ -422,7 +423,7 @@
     <header class="h-kopf">
       <img class="logo" src={symbol} alt="" />
       <Stationswahl bind:this={wahl} {stationen} {favoriten} aktuell={kopfStation} wahl={(id) => stationLaden(id)} vollbild />
-      <button class="h-knopf" onclick={aktualisieren} disabled={!!laedt || !station} title="Aktualisieren">⟳</button>
+      <button class="h-knopf" onclick={aktualisieren} disabled={!!laedt || !station} title="Aktualisieren"><Symbol name="aktualisieren" /></button>
     </header>
     <div class="h-steuer">{@render steuerung()}</div>
     <main class="h-inhalt">{@render inhalt()}</main>
@@ -430,10 +431,10 @@
     <nav class="h-nav">
       {#each HANDY_NAV as k}
         {@const h = HAUPT.find((x) => x[0] === k)}
-        <button class:an={ansicht === k} onclick={() => setze("ansicht", k)}><span>{h[3]}</span>{h[2]}</button>
+        <button class:an={ansicht === k} onclick={() => setze("ansicht", k)}><span><Symbol name={h[3]} /></span>{h[2]}</button>
       {/each}
       <button class:an={mehr || weitere} onclick={() => (mehr = !mehr)}>
-        <span>⋯</span>{weitere ? (AUSWERTUNGEN.find((a) => a[0] === ansicht)?.[4] ?? HAUPT.find((a) => a[0] === ansicht)?.[2]) : "Mehr"}
+        <span><Symbol name={weitere ? (HAUPT.find((a) => a[0] === ansicht)?.[3] ?? ansicht) : "mehr"} /></span>{weitere ? (AUSWERTUNGEN.find((a) => a[0] === ansicht)?.[4] ?? HAUPT.find((a) => a[0] === ansicht)?.[2]) : "Mehr"}
       </button>
     </nav>
     {#if mehr}
@@ -443,13 +444,13 @@
         <div class="lbl">Ansichten</div>
         <div class="h-raster">
           {#each HAUPT.filter(([k]) => !HANDY_NAV.includes(k)) as [k, t, , s]}
-            <button class:an={ansicht === k} onclick={() => setze("ansicht", k)}><span>{s}</span>{t}</button>
+            <button class:an={ansicht === k} onclick={() => setze("ansicht", k)}><span><Symbol name={s} /></span>{t}</button>
           {/each}
         </div>
         <div class="lbl">Auswertungen</div>
         <div class="h-raster">
           {#each AUSWERTUNGEN as [k, t, , s]}
-            <button class:an={ansicht === k} onclick={() => setze("ansicht", k)}><span>{s}</span>{t}</button>
+            <button class:an={ansicht === k} onclick={() => setze("ansicht", k)}><span><Symbol name={s} /></span>{t}</button>
           {/each}
         </div>
         <div class="lbl">Qualitätsniveau (QN)</div>
@@ -460,7 +461,7 @@
             <button class="chip" class:an={thema === t} onclick={() => themaSetzen(t)}>{t2}</button>
           {/each}
         </div>
-        <button class="knopf" onclick={favoritUmschalten} disabled={!station}>{istFavorit ? "★ Favorit entfernen" : "☆ Als Favorit merken"}</button>
+        <button class="knopf" onclick={favoritUmschalten} disabled={!station}><Symbol name={istFavorit ? "favorit_an" : "favorit"} /> {istFavorit ? "Favorit entfernen" : "Als Favorit merken"}</button>
         {#if station?.zeitraum?.bis}<div class="leise">Stand {datum(station.zeitraum.bis)} · {tausend(station.zeitraum.tage)} Tage</div>{/if}
         <div class="leise">{@render bilanzText()}</div>
         {#if hintergrund.meldung}<div class="leise">{hintergrund.meldung}</div>{/if}
@@ -492,7 +493,7 @@
                 <button onclick={favoritUmschalten} disabled={!station}>{istFavorit ? "Favorit entfernen" : "Als Favorit merken"}</button>
                 {#each favoriten as f}
                   {@const s = stationen.find((x) => x[0] === f)}
-                  {#if s}<button onclick={() => ((menue = ""), stationLaden(f))}>★ {s[1]}</button>{/if}
+                  {#if s}<button onclick={() => ((menue = ""), stationLaden(f))}><Symbol name="favorit_an" /> {s[1]}</button>{/if}
                 {/each}
               {:else if k === "ansicht"}
                 {#each ANSICHTEN as [a, t2]}
@@ -531,7 +532,7 @@
         <div class="b-inhalt">
           <Stationswahl bind:this={wahl} {stationen} {favoriten} aktuell={kopfStation} wahl={(id) => stationLaden(id)} />
           <button class="b-knopf" class:an={istFavorit} onclick={favoritUmschalten} disabled={!station} title="Favorit">
-            <span>{istFavorit ? "★" : "☆"}</span>Favorit
+            <span><Symbol name={istFavorit ? "favorit_an" : "favorit"} /></span>Favorit
           </button>
         </div>
         <div class="b-titel">Station</div>
@@ -539,7 +540,7 @@
       <div class="b-gruppe">
         <div class="b-inhalt">
           {#each ANSICHTEN as [k, t, s]}
-            <button class="b-knopf" class:an={ansicht === k} onclick={() => setze("ansicht", k)}><span>{s}</span>{t}</button>
+            <button class="b-knopf" class:an={ansicht === k} onclick={() => setze("ansicht", k)}><span><Symbol name={s} /></span>{t}</button>
           {/each}
         </div>
         <div class="b-titel">Ansicht</div>
@@ -547,7 +548,7 @@
       <div class="b-gruppe">
         <div class="b-inhalt b-raster">
           {#each AUSWERTUNGEN as [k, t, , s, kurz]}
-            <button class="b-klein" class:an={ansicht === k} onclick={() => setze("ansicht", k)} title={t}><span>{s}</span>{kurz}</button>
+            <button class="b-klein" class:an={ansicht === k} onclick={() => setze("ansicht", k)} title={t}><span><Symbol name={s} /></span>{kurz}</button>
           {/each}
         </div>
         <div class="b-titel">Auswertungen</div>
@@ -562,7 +563,7 @@
       </div>
       <div class="b-gruppe">
         <div class="b-inhalt">
-          <button class="b-knopf" onclick={aktualisieren} disabled={!!laedt || !station}><span>⟳</span>Aktualisieren</button>
+          <button class="b-knopf" onclick={aktualisieren} disabled={!!laedt || !station}><span><Symbol name="aktualisieren" /></span>Aktualisieren</button>
         </div>
         <div class="b-titel">Daten</div>
       </div>
@@ -603,6 +604,7 @@
     height: 100%;
   }
   .menueleiste {
+    --symbol-akzent: var(--graphit-akzent);
     display: flex;
     align-items: center;
     gap: 2px;
@@ -689,6 +691,7 @@
   }
 
   .band {
+    --symbol-akzent: var(--graphit-akzent);
     display: flex;
     align-items: stretch;
     padding: 6px 6px 4px;
@@ -730,7 +733,8 @@
     cursor: pointer;
   }
   .b-knopf span {
-    font-size: 18px;
+    display: flex;
+    font-size: 17px;
     line-height: 1.1;
   }
   .b-knopf:hover:not(:disabled) {
@@ -763,8 +767,9 @@
     cursor: pointer;
   }
   .b-klein span {
+    display: flex;
     width: 16px;
-    text-align: center;
+    justify-content: center;
   }
   .b-klein:hover {
     background: rgb(255 255 255 / 8%);
@@ -883,7 +888,8 @@
     border-radius: 8px;
     background: var(--akzent);
     color: #fff;
-    font-size: 20px;
+    font-size: 17px;
+    --symbol-akzent: #fff;
   }
   .h-knopf:disabled {
     opacity: 0.5;
@@ -920,6 +926,7 @@
     background: var(--akzent-zart);
   }
   .h-nav {
+    --symbol-akzent: var(--graphit-akzent);
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     background: var(--graphit);
@@ -936,7 +943,8 @@
     font-size: 11px;
   }
   .h-nav button span {
-    font-size: 19px;
+    display: flex;
+    font-size: 18px;
     line-height: 1.2;
   }
   .h-nav button.an {
@@ -987,7 +995,8 @@
     text-align: center;
   }
   .h-raster button span {
-    font-size: 18px;
+    display: flex;
+    font-size: 20px;
   }
   .h-raster button.an {
     border-color: var(--akzent);

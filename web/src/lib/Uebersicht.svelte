@@ -2,7 +2,8 @@
   // Die Startseite: das Wichtigste auf einen Blick, jede Kachel führt in
   // ihre Ansicht. Daten kommen aus Jahresband, Monat, Geschichte und
   // Vorhersage - dieselben Aufrufe wie in den Ansichten.
-  import { MONATE, SYMBOL_TEXT, datum, de, mitVorzeichen, tagText, wetterSymbol } from "./format.js";
+  import { MONATE, SYMBOL_TEXT, datum, de, istTag, mitVorzeichen, tagText } from "./format.js";
+  import Symbol from "./Symbol.svelte";
 
   let { name, band, monat, geschichte, vorhersage, modell, gehe } = $props();
 
@@ -44,7 +45,7 @@
     <div class="lbl">Jetzt · {name}</div>
     {#if a && !a.fehler}
       <div class="zeile">
-        <span class="symbol">{wetterSymbol(a.symbol, a.tag, a.zeit, vorhersage.station)}</span>
+        <span class="symbol"><Symbol wetter={a.symbol} tag={istTag(a.tag, a.zeit, vorhersage.station)} titel={SYMBOL_TEXT[a.symbol]} /></span>
         <span class="gross num">{de(a.temp)} °C</span>
       </div>
       <div class="text-2">{SYMBOL_TEXT[a.symbol] ?? ""} · Wind {de(a.wind, 0)} km/h · Feuchte {de(a.feuchte, 0)} %</div>
@@ -62,7 +63,7 @@
           {@const h = stunde(s[0])}
           <div class="stunde">
             <span class="leise num">{String(h).padStart(2, "0")}</span>
-            <span class="symbol klein">{wetterSymbol(s[6], s[7], s[0], vorhersage.station)}</span>
+            <span class="symbol klein"><Symbol wetter={s[6]} tag={istTag(s[7], s[0], vorhersage.station)} titel={SYMBOL_TEXT[s[6]]} /></span>
             <span class="num">{de(s[1], 0)}°</span>
           </div>
         {/each}
@@ -148,11 +149,12 @@
     gap: 10px;
   }
   .symbol {
-    font-size: 40px;
+    display: flex;
+    font-size: 34px;
     line-height: 1;
   }
   .symbol.klein {
-    font-size: 22px;
+    font-size: 18px;
   }
   .gross {
     font-size: 32px;

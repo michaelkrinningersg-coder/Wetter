@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { abweichungsfarbe, de, istTag, mitVorzeichen, schritte, sonnenhoehe, suchen, tagText, tausend, wetterSymbol } from "../src/lib/format.js";
+import { AUSWERTUNGEN, HANDY_NAV, HAUPT } from "../src/lib/ansichten.js";
+import { SYMBOLE, WETTER_ARTEN, wetterPfade } from "../src/lib/symbole.js";
+
+import { SYMBOL_TEXT, abweichungsfarbe, de, istTag, mitVorzeichen, schritte, sonnenhoehe, suchen, tagText, tausend } from "../src/lib/format.js";
 
 test("Zahlen mit Komma, ohne negative Null", () => {
   assert.equal(de(8.35, 2), "8,35");
@@ -61,7 +64,24 @@ test("Sonnenhöhe und Tag/Nacht in Göttingen", () => {
   assert.equal(istTag(null, "2026-10-20T16:00:00Z", ort), false);
   // die Angabe des Dienstes geht vor
   assert.equal(istTag(true, "2026-10-20T23:00:00Z", ort), true);
-  assert.equal(wetterSymbol("klar", null, "2026-10-20T22:00:00Z", ort), "🌙");
-  assert.equal(wetterSymbol("klar", null, "2026-10-20T11:00:00Z", ort), "☀️");
-  assert.equal(wetterSymbol("unbekannt", true, "2026-10-20T11:00:00Z", ort), "·");
+});
+
+test("Symbole: jede Ansicht, Auswertung und jedes Wetter hat eins", () => {
+  for (const [k, , , s] of [...HAUPT, ...AUSWERTUNGEN]) assert.ok(SYMBOLE[s]?.length, `Symbol für ${k}`);
+  for (const s of ["favorit", "favorit_an", "aktualisieren", "mehr"]) assert.ok(SYMBOLE[s]?.length, s);
+  // dieselben Wetter-Schlüssel wie vorhersage.py, Tag und Nacht
+  assert.deepEqual([...WETTER_ARTEN].sort(), Object.keys(SYMBOL_TEXT).sort());
+  for (const a of WETTER_ARTEN) for (const tag of [true, false]) {
+    const p = wetterPfade(a, tag);
+    assert.ok(p.length, a);
+    for (const [d, art] of p) {
+      assert.match(d, /^M[-\d. ,a-zA-Z]+$/, `${a}: ${d}`);
+      assert.ok(["", "a", "af", "aF", "d", "n", "w"].includes(art), `${a}: Art ${art}`);
+    }
+  }
+  assert.equal(wetterPfade("unbekannt"), null);
+});
+
+test("Handy-Leiste: vier verschiedene Hauptansichten", () => {
+  assert.deepEqual(HANDY_NAV, ["uebersicht", "vorhersage", "band", "monat"]);
 });

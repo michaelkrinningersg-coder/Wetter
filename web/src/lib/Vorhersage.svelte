@@ -2,7 +2,8 @@
   // Aktuelles Wetter und die Vorhersage je Modell als Tabelle, Stunde für
   // Stunde: Symbol, Temperatur, Bewölkung, Niederschlag, Wind und Böen.
   // Zeiten kommen in UTC und werden hier in Ortszeit (Europe/Berlin) gezeigt.
-  import { SYMBOL_TEXT, de, istTag, wetterSymbol } from "./format.js";
+  import { SYMBOL_TEXT, de, istTag } from "./format.js";
+  import Symbol from "./Symbol.svelte";
 
   let { v, modell, waehle } = $props();
 
@@ -41,7 +42,7 @@
       <div class="leise">{a.fehler}</div>
     {:else if a}
       <div class="jetzt">
-        <span class="gross-symbol">{wetterSymbol(a.symbol, a.tag, a.zeit, v.station)}</span>
+        <span class="gross-symbol"><Symbol wetter={a.symbol} tag={istTag(a.tag, a.zeit, v.station)} titel={SYMBOL_TEXT[a.symbol]} /></span>
         <span class="gross num">{de(a.temp)} °C</span>
         <div class="details">
           <div>{SYMBOL_TEXT[a.symbol] ?? ""} · Wolken {de(a.wolken, 0)} %</div>
@@ -87,7 +88,7 @@
               {@const h = stunde(zeit)}
               <tr class:nacht={!istTag(tag, zeit, v.station)}>
                 <td class="l num">{String(h).padStart(2, "0")}</td>
-                <td class="symbol" title={SYMBOL_TEXT[symbol] ?? ""}>{wetterSymbol(symbol, tag, zeit, v.station)}</td>
+                <td class="symbol"><Symbol wetter={symbol} tag={istTag(tag, zeit, v.station)} titel={SYMBOL_TEXT[symbol]} /></td>
                 <td class="num temp" style:color={temp >= 25 ? "var(--rot)" : temp < 0 ? "var(--blau)" : null}>{de(temp)}</td>
                 <td class="l"><span class="wolken" style:background={wolkenBalken(wolken)}>{de(wolken, 0)}</span></td>
                 <td class="num" class:nass={regen >= 0.1}>{regen ? de(regen) : "–"}</td>
@@ -137,7 +138,8 @@
     gap: 4px 12px;
   }
   .gross-symbol {
-    font-size: 44px;
+    display: flex;
+    font-size: 36px;
     line-height: 1;
   }
   .gross {
