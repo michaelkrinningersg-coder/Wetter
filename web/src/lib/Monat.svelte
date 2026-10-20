@@ -3,7 +3,7 @@
   // Tagesmittel ist gefärbt nach der Abweichung vom Normal (wie im
   // Jahresband). Unten: der Monat (Mittel bzw. Summe), dasselbe Stück des
   // Monats im Normal 1991-2020 und die Abweichung.
-  import { MONATE, abweichungsfarbe, de, mitVorzeichen } from "./format.js";
+  import { MONATE, abweichungsfarbeThema, de, mitVorzeichen } from "./format.js";
 
   let { monat } = $props();
 
@@ -68,7 +68,7 @@
               {#if s === "tmk"}
                 <td
                   class="num"
-                  style:background={z.abw != null ? abweichungsfarbe(z.abw) : null}
+                  style:background={z.abw != null ? abweichungsfarbeThema(z.abw) : null}
                   style:color={textfarbe(z.abw)}
                   title={z.abw != null ? `${mitVorzeichen(z.abw)} K gegen normal` : ""}
                 >
@@ -182,7 +182,7 @@
   td {
     text-align: right;
     padding: 4px 6px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--rand-zart);
     white-space: nowrap;
   }
   .l {

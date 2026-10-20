@@ -25,6 +25,14 @@
   --blau-hell: #bfdbfe;
   --amber: #b45309;
   --gruppe: #f1f5f9;
+  --rot-dunkel: #7f1d1d;
+  --gitter: #eef2f7;
+  --rand-zart: #f1f5f9;
+  --band-innen: #e2e8f0;
+  --band-aussen: #cbd5e1;
+  --abw-kalt: rgb(8 48 107);
+  --abw-mitte: rgb(247 247 247);
+  --abw-warm: rgb(103 0 13);
   --schatten: 0 1px 2px rgb(15 23 42 / 6%), 0 4px 16px rgb(15 23 42 / 6%);
   --schatten-hoch: 0 10px 40px rgb(15 23 42 / 18%), 0 2px 6px rgb(15 23 42 / 8%);
   --radius: 10px;
@@ -32,6 +40,77 @@
     "Inter", "Helvetica Neue", Arial, sans-serif;
   --mono: "Cascadia Mono", "Consolas", ui-monospace, monospace;
   color-scheme: light;
+}
+
+/* Dunkel: folgt dem System, außer "hell" ist gewählt; "dunkel" erzwingt es.
+   Die Abweichungsfarben bekommen im Dunklen einen grauen Mittelpunkt
+   (--abw-*); die Klimastreifen bleiben in den klassischen Farben. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-thema="hell"]) {
+    --bg: #121418;
+    --flaeche: #1b1e24;
+    --flaeche-2: #22262d;
+    --rand: #2e333b;
+    --rand-stark: #4a515c;
+    --text: #e8eaee;
+    --text-2: #b4bac4;
+    --text-3: #808896;
+    --akzent: #f97316;
+    --akzent-hell: #4a2814;
+    --akzent-zart: #2a1e16;
+    --graphit: #0c0e11;
+    --graphit-2: #181b20;
+    --rot: #f87171;
+    --rot-hell: #4c1d1d;
+    --blau: #60a5fa;
+    --blau-hell: #1e3a5f;
+    --amber: #f59e0b;
+    --gruppe: #22262d;
+    --rot-dunkel: #fecaca;
+    --gitter: #262a31;
+    --rand-zart: #24282f;
+    --band-innen: #3a404a;
+    --band-aussen: #2c3139;
+    --abw-kalt: #3b82f6;
+    --abw-mitte: #5b616c;
+    --abw-warm: #ef4444;
+    --schatten: 0 1px 2px rgb(0 0 0 / 30%), 0 4px 16px rgb(0 0 0 / 25%);
+    --schatten-hoch: 0 10px 40px rgb(0 0 0 / 50%), 0 2px 6px rgb(0 0 0 / 30%);
+    color-scheme: dark;
+  }
+}
+
+:root[data-thema="dunkel"] {
+  --bg: #121418;
+  --flaeche: #1b1e24;
+  --flaeche-2: #22262d;
+  --rand: #2e333b;
+  --rand-stark: #4a515c;
+  --text: #e8eaee;
+  --text-2: #b4bac4;
+  --text-3: #808896;
+  --akzent: #f97316;
+  --akzent-hell: #4a2814;
+  --akzent-zart: #2a1e16;
+  --graphit: #0c0e11;
+  --graphit-2: #181b20;
+  --rot: #f87171;
+  --rot-hell: #4c1d1d;
+  --blau: #60a5fa;
+  --blau-hell: #1e3a5f;
+  --amber: #f59e0b;
+  --gruppe: #22262d;
+  --rot-dunkel: #fecaca;
+  --gitter: #262a31;
+  --rand-zart: #24282f;
+  --band-innen: #3a404a;
+  --band-aussen: #2c3139;
+  --abw-kalt: #3b82f6;
+  --abw-mitte: #5b616c;
+  --abw-warm: #ef4444;
+  --schatten: 0 1px 2px rgb(0 0 0 / 30%), 0 4px 16px rgb(0 0 0 / 25%);
+  --schatten-hoch: 0 10px 40px rgb(0 0 0 / 50%), 0 2px 6px rgb(0 0 0 / 30%);
+  color-scheme: dark;
 }
 
 * {

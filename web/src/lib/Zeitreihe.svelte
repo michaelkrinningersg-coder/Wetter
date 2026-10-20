@@ -15,7 +15,9 @@
   let zeiger = $state(null);
   let plot = null;
 
-  const FARBE = { m: "#ea580c", x: "#dc2626", n: "#1d4ed8" };
+  // Farben des Themas für die Zeichenfläche (uPlot zeichnet ohne CSS)
+  const farbe = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const FARBE = { m: "--akzent", x: "--rot", n: "--blau" };
   const GROESSE = { m: "Mittel", x: "Höchstwert", n: "Tiefstwert" };
   const AUFLOESUNG = { jahr: "Jahresmittel", monat: "Monatsmittel", tag: "Tageswerte" };
 
@@ -46,16 +48,16 @@
   }
 
   function serien() {
-    const farbe = FARBE[groesse];
+    const linie = farbe(FARBE[groesse]);
     const s = [{}];
     if (aufloesung === "jahr") {
       s.push({ stroke: "#9aa1ad", width: 0, points: { show: true, size: 5, fill: "#b8bec8", stroke: "#b8bec8" } });
-      s.push({ stroke: farbe, width: 2.2, points: { show: false } });
+      s.push({ stroke: linie, width: 2.2, points: { show: false } });
     } else if (aufloesung === "monat") {
-      s.push({ stroke: farbe, width: 1, points: { show: false } });
+      s.push({ stroke: linie, width: 1, points: { show: false } });
     } else {
-      s.push({ stroke: farbe, width: 1, points: { show: false } });
-      s.push({ stroke: "#dc2626", width: 0, points: { show: true, size: 8, fill: "#fff", stroke: "#dc2626", width: 2 } });
+      s.push({ stroke: linie, width: 1, points: { show: false } });
+      s.push({ stroke: "#dc2626", width: 0, points: { show: true, size: 8, fill: farbe("--flaeche"), stroke: "#dc2626", width: 2 } });
     }
     return s;
   }
@@ -99,11 +101,11 @@
       cursor: { y: false, points: { show: false }, drag: { x: true, y: false } },
       scales: { x: { time: true } },
       axes: [
-        { stroke: "#94a3b8", grid: { stroke: "#eef2f7" }, ticks: { stroke: "#e2e8f0" }, font: "11px Cascadia Mono, Consolas, monospace" },
+        { stroke: farbe("--text-3"), grid: { stroke: farbe("--gitter") }, ticks: { stroke: farbe("--rand") }, font: "11px Cascadia Mono, Consolas, monospace" },
         {
-          stroke: "#94a3b8",
-          grid: { stroke: "#eef2f7" },
-          ticks: { stroke: "#e2e8f0" },
+          stroke: farbe("--text-3"),
+          grid: { stroke: farbe("--gitter") },
+          ticks: { stroke: farbe("--rand") },
           font: "11px Cascadia Mono, Consolas, monospace",
           values: (u, v) => v.map((x) => de(x, Number.isInteger(x) ? 0 : 1)),
           size: 44,
@@ -260,7 +262,7 @@
       onpointercancel={() => (ziehen = false)}
     >
       <svg width={uebersichtBreite} height={UH}>
-        <path d={uebersicht.pfad} stroke="#cbd5e1" stroke-width="1.2" />
+        <path d={uebersicht.pfad} style:stroke="var(--rand-stark)" stroke-width="1.2" />
         {#if ausschnitt}
           {@const x0 = Math.max(1, xu(ausschnitt[0]))}
           {@const x1 = Math.min(uebersichtBreite - 1, xu(ausschnitt[1]))}

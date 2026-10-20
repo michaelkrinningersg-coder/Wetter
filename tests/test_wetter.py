@@ -24,9 +24,10 @@ def api(tmp_path):
 def test_start_ohne_netz(api):
     r = api.start()
     assert [s[1] for s in r["stationen"]] == ["Brocken", "Göttingen"]
-    assert r["einstellungen"] == {"station": 1691, "qn": "alle", "ansicht": "band",
-                                  "rang_modus": "heute", "rang_prognose": True,
-                                  "favoriten": [], "wellen": {}}
+    assert r["einstellungen"] == {"station": 1691, "qn": "alle", "ansicht": "uebersicht",
+                                  "vmodell": "icon_d2", "rang_modus": "heute",
+                                  "rang_prognose": True, "favoriten": [], "wellen": {},
+                                  "thema": "system"}
 
 
 def test_einstellungen_bleiben(api):

@@ -2,6 +2,8 @@
 // Menüband, das Menü "Ansicht" und die Navigation auf dem Handy.
 
 export const HAUPT = [
+  ["uebersicht", "Übersicht", "Start", "⌂"],
+  ["vorhersage", "Vorhersage", "Wetter", "⛅"],
   ["band", "Jahresband", "Jahr", "▥"],
   ["monat", "Monat", "Monat", "▦"],
   ["rang", "Rangliste", "Rang", "≡"],
@@ -43,3 +45,6 @@ export const DATEN_OPTIONEN = {
   niederschlag: ["jahr"],
   sonne: ["jahr"],
 };
+
+// Handy: diese vier stehen unten, alles andere unter "Mehr"
+export const HANDY_NAV = ["uebersicht", "vorhersage", "band", "monat"];

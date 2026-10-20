@@ -15,7 +15,9 @@
   import { onMount } from "svelte";
   import { aufDemHandy, rufe } from "./lib/api.js";
   import { MONATE, datum, tausend } from "./lib/format.js";
-  import { AUFRUF, AUSWERTUNGEN, DATEN_OPTIONEN, HAUPT, IST_AUSWERTUNG, OPTIONEN, TITEL } from "./lib/ansichten.js";
+  import { AUFRUF, AUSWERTUNGEN, DATEN_OPTIONEN, HANDY_NAV, HAUPT, IST_AUSWERTUNG, OPTIONEN, TITEL } from "./lib/ansichten.js";
+  import Uebersicht from "./lib/Uebersicht.svelte";
+  import Vorhersage from "./lib/Vorhersage.svelte";
   import Auswertung from "./lib/Auswertung.svelte";
   import Jahresband from "./lib/Jahresband.svelte";
   import Monat from "./lib/Monat.svelte";
@@ -42,6 +44,23 @@
   let liste = $state(null);
   let reihe = $state(null);
   let auswertung = $state(null); // Ergebnis der gerade gezeigten Auswertung
+  let vorhersage = $state(null);
+  let geschichteKurz = $state(null); // für die Übersicht
+  let vmodell = $state("icon_d2");
+  let thema = $state("system"); // system, hell, dunkel
+  const THEMEN = [
+    ["system", "Wie das System"],
+    ["hell", "Hell"],
+    ["dunkel", "Dunkel"],
+  ];
+  $effect(() => {
+    if (thema === "system") delete document.documentElement.dataset.thema;
+    else document.documentElement.dataset.thema = thema;
+  });
+  function themaSetzen(t) {
+    thema = t;
+    rufe("einstellung", "thema", t);
+  }
   let optionen = $state(structuredClone(OPTIONEN));
   let laedt = $state("");
   let fehler = $state("");
@@ -84,6 +103,8 @@
     station = r;
     jahr = null;
     monatWahl = null;
+    vorhersage = null;
+    geschichteKurz = null;
     rufe("einstellung", "station", id);
     if (r.geladen) await listeNeu();
     await ansichtLaden();
@@ -98,7 +119,20 @@
   async function ansichtLaden() {
     if (!station) return;
     const id = station.station.id;
-    if (ansicht === "band") {
+    if (ansicht === "uebersicht") {
+      // alles gleichzeitig; die Vorhersage braucht das Netz und kommt zuletzt
+      const [b, m, g] = await Promise.all([
+        rufe("jahresband", id, null, qn),
+        rufe("monat", id, null, null, qn),
+        rufe("auswertung", id, "geschichte", qn, {}),
+      ]);
+      if (!b.fehler) band = b;
+      if (!m.fehler) monat = m;
+      if (!g.fehler) geschichteKurz = g;
+      vorhersageLaden();
+    } else if (ansicht === "vorhersage") {
+      await vorhersageLaden();
+    } else if (ansicht === "band") {
       const r = await sicher(() => rufe("jahresband", id, jahr, qn));
       if (!r.fehler) band = r;
     } else if (ansicht === "monat") {
@@ -137,6 +171,18 @@
     ansichtLaden();
   }
 
+  async function vorhersageLaden(neu = false) {
+    if (!station) return;
+    const id = station.station.id;
+    const r = await rufe("vorhersage", id, neu);
+    if (station?.station.id !== id) return;
+    if (r.fehler) {
+      if (ansicht === "vorhersage") fehler = r.fehler;
+      return;
+    }
+    vorhersage = r;
+  }
+
   /** Option der gerade gezeigten Auswertung; rechnet neu, wenn sie die Zahlen ändert. */
   function setzeOption(name, wert) {
     optionen[ansicht][name] = wert;
@@ -160,6 +206,7 @@
     laedt = "";
     if (!r.fehler) {
       station = { ...station, zeitraum: r.zeitraum };
+      if (ansicht === "uebersicht" || ansicht === "vorhersage") await vorhersageLaden(true);
       await ansichtLaden();
     }
   }
@@ -192,6 +239,8 @@
     favoriten = Array.isArray(r.einstellungen.favoriten) ? r.einstellungen.favoriten : [];
     ansicht = ALLE.some(([k]) => k === r.einstellungen.ansicht) ? r.einstellungen.ansicht : "band";
     if (r.einstellungen.wellen) optionen.wellen = { ...optionen.wellen, ...r.einstellungen.wellen };
+    if (r.einstellungen.vmodell) vmodell = r.einstellungen.vmodell;
+    if (r.einstellungen.thema) thema = r.einstellungen.thema;
     rangModus = r.einstellungen.rang_modus === "jahr" ? "jahr" : "heute";
     rangPrognose = r.einstellungen.rang_prognose !== false;
     qn = "alle"; // so entschieden: immer mit allen Qualitätsstufen beginnen
@@ -203,6 +252,7 @@
   const kopfStation = $derived(
     station ? { id: station.station.id, name: station.station.name, hoehe: station.station.hoehe } : null,
   );
+  const weitere = $derived(!HANDY_NAV.includes(ansicht));
   const istFavorit = $derived(!!station && favoriten.includes(station.station.id));
 </script>
 
@@ -327,7 +377,11 @@
       <button class="knopf" onclick={() => (fehler = "")}>OK</button>
     </div>
   {/if}
-  {#if ansicht === "band" && band && !band.leer}
+  {#if ansicht === "uebersicht" && station}
+    <Uebersicht name={station.station.name} {band} {monat} geschichte={geschichteKurz} {vorhersage} modell={vmodell} gehe={(a) => setze("ansicht", a)} />
+  {:else if ansicht === "vorhersage" && vorhersage}
+    <Vorhersage v={vorhersage} modell={vmodell} waehle={(m) => ((vmodell = m), rufe("einstellung", "vmodell", m))} />
+  {:else if ansicht === "band" && band && !band.leer}
     <Jahresband {band} name={station.station.name} />
   {:else if ansicht === "monat" && monat && !monat.leer}
     <Monat {monat} />
@@ -374,17 +428,24 @@
     <main class="h-inhalt">{@render inhalt()}</main>
     {#if hintergrund.laeuft}<div class="h-laeuft">{hintergrund.laeuft}</div>{/if}
     <nav class="h-nav">
-      {#each ANSICHTEN as [k, t, s]}
-        <button class:an={ansicht === k} onclick={() => setze("ansicht", k)}><span>{s}</span>{t}</button>
+      {#each HANDY_NAV as k}
+        {@const h = HAUPT.find((x) => x[0] === k)}
+        <button class:an={ansicht === k} onclick={() => setze("ansicht", k)}><span>{h[3]}</span>{h[2]}</button>
       {/each}
-      <button class:an={mehr || IST_AUSWERTUNG.has(ansicht)} onclick={() => (mehr = !mehr)}>
-        <span>⋯</span>{IST_AUSWERTUNG.has(ansicht) ? AUSWERTUNGEN.find((a) => a[0] === ansicht)[4] : "Mehr"}
+      <button class:an={mehr || weitere} onclick={() => (mehr = !mehr)}>
+        <span>⋯</span>{weitere ? (AUSWERTUNGEN.find((a) => a[0] === ansicht)?.[4] ?? HAUPT.find((a) => a[0] === ansicht)?.[2]) : "Mehr"}
       </button>
     </nav>
     {#if mehr}
       <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
       <div class="h-schleier" onclick={() => (mehr = false)}></div>
       <div class="h-blatt">
+        <div class="lbl">Ansichten</div>
+        <div class="h-raster">
+          {#each HAUPT.filter(([k]) => !HANDY_NAV.includes(k)) as [k, t, , s]}
+            <button class:an={ansicht === k} onclick={() => setze("ansicht", k)}><span>{s}</span>{t}</button>
+          {/each}
+        </div>
         <div class="lbl">Auswertungen</div>
         <div class="h-raster">
           {#each AUSWERTUNGEN as [k, t, , s]}
@@ -393,6 +454,12 @@
         </div>
         <div class="lbl">Qualitätsniveau (QN)</div>
         {@render qnSchalter()}
+        <div class="lbl">Farben</div>
+        <div class="gruppe">
+          {#each THEMEN as [t, t2]}
+            <button class="chip" class:an={thema === t} onclick={() => themaSetzen(t)}>{t2}</button>
+          {/each}
+        </div>
         <button class="knopf" onclick={favoritUmschalten} disabled={!station}>{istFavorit ? "★ Favorit entfernen" : "☆ Als Favorit merken"}</button>
         {#if station?.zeitraum?.bis}<div class="leise">Stand {datum(station.zeitraum.bis)} · {tausend(station.zeitraum.tage)} Tage</div>{/if}
         <div class="leise">{@render bilanzText()}</div>
@@ -434,6 +501,10 @@
                 <div class="eintrag-leise">Auswertungen</div>
                 {#each AUSWERTUNGEN as [a, t2]}
                   <button class:an={ansicht === a} onclick={() => setze("ansicht", a)}>{t2}</button>
+                {/each}
+                <div class="eintrag-leise">Farben</div>
+                {#each THEMEN as [t, t2]}
+                  <button class:an={thema === t} onclick={() => themaSetzen(t)}>{t2}</button>
                 {/each}
               {:else if k === "daten"}
                 <button onclick={aktualisieren} disabled={!!laedt || !station}>Aktualisieren</button>
@@ -965,12 +1036,12 @@
   }
   .meldung.fehler {
     background: var(--rot-hell);
-    color: #7f1d1d;
+    color: var(--rot-dunkel);
   }
   .schleier {
     position: fixed;
     inset: 0;
-    background: rgb(238 240 243 / 70%);
+    background: color-mix(in srgb, var(--bg) 70%, transparent);
     display: grid;
     place-items: center;
     z-index: 40;

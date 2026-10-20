@@ -54,6 +54,17 @@ export function abweichungsfarbe(a, spanne = 5) {
   return `rgb(${misch(r0)},${misch(g0)},${misch(b0)})`;
 }
 
+/**
+ * Wie abweichungsfarbe, aber mit den Farben des Themas (--abw-kalt,
+ * --abw-mitte, --abw-warm): im hellen Thema dieselben Töne, im dunklen
+ * ein grauer Mittelpunkt statt Weiß. Für Tagesbalken und Monatstabelle.
+ */
+export function abweichungsfarbeThema(a, spanne = 5) {
+  const t = Math.max(-1, Math.min(1, a / spanne));
+  const anteil = Math.round(Math.abs(t) * 1000) / 10;
+  return `color-mix(in srgb, var(${t < 0 ? "--abw-kalt" : "--abw-warm"}) ${anteil}%, var(--abw-mitte))`;
+}
+
 /** Hübsche Achsenschritte zwischen min und max */
 export function schritte(min, max, ziel = 6) {
   const roh = (max - min) / ziel;
@@ -84,4 +95,53 @@ export function suchen(stationen, text, grenze = 60) {
   }
   treffer.sort((a, b) => a[0] - b[0] || a[1][1].localeCompare(b[1][1], "de"));
   return treffer.slice(0, grenze).map((t) => t[1]);
+}
+
+// Wettersymbole der Vorhersage (gemeinsame Namen aus vorhersage.py)
+const SYMBOLE = {
+  klar: ["☀️", "🌙"], heiter: ["🌤️", "🌙"], wolkig: ["⛅", "☁️"], bedeckt: ["☁️", "☁️"],
+  nebel: ["🌫️", "🌫️"], niesel: ["🌦️", "🌧️"], regen: ["🌧️", "🌧️"], starkregen: ["🌧️", "🌧️"],
+  schauer: ["🌦️", "🌧️"], schneeregen: ["🌨️", "🌨️"], schnee: ["❄️", "❄️"], schneeschauer: ["🌨️", "🌨️"],
+  gewitter: ["⛈️", "⛈️"], glatteis: ["🧊", "🧊"], wind: ["💨", "💨"],
+};
+export const SYMBOL_TEXT = {
+  klar: "klar", heiter: "heiter", wolkig: "wolkig", bedeckt: "bedeckt", nebel: "Nebel", niesel: "Niesel",
+  regen: "Regen", starkregen: "Starkregen", schauer: "Schauer", schneeregen: "Schneeregen", schnee: "Schnee",
+  schneeschauer: "Schneeschauer", gewitter: "Gewitter", glatteis: "Glatteis", wind: "windig",
+};
+
+/**
+ * Sonnenhöhe in Grad zu einer Zeit an einem Ort (Näherung des US Naval
+ * Observatory, auf gut 0,1° genau - reicht für Tag oder Nacht).
+ */
+export function sonnenhoehe(ms, lat, lon) {
+  const rad = Math.PI / 180;
+  const d = ms / 86400000 - 10957.5; // Tage seit 1.1.2000 12 Uhr UTC
+  const g = (357.529 + 0.98560028 * d) * rad;
+  const l = (280.459 + 0.98564736 * d + 1.915 * Math.sin(g) + 0.02 * Math.sin(2 * g)) * rad;
+  const e = (23.439 - 0.00000036 * d) * rad;
+  const ra = Math.atan2(Math.cos(e) * Math.sin(l), Math.cos(l));
+  const dek = Math.asin(Math.sin(e) * Math.sin(l));
+  const h = (280.46061837 + 360.98564736629 * d + lon) * rad - ra;
+  return Math.asin(Math.sin(lat * rad) * Math.sin(dek) + Math.cos(lat * rad) * Math.cos(dek) * Math.cos(h)) / rad;
+}
+
+/**
+ * Ist es in der Stunde ab `iso` Tag? Liefert der Dienst selbst Tag/Nacht,
+ * gilt das; sonst entscheidet die Sonnenhöhe zur Mitte der Stunde
+ * (über -0,833°, also Sonnenrand über dem Horizont), ohne Ort 7-19 Uhr.
+ */
+export function istTag(tag, iso, ort) {
+  if (tag != null) return tag;
+  const ms = Date.parse(iso);
+  if (ort?.lat != null && ort?.lon != null && !Number.isNaN(ms)) return sonnenhoehe(ms + 1800000, ort.lat, ort.lon) > -0.833;
+  const h = new Date(ms).getHours();
+  return h >= 7 && h < 19;
+}
+
+/** Symbol für eine Stunde (Tag/Nacht siehe istTag). */
+export function wetterSymbol(symbol, tag, iso, ort) {
+  const s = SYMBOLE[symbol];
+  if (!s) return "·";
+  return istTag(tag, iso, ort) ? s[0] : s[1];
 }

@@ -12,6 +12,7 @@
 
 import { produktAusZip, produktLesen, stationenLesen, verzeichnisLesen, zusammenfuehren } from "./lesen.js";
 import { auswertung } from "./auswertung.js";
+import { abrufen as vorhersageAbrufen } from "./vorhersage.js";
 import * as R from "./rechnen.js";
 
 const BASIS = "https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/daily/kl/";
@@ -76,6 +77,22 @@ async function holen(pfad, binaer = true) {
     throw new Error(`${url}: ${e?.message ?? e}`);
   }
 }
+/** JSON von einem Wetterdienst (UTF-8) - nativ auf dem Handy, sonst fetch. */
+async function holenJson(url) {
+  const cap = globalThis.Capacitor;
+  if (cap?.isNativePlatform?.()) {
+    const { CapacitorHttp } = await import("@capacitor/core");
+    const a = await CapacitorHttp.get({
+      url, responseType: "arraybuffer", connectTimeout: 20000, readTimeout: 30000,
+      headers: { "User-Agent": "Wetter-App (github.com/michaelkrinningersg-coder/Wetter)" },
+    });
+    const bytes = typeof a.data === "string" ? Uint8Array.from(atob(a.data), (c) => c.charCodeAt(0)) : new Uint8Array(a.data);
+    return JSON.parse(new TextDecoder("utf-8").decode(bytes));
+  }
+  const r = await fetch(url);
+  return r.json();
+}
+
 async function mitgeliefert(name) {
   const r = await fetch(`start/${name}`);
   if (!r.ok) throw new Error(`start/${name} fehlt`);
@@ -84,6 +101,7 @@ async function mitgeliefert(name) {
 
 // ---------------------------------------------------------------- Zustand
 const reihen = new Map(); // id -> R.reihe(...)
+const vorhersagen = new Map(); // id -> [Zeit, Antwort]
 const zustand = { laeuft: "", meldung: "", stand: 0 };
 let stationsliste = null;
 let laufend = Promise.resolve();
@@ -263,7 +281,9 @@ export const lokal = {
       const einstellungen = {
         station: await meta("station", GOETTINGEN),
         qn: await meta("qn", "alle"),
-        ansicht: await meta("ansicht", "band"),
+        ansicht: await meta("ansicht", "uebersicht"),
+        vmodell: await meta("vmodell", "icon_d2"),
+        thema: await meta("thema", "system"),
         rang_modus: await meta("rang_modus", "heute"),
         rang_prognose: (await meta("rang_prognose", true)) !== false,
         favoriten: (await meta("favoriten", [])) ?? [],
@@ -316,6 +336,17 @@ export const lokal = {
     ),
   monat: (id, jahr = null, monat = null, qn = "alle") => sicher(() => mitReihe(id, (r) => R.monat(r, jahr, monat, qn))),
   rangliste: (id, modus = "heute", prognose = true, qn = "alle") => sicher(() => mitReihe(id, (r) => R.rangliste(r, modus, !!prognose, qn, heute()))),
+  vorhersage: (id, neu = false) =>
+    sicher(async () => {
+      id = Number(id);
+      const gemerkt = vorhersagen.get(id);
+      if (gemerkt && !neu && Date.now() - gemerkt[0] < 20 * 60 * 1000) return gemerkt[1];
+      const s = (await liste()).find((x) => x.id === id);
+      if (!s) throw new Error(`Station ${id} steht nicht in der Liste`);
+      const antwort = { station: stationKopf(s), abgerufen: Date.now() / 1000, ...(await vorhersageAbrufen(s.lat, s.lon, holenJson)) };
+      vorhersagen.set(id, [Date.now(), antwort]);
+      return antwort;
+    }),
   auswertung: (id, art, qn = "alle", optionen = {}) => sicher(() => mitReihe(id, (r) => auswertung(r, art, qn, optionen, heute()))),
   zeitreihe: (id, groesse = "m", aufloesung = "jahr", qn = "alle") => sicher(() => mitReihe(id, (r) => R.zeitreihe(r, groesse, aufloesung, qn))),
 };

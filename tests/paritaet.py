@@ -179,5 +179,52 @@ def test_erwartungswerte_aktuell():
         "daten.py rechnet anders - python tests/paritaet.py neu laufen lassen"
 
 
+
+
+# ------------------------------------------------- Vorhersage-Antworten
+VORHERSAGE = os.path.join(os.path.dirname(HIER), "web", "test", "vorhersage")
+
+
+def vorhersage_rechnen() -> dict:
+    """Abgelegte Antworten der Dienste -> gemeinsames Format (vorhersage.py)."""
+    import vorhersage
+    aus = {}
+    for name in sorted(os.listdir(VORHERSAGE)):
+        if not name.endswith(".json") or name == "erwartet.json":
+            continue
+        with open(os.path.join(VORHERSAGE, name), encoding="utf-8") as datei:
+            antwort = json.load(datei)
+        if name.startswith("om_"):
+            aus[name] = vorhersage.open_meteo(antwort)
+        elif name.startswith("metno"):
+            aus[name] = vorhersage.met_norway(antwort)
+        else:
+            aus[name] = vorhersage.bright_sky(antwort)
+    # jeder Code einmal durch die Symbol-Tabellen
+    aus["symbole_wmo"] = {c: vorhersage.symbol_wmo(c) for c in
+                          (0, 1, 2, 3, 45, 48, 51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 71, 73,
+                           75, 77, 80, 81, 82, 85, 86, 95, 96, 99, 4)}
+    aus["symbole_metno"] = {c: list(vorhersage.symbol_metno(c)) for c in (
+        "clearsky_day", "clearsky_night", "fair_polartwilight", "partlycloudy_night", "cloudy", "fog",
+        "lightrain", "rain", "heavyrain", "lightrainshowers_day", "heavyrainshowersandthunder_night",
+        "sleet", "lightsleetshowers_day", "snow", "heavysnowshowers_night", "lightssnowshowersandthunder_day")}
+    aus["symbole_brightsky"] = {c: list(vorhersage.symbol_brightsky(c)) for c in (
+        "clear-day", "clear-night", "partly-cloudy-day", "partly-cloudy-night", "cloudy", "fog",
+        "wind", "rain", "sleet", "snow", "hail", "thunderstorm")}
+    return aus
+
+
+def vorhersage_schreiben():
+    with open(os.path.join(VORHERSAGE, "erwartet.json"), "w", encoding="utf-8") as datei:
+        json.dump(vorhersage_rechnen(), datei, ensure_ascii=False)
+
+
+def test_vorhersage_erwartung_aktuell():
+    with open(os.path.join(VORHERSAGE, "erwartet.json"), encoding="utf-8") as datei:
+        assert json.loads(json.dumps(vorhersage_rechnen())) == json.load(datei), \
+            "vorhersage.py rechnet anders - python tests/paritaet.py neu laufen lassen"
+
+
 if __name__ == "__main__":
     schreiben()
+    vorhersage_schreiben()

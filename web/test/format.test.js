@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { abweichungsfarbe, de, mitVorzeichen, schritte, suchen, tagText, tausend } from "../src/lib/format.js";
+import { abweichungsfarbe, de, istTag, mitVorzeichen, schritte, sonnenhoehe, suchen, tagText, tausend, wetterSymbol } from "../src/lib/format.js";
 
 test("Zahlen mit Komma, ohne negative Null", () => {
   assert.equal(de(8.35, 2), "8,35");
@@ -47,4 +47,21 @@ test("Suche: Nummer, Wortanfang, dann Teilwort", () => {
   assert.deepEqual(suchen(liste, "gött").map((s) => s[0]), [1691, 5555]);
   assert.deepEqual(suchen(liste, "aach").map((s) => s[0]), [1, 3]);
   assert.deepEqual(suchen(liste, "nieder").map((s) => s[0]), [1691]);
+});
+
+test("Sonnenhöhe und Tag/Nacht in Göttingen", () => {
+  const ort = { lat: 51.5, lon: 9.95 };
+  // Mittag zur Sommersonnenwende: 90 - 51,5 + 23,44
+  const mittag = sonnenhoehe(Date.parse("2026-06-21T11:20:00Z"), ort.lat, ort.lon);
+  assert.ok(Math.abs(mittag - 61.9) < 0.3, String(mittag));
+  // 20.10.: Aufgang gegen 5:55 UTC, Untergang gegen 16:15 UTC
+  assert.equal(istTag(null, "2026-10-20T05:00:00Z", ort), false);
+  assert.equal(istTag(null, "2026-10-20T06:00:00Z", ort), true);
+  assert.equal(istTag(null, "2026-10-20T15:00:00Z", ort), true);
+  assert.equal(istTag(null, "2026-10-20T16:00:00Z", ort), false);
+  // die Angabe des Dienstes geht vor
+  assert.equal(istTag(true, "2026-10-20T23:00:00Z", ort), true);
+  assert.equal(wetterSymbol("klar", null, "2026-10-20T22:00:00Z", ort), "🌙");
+  assert.equal(wetterSymbol("klar", null, "2026-10-20T11:00:00Z", ort), "☀️");
+  assert.equal(wetterSymbol("unbekannt", true, "2026-10-20T11:00:00Z", ort), "·");
 });

@@ -47,6 +47,7 @@ import config
 import daten
 import dwd
 import plausibel
+import vorhersage
 
 APP_TITEL = "Wetter"
 APP_VERSION = "v1.0"
@@ -144,6 +145,7 @@ class Api:
         self._meldung = ""
         self._stand = 0                     # zählt Datenänderungen
         self._hintergrund: threading.Thread | None = None
+        self._vorhersage: dict = {}        # Station -> (Zeit, Antwort)
 
     # ------------------------------------------------------------ Hilfen
     def _sicher(self, arbeit):
@@ -174,11 +176,13 @@ class Api:
         db = self._daten()
         return {"station": int(db.meta("station", GOETTINGEN)),
                 "qn": db.meta("qn", plausibel.QN_VORGABE),
-                "ansicht": db.meta("ansicht", "band"),
+                "ansicht": db.meta("ansicht", "uebersicht"),
+                "vmodell": db.meta("vmodell", "icon_d2"),
                 "rang_modus": db.meta("rang_modus", "heute"),
                 "rang_prognose": db.meta("rang_prognose", "1") != "0",
                 "favoriten": _liste(db.meta("favoriten", "[]")),
-                "wellen": _objekt(db.meta("wellen", "{}"))}
+                "wellen": _objekt(db.meta("wellen", "{}")),
+                "thema": db.meta("thema", "system")}
 
     def _verzeichnis(self, neu=False) -> dict[int, str]:
         """Stationsnummer -> hist-Archiv; gemerkt, einmal am Tag neu."""
@@ -277,7 +281,8 @@ class Api:
     def einstellung(self, name: str, wert) -> dict:
         def arbeit():
             if name not in ("station", "qn", "ansicht", "rang_modus",
-                            "rang_prognose", "favoriten", "wellen"):
+                            "rang_prognose", "favoriten", "wellen", "vmodell",
+                            "thema"):
                 raise Hinweis(f"Unbekannte Einstellung: {name}")
             if isinstance(wert, bool):
                 text = "1" if wert else "0"
@@ -355,6 +360,25 @@ class Api:
         Niederschlag, Sonne, Schnee, Wind, Frost, Prognose im Verlauf."""
         return self._sicher(lambda: self._daten().auswertung(
             int(sid), art, qn, optionen))
+
+    def vorhersage(self, sid, neu=False) -> dict:
+        """Aktuelles Wetter (Bright Sky) und alle Modelle für die Station -
+        20 Minuten gemerkt, die Modelle rechnen ohnehin nur stündlich neu."""
+        def arbeit():
+            sid_ = int(sid)
+            gemerkt = self._vorhersage.get(sid_)
+            if gemerkt and not neu and time.time() - gemerkt[0] < 20 * 60:
+                return gemerkt[1]
+            if not self._netz:
+                raise Hinweis("Ohne Netz keine Vorhersage")
+            s = self._daten().station(sid_)
+            if not s:
+                raise Hinweis(f"Station {sid_} steht nicht in der Liste")
+            antwort = {"station": s, "abgerufen": time.time(),
+                       **vorhersage.abrufen(s["lat"], s["lon"])}
+            self._vorhersage[sid_] = (time.time(), antwort)
+            return antwort
+        return self._sicher(arbeit)
 
     def zeitreihe(self, sid, groesse="m", aufloesung="jahr",
                   qn=plausibel.QN_VORGABE) -> dict:

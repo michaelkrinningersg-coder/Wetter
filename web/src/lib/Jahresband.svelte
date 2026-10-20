@@ -5,7 +5,7 @@
   import {
     MONATE,
     MONATSANFANG,
-    abweichungsfarbe,
+    abweichungsfarbeThema,
     datum,
     de,
     mitVorzeichen,
@@ -98,8 +98,8 @@
         {#each MONATSANFANG as anfang, m}
           <text x={xs(anfang + 15)} y={hoehe - 6} text-anchor="middle">{MONATE[m]}</text>
         {/each}
-        <path d={flaeche(3, 2)} fill="#e2e8f0" opacity="0.85" />
-        <path d={flaeche(4, 5)} fill="#cbd5e1" opacity="0.55" />
+        <path d={flaeche(3, 2)} style:fill="var(--band-innen)" opacity="0.85" />
+        <path d={flaeche(4, 5)} style:fill="var(--band-aussen)" opacity="0.55" />
         {#each band.tage as [i, m, x, n] (i)}
           {#if x != null && n != null}
             {@const mitte = m ?? (x + n) / 2}
@@ -109,11 +109,11 @@
               x2={xs(i)}
               y1={ys(n)}
               y2={ys(x)}
-              stroke={nm ? abweichungsfarbe(mitte - nm[1]) : "#64748b"}
+              style:stroke={nm ? abweichungsfarbeThema(mitte - nm[1]) : "var(--text-3)"}
               stroke-width={balkenbreite}
             />
           {:else if m != null}
-            <circle cx={xs(i)} cy={ys(m)} r="1.6" fill="#64748b" />
+            <circle cx={xs(i)} cy={ys(m)} r="1.6" style:fill="var(--text-3)" />
           {/if}
         {/each}
         {#if maus != null}
@@ -226,10 +226,10 @@
     fill: var(--text-3);
   }
   .gitter {
-    stroke: #eef2f7;
+    stroke: var(--gitter);
   }
   .null {
-    stroke: #cbd5e1;
+    stroke: var(--rand-stark);
   }
   .zeiger {
     stroke: var(--text);

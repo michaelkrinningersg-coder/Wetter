@@ -185,7 +185,7 @@
   td {
     text-align: right;
     padding: 4px 10px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--rand-zart);
     white-space: nowrap;
   }
   tr.aktuell td {
