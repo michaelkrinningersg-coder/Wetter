@@ -1,0 +1,180 @@
+name: Wetter bauen
+
+# Wie der Serientrenner: pywebview (Edge WebView2) + Svelte/Vite, dazu
+# DuckDB für die Tageswerte.
+#
+#   * Erst die Seite: web/ wird mit Node gebaut und landet als eine einzige
+#     Datei in webdist/index.html.
+#   * Dann Python 3.11 in x64 - DuckDB gibt es für Windows nur in 64 bit.
+#   * Die Startdatenbank wird hier frisch vom DWD geholt (Stationsliste,
+#     Verzeichnis, Göttingen) - das Programm öffnet beim ersten Start sofort.
+#   * PyInstaller als Ordner (onedir), nicht als eine exe: eine onefile-exe
+#     packt sich bei jedem Start erst aus (gemessen 0,6-0,7 s gegen 0,2 s).
+#     Der Ordner kommt als ein Artefakt; entpacken, Wetter.exe starten.
+#   * Danach Selbsttest und Startversuch der fertigen exe.
+#
+# Nur die portable Fassung, kein Installer, kein Release.
+
+on:
+  push:
+    branches: [main, "claude/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  VERSION: v1.0.${{ github.run_number }}
+
+jobs:
+  build:
+    name: Wetter x64
+    runs-on: windows-latest
+
+    steps:
+      - name: Code herunterladen
+        uses: actions/checkout@v4
+
+      - name: Node einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Oberfläche prüfen und bauen (Svelte + Vite)
+        working-directory: web
+        run: |
+          npm ci --no-audit --no-fund
+          npm test
+          npm run build
+          Get-Item ..\webdist\index.html | Select-Object Name, Length
+
+      - name: Python 3.11 einrichten (x64)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          architecture: x64
+
+      - name: Abhängigkeiten installieren
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip list
+
+      - name: Alle Prüfungen
+        run: |
+          python -m pytest -q
+          node --test tests/cleanup-runs.test.mjs
+
+      - name: Startdatenbank vom DWD
+        run: python startdaten_bauen.py
+
+      - name: Version in die exe
+        run: Set-Content -Path version.txt -Value $env:VERSION -NoNewline -Encoding ascii
+
+      - name: Programm mit PyInstaller bauen
+        # webdist/ ist die gebaute Seite, startdaten/ die Datenbank für den
+        # ersten Start. webview bringt seine .NET- und WebView2-Bibliotheken
+        # als Daten mit; pythonnet und clr_loader laden die .NET-Laufzeit.
+        run: >
+          pyinstaller --noconfirm --clean --onedir --windowed
+          --name "Wetter"
+          --add-data "webdist;webdist"
+          --add-data "startdaten;startdaten"
+          --add-data "version.txt;."
+          --collect-all webview
+          --collect-all pythonnet
+          --collect-all clr_loader
+          --collect-all duckdb
+          --hidden-import clr
+          --exclude-module tkinter
+          --exclude-module _tkinter
+          --exclude-module matplotlib
+          --exclude-module PIL
+          --exclude-module pytest
+          --exclude-module numpy
+          --exclude-module pandas
+          --exclude-module pyarrow
+          --exclude-module PyQt5
+          --exclude-module PyQt6
+          --exclude-module PySide2
+          --exclude-module PySide6
+          --exclude-module qtpy
+          --exclude-module gi
+          wetter.py
+
+      - name: Größe
+        run: |
+          $summe = (Get-ChildItem dist\Wetter -Recurse | Measure-Object Length -Sum).Sum
+          Write-Host ("Ordner: {0:N1} MB" -f ($summe / 1MB))
+          "### Gebaut: Wetter $env:VERSION" >> $env:GITHUB_STEP_SUMMARY
+          ("- Ordner {0:N1} MB" -f ($summe / 1MB)) >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Selbsttest der fertigen exe
+        run: |
+          $exe = "dist\Wetter\Wetter.exe"
+          $proc = Start-Process -FilePath $exe -ArgumentList "--selbsttest" `
+            -Wait -PassThru -RedirectStandardOutput selbsttest-ausgabe.log
+          $code = $proc.ExitCode
+          foreach ($pfad in @("selbsttest-ausgabe.log", "dist\Wetter\selbsttest.log")) {
+            if (Test-Path $pfad) { Write-Host "--- $pfad ---"; Get-Content $pfad }
+          }
+          if ($code -ne 0) { throw "Selbsttest fehlgeschlagen (Exit $code)" }
+          Get-Content "dist\Wetter\selbsttest.log" | ForEach-Object { "    $_" } >> $env:GITHUB_STEP_SUMMARY
+          Remove-Item "dist\Wetter\selbsttest.log"
+
+      # Fängt ab, was erst beim Öffnen des Fensters schiefgeht. Gewartet
+      # wird, bis die Seite Python erreicht hat - höchstens 60 s.
+      - name: Startet die Oberfläche wirklich?
+        run: |
+          $ordner = "dist\Wetter"
+          $log = "$ordner\wetter.log"
+          $uhr = [System.Diagnostics.Stopwatch]::StartNew()
+          $proc = Start-Process -FilePath "$ordner\Wetter.exe" -PassThru
+          $verbunden = $false
+          for ($i = 1; $i -le 600; $i++) {
+            Start-Sleep -Milliseconds 100
+            if ((Test-Path "$ordner\startfehler.txt") -or $proc.HasExited) { break }
+            if ((Test-Path $log) -and
+                (Select-String -Path $log -Pattern "Seite mit Python verbunden" -Quiet -ErrorAction SilentlyContinue)) {
+              $verbunden = $true
+              break
+            }
+          }
+          $sekunden = [math]::Round($uhr.Elapsed.TotalSeconds, 1)
+          # Noch ein paar Sekunden offen lassen - beendet es sich doch noch?
+          # Der Hintergrundabruf beim DWD läuft in dieser Zeit.
+          if ($verbunden) { Start-Sleep -Seconds 8 }
+          if (Test-Path "$ordner\startfehler.txt") {
+            Get-Content "$ordner\startfehler.txt"
+            throw "Die Anwendung meldet einen Startfehler"
+          }
+          if ($proc.HasExited) {
+            throw "Die Anwendung hat sich nach dem Start sofort beendet (Exit $($proc.ExitCode))"
+          }
+          Stop-Process -Id $proc.Id -Force
+          Start-Sleep -Seconds 1
+          if (Test-Path $log) { Get-Content $log | Select-String -NotMatch "pywebview" }
+          if (-not $verbunden) {
+            throw "Das Fenster ist offen, aber die Seite hat Python in 60 s nicht erreicht"
+          }
+          Write-Host "Fenster offen und Seite mit Python verbunden nach $sekunden s"
+          "- Kaltstart bis Seite verbunden: $sekunden s (Läufer, erster Start)" >> $env:GITHUB_STEP_SUMMARY
+          # Was der Startversuch hinterlassen hat, gehört nicht ins Paket
+          Remove-Item -Recurse -Force "$ordner\daten", $log -ErrorAction SilentlyContinue
+
+      - name: Auskunft, falls das Fenster nicht startet
+        if: failure()
+        run: |
+          foreach ($pfad in @("dist\Wetter\startfehler.txt", "dist\Wetter\wetter.log")) {
+            if (Test-Path $pfad) { Write-Host "--- $pfad ---"; Get-Content $pfad }
+          }
+
+      - name: Ordner als Artefakt bereitstellen
+        uses: actions/upload-artifact@v4
+        with:
+          name: Wetter-x64-${{ env.VERSION }}
+          path: dist/Wetter
+          if-no-files-found: error
+          retention-days: 14

@@ -86,7 +86,12 @@ def datenbank_oeffnen(ordner: str | None = None) -> daten.Daten:
     if not os.path.exists(pfad) and os.path.isfile(vorlage):
         shutil.copyfile(vorlage, pfad + ".neu")
         os.replace(pfad + ".neu", pfad)
-    return daten.Daten(pfad)
+    try:
+        return daten.Daten(pfad)
+    except daten.duckdb.IOException as fehler:
+        # DuckDB sperrt die Datei für einen Prozess
+        raise Hinweis("Die Datenbank ist schon offen - läuft Wetter bereits "
+                      f"in einem anderen Fenster? ({fehler})") from fehler
 
 
 class Hinweis(Exception):
@@ -462,6 +467,7 @@ def fenster_starten(api: Api):
     import webview
 
     _protokoll_einrichten()
+    log.info("%s %s gestartet (%s-bit)", APP_TITEL, programmversion(), BITNESS)
     _net_fehler_merken()
 
     seite = ressource(WEBORDNER, "index.html")
