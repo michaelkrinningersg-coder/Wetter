@@ -56,7 +56,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          node scripts/cleanup-runs.js \
+          node scripts/cleanup-runs.mjs \
             --keep ${{ inputs.keep || 5 }} \
             --days ${{ inputs.days || 14 }} \
             ${{ inputs.dry_run && '--dry-run' || '' }}

@@ -1,13 +1,22 @@
-node_modules/
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Bau
+build/
 dist/
-release/
-data/*.sqlite
-data/*.sqlite-journal
-data/*.sqlite-wal
-data/*.sqlite-shm
-.env
-.env.local
-.DS_Store
+*.spec
+version.txt
+webdist/
+web/node_modules/
+
+# Die Startdatenbank entsteht beim Bau frisch vom DWD
+startdaten/
+
+# Laufzeit: Daten und Protokolle neben dem Programm
+daten/
 *.log
-tsconfig.tsbuildinfo
-vorlage/
+startfehler.txt
