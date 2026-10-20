@@ -11,7 +11,8 @@
   import { STUFEN, ausschnitt, farbe, mmProStunde, raster } from "./raster.js";
   import Symbol from "./Symbol.svelte";
 
-  let { station, stationen = [] } = $props(); // station {name, lat, lon}; stationen: Zeilen der Suche
+  // station {name, lat, lon}; stationen: Zeilen der Suche; meinStandort: () => Promise {lat, lon}
+  let { station, stationen = [], meinStandort = null } = $props();
 
   const ZOOMS = [
     ["100", 100, "100 km"],
@@ -20,6 +21,21 @@
   ];
   let zoom = $state("100");
   let mitte = $state(null); // [Spalte, Zeile] oder null = Station
+  let mitteArt = $state("station"); // station, tipp, gps
+  let ortFehler = $state("");
+
+  async function zumStandort() {
+    ortFehler = "";
+    try {
+      const p = await meinStandort(true);
+      const [x, y] = raster(p.lon, p.lat);
+      if (x < 0 || y < 0 || x > 1099 || y > 1199) throw new Error("Standort liegt außerhalb des Radargebiets");
+      mitte = [x, y];
+      mitteArt = "gps";
+    } catch (e) {
+      ortFehler = e.message;
+    }
+  }
   let daten = $state(null);
   let fehler = $state("");
   let laedt = $state(false);
@@ -227,6 +243,7 @@
     const gx = daten.bbox[1] + (e.clientX - r.left) / mass.s;
     const gy = daten.bbox[0] + (e.clientY - r.top) / mass.s;
     mitte = [gx, gy];
+    mitteArt = "tipp";
   }
 
   const aktuell = $derived(daten?.bilder[Math.min(bild, daten.bilder.length - 1)]);
@@ -241,11 +258,15 @@
       {/each}
     </div>
     <div class="gruppe">
-      <button class="chip" class:an={!mitte} onclick={() => (mitte = null)} title="Mittelpunkt auf die Station">{station.name}</button>
-      {#if mitte}<span class="chip an">angetippter Punkt</span>{/if}
+      <button class="chip" class:an={!mitte} onclick={() => ((mitte = null), (mitteArt = "station"))} title="Mittelpunkt auf die Station">{station.name}</button>
+      {#if meinStandort}
+        <button class="chip" class:an={mitte && mitteArt === "gps"} onclick={zumStandort} title="Mittelpunkt auf den Standort dieses Geräts"><Symbol name="standort" /> Mein Standort</button>
+      {/if}
+      {#if mitte && mitteArt === "tipp"}<span class="chip an">angetippter Punkt</span>{/if}
     </div>
     <button class="chip" onclick={() => laden(bbox, true)} disabled={laedt} title="Neu laden"><Symbol name="aktualisieren" /></button>
     {#if laedt}<span class="leise">lädt …</span>{/if}
+    {#if ortFehler}<span class="leise">{ortFehler}</span>{/if}
   </div>
 
   <div class="flaeche" bind:clientWidth={breite} bind:clientHeight={hoehe}>

@@ -37,7 +37,7 @@
 
 <div class="vorhersage">
   <div class="karte aktuell">
-    <div class="lbl">Jetzt gemessen</div>
+    <div class="lbl">Jetzt gemessen · {v.station.name}</div>
     {#if a?.fehler}
       <div class="leise">{a.fehler}</div>
     {:else if a}

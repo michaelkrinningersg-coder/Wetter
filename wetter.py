@@ -187,7 +187,8 @@ class Api:
                 "favoriten": _liste(db.meta("favoriten", "[]")),
                 "wellen": _objekt(db.meta("wellen", "{}")),
                 "thema": db.meta("thema", "system"),
-                "normal": daten.normal_zeitraum(db.meta("normal", daten.NORMAL_VON))[0]}
+                "normal": daten.normal_zeitraum(db.meta("normal", daten.NORMAL_VON))[0],
+                "ort": "gps" if db.meta("ort", "station") == "gps" else "station"}
 
     def _verzeichnis(self, neu=False) -> dict[int, str]:
         """Stationsnummer -> hist-Archiv; gemerkt, einmal am Tag neu."""
@@ -287,7 +288,7 @@ class Api:
         def arbeit():
             if name not in ("station", "qn", "ansicht", "rang_modus",
                             "rang_prognose", "favoriten", "wellen", "vmodell",
-                            "thema", "normal"):
+                            "thema", "normal", "ort"):
                 raise Hinweis(f"Unbekannte Einstellung: {name}")
             if isinstance(wert, bool):
                 text = "1" if wert else "0"
@@ -475,6 +476,25 @@ class Api:
                 raise Hinweis("Ohne Netz kein Radar")
             antwort = vorhersage.radar(schluessel)
             self._radar = {schluessel: (time.time(), antwort)}
+            return antwort
+        return self._sicher(arbeit)
+
+    def vorhersage_ort(self, lat, lon, neu=False) -> dict:
+        """Wie vorhersage, aber für einen beliebigen Ort (Standort des
+        Geräts) - 20 Minuten gemerkt je Ort auf rund 1 km genau."""
+        def arbeit():
+            la, lo = round(float(lat), 2), round(float(lon), 2)
+            if not (-90 <= la <= 90 and -180 <= lo <= 180):
+                raise Hinweis("Ungültiger Standort")
+            schluessel = ("ort", la, lo)
+            gemerkt = self._vorhersage.get(schluessel)
+            if gemerkt and not neu and time.time() - gemerkt[0] < 20 * 60:
+                return gemerkt[1]
+            if not self._netz:
+                raise Hinweis("Ohne Netz keine Vorhersage")
+            antwort = {"station": {"name": "Mein Standort", "lat": la, "lon": lo, "ort": True},
+                       "abgerufen": time.time(), **vorhersage.abrufen(la, lo)}
+            self._vorhersage[schluessel] = (time.time(), antwort)
             return antwort
         return self._sicher(arbeit)
 

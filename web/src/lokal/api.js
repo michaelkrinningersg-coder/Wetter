@@ -288,6 +288,7 @@ export const lokal = {
         vmodell: await meta("vmodell", "icon_d2"),
         thema: await meta("thema", "system"),
         normal: R.normalVon(await meta("normal", R.NORMAL_VON)),
+        ort: (await meta("ort", "station")) === "gps" ? "gps" : "station",
         rang_modus: await meta("rang_modus", "heute"),
         rang_prognose: (await meta("rang_prognose", true)) !== false,
         favoriten: (await meta("favoriten", [])) ?? [],
@@ -358,6 +359,17 @@ export const lokal = {
       if (!d) return { leer: true, eintraege: [], selbst: false };
       const antwort = { ...d, quelle: "GitHub", selbst: false };
       rekordeGemerkt = [Date.now(), antwort];
+      return antwort;
+    }),
+  vorhersage_ort: (lat, lon, neu = false) =>
+    sicher(async () => {
+      const la = Math.round(lat * 100) / 100;
+      const lo = Math.round(lon * 100) / 100;
+      const schluessel = `ort:${la},${lo}`;
+      const gemerkt = vorhersagen.get(schluessel);
+      if (gemerkt && !neu && Date.now() - gemerkt[0] < 20 * 60 * 1000) return gemerkt[1];
+      const antwort = { station: { name: "Mein Standort", lat: la, lon: lo, ort: true }, abgerufen: Date.now() / 1000, ...(await vorhersageAbrufen(la, lo, holenJson)) };
+      vorhersagen.set(schluessel, [Date.now(), antwort]);
       return antwort;
     }),
   radar: (bbox, neu = false) =>

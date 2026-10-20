@@ -3,6 +3,7 @@
   // die Suche über alle Stationen der DWD-Liste. Gesucht wird hier in der
   // Seite - 1.386 Zeilen sind schneller durchsucht als ein Aufruf dauert.
   import { suchen, tausend } from "./format.js";
+  import { meinStandort, naechsteStation } from "./standort.js";
   import Symbol from "./Symbol.svelte";
 
   let { stationen = [], favoriten = [], aktuell = null, wahl, vollbild = false } = $props();
@@ -27,6 +28,25 @@
     text = "";
     markiert = 0;
     queueMicrotask(() => feld?.focus());
+  }
+
+  // nächste aktive Station zum Standort des Geräts
+  let naheText = $state("");
+  async function inDerNaehe() {
+    naheText = "Standort wird bestimmt …";
+    try {
+      const ort = await meinStandort(true);
+      const n = naechsteStation(stationen, ort.lat, ort.lon);
+      if (!n) throw new Error("keine aktive Station mit Lage in der Liste");
+      naheText = "";
+      offen = false;
+      wahl(n[0][0]);
+    } catch (e) {
+      naheText = e.message;
+    }
+  }
+  export function inDerNaeheWaehlen() {
+    return inDerNaehe();
   }
 
   function nehmen(s) {
@@ -72,8 +92,10 @@
           class="feld"
           placeholder="Name, Nummer oder Bundesland"
         />
+        <button class="knopf nahe" onclick={inDerNaehe} title="Nächste aktive Station zum Standort dieses Geräts"><Symbol name="standort" /> In meiner Nähe</button>
         {#if vollbild}<button class="knopf" onclick={() => (offen = false)}>Schließen</button>{/if}
       </div>
+      {#if naheText}<div class="leise nahe-text">{naheText}</div>{/if}
       <div class="zeilen">
         {#each treffer as s, i (s[0])}
           {@const [id, name, land, hoehe, von, bis, tage] = s}
@@ -103,6 +125,15 @@
 </div>
 
 <style>
+  .nahe {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+  }
+  .nahe-text {
+    padding: 4px 12px;
+  }
   .wahl-rahmen {
     position: relative;
   }

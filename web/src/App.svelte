@@ -17,6 +17,7 @@
   import { MONATE, datum, tausend } from "./lib/format.js";
   import Symbol from "./lib/Symbol.svelte";
   import { NORMALE, normalText, vergleich } from "./lib/zeitraum.svelte.js";
+  import { meinStandort, naechsteStation } from "./lib/standort.js";
   import { AUFRUF, AUSWERTUNGEN, DATEN_OPTIONEN, DEUTSCHLAND, HANDY_NAV, HAUPT, IST_AUSWERTUNG, OPTIONEN, TITEL } from "./lib/ansichten.js";
   import Uebersicht from "./lib/Uebersicht.svelte";
   import Vorhersage from "./lib/Vorhersage.svelte";
@@ -50,6 +51,8 @@
   let auswertung = $state(null); // Ergebnis der gerade gezeigten Auswertung
   let vorhersage = $state(null);
   let rekordeDe = $state(null); // Rekorde Deutschland (für Seite und Laufband)
+  let ort = $state("station"); // Vorhersage für die Station oder "gps" = Standort des Geräts
+  let ortHinweis = $state("");
   let geschichteKurz = $state(null); // für die Übersicht
   let vmodell = $state("icon_d2");
   let thema = $state("system"); // system, hell, dunkel
@@ -182,6 +185,13 @@
     ansichtLaden();
   }
 
+  function ortSetzen(o) {
+    ort = o;
+    ortHinweis = "";
+    rufe("einstellung", "ort", o);
+    vorhersageLaden();
+  }
+
   async function rekordeLaden(neu = false) {
     const r = await rufe("rekorde_de", neu);
     if (!r.fehler) rekordeDe = r;
@@ -191,11 +201,30 @@
     if (await stationLaden(id)) setze("ansicht", "rekorde");
   }
 
+  let vorhersageNr = 0; // nur die jüngste Anfrage zählt (Station oder Standort)
   async function vorhersageLaden(neu = false) {
     if (!station) return;
     const id = station.station.id;
-    const r = await rufe("vorhersage", id, neu);
-    if (station?.station.id !== id) return;
+    const nr = ++vorhersageNr;
+    let r = null;
+    if (ort === "gps") {
+      // Standort des Geräts; klappt das nicht, die Station und ein Hinweis
+      try {
+        const p = await meinStandort();
+        r = await rufe("vorhersage_ort", p.lat, p.lon, neu);
+        if (!r.fehler) {
+          const n = naechsteStation(stationen, p.lat, p.lon);
+          r.station = { ...r.station, name: n ? `Mein Standort · bei ${n[0][1]}` : "Mein Standort", genau: p.genau };
+          ortHinweis = "";
+        }
+      } catch (e) {
+        ortHinweis = `${e.message} – gezeigt wird ${station.station.name}`;
+        r = null;
+      }
+      if (nr !== vorhersageNr) return;
+    }
+    r ??= await rufe("vorhersage", id, neu);
+    if (nr !== vorhersageNr || station?.station.id !== id) return;
     if (r.fehler) {
       if (ansicht === "vorhersage") fehler = r.fehler;
       return;
@@ -272,6 +301,7 @@
     if (r.einstellungen.vmodell) vmodell = r.einstellungen.vmodell;
     if (r.einstellungen.thema) thema = r.einstellungen.thema;
     if (NORMALE.includes(r.einstellungen.normal)) vergleich.von = r.einstellungen.normal;
+    if (r.einstellungen.ort === "gps") ort = "gps";
     rangModus = r.einstellungen.rang_modus === "jahr" ? "jahr" : "heute";
     rangPrognose = r.einstellungen.rang_prognose !== false;
     qn = "alle"; // so entschieden: immer mit allen Qualitätsstufen beginnen
@@ -289,6 +319,12 @@
 
 <!-- Schalter der gerade gezeigten Ansicht: im Menüband wie auf dem Handy -->
 {#snippet steuerung()}
+  {#if (ansicht === "uebersicht" || ansicht === "vorhersage") && station}
+    <div class="gruppe" title="Vorhersage und aktuelles Wetter für">
+      <button class="chip" class:an={ort === "station"} onclick={() => ortSetzen("station")}>{station.station.name}</button>
+      <button class="chip ort" class:an={ort === "gps"} onclick={() => ortSetzen("gps")}><Symbol name="standort" /> Mein Standort</button>
+    </div>
+  {/if}
   {#if ansicht === "band" && band && !band.leer}
     <div class="gruppe">
       {#each jahreAuswahl.slice(0, 2) as j}
@@ -417,6 +453,9 @@
 {/snippet}
 
 {#snippet inhalt()}
+  {#if ortHinweis && (ansicht === "uebersicht" || ansicht === "vorhersage")}
+    <div class="meldung">{ortHinweis}</div>
+  {/if}
   {#if fehler}
     <div class="meldung fehler">
       <span>{fehler}</span>
@@ -424,11 +463,11 @@
     </div>
   {/if}
   {#if ansicht === "uebersicht" && station}
-    <Uebersicht name={station.station.name} {band} {monat} geschichte={geschichteKurz} {vorhersage} rekorde={rekordeDe} gehe={(a) => setze("ansicht", a)} />
+    <Uebersicht name={vorhersage?.station?.ort ? vorhersage.station.name : station.station.name} {band} {monat} geschichte={geschichteKurz} {vorhersage} rekorde={rekordeDe} gehe={(a) => setze("ansicht", a)} />
   {:else if ansicht === "rekorde_de"}
     <RekordeDE daten={rekordeDe} oeffnen={stationOeffnen} neu={() => rekordeLaden(true)} rechnen={async () => { await rufe("rekorde_de_rechnen"); rekordeLaden(); }} />
   {:else if ansicht === "radar" && station}
-    <Radar station={station.station} {stationen} />
+    <Radar station={station.station} {stationen} {meinStandort} />
   {:else if ansicht === "vorhersage" && vorhersage}
     <Vorhersage v={vorhersage} modell={vmodell} waehle={(m) => ((vmodell = m), rufe("einstellung", "vmodell", m))} />
   {:else if ansicht === "band" && band && !band.leer}
@@ -547,6 +586,7 @@
                 <div class="eintrag-leise">{datenordner || "Daten im Programm"}</div>
               {:else if k === "station"}
                 <button onclick={() => ((menue = ""), wahl?.oeffnen())}>Station wählen …</button>
+                <button onclick={() => ((menue = ""), wahl?.oeffnen(), wahl?.inDerNaeheWaehlen())}>Station in meiner Nähe</button>
                 <button onclick={favoritUmschalten} disabled={!station}>{istFavorit ? "Favorit entfernen" : "Als Favorit merken"}</button>
                 {#each favoriten as f}
                   {@const s = stationen.find((x) => x[0] === f)}
