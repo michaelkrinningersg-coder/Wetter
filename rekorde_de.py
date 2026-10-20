@@ -97,6 +97,19 @@ def aktive_stationen() -> list[int]:
     return sorted({int(m) for m in re.findall(r"tageswerte_KL_(\d{5})_akt\.zip", html)})
 
 
+def _holen(pfad: str, versuche=3) -> bytes:
+    """dwd.holen mit Wiederholung: bei 570 Stationen bricht die eine oder
+    andere TLS-Verbindung des DWD-Servers ab."""
+    for versuch in range(versuche):
+        try:
+            return dwd.holen(pfad)
+        except dwd.Abruffehler:
+            if versuch == versuche - 1:
+                raise
+            time.sleep(2 * (versuch + 1))
+    raise AssertionError("unerreichbar")
+
+
 def _archive(sid, hist_datei, zwischenspeicher):
     """hist (aus dem Zwischenspeicher, wenn schon da) und recent einer Station."""
     hist = None
@@ -106,13 +119,13 @@ def _archive(sid, hist_datei, zwischenspeicher):
             with open(pfad, "rb") as datei:
                 roh = datei.read()
         else:
-            roh = dwd.holen("historical/" + hist_datei)
+            roh = _holen("historical/" + hist_datei)
             if pfad:
                 with open(pfad + ".neu", "wb") as datei:
                     datei.write(roh)
                 os.replace(pfad + ".neu", pfad)
         hist = dwd.produkt(roh)
-    recent = dwd.produkt(dwd.holen(dwd.recent_pfad(sid)))
+    recent = dwd.produkt(_holen(dwd.recent_pfad(sid)))
     return hist, recent
 
 
