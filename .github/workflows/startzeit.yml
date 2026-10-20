@@ -1,0 +1,122 @@
+name: Startzeit messen
+
+# Ordner (onedir) gegen eine einzelne exe (onefile): dasselbe Programm,
+# zweimal gepackt, auf demselben Windows-Läufer gestartet.
+#
+#   * Fenster: Zeit vom Start der exe bis "Seite mit Python verbunden" im
+#     Protokoll - das ist der Moment, ab dem die Seite Daten bekommt.
+#   * Selbsttest: dieselbe exe ohne Fenster bis zum Ende - zeigt, was das
+#     Auspacken der onefile-exe allein kostet.
+#
+# Je Fassung ein erster (kalter) Start und danach mehrere warme.
+# Nur auf Zuruf.
+
+on:
+  workflow_dispatch:
+    inputs:
+      laeufe:
+        description: "Warme Starts je Fassung"
+        default: "5"
+
+permissions:
+  contents: read
+
+jobs:
+  messen:
+    name: onedir gegen onefile
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Oberfläche bauen
+        working-directory: web
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          architecture: x64
+
+      - name: Abhängigkeiten und Startdatenbank
+        run: |
+          python -m pip install -r requirements.txt
+          python startdaten_bauen.py
+          Set-Content -Path version.txt -Value "messung" -NoNewline -Encoding ascii
+
+      - name: Zweimal packen
+        run: |
+          $gemeinsam = @(
+            "--noconfirm", "--clean", "--windowed", "--name", "Wetter", "--icon=Icon.ico",
+            "--add-data", "Icon.ico;.", "--add-data", "Icon.png;.",
+            "--add-data", "webdist;webdist", "--add-data", "startdaten;startdaten",
+            "--add-data", "version.txt;.",
+            "--collect-all", "webview", "--collect-all", "pythonnet", "--collect-all", "clr_loader",
+            "--collect-all", "duckdb", "--collect-all", "truststore", "--hidden-import", "clr",
+            "--exclude-module", "tkinter", "--exclude-module", "numpy", "--exclude-module", "pandas",
+            "--exclude-module", "pyarrow", "--exclude-module", "pytest", "--exclude-module", "PIL"
+          )
+          pyinstaller @gemeinsam --onedir --distpath ordner --workpath bau1 wetter.py
+          pyinstaller @gemeinsam --onefile --distpath einzeln --workpath bau2 wetter.py
+          $o = (Get-ChildItem ordner\Wetter -Recurse | Measure-Object Length -Sum).Sum / 1MB
+          $e = (Get-Item einzeln\Wetter.exe).Length / 1MB
+          "### Größe" >> $env:GITHUB_STEP_SUMMARY
+          ("- Ordner: {0:N1} MB (zip etwa 28 MB)" -f $o) >> $env:GITHUB_STEP_SUMMARY
+          ("- Eine exe: {0:N1} MB" -f $e) >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Messen
+        run: |
+          $laeufe = [int]("${{ inputs.laeufe }}" -as [int]); if ($laeufe -lt 1) { $laeufe = 5 }
+
+          function Fenster($exe) {
+            $ordner = Split-Path $exe
+            $log = Join-Path $ordner "wetter.log"
+            Remove-Item $log -ErrorAction SilentlyContinue
+            $uhr = [System.Diagnostics.Stopwatch]::StartNew()
+            $p = Start-Process -FilePath $exe -PassThru
+            while ($uhr.Elapsed.TotalSeconds -lt 60) {
+              if ((Test-Path $log) -and (Select-String -Path $log -Pattern "Seite mit Python verbunden" -Quiet -ErrorAction SilentlyContinue)) { break }
+              Start-Sleep -Milliseconds 25
+            }
+            $s = $uhr.Elapsed.TotalSeconds
+            Start-Sleep -Milliseconds 500
+            # onefile: der Bootloader startet einen zweiten Prozess - beide beenden
+            Get-Process Wetter -ErrorAction SilentlyContinue | Stop-Process -Force
+            Start-Sleep -Seconds 2
+            return $s
+          }
+
+          function Selbsttest($exe) {
+            $uhr = [System.Diagnostics.Stopwatch]::StartNew()
+            Start-Process -FilePath $exe -ArgumentList "--selbsttest" -Wait | Out-Null
+            return $uhr.Elapsed.TotalSeconds
+          }
+
+          $ergebnis = @{}
+          foreach ($fassung in @(@("Ordner (onedir)", "ordner\Wetter\Wetter.exe"), @("Eine exe (onefile)", "einzeln\Wetter.exe"))) {
+            $name, $exe = $fassung
+            $kalt = Fenster $exe
+            $warm = 1..$laeufe | ForEach-Object { Fenster $exe }
+            $test = 1..$laeufe | ForEach-Object { Selbsttest $exe }
+            $ergebnis[$name] = @{ kalt = $kalt; warm = $warm; test = $test }
+            Write-Host "$name  kalt $([math]::Round($kalt,2)) s  warm $(($warm | ForEach-Object { [math]::Round($_,2) }) -join ', ') s  Selbsttest $(($test | ForEach-Object { [math]::Round($_,2) }) -join ', ') s"
+          }
+
+          function Median($werte) { $s = $werte | Sort-Object; $n = $s.Count; if ($n % 2) { $s[[int][math]::Floor($n/2)] } else { ($s[$n/2-1] + $s[$n/2]) / 2 } }
+
+          "### Start bis Seite verbunden (Fenster)" >> $env:GITHUB_STEP_SUMMARY
+          "| Fassung | erster Start | warm (Median von $laeufe) | Selbsttest ohne Fenster (Median) |" >> $env:GITHUB_STEP_SUMMARY
+          "|---|---|---|---|" >> $env:GITHUB_STEP_SUMMARY
+          foreach ($name in @("Ordner (onedir)", "Eine exe (onefile)")) {
+            $r = $ergebnis[$name]
+            ("| {0} | {1:N2} s | {2:N2} s | {3:N2} s |" -f $name, $r.kalt, (Median $r.warm), (Median $r.test)) >> $env:GITHUB_STEP_SUMMARY
+          }
+          $o = Median $ergebnis["Ordner (onedir)"].warm; $e = Median $ergebnis["Eine exe (onefile)"].warm
+          $ot = Median $ergebnis["Ordner (onedir)"].test; $et = Median $ergebnis["Eine exe (onefile)"].test
+          ("`nOrdner ist warm {0:N2} s schneller ({1:N1}x), ohne Fenster {2:N2} s ({3:N1}x)." -f ($e - $o), ($e / $o), ($et - $ot), ($et / $ot)) >> $env:GITHUB_STEP_SUMMARY
+          Get-Content $env:GITHUB_STEP_SUMMARY
