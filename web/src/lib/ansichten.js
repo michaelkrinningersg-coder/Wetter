@@ -29,7 +29,10 @@ export const AUSWERTUNGEN = [
 ];
 
 // Über alle Stationen - gleicher Aufbau wie AUSWERTUNGEN (ohne Aufruf)
-export const DEUTSCHLAND = [["rekorde_de", "Rekorde Deutschland", null, "rekorde_de", "Rekorde DE"]];
+export const DEUTSCHLAND = [
+  ["rekorde_de", "Rekorde Deutschland", null, "rekorde_de", "Rekorde DE"],
+  ["top50", "Deutschland Top 50", null, "top50", "Top 50 DE"],
+];
 
 export const TITEL = Object.fromEntries([...HAUPT, ...AUSWERTUNGEN, ...DEUTSCHLAND].map(([k, t]) => [k, t]));
 export const IST_AUSWERTUNG = new Set(AUSWERTUNGEN.map(([k]) => k));

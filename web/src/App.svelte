@@ -23,6 +23,7 @@
   import Vorhersage from "./lib/Vorhersage.svelte";
   import Radar from "./lib/Radar.svelte";
   import RekordeDE from "./lib/RekordeDE.svelte";
+  import DeutschlandTop from "./lib/DeutschlandTop.svelte";
   import Auswertung from "./lib/Auswertung.svelte";
   import Jahresband from "./lib/Jahresband.svelte";
   import Monat from "./lib/Monat.svelte";
@@ -51,6 +52,7 @@
   let auswertung = $state(null); // Ergebnis der gerade gezeigten Auswertung
   let vorhersage = $state(null);
   let rekordeDe = $state(null); // Rekorde Deutschland (für Seite und Laufband)
+  let deutschlandDaten = $state(null); // Top 50: letzte 7 Tage aller aktiven Stationen
   let ort = $state("station"); // Vorhersage für die Station oder "gps" = Standort des Geräts
   let ortHinweis = $state("");
   let geschichteKurz = $state(null); // für die Übersicht
@@ -145,6 +147,9 @@
       // lädt selbst (Radar.svelte)
     } else if (ansicht === "rekorde_de") {
       await rekordeLaden();
+    } else if (ansicht === "top50") {
+      const r = await rufe("deutschland", false);
+      if (!r.fehler) deutschlandDaten = r;
     } else if (ansicht === "band") {
       const r = await sicher(() => rufe("jahresband", id, jahr, qn, vergleich.von));
       if (!r.fehler) band = r;
@@ -464,6 +469,8 @@
   {/if}
   {#if ansicht === "uebersicht" && station}
     <Uebersicht name={vorhersage?.station?.ort ? vorhersage.station.name : station.station.name} {band} {monat} geschichte={geschichteKurz} {vorhersage} rekorde={rekordeDe} gehe={(a) => setze("ansicht", a)} />
+  {:else if ansicht === "top50"}
+    <DeutschlandTop daten={deutschlandDaten} oeffnen={(id) => stationLaden(id).then((ok) => ok && setze("ansicht", "monat"))} neu={async () => { const r = await rufe("deutschland", true); if (!r.fehler) deutschlandDaten = r; }} />
   {:else if ansicht === "rekorde_de"}
     <RekordeDE daten={rekordeDe} oeffnen={stationOeffnen} neu={() => rekordeLaden(true)} rechnen={async () => { await rufe("rekorde_de_rechnen"); rekordeLaden(); }} />
   {:else if ansicht === "radar" && station}

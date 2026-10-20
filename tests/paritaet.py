@@ -174,6 +174,8 @@ def schreiben():
         json.dump({"heute": HEUTE.isoformat(), "station": SID,
                    "aufrufe": rechnen(hist, recent)}, datei, ensure_ascii=False)
     print(f"{len(AUFRUFE)} Aufrufe nach {ZIEL}")
+    with open(os.path.join(ZIEL, "deutschland.json"), "w", encoding="utf-8") as datei:
+        json.dump(deutschland_rechnen(recent), datei, ensure_ascii=False)
 
 
 def test_erwartungswerte_aktuell():
@@ -213,6 +215,23 @@ def _gleich(ist, soll, pfad, fehler):
         fehler.append(f"{pfad}: {ist!r} statt {soll!r}")
 
 
+
+
+# --------------------------------------------- Deutschland-Übersicht
+def deutschland_rechnen(recent: bytes) -> dict:
+    """recent.txt als eine Station 4711 durch deutschland.aus_texten."""
+    import deutschland
+    d = deutschland.aus_texten({SID: recent}, {SID: {"name": "Prüfstadt", "land": "Testland", "hoehe": 100}})
+    d.pop("erstellt")
+    return d
+
+
+def test_deutschland_erwartung_aktuell():
+    with open(os.path.join(ZIEL, "recent.txt"), "rb") as datei:
+        recent = datei.read()
+    with open(os.path.join(ZIEL, "deutschland.json"), encoding="utf-8") as datei:
+        assert deutschland_rechnen(recent) == json.load(datei), \
+            "deutschland.py rechnet anders - python tests/paritaet.py neu laufen lassen"
 
 
 # ------------------------------------------------- Vorhersage-Antworten

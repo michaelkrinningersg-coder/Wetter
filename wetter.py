@@ -45,6 +45,7 @@ import traceback
 
 import config
 import daten
+import deutschland
 import dwd
 import plausibel
 import rekorde_de
@@ -142,6 +143,7 @@ class Api:
         self._netz = netz
         self._abruf = threading.Lock()      # eine Station nach der anderen
         self._status_sperre = threading.Lock()
+        self._oeffnen = threading.Lock()
         self._laeuft = ""
         self._meldung = ""
         self._stand = 0                     # zählt Datenänderungen
@@ -150,6 +152,7 @@ class Api:
         self._radar: dict = {}             # Ausschnitt -> (Zeit, Antwort)
         self._rekorde: tuple | None = None # (Zeit, Antwort von GitHub)
         self._rekorde_lauf: threading.Thread | None = None
+        self._deutschland_lauf: threading.Thread | None = None
 
     # ------------------------------------------------------------ Hilfen
     def _sicher(self, arbeit):
@@ -163,8 +166,12 @@ class Api:
             return {"fehler": f"{type(fehler).__name__}: {fehler}"}
 
     def _daten(self) -> daten.Daten:
+        # Aufrufe der Seite kommen in eigenen Threads - beim Start öffneten
+        # zwei gleichzeitige die Datenbank doppelt ("Conflict on update")
         if self._db is None:
-            self._db = datenbank_oeffnen()
+            with self._oeffnen:
+                if self._db is None:
+                    self._db = datenbank_oeffnen()
         return self._db
 
     def _status(self, laeuft=None, meldung=None, geaendert=False):
@@ -462,6 +469,40 @@ class Api:
                 self._rekorde_lauf = threading.Thread(target=lauf, daemon=True)
                 self._rekorde_lauf.start()
             return {"ok": True}
+        return self._sicher(arbeit)
+
+    # ------------------------------------------------ Deutschland-Übersicht
+    def deutschland(self, neu=False) -> dict:
+        """Die letzten 7 Tage aller aktiven Stationen (nur recent, rund
+        17 MB). Liegt nichts vor, ist es älter als 6 Stunden oder neu
+        gewünscht, lädt es im Hintergrund; fertig zählt der Stand hoch."""
+        def lauf():
+            try:
+                db = self._daten()
+                stationen = {s[0]: {"name": s[1], "land": s[2], "hoehe": s[3]} for s in db.stationen()}
+                d = deutschland.laden(stationen, lambda t: self._status(laeuft=f"Deutschland: {t}"))
+                pfad = os.path.join(os.path.dirname(db.pfad), "deutschland.json")
+                with open(pfad + ".neu", "w", encoding="utf-8") as datei:
+                    json.dump(d, datei, ensure_ascii=False)
+                os.replace(pfad + ".neu", pfad)
+                self._status(meldung=f"Deutschland: {len(d['stationen'])} Stationen geladen, "
+                                     f"Stand {d['stand']}", geaendert=True)
+            except Exception as fehler:                  # noqa: BLE001
+                log.exception("Deutschland")
+                self._status(meldung=f"Deutschland: {fehler}")
+            finally:
+                self._status(laeuft="")
+
+        def arbeit():
+            pfad = os.path.join(os.path.dirname(self._daten().pfad), "deutschland.json")
+            d = self._json_datei(pfad)
+            alt = d is None or time.time() - os.path.getmtime(pfad) > 6 * 3600
+            laeuft = bool(self._deutschland_lauf and self._deutschland_lauf.is_alive())
+            if (neu or alt) and not laeuft and self._netz:
+                self._deutschland_lauf = threading.Thread(target=lauf, daemon=True)
+                self._deutschland_lauf.start()
+                laeuft = True
+            return {**(d or {"leer": True}), "laedt": laeuft}
         return self._sicher(arbeit)
 
     def radar(self, bbox, neu=False) -> dict:

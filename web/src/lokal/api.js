@@ -14,6 +14,7 @@ import { produktAusZip, produktLesen, stationenLesen, verzeichnisLesen, zusammen
 import { auswertung } from "./auswertung.js";
 import { abrufen as vorhersageAbrufen } from "./vorhersage.js";
 import * as R from "./rechnen.js";
+import * as DE from "./deutschland.js";
 
 const BASIS = "https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/daily/kl/";
 const GOETTINGEN = 1691;
@@ -99,11 +100,51 @@ async function mitgeliefert(name) {
   return name.endsWith(".json") ? r.json() : new Uint8Array(await r.arrayBuffer());
 }
 
+// --------------------------------------------------- Deutschland-Übersicht
+async function deutschlandLaden() {
+  try {
+    zustand.laeuft = "Deutschland: Liste der Stationen …";
+    const html = await holen("recent/", false);
+    const ids = [...new Set([...html.matchAll(/tageswerte_KL_(\d{5})_akt\.zip/g)].map((m) => Number(m[1])))];
+    const bekannt = new Map((await liste()).map((s) => [s.id, s]));
+    const aktiv = ids.filter((id) => bekannt.has(id));
+    const stationen = [];
+    const ausfaelle = {};
+    let fertig = 0;
+    // 8 gleichzeitig - schneller wird es am Handy kaum, und der DWD bleibt freundlich
+    const offen = [...aktiv];
+    const arbeiter = Array.from({ length: 8 }, async () => {
+      while (offen.length) {
+        const id = offen.shift();
+        try {
+          const text = produktAusZip(await holen(`recent/tageswerte_KL_${String(id).padStart(5, "0")}_akt.zip`));
+          const s = bekannt.get(id);
+          stationen.push({ id, name: s.name, land: s.land, hoehe: s.hoehe, daten: DE.stationsTage(text) });
+        } catch (e) {
+          ausfaelle[id] = String(e?.message ?? e).slice(0, 200);
+        }
+        fertig++;
+        if (fertig % 10 === 0) zustand.laeuft = `Deutschland: ${fertig} von ${aktiv.length} Stationen`;
+      }
+    });
+    await Promise.all(arbeiter);
+    const d = DE.zusammenstellen(stationen, ausfaelle);
+    await schreiben("meta", "deutschland", d);
+    zustand.meldung = `Deutschland: ${d.stationen.length} Stationen geladen, Stand ${d.stand}`;
+    zustand.stand++;
+  } catch (e) {
+    zustand.meldung = `Deutschland: ${e?.message ?? e}`;
+  } finally {
+    zustand.laeuft = "";
+  }
+}
+
 // ---------------------------------------------------------------- Zustand
 const reihen = new Map(); // id -> R.reihe(...)
 const vorhersagen = new Map(); // id -> [Zeit, Antwort]
 let radarGemerkt = null; // [Ausschnitt, Zeit, Antwort]
 let rekordeGemerkt = null; // [Zeit, Antwort]
+let deutschlandLauf = null; // laufendes Laden aller Stationen
 const REKORDE_ADRESSE = "https://github.com/michaelkrinningersg-coder/Wetter/releases/download/rekorde-de/rekorde_de.json";
 const zustand = { laeuft: "", meldung: "", stand: 0 };
 let stationsliste = null;
@@ -371,6 +412,17 @@ export const lokal = {
       const antwort = { station: { name: "Mein Standort", lat: la, lon: lo, ort: true }, abgerufen: Date.now() / 1000, ...(await vorhersageAbrufen(la, lo, holenJson)) };
       vorhersagen.set(schluessel, [Date.now(), antwort]);
       return antwort;
+    }),
+  // Deutschland-Übersicht: alle aktiven Stationen, nur recent (rund 17 MB) -
+  // im Hintergrund; fertig zählt der Stand hoch und die Seite lädt neu
+  deutschland: (neu = false) =>
+    sicher(async () => {
+      const gespeichert = await meta("deutschland", null);
+      const alt = gespeichert && Date.now() - Date.parse(gespeichert.erstellt) > 6 * 3600 * 1000;
+      if ((neu || !gespeichert || alt) && !deutschlandLauf) {
+        deutschlandLauf = deutschlandLaden().finally(() => (deutschlandLauf = null));
+      }
+      return { ...(gespeichert ?? { leer: true }), laedt: !!deutschlandLauf };
     }),
   radar: (bbox, neu = false) =>
     sicher(async () => {
