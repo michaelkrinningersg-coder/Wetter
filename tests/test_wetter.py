@@ -24,7 +24,8 @@ def api(tmp_path):
 def test_start_ohne_netz(api):
     r = api.start()
     assert [s[1] for s in r["stationen"]] == ["Brocken", "Göttingen"]
-    assert r["einstellungen"] == {"station": 1691, "qn": "alle", "ansicht": "band"}
+    assert r["einstellungen"] == {"station": 1691, "qn": "alle", "ansicht": "band",
+                                  "rang_modus": "heute", "rang_prognose": True}
 
 
 def test_einstellungen_bleiben(api):
@@ -64,3 +65,10 @@ def test_erster_abruf_laedt_die_ganze_reihe(api, monkeypatch):
 
 def test_fehler_kommen_als_text(api):
     assert "fehler" in api.jahresband("keine Zahl")
+
+
+def test_schalter_bleiben_auch_aus(api):
+    api.einstellung("rang_prognose", False)
+    assert api.start()["einstellungen"]["rang_prognose"] is False
+    api.einstellung("rang_prognose", True)
+    assert api.start()["einstellungen"]["rang_prognose"] is True

@@ -44,7 +44,10 @@ CREATE TABLE IF NOT EXISTS station (
     lat DOUBLE, lon DOUBLE, von DATE, bis DATE);
 CREATE TABLE IF NOT EXISTS tag (
     station INTEGER, datum DATE, tmk DOUBLE, txk DOUBLE, tnk DOUBLE,
-    qn UTINYINT, quelle UTINYINT);
+    qn UTINYINT, quelle UTINYINT,
+    fx DOUBLE, fm DOUBLE, rsk DOUBLE, rskf UTINYINT, sdk DOUBLE,
+    shk DOUBLE, nm DOUBLE, vpm DOUBLE, pm DOUBLE, upm DOUBLE, tgk DOUBLE,
+    qn3 UTINYINT);
 CREATE TABLE IF NOT EXISTS abruf (
     station INTEGER PRIMARY KEY, hist_datei VARCHAR, recent_am DOUBLE);
 CREATE TABLE IF NOT EXISTS meta (k VARCHAR PRIMARY KEY, v VARCHAR);
@@ -55,10 +58,24 @@ JAHR_MIN_TAGE = 330
 NORMAL_VON, NORMAL_BIS = 1991, 2020
 GLAETTUNG = 15                  # Jahre je Seite: Mittel über 31 Jahre
 SPALTEN = {"m": "tmk", "x": "txk", "n": "tnk"}
+PROGNOSE_JAHRE = 30             # Vergleichsjahre vor dem laufenden
+# Die Monatstabelle: alle Größen der Tagesarchive, in Leserichtung
+MONAT_SPALTEN = ["tmk", "txk", "tnk", "tgk", "fm", "fx", "rsk", "rskf",
+                 "sdk", "shk", "nm", "upm", "vpm", "pm"]
+SUMMEN = {"rsk", "sdk"}         # im Monat summiert statt gemittelt
+WIND = {"fm", "fx"}
+
+# Die übrigen Größen der Tagesarchive: DWD-Spalte -> Spalte in `tag`.
+# Wind in m/s wie geliefert; km/h rechnet erst die Anzeige.
+WEITERE = {"FX": "fx", "FM": "fm", "RSK": "rsk", "RSKF": "rskf",
+           "SDK": "sdk", "SHK_TAG": "shk", "NM": "nm", "VPM": "vpm",
+           "PM": "pm", "UPM": "upm", "TGK": "tgk"}
+SCHEMA_STAND = "2"
 
 _NAME = re.compile(r"^[A-Za-z0-9_]+$")
-_TYP = {"MESS_DATUM": "VARCHAR", "QN_4": "INTEGER",
-        "TMK": "DOUBLE", "TXK": "DOUBLE", "TNK": "DOUBLE"}
+_TYP = {"MESS_DATUM": "VARCHAR", "QN_4": "INTEGER", "QN_3": "INTEGER",
+        "RSKF": "INTEGER", "TMK": "DOUBLE", "TXK": "DOUBLE", "TNK": "DOUBLE",
+        **{k: "DOUBLE" for k in WEITERE if k != "RSKF"}}
 
 
 def _tag_index(datum_sql: str) -> str:
@@ -78,7 +95,20 @@ class Daten:
         self.pfad = pfad
         self._con = duckdb.connect(pfad)
         self._schreiben = threading.Lock()
+        self._umbauen()
         self._con.execute(SCHEMA)
+        self._con.execute("INSERT OR REPLACE INTO meta VALUES ('schema', ?)",
+                          [SCHEMA_STAND])
+
+    def _umbauen(self):
+        """Eine Datenbank aus einem älteren Stand: Tage und Abrufe weg,
+        die Stationen werden beim nächsten Öffnen neu geladen. Die
+        Stationsliste und die Einstellungen bleiben."""
+        spalten = {z[0] for z in self._con.execute(
+            "SELECT column_name FROM information_schema.columns "
+            "WHERE table_name = 'tag'").fetchall()}
+        if spalten and "qn3" not in spalten:
+            self._con.execute("DROP TABLE tag; DROP TABLE IF EXISTS abruf")
 
     def schliessen(self):
         self._con.close()
@@ -194,7 +224,9 @@ class Daten:
             raise ValueError(f"{art}: unerwarteter Kopf {kopf!r}")
         spalten = "{" + ", ".join(f"'{n}': '{_TYP.get(n, 'VARCHAR')}'"
                                   for n in namen) + "}"
-        qn = "nullif(QN_4, -999)" if "QN_4" in namen else "NULL"
+        def wert(dwd_name):
+            return f"nullif({dwd_name}, -999)" if dwd_name in namen else "NULL"
+        weitere = ", ".join(wert(k) for k in WEITERE)
         pfad = os.path.join(ordner, art + ".csv")
         with open(pfad, "wb") as datei:
             datei.write(roh)
@@ -202,7 +234,7 @@ class Daten:
             INSERT INTO tag
             SELECT ?, strptime(trim(MESS_DATUM), '%Y%m%d')::DATE,
                    nullif(TMK, -999), nullif(TXK, -999), nullif(TNK, -999),
-                   {qn}, ?
+                   {wert("QN_4")}, ?, {weitere}, {wert("QN_3")}
             FROM read_csv(?, delim=';', header=true, auto_detect=false,
                           columns={spalten}, null_padding=true)
             WHERE trim(MESS_DATUM) <> ''
@@ -306,6 +338,218 @@ class Daten:
             "monate": monate,
             "bisher": {"m": _r(eigen[0], 2), "tage": eigen[1],
                        "platz": platz, "von": len(reihe)},
+            "prognose": (self._prognose(c, r, sid, letzter)
+                         if jahr == letzter.year else None),
+        }
+
+    # ----------------------------------------------------------- Prognose
+    def _prognose(self, c, r, sid, letzter: dt.date) -> dict | None:
+        """Wo landet das Jahresmittel am 31.12.?
+
+        Bisher gemessen plus der Rest des Jahres. Für den Rest nimmt jedes
+        der letzten 30 Jahre sein eigenes Mittel vom Tag nach `letzter` bis
+        zum 31.12.; davon das 10., 50. und 90. Perzentil. (So entschieden:
+        die letzten 30 Jahre, damit die Erwärmung drin ist.) Pro Tag ein
+        Perzentil zu summieren gäbe ein viel zu breites Band - dass jeder
+        Tag bis Silvester zu den kältesten zehn Prozent gehört, kommt nicht
+        vor.
+
+        Nur für das laufende Kalenderjahr, und nur wenn der Rest in einem
+        Vergleichsjahr zu mindestens 90 % gemessen ist.
+        """
+        jahr = letzter.year
+        if jahr != heute().year:
+            return None
+        jahresende = dt.date(jahr, 12, 31)
+        rest = (jahresende - letzter).days
+        tage_im_jahr = jahresende.timetuple().tm_yday
+        bisher_tage = tage_im_jahr - rest
+        eigen = c.execute(f"""
+            SELECT avg(tmk), count(tmk) FROM {r}
+            WHERE year(datum) = ? AND datum <= ?""",
+                          [sid, jahr, letzter]).fetchone()
+        if eigen[0] is None or eigen[1] < 0.9 * bisher_tage:
+            return None
+        if rest == 0:
+            q = [eigen[0]] * 3
+            vergleich = 0
+        else:
+            z = c.execute(f"""
+                WITH j AS (SELECT year(datum) y, avg(tmk) m, count(tmk) n
+                           FROM {r}
+                           WHERE year(datum) BETWEEN ? AND ?
+                             AND month(datum) * 100 + day(datum) > ?
+                           GROUP BY 1)
+                SELECT quantile_cont(m, [0.1, 0.5, 0.9]), count(*)
+                FROM j WHERE n >= ?""",
+                          [sid, jahr - PROGNOSE_JAHRE, jahr - 1,
+                           letzter.month * 100 + letzter.day,
+                           0.9 * rest]).fetchone()
+            if not z[1]:
+                return None
+            vergleich = z[1]
+            q = [(eigen[0] * bisher_tage + w * rest) / tage_im_jahr
+                 for w in z[0]]
+        volle = [z[0] for z in c.execute(f"""
+            SELECT avg(tmk) FROM {r} WHERE year(datum) <> ?
+            GROUP BY year(datum) HAVING count(tmk) >= {JAHR_MIN_TAGE}""",
+                                          [sid, jahr]).fetchall()]
+
+        def platz(wert):
+            return 1 + sum(1 for v in volle if v > wert)
+
+        return {"tief": _r(q[0], 2), "mitte": _r(q[1], 2), "hoch": _r(q[2], 2),
+                "platz": platz(q[1]), "platz_hoch": platz(q[2]),
+                "platz_tief": platz(q[0]), "von": len(volle) + 1,
+                "vergleichsjahre": vergleich,
+                "jahre": [jahr - PROGNOSE_JAHRE, jahr - 1],
+                "rest_tage": rest}
+
+    # ---------------------------------------------------------- Rangliste
+    def rangliste(self, sid, modus: str, mit_prognose: bool, stufe) -> dict:
+        """Alle Jahre nach Mittel, wärmstes zuerst.
+
+        modus "heute": jedes Jahr vom 1.1. bis zum selben Kalendertag wie
+        der letzte Messtag (mindestens 90 % gemessen).
+        modus "jahr": ganze Jahre (mindestens 330 Tage). Das laufende Jahr
+        ist dann nur mit Prognose dabei - als Mitte des Bands.
+        Abweichung gegen das Mittel derselben Spanne 1991-2020.
+        """
+        c = self._c()
+        r = plausibel.rein(stufe, "station = ?")
+        letzter = c.execute(f"SELECT max(datum) FROM {r} WHERE tmk IS NOT NULL",
+                            [sid]).fetchone()[0]
+        if letzter is None:
+            return {"zeilen": []}
+        if modus == "heute":
+            bis_md = letzter.month * 100 + letzter.day
+            spanne = (letzter - dt.date(letzter.year, 1, 1)).days + 1
+            zeilen = c.execute(f"""
+                SELECT year(datum), avg(tmk), count(tmk) FROM {r}
+                WHERE month(datum) * 100 + day(datum) <= ?
+                GROUP BY 1 HAVING count(tmk) >= ?""",
+                               [sid, bis_md, 0.9 * spanne]).fetchall()
+        else:
+            modus = "jahr"
+            zeilen = c.execute(f"""
+                SELECT year(datum), avg(tmk), count(tmk) FROM {r}
+                WHERE year(datum) <> ?
+                GROUP BY 1 HAVING count(tmk) >= {JAHR_MIN_TAGE}""",
+                               [sid, letzter.year]).fetchall()
+        liste = [{"jahr": y, "m": m, "tage": n} for y, m, n in zeilen]
+        prognose = None
+        if modus == "jahr" and mit_prognose:
+            prognose = self._prognose(c, r, sid, letzter)
+            if prognose:
+                liste.append({"jahr": letzter.year, "m": prognose["mitte"],
+                              "tage": None, "prognose": True,
+                              "tief": prognose["tief"],
+                              "hoch": prognose["hoch"]})
+        normale = [z["m"] for z in liste
+                   if NORMAL_VON <= z["jahr"] <= NORMAL_BIS]
+        normal = sum(normale) / len(normale) if normale else None
+        liste.sort(key=lambda z: -z["m"])
+        for i, z in enumerate(liste):
+            z["platz"] = i + 1
+            z["abw"] = _r(z["m"] - normal, 2) if normal is not None else None
+            z["m"] = _r(z["m"], 2)
+        return {"zeilen": liste, "modus": modus, "letzter": letzter.isoformat(),
+                "jahr": letzter.year, "normal": _r(normal, 2),
+                "normal_jahre": len(normale), "prognose": prognose}
+
+    # -------------------------------------------------------------- Monat
+    def monat(self, sid, jahr, monat, stufe) -> dict:
+        """Ein Monat Tag für Tag mit allen Größen, dazu Summe und Normal.
+
+        Summe: Mittel über die Tage, bei Niederschlag und Sonne die Summe.
+        Normal: derselbe Monat 1991-2020, und zwar dieselben Tage - im
+        laufenden Monat bis zum letzten Messtag, sonst hinkt die Summe des
+        halben Monats gegen die eines ganzen.
+        Wind kommt vom DWD in m/s und geht hier als km/h hinaus.
+        """
+        c = self._c()
+        r = plausibel.rein(stufe, "station = ?")
+        z = c.execute(f"SELECT min(datum), max(datum) FROM {r} "
+                      "WHERE tmk IS NOT NULL OR rsk IS NOT NULL", [sid]).fetchone()
+        if z[1] is None:
+            return {"leer": True}
+        erster, letzter = z
+        if not jahr or not monat:
+            jahr, monat = letzter.year, letzter.month
+        jahr, monat = int(jahr), int(monat)
+        sp = ", ".join(MONAT_SPALTEN)
+        tage = c.execute(f"""
+            SELECT day(datum), {_tag_index('datum')}, {sp} FROM {r}
+            WHERE year(datum) = ? AND month(datum) = ? ORDER BY datum""",
+                         [sid, jahr, monat]).fetchall()
+        bis_tag = max((t[0] for t in tage), default=31)
+        # Tagesnormal des Mittels für die Farbe: +-7 Tage, 1991-2020
+        normal_tag = dict(c.execute(f"""
+            WITH b AS (SELECT {_tag_index('datum')} AS k, tmk FROM {r}
+                       WHERE year(datum) BETWEEN {NORMAL_VON} AND {NORMAL_BIS}),
+            p AS (SELECT (k + o + 366) % 366 AS k, tmk FROM b, range(-7, 8) t(o))
+            SELECT k, avg(tmk) FROM p WHERE k IN (SELECT unnest(?::INTEGER[]))
+            GROUP BY k""", [sid, [t[1] for t in tage]]).fetchall())
+
+        def mittel_oder_summe(spalte):
+            return f"sum({spalte})" if spalte in SUMMEN else f"avg({spalte})"
+
+        werte_spalten = [s for s in MONAT_SPALTEN if s != "rskf"]
+        z = c.execute(f"""
+            SELECT {", ".join(mittel_oder_summe(s) for s in werte_spalten)},
+                   {", ".join(f"count({s})" for s in werte_spalten)}
+            FROM {r} WHERE year(datum) = ? AND month(datum) = ?""",
+                      [sid, jahr, monat]).fetchone()
+        n = len(werte_spalten)
+        summe = dict(zip(werte_spalten, z[:n]))
+        anzahl = dict(zip(werte_spalten, z[n:]))
+
+        normal = c.execute(f"""
+            WITH b AS (SELECT * FROM {r}
+                       WHERE year(datum) BETWEEN {NORMAL_VON} AND {NORMAL_BIS}
+                         AND month(datum) = ? AND day(datum) <= ?),
+            j AS (SELECT year(datum) y,
+                         {", ".join(f"sum({s}) AS {s}, count({s}) AS n_{s}"
+                                    for s in SUMMEN)}
+                  FROM b GROUP BY 1)
+            SELECT {", ".join(
+                f"(SELECT avg({s}) FROM j WHERE n_{s} >= 0.9 * ?)"
+                if s in SUMMEN else f"(SELECT avg({s}) FROM b)"
+                for s in werte_spalten)},
+                   (SELECT count(DISTINCT year(datum)) FROM b
+                    WHERE tmk IS NOT NULL)""",
+                           [sid, monat, bis_tag]
+                           + [bis_tag] * len(SUMMEN)).fetchone()
+        normal_jahre = normal[-1]
+        normal = dict(zip(werte_spalten, normal[:-1]))
+
+        def ausgabe(spalte, wert):
+            if wert is None:
+                return None
+            if spalte in WIND:
+                return _r(wert * 3.6)
+            if spalte == "rskf":
+                return int(wert)
+            return _r(wert)
+
+        zeilen = []
+        for t in tage:
+            werte = dict(zip(MONAT_SPALTEN, t[2:]))
+            nm = normal_tag.get(t[1])
+            zeilen.append({
+                "tag": t[0],
+                "werte": {s: ausgabe(s, w) for s, w in werte.items()},
+                "abw": _r(werte["tmk"] - nm) if nm is not None
+                and werte["tmk"] is not None else None})
+        return {
+            "jahr": jahr, "monat": monat, "bis_tag": bis_tag,
+            "erster": erster.isoformat(), "letzter": letzter.isoformat(),
+            "spalten": MONAT_SPALTEN, "summen": sorted(SUMMEN),
+            "zeilen": zeilen,
+            "summe": {s: ausgabe(s, w) for s, w in summe.items()},
+            "anzahl": anzahl,
+            "normal": {s: ausgabe(s, w) for s, w in normal.items()},
+            "normal_jahre": normal_jahre,
         }
 
     def zeitreihe(self, sid, groesse: str, aufloesung: str, stufe) -> dict:
@@ -362,6 +606,11 @@ class Daten:
                          "ORDER BY tnk, datum LIMIT 1", [sid]).fetchone()
         return {"heiss": [_r(heiss[0]), heiss[1].isoformat()] if heiss else None,
                 "kalt": [_r(kalt[0]), kalt[1].isoformat()] if kalt else None}
+
+
+def heute() -> dt.date:
+    """Eigene Funktion, damit Tests ein anderes Heute setzen können."""
+    return dt.date.today()
 
 
 def _datum(text: str):

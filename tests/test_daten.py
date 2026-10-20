@@ -102,10 +102,55 @@ def test_qn_stufen(db):
     db.einlesen(1, produkt(1, [(D(2000, 1, 1), 1.0, 2.0, 0.0, 1),
                                (D(2000, 1, 2), 1.0, 2.0, 0.0, 5),
                                (D(2000, 1, 3), 1.0, 2.0, 0.0, 10)]), None, "h")
-    assert len(rein(db, "alle")) == 3
-    assert len(rein(db, "ab5")) == 2
-    assert len(rein(db, "nur10")) == 1
-    assert len(rein(db, "unsinn")) == 3, "Unbekanntes ist die Vorgabe"
+    def gezaehlt(stufe):
+        return sum(1 for z in rein(db, stufe) if z[1] is not None)
+    assert gezaehlt("alle") == 3
+    assert gezaehlt("ab5") == 2
+    assert gezaehlt("nur10") == 1
+    assert gezaehlt("unsinn") == 3, "Unbekanntes ist die Vorgabe"
+
+
+def test_weitere_groessen_physikalische_grenzen(db):
+    """Die Spalten stehen in der DWD-Reihenfolge; Wind kommt in m/s."""
+    kopf = ("STATIONS_ID;MESS_DATUM;QN_3;  FX;  FM;QN_4; RSK;RSKF; SDK;SHK_TAG;"
+            "  NM; VPM;  PM; TMK; UPM; TXK; TNK; TGK;eor")
+    zeilen = [
+        # gut
+        "1;20000101;10;  20.0;  5.0;10;  3.2;6;  4.5;  2;  6.0; 9.7; 1000.0; 5.0; 80.0; 7.0; 2.0; 1.0;eor",
+        # Spitze 70 m/s = 252 km/h zu viel; Mittel über Spitze; Sonne 17 h;
+        # Feuchte 101 %; Form 5 gibt es nicht
+        "1;20000102;10;  70.0;  5.0;10;  3.2;5; 17.0;  2;  6.0; 9.7; 1000.0; 5.0;101.0; 7.0; 2.0; 1.0;eor",
+        "1;20000103;10;   4.0;  5.0;10;-999;7;  4.5;900;  9.0;130.0; 400.0; 5.0; 80.0; 7.0; 2.0;-60.0;eor",
+        # Wind mit QN_3 1, Rest QN_4 10
+        "1;20000104; 1;  20.0;  5.0;10;  3.2;6;  4.5;  2;  6.0; 9.7; 1000.0; 5.0; 80.0; 7.0; 2.0; 1.0;eor",
+    ]
+    db.einlesen(1, ("\r\n".join([kopf] + zeilen) + "\r\n").encode(), None, "h")
+    import plausibel
+    r = db._c().execute(
+        f"SELECT fx, fm, rsk, rskf, sdk, shk, nm, vpm, pm, upm, tgk "
+        f"FROM {plausibel.rein('alle', 'station = 1')} ORDER BY datum").fetchall()
+    assert r[0] == (20.0, 5.0, 3.2, 6, 4.5, 2.0, 6.0, 9.7, 1000.0, 80.0, 1.0)
+    assert r[1] == (None, 5.0, 3.2, None, None, 2.0, 6.0, 9.7, 1000.0, None, 1.0)
+    assert r[2] == (4.0, None, None, 7, 4.5, None, None, None, None, 80.0, None)
+    nur10 = db._c().execute(
+        f"SELECT fx, rsk FROM {plausibel.rein('nur10', 'station = 1')} "
+        "ORDER BY datum").fetchall()
+    assert nur10[3] == (None, 3.2), "Wind folgt QN_3, der Rest QN_4"
+
+
+def test_alte_datenbank_wird_umgebaut(tmp_path):
+    import duckdb
+    pfad = str(tmp_path / "alt.duckdb")
+    con = duckdb.connect(pfad)
+    con.execute("CREATE TABLE tag (station INTEGER, datum DATE, tmk DOUBLE)")
+    con.execute("CREATE TABLE meta (k VARCHAR PRIMARY KEY, v VARCHAR)")
+    con.execute("INSERT INTO meta VALUES ('qn', 'nur10')")
+    con.close()
+    d = daten.Daten(pfad)
+    assert d.meta("qn") == "nur10", "Einstellungen bleiben"
+    assert d.meta("schema") == daten.SCHEMA_STAND
+    assert d.geladene() == []
+    d.schliessen()
 
 
 def test_bilanz_zaehlt_jede_regel(db):
@@ -180,3 +225,76 @@ def test_stationsliste_zaehlt_geladene_tage(db):
     db.einlesen(1, produkt(1, reihe(D(2000, 1, 1), D(2000, 1, 10))), None, "h")
     assert db.stationen() == [[1, "Prüfstadt", "Testland", 100, 1950,
                                "2026-10-19", 10]]
+
+
+# ------------------------------------------------- Prognose und Rangliste
+@pytest.fixture
+def dreissig(db, monkeypatch):
+    """1996-2025: Jan-Okt 10 °C, Rest des Jahres je Jahr 1..30 °C kälter
+    bzw. ansteigend; 2026 bis 31.10. mit 12 °C. Heute ist der 1.11.2026."""
+    monkeypatch.setattr(daten, "heute", lambda: D(2026, 11, 1))
+
+    def wert(d):
+        if d.year == 2026:
+            m = 12.0
+        elif d.month <= 10:
+            m = 10.0
+        else:
+            m = float(d.year - 1995)          # 1 .. 30
+        return (m, m + 3, m - 3)
+    db.einlesen(1, produkt(1, reihe(D(1996, 1, 1), D(2026, 10, 31), wert)),
+                None, "h")
+    return db
+
+
+def test_prognose_aus_dem_rest_der_vergleichsjahre(dreissig):
+    p = dreissig.jahresband(1, None, "alle")["prognose"]
+    assert p["vergleichsjahre"] == 30 and p["jahre"] == [1996, 2025]
+    assert p["rest_tage"] == 61
+    # Rest-Mittel 1..30: 10 % = 3,9, Median 15,5, 90 % = 27,1
+    bisher = 12.0 * 304
+    assert p["tief"] == pytest.approx((bisher + 3.9 * 61) / 365, abs=0.01)
+    assert p["mitte"] == pytest.approx((bisher + 15.5 * 61) / 365, abs=0.01)
+    assert p["hoch"] == pytest.approx((bisher + 27.1 * 61) / 365, abs=0.01)
+    assert p["platz_hoch"] <= p["platz"] <= p["platz_tief"]
+    assert p["von"] == 31
+
+
+def test_keine_prognose_fuer_vergangene_jahre(dreissig, monkeypatch):
+    assert dreissig.jahresband(1, 2025, "alle")["prognose"] is None
+    monkeypatch.setattr(daten, "heute", lambda: D(2027, 3, 1))
+    assert dreissig.jahresband(1, None, "alle")["prognose"] is None
+
+
+def test_rangliste_bis_heute_und_bis_jahresende(dreissig):
+    heute = dreissig.rangliste(1, "heute", True, "alle")
+    assert heute["zeilen"][0]["jahr"] == 2026, "bis 31.10. ist 2026 am wärmsten"
+    assert len(heute["zeilen"]) == 31
+
+    ohne = dreissig.rangliste(1, "jahr", False, "alle")
+    assert 2026 not in [z["jahr"] for z in ohne["zeilen"]]
+    assert ohne["zeilen"][0]["jahr"] == 2025, "wärmster Rest, wärmstes Jahr"
+
+    mit = dreissig.rangliste(1, "jahr", True, "alle")
+    zeile = next(z for z in mit["zeilen"] if z["jahr"] == 2026)
+    assert zeile["prognose"] and zeile["tief"] < zeile["m"] < zeile["hoch"]
+    assert [z["platz"] for z in mit["zeilen"]] == list(range(1, 32))
+
+
+def test_monat_mit_summe_und_normal(db, monkeypatch):
+    def wert(d):
+        return (10.0, 15.0, 5.0)
+    db.einlesen(1, produkt(1, reihe(D(1991, 1, 1), D(2021, 1, 10), wert)),
+                None, "h")
+    m = db.monat(1, None, None, "alle")
+    assert (m["jahr"], m["monat"], m["bis_tag"]) == (2021, 1, 10)
+    assert len(m["zeilen"]) == 10
+    tag = m["zeilen"][0]
+    # aus hilfen.zeile: FX 7,9 m/s, FM 2,9 m/s, RSK 0,4, RSKF 6
+    assert tag["werte"]["fx"] == 28.4 and tag["werte"]["fm"] == 10.4
+    assert tag["werte"]["rskf"] == 6 and tag["abw"] == 0.0
+    assert m["summe"]["rsk"] == 4.0, "Niederschlag wird summiert"
+    assert m["summe"]["tmk"] == 10.0, "Temperatur gemittelt"
+    # Normal über dieselben zehn Januartage 1991-2020
+    assert m["normal"]["rsk"] == 4.0 and m["normal_jahre"] == 30
+    assert m["anzahl"]["tmk"] == 10

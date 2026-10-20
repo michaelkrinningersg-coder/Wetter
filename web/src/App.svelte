@@ -7,8 +7,10 @@
   // `status()` mit einem Zähler - steigt er, wird die Ansicht neu geladen.
   import { onMount } from "svelte";
   import { rufe } from "./lib/api.js";
-  import { datum, tausend } from "./lib/format.js";
+  import { MONATE, datum, tausend } from "./lib/format.js";
   import Jahresband from "./lib/Jahresband.svelte";
+  import Monat from "./lib/Monat.svelte";
+  import Rangliste from "./lib/Rangliste.svelte";
   import Stationswahl from "./lib/Stationswahl.svelte";
   import Zeitreihe from "./lib/Zeitreihe.svelte";
 
@@ -20,7 +22,13 @@
   let groesse = $state("m");
   let aufloesung = $state("jahr");
 
+  let monatWahl = $state(null); // [jahr, monat] oder null = letzter
+  let rangModus = $state("heute");
+  let rangPrognose = $state(true);
+
   let band = $state(null);
+  let monat = $state(null);
+  let liste = $state(null);
   let reihe = $state(null);
   let laedt = $state("");
   let fehler = $state("");
@@ -53,6 +61,7 @@
     if (r.fehler) return false;
     station = r;
     jahr = null;
+    monatWahl = null;
     rufe("einstellung", "station", id);
     if (r.geladen) await listeNeu();
     await ansichtLaden();
@@ -70,6 +79,12 @@
     if (ansicht === "band") {
       const r = await sicher(() => rufe("jahresband", id, jahr, qn));
       if (!r.fehler) band = r;
+    } else if (ansicht === "monat") {
+      const r = await sicher(() => rufe("monat", id, monatWahl?.[0] ?? null, monatWahl?.[1] ?? null, qn));
+      if (!r.fehler) monat = r;
+    } else if (ansicht === "rang") {
+      const r = await sicher(() => rufe("rangliste", id, rangModus, rangPrognose, qn));
+      if (!r.fehler) liste = r;
     } else {
       const r = await sicher(() => rufe("zeitreihe", id, groesse, aufloesung, qn));
       if (!r.fehler) reihe = r;
@@ -82,6 +97,9 @@
     if (was === "jahr") jahr = wert;
     if (was === "groesse") groesse = wert;
     if (was === "aufloesung") aufloesung = wert;
+    if (was === "monat") monatWahl = wert;
+    if (was === "rangModus") ((rangModus = wert), rufe("einstellung", "rang_modus", wert));
+    if (was === "rangPrognose") ((rangPrognose = wert), rufe("einstellung", "rang_prognose", wert));
     ansichtLaden();
   }
 
@@ -119,7 +137,9 @@
     if (r.fehler) return;
     version = r.version;
     stationen = r.stationen;
-    ansicht = r.einstellungen.ansicht === "reihe" ? "reihe" : "band";
+    ansicht = ["band", "monat", "rang", "reihe"].includes(r.einstellungen.ansicht) ? r.einstellungen.ansicht : "band";
+    rangModus = r.einstellungen.rang_modus === "jahr" ? "jahr" : "heute";
+    rangPrognose = r.einstellungen.rang_prognose !== false;
     qn = r.einstellungen.qn;
     await stationLaden(r.einstellungen.station);
     horchen();
@@ -139,6 +159,8 @@
 
     <div class="gruppe">
       <button class="chip" class:an={ansicht === "band"} onclick={() => setze("ansicht", "band")}>Jahresband</button>
+      <button class="chip" class:an={ansicht === "monat"} onclick={() => setze("ansicht", "monat")}>Monat</button>
+      <button class="chip" class:an={ansicht === "rang"} onclick={() => setze("ansicht", "rang")}>Rangliste</button>
       <button class="chip" class:an={ansicht === "reihe"} onclick={() => setze("ansicht", "reihe")}>Zeitreihe</button>
     </div>
 
@@ -160,6 +182,40 @@
           {/each}
         </select>
       </div>
+    {:else if ansicht === "monat" && monat && !monat.leer}
+      {@const [j, m] = [monat.jahr, monat.monat]}
+      {@const vor = m === 1 ? [j - 1, 12] : [j, m - 1]}
+      {@const nach = m === 12 ? [j + 1, 1] : [j, m + 1]}
+      {@const ab = monat.erster.slice(0, 7)}
+      {@const bis = monat.letzter.slice(0, 7)}
+      {@const schluessel = (x) => `${x[0]}-${String(x[1]).padStart(2, "0")}`}
+      <div class="gruppe">
+        <button class="chip" disabled={schluessel(vor) < ab} onclick={() => setze("monat", vor)} title="Monat davor">‹</button>
+        <span class="chip an monat-name">{MONATE[m - 1]} {j}</span>
+        <button class="chip" disabled={schluessel(nach) > bis} onclick={() => setze("monat", nach)} title="Monat danach">›</button>
+        <select
+          class="chip"
+          value={j}
+          onchange={(e) => setze("monat", [Number(e.currentTarget.value), m])}
+          title="Jahr"
+        >
+          {#each Array.from({ length: Number(bis.slice(0, 4)) - Number(ab.slice(0, 4)) + 1 }, (_, i) => Number(bis.slice(0, 4)) - i) as y}
+            <option value={y}>{y}</option>
+          {/each}
+        </select>
+        <button class="chip" onclick={() => setze("monat", null)} title="Zum letzten Monat mit Daten">aktuell</button>
+      </div>
+    {:else if ansicht === "rang"}
+      <div class="gruppe">
+        <button class="chip" class:an={rangModus === "heute"} onclick={() => setze("rangModus", "heute")}>bis heute</button>
+        <button class="chip" class:an={rangModus === "jahr"} onclick={() => setze("rangModus", "jahr")}>bis Jahresende</button>
+      </div>
+      {#if rangModus === "jahr"}
+        <div class="gruppe">
+          <button class="chip" class:an={rangPrognose} onclick={() => setze("rangPrognose", true)}>mit Prognose</button>
+          <button class="chip" class:an={!rangPrognose} onclick={() => setze("rangPrognose", false)}>ohne</button>
+        </div>
+      {/if}
     {:else if ansicht === "reihe"}
       <div class="gruppe">
         {#each [["m", "Mittel"], ["x", "Max"], ["n", "Min"]] as [k, t]}
@@ -197,6 +253,10 @@
 
     {#if ansicht === "band" && band && !band.leer}
       <Jahresband {band} name={station.station.name} />
+    {:else if ansicht === "monat" && monat && !monat.leer}
+      <Monat {monat} />
+    {:else if ansicht === "rang" && liste}
+      <Rangliste {liste} name={station.station.name} />
     {:else if ansicht === "reihe" && reihe}
       <Zeitreihe {reihe} name={station.station.name} {groesse} {aufloesung} />
     {:else if band?.leer}
@@ -232,7 +292,8 @@
 <style>
   .seite {
     display: grid;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr);
     height: 100%;
   }
   header {
@@ -243,6 +304,8 @@
     background: var(--flaeche);
     border-bottom: 1px solid var(--rand);
     white-space: nowrap;
+    flex-wrap: wrap;
+    row-gap: 8px;
   }
   .logo {
     width: 28px;
@@ -265,6 +328,15 @@
     font-weight: 600;
     color: var(--text-3);
     padding: 3px 4px 3px 8px;
+  }
+  .chip:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+  .monat-name {
+    min-width: 76px;
+    text-align: center;
+    cursor: default;
   }
   select.chip {
     appearance: none;

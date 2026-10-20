@@ -140,7 +140,9 @@ class Api:
         db = self._daten()
         return {"station": int(db.meta("station", GOETTINGEN)),
                 "qn": db.meta("qn", plausibel.QN_VORGABE),
-                "ansicht": db.meta("ansicht", "band")}
+                "ansicht": db.meta("ansicht", "band"),
+                "rang_modus": db.meta("rang_modus", "heute"),
+                "rang_prognose": db.meta("rang_prognose", "1") != "0"}
 
     def _verzeichnis(self, neu=False) -> dict[int, str]:
         """Stationsnummer -> hist-Archiv; gemerkt, einmal am Tag neu."""
@@ -238,9 +240,11 @@ class Api:
 
     def einstellung(self, name: str, wert) -> dict:
         def arbeit():
-            if name not in ("station", "qn", "ansicht"):
+            if name not in ("station", "qn", "ansicht", "rang_modus",
+                            "rang_prognose"):
                 raise Hinweis(f"Unbekannte Einstellung: {name}")
-            self._daten().meta_setzen(name, wert)
+            text = ("1" if wert else "0") if isinstance(wert, bool) else wert
+            self._daten().meta_setzen(name, text)
             return {"ok": True}
         return self._sicher(arbeit)
 
@@ -282,10 +286,19 @@ class Api:
             db = self._daten()
             band = db.jahresband(int(sid), jahr, qn)
             band["jahre"] = db.jahre(int(sid), qn)
-            band["rekorde"] = db.rekorde(int(sid), qn)
             band["bilanz"] = db.bilanz(int(sid), qn)
             return band
         return self._sicher(arbeit)
+
+    def monat(self, sid, jahr=None, monat=None,
+              qn=plausibel.QN_VORGABE) -> dict:
+        return self._sicher(lambda: self._daten().monat(
+            int(sid), jahr, monat, qn))
+
+    def rangliste(self, sid, modus="heute", prognose=True,
+                  qn=plausibel.QN_VORGABE) -> dict:
+        return self._sicher(lambda: self._daten().rangliste(
+            int(sid), modus, bool(prognose), qn))
 
     def zeitreihe(self, sid, groesse="m", aufloesung="jahr",
                   qn=plausibel.QN_VORGABE) -> dict:

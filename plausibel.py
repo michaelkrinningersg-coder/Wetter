@@ -20,8 +20,23 @@ Die Regeln (so entschieden):
   5. Qualitätsniveau (QN) umschaltbar: alle / ab QN 5 / nur QN 10.
      Vorgabe: alle. Ein strenger Filter schneidet Jahrzehnte ab - vor 1981
      vergibt der DWD höchstens QN 5, die letzten Jahre tragen QN 9.
+     Wind trägt beim DWD ein eigenes QN (QN_3), alles andere QN_4.
 
-Die Regeln 1 bis 3 greifen nach der QN-Auswahl und vor jeder Rechnung.
+Die übrigen Größen (so entschieden): physikalische Grenzen, außerhalb
+fällt nur dieser eine Wert weg -
+
+     Wind (Mittel, Spitze)  0-250 km/h; Mittel über der Spitze -> Mittel weg
+     Niederschlag           0-300 mm
+     Sonnenschein           0-16,5 h (längster Tag in Deutschland)
+     Schneehöhe             0-800 cm
+     Bedeckung              0-8 Achtel
+     rel. Feuchte           0-100 %
+     Luftdruck              500-1100 hPa
+     Dampfdruck             0-125 hPa (Sättigung bei der Obergrenze 50 °C)
+     Erdbodenminimum        -50 bis +50 °C
+     Niederschlagsform      nur die Codes des DWD (0 1 4 6 7 8 9)
+
+Die Regeln greifen nach der QN-Auswahl und vor jeder Rechnung.
 """
 
 from __future__ import annotations
@@ -29,6 +44,12 @@ from __future__ import annotations
 TIEFST = -45.0
 HOECHST = 50.0
 SPRUNG = 15.0
+
+WIND_MAX = 250 / 3.6          # km/h -> m/s, so liefert der DWD
+GRENZEN = {"fx": (0, WIND_MAX), "fm": (0, WIND_MAX), "rsk": (0, 300),
+           "sdk": (0, 16.5), "shk": (0, 800), "nm": (0, 8), "upm": (0, 100),
+           "pm": (500, 1100), "vpm": (0, 125), "tgk": (-50, 50)}
+NS_FORMEN = (0, 1, 4, 6, 7, 8, 9)
 
 # Wie die Seite sie nennt -> kleinstes zugelassenes QN
 QN_STUFEN = {"alle": 0, "ab5": 5, "nur10": 10}
@@ -41,8 +62,8 @@ def qn_min(stufe) -> int:
     return QN_STUFEN.get(stufe, QN_STUFEN[QN_VORGABE])
 
 
-def _grenze(spalte: str) -> str:
-    return (f"CASE WHEN {spalte} BETWEEN {TIEFST} AND {HOECHST} "
+def _grenze(spalte: str, tief=TIEFST, hoch=HOECHST) -> str:
+    return (f"CASE WHEN {spalte} BETWEEN {tief} AND {hoch} "
             f"THEN {spalte} END")
 
 
@@ -53,19 +74,35 @@ def rein(stufe=QN_VORGABE, wo: str = "TRUE") -> str:
     Zeilen einer Station anfasst. Die Spalten heißen wie in `tag`.
     """
     q = qn_min(stufe)
+    ok4 = f"coalesce(qn, 0) >= {q}"
+    ok3 = f"coalesce(qn3, 0) >= {q}"
+
+    def weitere(spalte, ok):
+        tief, hoch = GRENZEN[spalte]
+        return f"CASE WHEN {ok} THEN {_grenze(spalte, tief, hoch)} END AS {spalte}"
+
     return f"""(
     SELECT station, datum, qn, quelle,
            CASE WHEN x0 < n0 THEN NULL
                 WHEN m0 < n0 OR m0 > x0 THEN NULL
                 ELSE m0 END AS tmk,
            CASE WHEN x0 < n0 THEN NULL ELSE x0 END AS txk,
-           CASE WHEN x0 < n0 THEN NULL ELSE n0 END AS tnk
+           CASE WHEN x0 < n0 THEN NULL ELSE n0 END AS tnk,
+           fx, CASE WHEN fm > fx THEN NULL ELSE fm END AS fm,
+           rsk, rskf, sdk, shk, nm, vpm, pm, upm, tgk
     FROM (SELECT station, datum, qn, quelle,
-                 {_grenze('tmk')} AS m0,
-                 {_grenze('txk')} AS x0,
-                 {_grenze('tnk')} AS n0
+                 CASE WHEN {ok4} THEN {_grenze('tmk')} END AS m0,
+                 CASE WHEN {ok4} THEN {_grenze('txk')} END AS x0,
+                 CASE WHEN {ok4} THEN {_grenze('tnk')} END AS n0,
+                 {weitere('fx', ok3)}, {weitere('fm', ok3)},
+                 {weitere('rsk', ok4)},
+                 CASE WHEN {ok4} AND rskf IN {NS_FORMEN} THEN rskf END AS rskf,
+                 {weitere('sdk', ok4)}, {weitere('shk', ok4)},
+                 {weitere('nm', ok4)}, {weitere('vpm', ok4)},
+                 {weitere('pm', ok4)}, {weitere('upm', ok4)},
+                 {weitere('tgk', ok4)}
           FROM tag
-          WHERE ({wo}) AND coalesce(qn, 0) >= {q})
+          WHERE ({wo}))
 )"""
 
 

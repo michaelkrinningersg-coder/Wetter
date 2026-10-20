@@ -135,6 +135,20 @@
       <div class="leise">1. Januar bis {datum(band.ende)} · Platz 1 = am wärmsten</div>
     </div>
 
+    {#if band.prognose}
+      {@const p = band.prognose}
+      <div class="karte kachel">
+        <div class="lbl">Prognose 31.12.{band.jahr}</div>
+        <div class="gross num">{de(p.mitte)} °C</div>
+        <div class="text-2 num">Band {de(p.tief, 2)} – {de(p.hoch, 2)} °C</div>
+        <div class="text-2">Platz <b>{p.platz}</b> ({p.platz_hoch}–{p.platz_tief}) von {p.von} Jahren</div>
+        <div class="leise">
+          Bisher gemessen plus der Rest des Jahres ({p.rest_tage} Tage), wie er in {p.vergleichsjahre} der Jahre
+          {p.jahre[0]}–{p.jahre[1]} war: 10 % · Median · 90 %
+        </div>
+      </div>
+    {/if}
+
     <div class="karte kachel">
       <div class="lbl">Monate gegen normal</div>
       <table>
