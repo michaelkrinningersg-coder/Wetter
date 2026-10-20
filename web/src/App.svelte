@@ -121,7 +121,8 @@
   function setze(was, wert) {
     menue = "";
     if (was === "ansicht") ((ansicht = wert), rufe("einstellung", "ansicht", wert));
-    if (was === "qn") ((qn = wert), (band = null), rufe("einstellung", "qn", wert));
+    // QN gilt nur bis zum nächsten Start - jeder Start beginnt mit "alle"
+    if (was === "qn") ((qn = wert), (band = null));
     if (was === "jahr") jahr = wert;
     if (was === "groesse") groesse = wert;
     if (was === "aufloesung") aufloesung = wert;
@@ -180,7 +181,7 @@
     ansicht = ANSICHTEN.some(([k]) => k === r.einstellungen.ansicht) ? r.einstellungen.ansicht : "band";
     rangModus = r.einstellungen.rang_modus === "jahr" ? "jahr" : "heute";
     rangPrognose = r.einstellungen.rang_prognose !== false;
-    qn = r.einstellungen.qn;
+    qn = "alle"; // so entschieden: immer mit allen Qualitätsstufen beginnen
     await stationLaden(r.einstellungen.station);
     horchen();
   });

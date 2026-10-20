@@ -60,11 +60,13 @@ async function holen(pfad, binaer = true) {
   try {
     if (cap?.isNativePlatform?.()) {
       const { CapacitorHttp } = await import("@capacitor/core");
-      const antwort = await CapacitorHttp.get({ url, responseType: binaer ? "arraybuffer" : "text", connectTimeout: 30000, readTimeout: 60000 });
+      // Immer roh holen: Text liest die native Schicht als UTF-8, die Dateien
+      // des DWD sind aber Latin-1 - aus "Göttingen" würde "G?ttingen".
+      const antwort = await CapacitorHttp.get({ url, responseType: "arraybuffer", connectTimeout: 30000, readTimeout: 60000 });
       if (antwort.status >= 400) throw new Error(`HTTP ${antwort.status}`);
-      if (!binaer) return antwort.data;
       // binär kommt als Base64 über die Brücke
-      return typeof antwort.data === "string" ? Uint8Array.from(atob(antwort.data), (c) => c.charCodeAt(0)) : new Uint8Array(antwort.data);
+      const bytes = typeof antwort.data === "string" ? Uint8Array.from(atob(antwort.data), (c) => c.charCodeAt(0)) : new Uint8Array(antwort.data);
+      return binaer ? bytes : new TextDecoder("latin1").decode(bytes);
     }
     const r = await fetch(url);
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -104,7 +106,9 @@ const heute = () => {
 
 async function liste() {
   if (stationsliste) return stationsliste;
-  stationsliste = (await meta("stationen")) ?? (await mitgeliefert("stationen.json"));
+  // "stationen_v2": bis v1.0.1 las die App die Liste als UTF-8 statt Latin-1,
+  // die damals gespeicherte Liste hat kaputte Umlaute und bleibt liegen
+  stationsliste = (await meta("stationen_v2")) ?? (await mitgeliefert("stationen.json"));
   return stationsliste;
 }
 
@@ -210,12 +214,12 @@ async function hintergrund(id) {
       const s2 = await lesen("station", id);
       if (s2 && (s2.hist_datei ?? null) !== (v[id] ?? null)) await laden(id);
     }
-    if (Date.now() - (await meta("stationen_am", 0)) > VERZEICHNIS_ALTER) {
+    if (!(await meta("stationen_v2")) || Date.now() - (await meta("stationen_am", 0)) > VERZEICHNIS_ALTER) {
       zustand.laeuft = "Stationsliste des DWD …";
       const neu = stationenLesen(await holen("recent/KL_Tageswerte_Beschreibung_Stationen.txt", false));
       if (neu.length > 100) {
         stationsliste = neu;
-        await schreiben("meta", "stationen", neu);
+        await schreiben("meta", "stationen_v2", neu);
         await schreiben("meta", "stationen_am", Date.now());
         zustand.stand++;
       }
