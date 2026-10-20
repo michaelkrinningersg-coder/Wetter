@@ -13,6 +13,8 @@
   import Rangliste from "./lib/Rangliste.svelte";
   import Stationswahl from "./lib/Stationswahl.svelte";
   import Zeitreihe from "./lib/Zeitreihe.svelte";
+  import symbolRoh from "./lib/icon.svg?raw";
+  const symbol = "data:image/svg+xml," + encodeURIComponent(symbolRoh);
 
   let stationen = $state([]);
   let station = $state(null); // {station, zeitraum, abruf}
@@ -153,7 +155,7 @@
 
 <div class="seite">
   <header>
-    <div class="logo">W</div>
+    <img class="logo" src={symbol} alt="" />
     <b class="titel">Wetter</b>
     <Stationswahl {stationen} aktuell={kopfStation} wahl={(id) => stationLaden(id)} />
 
@@ -308,14 +310,9 @@
     row-gap: 8px;
   }
   .logo {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    background: var(--akzent);
-    display: grid;
-    place-items: center;
-    color: #fff;
-    font-weight: 700;
+    width: 30px;
+    height: 30px;
+    margin: -1px;
   }
   .titel {
     font-size: 16px;

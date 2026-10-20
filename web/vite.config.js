@@ -12,6 +12,8 @@ export default defineConfig({
     emptyOutDir: true,
     target: "es2022",
     reportCompressedSize: false,
+    // auch das Symbol in die eine Datei - nichts nachzuladen
+    assetsInlineLimit: 100000,
   },
   server: {
     port: 5174,

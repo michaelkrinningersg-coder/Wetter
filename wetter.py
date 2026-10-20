@@ -56,6 +56,8 @@ DATENBANK = "wetter.duckdb"
 GOETTINGEN = 1691
 
 SEITE_VERBUNDEN = "Seite mit Python verbunden"
+SYMBOL_WINDOWS = "Icon.ico"     # das W als Temperaturkurve
+SYMBOL = "Icon.png"
 PROTOKOLL = "wetter.log"
 
 RECENT_ALTER = 3 * 3600       # recent neu, wenn älter (DWD: täglich neu)
@@ -515,7 +517,8 @@ def fenster_starten(api: Api):
         text_select=True, maximized=True)
     windows = sys.platform == "win32"
     webview.start(gui="edgechromium" if windows else None,
-                  debug=bool(os.environ.get("WETTER_DEBUG")))
+                  debug=bool(os.environ.get("WETTER_DEBUG")),
+                  icon=ressource(SYMBOL_WINDOWS if windows else SYMBOL))
 
 
 def netztest() -> int:
