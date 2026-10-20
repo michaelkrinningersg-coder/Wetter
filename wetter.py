@@ -36,6 +36,7 @@ import logging
 import os
 import shutil
 import struct
+import subprocess
 import sys
 import tempfile
 import threading
@@ -97,6 +98,23 @@ def datenbank_oeffnen(ordner: str | None = None) -> daten.Daten:
                       f"in einem anderen Fenster? ({fehler})") from fehler
 
 
+def oeffnen(pfad: str) -> None:
+    """Öffnet einen Ordner im Explorer."""
+    if sys.platform == "win32":
+        os.startfile(pfad)                               # noqa: S606
+    elif sys.platform == "darwin":
+        subprocess.Popen(["open", pfad])
+    else:
+        subprocess.Popen(["xdg-open", pfad])
+
+
+def _liste(text) -> list[int]:
+    try:
+        return [int(v) for v in json.loads(text)]
+    except (TypeError, ValueError):
+        return []
+
+
 class Hinweis(Exception):
     """Was der Anwender wissen muss - kein Fehler im Programm."""
 
@@ -150,7 +168,8 @@ class Api:
                 "qn": db.meta("qn", plausibel.QN_VORGABE),
                 "ansicht": db.meta("ansicht", "band"),
                 "rang_modus": db.meta("rang_modus", "heute"),
-                "rang_prognose": db.meta("rang_prognose", "1") != "0"}
+                "rang_prognose": db.meta("rang_prognose", "1") != "0",
+                "favoriten": _liste(db.meta("favoriten", "[]"))}
 
     def _verzeichnis(self, neu=False) -> dict[int, str]:
         """Stationsnummer -> hist-Archiv; gemerkt, einmal am Tag neu."""
@@ -249,15 +268,27 @@ class Api:
     def einstellung(self, name: str, wert) -> dict:
         def arbeit():
             if name not in ("station", "qn", "ansicht", "rang_modus",
-                            "rang_prognose"):
+                            "rang_prognose", "favoriten"):
                 raise Hinweis(f"Unbekannte Einstellung: {name}")
-            text = ("1" if wert else "0") if isinstance(wert, bool) else wert
+            if isinstance(wert, bool):
+                text = "1" if wert else "0"
+            elif isinstance(wert, list):
+                text = json.dumps([int(v) for v in wert])
+            else:
+                text = wert
             self._daten().meta_setzen(name, text)
             return {"ok": True}
         return self._sicher(arbeit)
 
     def stationen(self) -> dict:
         return self._sicher(lambda: {"stationen": self._daten().stationen()})
+
+    def ordner_oeffnen(self) -> dict:
+        """Menü Datei: der Datenordner im Explorer."""
+        def arbeit():
+            oeffnen(os.path.dirname(self._daten().pfad))
+            return {"ok": True}
+        return self._sicher(arbeit)
 
     # ----------------------------------------------------------- Station
     def station(self, sid) -> dict:

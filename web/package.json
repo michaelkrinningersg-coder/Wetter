@@ -6,12 +6,16 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "test": "node --test test/format.test.js"
+    "test": "node --test test/format.test.js test/paritaet.test.js test/lesen.test.js"
   },
   "dependencies": {
+    "@capacitor/core": "8.5.2",
+    "fflate": "0.8.3",
     "uplot": "1.6.32"
   },
   "devDependencies": {
+    "@capacitor/android": "8.5.2",
+    "@capacitor/cli": "8.5.2",
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
     "svelte": "^5.57.2",
     "vite": "^8.3.3",

@@ -1,12 +1,19 @@
 <script>
-  // Wetter - die Seite. Oben die Kopfzeile (Station, Ansicht, QN, Stand,
-  // Aktualisieren), darunter Jahresband oder Zeitreihe.
+  // Wetter - die Seite. Zustand, Abrufe und Ansichten sind gemeinsam; darum
+  // liegen zwei Hüllen:
   //
-  // Alles kommt aus Python über `rufe()`. Beim Start zeigt die Seite sofort
-  // den gespeicherten Stand; was Python im Hintergrund vom DWD holt, meldet
-  // `status()` mit einem Zähler - steigt er, wird die Ansicht neu geladen.
+  //   PC (Layout D): Menüleiste Datei · Station · Ansicht · Daten · Hilfe,
+  //   darunter das Menüband mit den Gruppen Station, Ansicht, Zeitraum,
+  //   Qualität und Daten. Graphit mit orangem Akzent.
+  //   Handy: Kopfzeile mit Station, darunter die Schalter der Ansicht, unten
+  //   die Navigation; QN und Bereinigung unter "Mehr".
+  //
+  // Alles kommt über `rufe()` - am PC aus Python, auf Android aus dem
+  // Rechenkern im Handy. Beim Start zeigt die Seite sofort den gespeicherten
+  // Stand; was im Hintergrund vom DWD kommt, meldet `status()` mit einem
+  // Zähler - steigt er, wird die Ansicht neu geladen.
   import { onMount } from "svelte";
-  import { rufe } from "./lib/api.js";
+  import { aufDemHandy, rufe } from "./lib/api.js";
   import { MONATE, datum, tausend } from "./lib/format.js";
   import Jahresband from "./lib/Jahresband.svelte";
   import Monat from "./lib/Monat.svelte";
@@ -18,12 +25,12 @@
 
   let stationen = $state([]);
   let station = $state(null); // {station, zeitraum, abruf}
+  let favoriten = $state([]);
   let ansicht = $state("band");
   let qn = $state("alle");
   let jahr = $state(null);
   let groesse = $state("m");
   let aufloesung = $state("jahr");
-
   let monatWahl = $state(null); // [jahr, monat] oder null = letzter
   let rangModus = $state("heute");
   let rangPrognose = $state(true);
@@ -36,11 +43,24 @@
   let fehler = $state("");
   let hintergrund = $state({ laeuft: "", meldung: "", stand: 0 });
   let version = $state("");
+  let datenordner = $state("");
+
+  let handy = $state(false);
+  let menue = $state(""); // offenes Menü der Menüleiste
+  let hilfe = $state(false);
+  let mehr = $state(false); // Handy: Blatt mit QN und Bereinigung
+  let wahl = $state(); // Stationswahl, zum Öffnen aus dem Menü
 
   const QN = [
     ["alle", "alle"],
     ["ab5", "ab 5"],
     ["nur10", "nur 10"],
+  ];
+  const ANSICHTEN = [
+    ["band", "Jahresband", "▥"],
+    ["monat", "Monat", "▦"],
+    ["rang", "Rangliste", "≡"],
+    ["reihe", "Zeitreihe", "⌇"],
   ];
 
   async function sicher(arbeit) {
@@ -91,11 +111,17 @@
       const r = await sicher(() => rufe("zeitreihe", id, groesse, aufloesung, qn));
       if (!r.fehler) reihe = r;
     }
+    // die Bilanz der Bereinigung steht im Jahresband - auch für die Fußzeile
+    if (ansicht !== "band" && !band) {
+      const r = await rufe("jahresband", id, null, qn);
+      if (!r.fehler) band = r;
+    }
   }
 
   function setze(was, wert) {
+    menue = "";
     if (was === "ansicht") ((ansicht = wert), rufe("einstellung", "ansicht", wert));
-    if (was === "qn") ((qn = wert), rufe("einstellung", "qn", wert));
+    if (was === "qn") ((qn = wert), (band = null), rufe("einstellung", "qn", wert));
     if (was === "jahr") jahr = wert;
     if (was === "groesse") groesse = wert;
     if (was === "aufloesung") aufloesung = wert;
@@ -105,7 +131,16 @@
     ansichtLaden();
   }
 
+  function favoritUmschalten() {
+    menue = "";
+    if (!station) return;
+    const id = station.station.id;
+    favoriten = favoriten.includes(id) ? favoriten.filter((f) => f !== id) : [...favoriten, id];
+    rufe("einstellung", "favoriten", favoriten);
+  }
+
   async function aktualisieren() {
+    menue = "";
     if (!station) return;
     laedt = `${station.station.name}: Abruf beim DWD …`;
     const r = await sicher(() => rufe("aktualisieren", station.station.id));
@@ -135,11 +170,14 @@
   }
 
   onMount(async () => {
+    handy = (await aufDemHandy()) || matchMedia("(max-width: 700px)").matches;
     const r = await sicher(() => rufe("start"));
     if (r.fehler) return;
     version = r.version;
+    datenordner = r.datenordner ?? "";
     stationen = r.stationen;
-    ansicht = ["band", "monat", "rang", "reihe"].includes(r.einstellungen.ansicht) ? r.einstellungen.ansicht : "band";
+    favoriten = Array.isArray(r.einstellungen.favoriten) ? r.einstellungen.favoriten : [];
+    ansicht = ANSICHTEN.some(([k]) => k === r.einstellungen.ansicht) ? r.einstellungen.ansicht : "band";
     rangModus = r.einstellungen.rang_modus === "jahr" ? "jahr" : "heute";
     rangPrognose = r.einstellungen.rang_prognose !== false;
     qn = r.einstellungen.qn;
@@ -151,182 +189,604 @@
   const kopfStation = $derived(
     station ? { id: station.station.id, name: station.station.name, hoehe: station.station.hoehe } : null,
   );
+  const istFavorit = $derived(!!station && favoriten.includes(station.station.id));
 </script>
 
-<div class="seite">
-  <header>
-    <img class="logo" src={symbol} alt="" />
-    <b class="titel">Wetter</b>
-    <Stationswahl {stationen} aktuell={kopfStation} wahl={(id) => stationLaden(id)} />
-
+<!-- Schalter der gerade gezeigten Ansicht: im Menüband wie auf dem Handy -->
+{#snippet steuerung()}
+  {#if ansicht === "band" && band && !band.leer}
     <div class="gruppe">
-      <button class="chip" class:an={ansicht === "band"} onclick={() => setze("ansicht", "band")}>Jahresband</button>
-      <button class="chip" class:an={ansicht === "monat"} onclick={() => setze("ansicht", "monat")}>Monat</button>
-      <button class="chip" class:an={ansicht === "rang"} onclick={() => setze("ansicht", "rang")}>Rangliste</button>
-      <button class="chip" class:an={ansicht === "reihe"} onclick={() => setze("ansicht", "reihe")}>Zeitreihe</button>
+      {#each jahreAuswahl.slice(0, 2) as j}
+        <button class="chip" class:an={band.jahr === j} onclick={() => setze("jahr", j)}>{j}</button>
+      {/each}
+      <select
+        class="chip"
+        class:an={jahreAuswahl.indexOf(band.jahr) > 1}
+        value={jahreAuswahl.indexOf(band.jahr) > 1 ? band.jahr : ""}
+        onchange={(e) => setze("jahr", Number(e.currentTarget.value))}
+        title="Anderes Jahr"
+      >
+        <option value="" disabled>…</option>
+        {#each jahreAuswahl.slice(2) as j}
+          <option value={j}>{j}</option>
+        {/each}
+      </select>
     </div>
-
-    {#if ansicht === "band" && band && !band.leer}
-      <div class="gruppe">
-        {#each jahreAuswahl.slice(0, 2) as j}
-          <button class="chip" class:an={band.jahr === j} onclick={() => setze("jahr", j)}>{j}</button>
+  {:else if ansicht === "monat" && monat && !monat.leer}
+    {@const [j, m] = [monat.jahr, monat.monat]}
+    {@const vor = m === 1 ? [j - 1, 12] : [j, m - 1]}
+    {@const nach = m === 12 ? [j + 1, 1] : [j, m + 1]}
+    {@const ab = monat.erster.slice(0, 7)}
+    {@const bis = monat.letzter.slice(0, 7)}
+    {@const schluessel = (x) => `${x[0]}-${String(x[1]).padStart(2, "0")}`}
+    <div class="gruppe">
+      <button class="chip" disabled={schluessel(vor) < ab} onclick={() => setze("monat", vor)} title="Monat davor">‹</button>
+      <span class="chip an monat-name">{MONATE[m - 1]} {j}</span>
+      <button class="chip" disabled={schluessel(nach) > bis} onclick={() => setze("monat", nach)} title="Monat danach">›</button>
+      <select class="chip" value={j} onchange={(e) => setze("monat", [Number(e.currentTarget.value), m])} title="Jahr">
+        {#each Array.from({ length: Number(bis.slice(0, 4)) - Number(ab.slice(0, 4)) + 1 }, (_, i) => Number(bis.slice(0, 4)) - i) as y}
+          <option value={y}>{y}</option>
         {/each}
-        <select
-          class="chip"
-          class:an={jahreAuswahl.indexOf(band.jahr) > 1}
-          value={jahreAuswahl.indexOf(band.jahr) > 1 ? band.jahr : ""}
-          onchange={(e) => setze("jahr", Number(e.currentTarget.value))}
-          title="Anderes Jahr"
-        >
-          <option value="" disabled>…</option>
-          {#each jahreAuswahl.slice(2) as j}
-            <option value={j}>{j}</option>
-          {/each}
-        </select>
-      </div>
-    {:else if ansicht === "monat" && monat && !monat.leer}
-      {@const [j, m] = [monat.jahr, monat.monat]}
-      {@const vor = m === 1 ? [j - 1, 12] : [j, m - 1]}
-      {@const nach = m === 12 ? [j + 1, 1] : [j, m + 1]}
-      {@const ab = monat.erster.slice(0, 7)}
-      {@const bis = monat.letzter.slice(0, 7)}
-      {@const schluessel = (x) => `${x[0]}-${String(x[1]).padStart(2, "0")}`}
+      </select>
+      <button class="chip" onclick={() => setze("monat", null)} title="Zum letzten Monat mit Daten">aktuell</button>
+    </div>
+  {:else if ansicht === "rang"}
+    <div class="gruppe">
+      <button class="chip" class:an={rangModus === "heute"} onclick={() => setze("rangModus", "heute")}>bis heute</button>
+      <button class="chip" class:an={rangModus === "jahr"} onclick={() => setze("rangModus", "jahr")}>bis Jahresende</button>
+    </div>
+    {#if rangModus === "jahr"}
       <div class="gruppe">
-        <button class="chip" disabled={schluessel(vor) < ab} onclick={() => setze("monat", vor)} title="Monat davor">‹</button>
-        <span class="chip an monat-name">{MONATE[m - 1]} {j}</span>
-        <button class="chip" disabled={schluessel(nach) > bis} onclick={() => setze("monat", nach)} title="Monat danach">›</button>
-        <select
-          class="chip"
-          value={j}
-          onchange={(e) => setze("monat", [Number(e.currentTarget.value), m])}
-          title="Jahr"
-        >
-          {#each Array.from({ length: Number(bis.slice(0, 4)) - Number(ab.slice(0, 4)) + 1 }, (_, i) => Number(bis.slice(0, 4)) - i) as y}
-            <option value={y}>{y}</option>
-          {/each}
-        </select>
-        <button class="chip" onclick={() => setze("monat", null)} title="Zum letzten Monat mit Daten">aktuell</button>
-      </div>
-    {:else if ansicht === "rang"}
-      <div class="gruppe">
-        <button class="chip" class:an={rangModus === "heute"} onclick={() => setze("rangModus", "heute")}>bis heute</button>
-        <button class="chip" class:an={rangModus === "jahr"} onclick={() => setze("rangModus", "jahr")}>bis Jahresende</button>
-      </div>
-      {#if rangModus === "jahr"}
-        <div class="gruppe">
-          <button class="chip" class:an={rangPrognose} onclick={() => setze("rangPrognose", true)}>mit Prognose</button>
-          <button class="chip" class:an={!rangPrognose} onclick={() => setze("rangPrognose", false)}>ohne</button>
-        </div>
-      {/if}
-    {:else if ansicht === "reihe"}
-      <div class="gruppe">
-        {#each [["m", "Mittel"], ["x", "Max"], ["n", "Min"]] as [k, t]}
-          <button class="chip" class:an={groesse === k} onclick={() => setze("groesse", k)}>{t}</button>
-        {/each}
-      </div>
-      <div class="gruppe">
-        {#each [["tag", "Tag"], ["monat", "Monat"], ["jahr", "Jahr"]] as [k, t]}
-          <button class="chip" class:an={aufloesung === k} onclick={() => setze("aufloesung", k)}>{t}</button>
-        {/each}
+        <button class="chip" class:an={rangPrognose} onclick={() => setze("rangPrognose", true)}>mit Prognose</button>
+        <button class="chip" class:an={!rangPrognose} onclick={() => setze("rangPrognose", false)}>ohne</button>
       </div>
     {/if}
-
-    <span class="raum"></span>
-
-    <div class="gruppe" title="Qualitätsniveau des DWD: welche Tage zählen">
-      <span class="qn-lbl">QN</span>
-      {#each QN as [k, t]}
-        <button class="chip" class:an={qn === k} onclick={() => setze("qn", k)}>{t}</button>
+  {:else if ansicht === "reihe"}
+    <div class="gruppe">
+      {#each [["m", "Mittel"], ["x", "Max"], ["n", "Min"]] as [k, t]}
+        <button class="chip" class:an={groesse === k} onclick={() => setze("groesse", k)}>{t}</button>
       {/each}
     </div>
-    {#if station?.zeitraum?.bis}
-      <span class="num leise" title="Letzter Tag in den Daten">Stand {datum(station.zeitraum.bis)}</span>
-    {/if}
-    <button class="knopf primaer" onclick={aktualisieren} disabled={!!laedt || !station}>Aktualisieren</button>
-  </header>
+    <div class="gruppe">
+      {#each [["tag", "Tag"], ["monat", "Monat"], ["jahr", "Jahr"]] as [k, t]}
+        <button class="chip" class:an={aufloesung === k} onclick={() => setze("aufloesung", k)}>{t}</button>
+      {/each}
+    </div>
+  {/if}
+{/snippet}
 
-  <main>
-    {#if fehler}
-      <div class="meldung fehler">
-        {fehler}
-        <button class="knopf" onclick={() => (fehler = "")}>OK</button>
+{#snippet qnSchalter()}
+  <div class="gruppe" title="Qualitätsniveau des DWD: welche Tage zählen">
+    {#each QN as [k, t]}
+      <button class="chip" class:an={qn === k} onclick={() => setze("qn", k)}>{t}</button>
+    {/each}
+  </div>
+{/snippet}
+
+{#snippet bilanzText()}
+  {#if band?.bilanz}
+    {@const b = band.bilanz}
+    Bereinigt: {tausend(b.grenze_weg)} Werte außerhalb der Grenzen · {tausend(b.max_unter_min)} Tage Max unter Min ·
+    {tausend(b.mittel_ausserhalb)} Mittel außerhalb Min…Max · {tausend(b.spruenge)} Sprünge &gt; 15 K markiert
+    {#if b.qn_weg}· {tausend(b.qn_weg)} von {tausend(b.tage)} Tagen durch QN-Filter ausgeblendet{/if}
+  {/if}
+{/snippet}
+
+{#snippet inhalt()}
+  {#if fehler}
+    <div class="meldung fehler">
+      <span>{fehler}</span>
+      <button class="knopf" onclick={() => (fehler = "")}>OK</button>
+    </div>
+  {/if}
+  {#if ansicht === "band" && band && !band.leer}
+    <Jahresband {band} name={station.station.name} />
+  {:else if ansicht === "monat" && monat && !monat.leer}
+    <Monat {monat} />
+  {:else if ansicht === "rang" && liste}
+    <Rangliste {liste} name={station.station.name} />
+  {:else if ansicht === "reihe" && reihe}
+    <Zeitreihe {reihe} name={station.station.name} {groesse} {aufloesung} {handy} />
+  {:else if band?.leer}
+    <div class="mitte leise">Für diese Station gibt es keine Temperaturwerte.</div>
+  {:else if !fehler}
+    <div class="mitte leise">Lade …</div>
+  {/if}
+{/snippet}
+
+{#snippet hilfeText()}
+  <h3>Wetter {version}</h3>
+  <p>Tageswerte der DWD-Klimastationen (opendata.dwd.de, daily/kl), historisch und recent. Historisch gewinnt; recent zählt erst nach dem letzten geprüften Tag.</p>
+  <h4>Bereinigung</h4>
+  <p>Rohwerte bleiben gespeichert, bereinigt wird beim Anzeigen:</p>
+  <ul>
+    <li>Temperatur außerhalb −45 … +50 °C: dieser Wert fällt weg.</li>
+    <li>Höchstwert unter Tiefstwert: alle drei Temperaturen des Tages fallen weg.</li>
+    <li>Mittel außerhalb Tiefst- bis Höchstwert: nur das Mittel fällt weg.</li>
+    <li>Sprung über 15 K zum Vortag: wird markiert, nie entfernt.</li>
+    <li>Wind 0–250 km/h (Mittel nicht über der Böe), Niederschlag 0–300 mm, Sonne 0–16,5 h, Schnee 0–800 cm, Bedeckung 0–8, Feuchte 0–100 %, Luftdruck 500–1100 hPa, Dampfdruck 0–125 hPa, Erdboden −50 … +50 °C.</li>
+    <li>QN (Qualitätsniveau des DWD) umschaltbar: alle, ab 5, nur 10.</li>
+  </ul>
+  <h4>Prognose</h4>
+  <p>Jahresmittel am 31.12. = bisher gemessen plus der Rest des Jahres, wie er in den letzten 30 Jahren war: 10 %, Median, 90 %.</p>
+  {#if datenordner}<p class="leise">Daten: {datenordner}</p>{/if}
+{/snippet}
+
+{#if handy}
+  <!-- ================================================================ Handy -->
+  <div class="handy">
+    <header class="h-kopf">
+      <img class="logo" src={symbol} alt="" />
+      <Stationswahl bind:this={wahl} {stationen} {favoriten} aktuell={kopfStation} wahl={(id) => stationLaden(id)} vollbild />
+      <button class="h-knopf" onclick={aktualisieren} disabled={!!laedt || !station} title="Aktualisieren">⟳</button>
+    </header>
+    <div class="h-steuer">{@render steuerung()}</div>
+    <main class="h-inhalt">{@render inhalt()}</main>
+    {#if hintergrund.laeuft}<div class="h-laeuft">{hintergrund.laeuft}</div>{/if}
+    <nav class="h-nav">
+      {#each ANSICHTEN as [k, t, s]}
+        <button class:an={ansicht === k} onclick={() => setze("ansicht", k)}><span>{s}</span>{t}</button>
+      {/each}
+      <button class:an={mehr} onclick={() => (mehr = !mehr)}><span>⋯</span>Mehr</button>
+    </nav>
+    {#if mehr}
+      <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+      <div class="h-schleier" onclick={() => (mehr = false)}></div>
+      <div class="h-blatt">
+        <div class="lbl">Qualitätsniveau (QN)</div>
+        {@render qnSchalter()}
+        <button class="knopf" onclick={favoritUmschalten} disabled={!station}>{istFavorit ? "★ Favorit entfernen" : "☆ Als Favorit merken"}</button>
+        {#if station?.zeitraum?.bis}<div class="leise">Stand {datum(station.zeitraum.bis)} · {tausend(station.zeitraum.tage)} Tage</div>{/if}
+        <div class="leise">{@render bilanzText()}</div>
+        {#if hintergrund.meldung}<div class="leise">{hintergrund.meldung}</div>{/if}
+        <details>
+          <summary>Hilfe und Regeln</summary>
+          <div class="hilfe-text">{@render hilfeText()}</div>
+        </details>
+        <div class="leise">Daten: Deutscher Wetterdienst · {version}</div>
       </div>
     {/if}
+  </div>
+{:else}
+  <!-- =================================================== PC: Layout D Menüband -->
+  <div class="seite">
+    <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+    {#if menue}<div class="menue-schleier" onclick={() => (menue = "")}></div>{/if}
+    <div class="menueleiste">
+      <img class="logo-klein" src={symbol} alt="" />
+      {#each [["datei", "Datei"], ["station", "Station"], ["ansicht", "Ansicht"], ["daten", "Daten"], ["hilfe", "Hilfe"]] as [k, t]}
+        <div class="menue">
+          <button class:offen={menue === k} onclick={() => (menue = menue === k ? "" : k)}>{t}</button>
+          {#if menue === k}
+            <div class="aufklapp">
+              {#if k === "datei"}
+                {#if datenordner}<button onclick={() => ((menue = ""), rufe("ordner_oeffnen"))}>Datenordner öffnen</button>{/if}
+                <div class="eintrag-leise">{datenordner || "Daten im Programm"}</div>
+              {:else if k === "station"}
+                <button onclick={() => ((menue = ""), wahl?.oeffnen())}>Station wählen …</button>
+                <button onclick={favoritUmschalten} disabled={!station}>{istFavorit ? "Favorit entfernen" : "Als Favorit merken"}</button>
+                {#each favoriten as f}
+                  {@const s = stationen.find((x) => x[0] === f)}
+                  {#if s}<button onclick={() => ((menue = ""), stationLaden(f))}>★ {s[1]}</button>{/if}
+                {/each}
+              {:else if k === "ansicht"}
+                {#each ANSICHTEN as [a, t2]}
+                  <button class:an={ansicht === a} onclick={() => setze("ansicht", a)}>{t2}</button>
+                {/each}
+              {:else if k === "daten"}
+                <button onclick={aktualisieren} disabled={!!laedt || !station}>Aktualisieren</button>
+                {#each QN as [q, t2]}
+                  <button class:an={qn === q} onclick={() => setze("qn", q)}>QN {t2}</button>
+                {/each}
+              {:else}
+                <button onclick={() => ((menue = ""), (hilfe = true))}>Regeln und Daten …</button>
+                <div class="eintrag-leise">Wetter {version}</div>
+              {/if}
+            </div>
+          {/if}
+        </div>
+      {/each}
+      <span class="raum"></span>
+      {#if hintergrund.laeuft}<span class="laeuft">{hintergrund.laeuft}</span>{/if}
+      {#if station}
+        <span class="num stand">{station.station.name} · Stand {datum(station.zeitraum?.bis)}</span>
+      {/if}
+    </div>
 
-    {#if ansicht === "band" && band && !band.leer}
-      <Jahresband {band} name={station.station.name} />
-    {:else if ansicht === "monat" && monat && !monat.leer}
-      <Monat {monat} />
-    {:else if ansicht === "rang" && liste}
-      <Rangliste {liste} name={station.station.name} />
-    {:else if ansicht === "reihe" && reihe}
-      <Zeitreihe {reihe} name={station.station.name} {groesse} {aufloesung} />
-    {:else if band?.leer}
-      <div class="mitte leise">Für diese Station gibt es keine Temperaturwerte.</div>
-    {:else if !fehler}
-      <div class="mitte leise">Lade …</div>
-    {/if}
-  </main>
+    <div class="band">
+      <div class="b-gruppe">
+        <div class="b-inhalt">
+          <Stationswahl bind:this={wahl} {stationen} {favoriten} aktuell={kopfStation} wahl={(id) => stationLaden(id)} />
+          <button class="b-knopf" class:an={istFavorit} onclick={favoritUmschalten} disabled={!station} title="Favorit">
+            <span>{istFavorit ? "★" : "☆"}</span>Favorit
+          </button>
+        </div>
+        <div class="b-titel">Station</div>
+      </div>
+      <div class="b-gruppe">
+        <div class="b-inhalt">
+          {#each ANSICHTEN as [k, t, s]}
+            <button class="b-knopf" class:an={ansicht === k} onclick={() => setze("ansicht", k)}><span>{s}</span>{t}</button>
+          {/each}
+        </div>
+        <div class="b-titel">Ansicht</div>
+      </div>
+      <div class="b-gruppe">
+        <div class="b-inhalt">{@render steuerung()}</div>
+        <div class="b-titel">{ansicht === "monat" ? "Zeitraum" : ansicht === "band" ? "Jahr" : ansicht === "rang" ? "Vergleich" : "Größe"}</div>
+      </div>
+      <div class="b-gruppe">
+        <div class="b-inhalt">{@render qnSchalter()}</div>
+        <div class="b-titel">Qualität (QN)</div>
+      </div>
+      <div class="b-gruppe">
+        <div class="b-inhalt">
+          <button class="b-knopf" onclick={aktualisieren} disabled={!!laedt || !station}><span>⟳</span>Aktualisieren</button>
+        </div>
+        <div class="b-titel">Daten</div>
+      </div>
+    </div>
 
-  <footer class="leise">
-    {#if band?.bilanz && ansicht === "band"}
-      {@const b = band.bilanz}
-      <span title="Rohwerte bleiben gespeichert; bereinigt wird beim Anzeigen">
-        Bereinigt: {tausend(b.grenze_weg)} Werte außerhalb −45…+50 °C · {tausend(b.max_unter_min)} Tage Max unter Min ·
-        {tausend(b.mittel_ausserhalb)} Mittel außerhalb Min…Max · {tausend(b.spruenge)} Sprünge &gt; 15 K markiert
-        {#if b.qn_weg}· {tausend(b.qn_weg)} von {tausend(b.tage)} Tagen durch QN-Filter ausgeblendet{/if}
-      </span>
-    {/if}
-    <span class="raum"></span>
-    {#if hintergrund.laeuft}
-      <span class="laeuft">{hintergrund.laeuft}</span>
-    {:else if hintergrund.meldung}
-      <span>{hintergrund.meldung}</span>
-    {/if}
-    <span>Daten: Deutscher Wetterdienst · {version}</span>
-  </footer>
+    <main>{@render inhalt()}</main>
 
-  {#if laedt}
-    <div class="schleier"><div class="karte hinweis">{laedt}</div></div>
-  {/if}
-</div>
+    <footer class="leise">
+      <span class="bilanz" title="Rohwerte bleiben gespeichert; bereinigt wird beim Anzeigen">{@render bilanzText()}</span>
+      <span class="raum"></span>
+      {#if hintergrund.meldung && !hintergrund.laeuft}<span>{hintergrund.meldung}</span>{/if}
+      <span>Daten: Deutscher Wetterdienst · {version}</span>
+    </footer>
+
+    {#if hilfe}
+      <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+      <div class="schleier" onclick={() => (hilfe = false)}>
+        <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+        <div class="karte dialog" onclick={(e) => e.stopPropagation()}>
+          {@render hilfeText()}
+          <button class="knopf primaer" onclick={() => (hilfe = false)}>Schließen</button>
+        </div>
+      </div>
+    {/if}
+  </div>
+{/if}
+
+{#if laedt}
+  <div class="schleier"><div class="karte hinweis">{laedt}</div></div>
+{/if}
 
 <style>
+  /* ------------------------------------------------------------------ PC */
   .seite {
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
     grid-template-columns: minmax(0, 1fr);
     height: 100%;
   }
-  header {
+  .menueleiste {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 18px;
-    background: var(--flaeche);
-    border-bottom: 1px solid var(--rand);
-    white-space: nowrap;
-    flex-wrap: wrap;
-    row-gap: 8px;
+    gap: 2px;
+    padding: 4px 12px;
+    background: var(--graphit);
+    color: var(--graphit-text);
+    font-size: 13px;
+    position: relative;
+    z-index: 30;
   }
+  .logo-klein {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+  }
+  .menue {
+    position: relative;
+  }
+  .menue > button {
+    background: none;
+    border: 0;
+    color: inherit;
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .menue > button:hover,
+  .menue > button.offen {
+    background: var(--graphit-2);
+    color: var(--graphit-akzent);
+  }
+  .aufklapp {
+    position: absolute;
+    top: 30px;
+    left: 0;
+    min-width: 220px;
+    background: var(--flaeche);
+    color: var(--text);
+    border: 1px solid var(--rand);
+    border-radius: 8px;
+    box-shadow: var(--schatten-hoch);
+    padding: 4px;
+    display: grid;
+  }
+  .aufklapp button {
+    text-align: left;
+    background: none;
+    border: 0;
+    padding: 7px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .aufklapp button:hover:not(:disabled) {
+    background: var(--akzent-zart);
+  }
+  .aufklapp button.an {
+    color: var(--akzent);
+    font-weight: 600;
+  }
+  .aufklapp button:disabled {
+    opacity: 0.4;
+  }
+  .eintrag-leise {
+    padding: 6px 10px;
+    font-size: 12px;
+    color: var(--text-3);
+    border-top: 1px solid var(--rand);
+    margin-top: 4px;
+    white-space: nowrap;
+  }
+  .menue-schleier {
+    position: fixed;
+    inset: 0;
+    z-index: 25;
+  }
+  .stand {
+    font-size: 12px;
+    color: var(--graphit-leise);
+    margin-left: 12px;
+  }
+  .laeuft {
+    color: var(--graphit-akzent);
+    font-size: 12px;
+  }
+
+  .band {
+    display: flex;
+    align-items: stretch;
+    padding: 6px 6px 4px;
+    background: var(--graphit-2);
+    color: var(--graphit-text);
+    border-bottom: 1px solid #111317;
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+  .b-gruppe {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 0 14px;
+    border-right: 1px solid rgb(255 255 255 / 10%);
+  }
+  .b-inhalt {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .b-titel {
+    font-size: 11px;
+    color: var(--graphit-leise);
+  }
+  .b-knopf {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    padding: 4px 9px;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    color: var(--graphit-text);
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .b-knopf span {
+    font-size: 18px;
+    line-height: 1.1;
+  }
+  .b-knopf:hover:not(:disabled) {
+    background: rgb(255 255 255 / 8%);
+  }
+  .b-knopf.an {
+    background: var(--akzent-hell);
+    color: var(--akzent);
+    font-weight: 600;
+  }
+  .b-knopf:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  /* Schalter im dunklen Band */
+  .band :global(.gruppe) {
+    background: transparent;
+    border-color: rgb(255 255 255 / 18%);
+  }
+  .band :global(.chip:not(.an)) {
+    background: transparent;
+    color: var(--graphit-text);
+  }
+
+  main {
+    padding: 14px 16px 6px;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+  }
+  footer {
+    display: flex;
+    gap: 14px;
+    padding: 4px 16px 8px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .bilanz {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .dialog {
+    max-width: 640px;
+    max-height: 80vh;
+    overflow: auto;
+    padding: 18px 22px;
+    display: grid;
+    gap: 6px;
+    justify-items: start;
+  }
+  .dialog :global(h3),
+  .hilfe-text :global(h3) {
+    margin: 0;
+  }
+  .dialog :global(h4),
+  .hilfe-text :global(h4) {
+    margin: 8px 0 0;
+  }
+  .dialog :global(p),
+  .dialog :global(ul),
+  .hilfe-text :global(p),
+  .hilfe-text :global(ul) {
+    margin: 2px 0;
+    font-size: 13px;
+    color: var(--text-2);
+  }
+
+  /* ---------------------------------------------------------------- Handy */
+  .handy {
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+    grid-template-columns: minmax(0, 1fr);
+    height: 100%;
+  }
+  .h-kopf {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: calc(8px + env(safe-area-inset-top)) 10px 8px;
+    background: var(--graphit);
+    color: var(--graphit-text);
+  }
+  .h-kopf :global(.wahl-rahmen) {
+    flex: 1;
+    min-width: 0;
+  }
+  .h-kopf .logo {
+    width: 28px;
+    height: 28px;
+  }
+  .h-knopf {
+    width: 38px;
+    height: 34px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--akzent);
+    color: #fff;
+    font-size: 20px;
+  }
+  .h-knopf:disabled {
+    opacity: 0.5;
+  }
+  .h-steuer {
+    display: flex;
+    gap: 8px;
+    padding: 8px 10px;
+    overflow-x: auto;
+    background: var(--graphit-2);
+    white-space: nowrap;
+  }
+  .h-steuer:empty {
+    display: none;
+  }
+  .h-steuer :global(.gruppe) {
+    background: transparent;
+    border-color: rgb(255 255 255 / 18%);
+    flex: none;
+  }
+  .h-steuer :global(.chip:not(.an)) {
+    background: transparent;
+    color: var(--graphit-text);
+  }
+  .h-inhalt {
+    overflow: auto;
+    padding: 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .h-laeuft {
+    padding: 4px 12px;
+    font-size: 12px;
+    color: var(--akzent);
+    background: var(--akzent-zart);
+  }
+  .h-nav {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    background: var(--graphit);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .h-nav button {
+    display: grid;
+    justify-items: center;
+    gap: 1px;
+    padding: 6px 0 8px;
+    border: 0;
+    background: none;
+    color: var(--graphit-leise);
+    font-size: 11px;
+  }
+  .h-nav button span {
+    font-size: 19px;
+    line-height: 1.2;
+  }
+  .h-nav button.an {
+    color: var(--graphit-akzent);
+    font-weight: 600;
+  }
+  .h-schleier {
+    position: fixed;
+    inset: 0;
+    background: rgb(0 0 0 / 30%);
+    z-index: 15;
+  }
+  .h-blatt {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 16;
+    max-height: 80vh;
+    overflow: auto;
+    background: var(--flaeche);
+    border-radius: 14px 14px 0 0;
+    padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+    display: grid;
+    gap: 10px;
+    justify-items: start;
+  }
+  .h-blatt > * {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  details summary {
+    cursor: pointer;
+    color: var(--akzent);
+  }
+
+  /* ------------------------------------------------------------ gemeinsam */
   .logo {
     width: 30px;
     height: 30px;
-    margin: -1px;
-  }
-  .titel {
-    font-size: 16px;
   }
   .raum {
     flex: 1;
   }
-  .qn-lbl {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-3);
-    padding: 3px 4px 3px 8px;
-  }
-  .chip:disabled {
+  :global(.chip:disabled) {
     opacity: 0.35;
     cursor: default;
   }
@@ -338,22 +798,6 @@
   select.chip {
     appearance: none;
     padding-right: 11px;
-  }
-  main {
-    padding: 16px 18px 8px;
-    min-height: 0;
-    overflow: hidden;
-    position: relative;
-  }
-  footer {
-    display: flex;
-    gap: 14px;
-    padding: 6px 18px 10px;
-    white-space: nowrap;
-    overflow: hidden;
-  }
-  .laeuft {
-    color: var(--akzent);
   }
   .mitte {
     display: grid;
@@ -376,10 +820,10 @@
   .schleier {
     position: fixed;
     inset: 0;
-    background: rgb(244 246 250 / 60%);
+    background: rgb(238 240 243 / 70%);
     display: grid;
     place-items: center;
-    z-index: 20;
+    z-index: 40;
   }
   .hinweis {
     padding: 16px 22px;

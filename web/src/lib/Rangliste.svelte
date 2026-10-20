@@ -223,4 +223,25 @@
   .fuss {
     padding-top: 6px;
   }
+
+  /* Handy: Liste in voller Länge, der Balken schmaler */
+  @media (max-width: 700px) {
+    .rahmen {
+      height: auto;
+      padding: 10px 8px 6px;
+    }
+    .kopf {
+      flex-wrap: wrap;
+    }
+    .rollen {
+      max-height: 70vh;
+    }
+    th.balken-k {
+      width: 25%;
+    }
+    td,
+    th {
+      padding: 4px 5px;
+    }
+  }
 </style>

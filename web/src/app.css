@@ -1,17 +1,24 @@
-/* Wetter - Grundlage der Seite: Farben, Schrift, Knöpfe (wie Serientrenner). */
+/* Wetter - Grundlage der Seite: Farben, Schrift, Knöpfe.
+   Farben: Graphit · Orange (Entwurf D5). Blau und Rot bleiben den Daten
+   vorbehalten - kälter und wärmer als normal. */
 
 :root {
-  --bg: #f4f6fa;
+  --bg: #eef0f3;
   --flaeche: #ffffff;
-  --flaeche-2: #f8fafc;
-  --rand: #e2e8f0;
-  --rand-stark: #cbd5e1;
-  --text: #0f172a;
-  --text-2: #475569;
-  --text-3: #94a3b8;
-  --akzent: #2563eb;
-  --akzent-hell: #dbeafe;
-  --akzent-zart: #eff6ff;
+  --flaeche-2: #f6f7f9;
+  --rand: #dfe2e7;
+  --rand-stark: #c4c9d1;
+  --text: #16181d;
+  --text-2: #4b515c;
+  --text-3: #8d94a0;
+  --akzent: #ea580c;
+  --akzent-hell: #ffe8d9;
+  --akzent-zart: #fff4ed;
+  --graphit: #1f2329;
+  --graphit-2: #2a2f37;
+  --graphit-text: #f3f4f6;
+  --graphit-leise: #9aa1ad;
+  --graphit-akzent: #fb923c;
   --rot: #dc2626;
   --rot-hell: #fee2e2;
   --blau: #1d4ed8;
@@ -115,8 +122,8 @@ select {
   font-weight: 600;
 }
 .knopf.primaer:hover:not(:disabled) {
-  background: #1d4ed8;
-  border-color: #1d4ed8;
+  background: #c2410c;
+  border-color: #c2410c;
 }
 
 .chip {
@@ -134,7 +141,7 @@ select {
 }
 .chip.an {
   background: var(--akzent-hell);
-  border-color: #bfdbfe;
+  border-color: #fed7aa;
   color: var(--akzent);
   font-weight: 600;
 }
@@ -152,7 +159,7 @@ select {
   border-color: transparent;
 }
 .gruppe .chip.an {
-  border-color: #bfdbfe;
+  border-color: #fed7aa;
 }
 
 .feld {

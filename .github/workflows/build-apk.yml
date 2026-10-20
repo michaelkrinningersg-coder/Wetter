@@ -1,0 +1,115 @@
+name: Android-App bauen
+
+# Dieselbe Svelte-Oberfläche wie am PC, als Android-App (Capacitor). Abruf
+# und Rechnung laufen im Handy (web/src/lokal/); web/test/paritaet.test.js
+# stellt sicher, dass dort dasselbe herauskommt wie in daten.py.
+#
+#   * Startdaten (Stationsliste, Verzeichnis, Göttingen) frisch vom DWD in
+#     die App, damit sie beim ersten Öffnen ohne Netz etwas zeigt.
+#   * Release-APK, signiert mit dem festen Schlüssel aus den Secrets
+#     ANDROID_KEYSTORE_B64 (keystore, base64) und ANDROID_KEYSTORE_PASSWORT.
+#     Nur so lässt sich jede neue APK über die alte installieren.
+#     Fehlen die Secrets, signiert der Lauf mit einem Wegwerfschlüssel und
+#     sagt das in der Zusammenfassung - installierbar, aber ein späteres
+#     Update mit dem festen Schlüssel braucht einmal Deinstallieren.
+
+on:
+  push:
+    branches: [main, "claude/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  VERSION: v1.0.${{ github.run_number }}
+
+jobs:
+  apk:
+    name: APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Prüfen (Oberfläche und Rechenkern gegen daten.py)
+        working-directory: web
+        run: |
+          npm ci --no-audit --no-fund
+          npm test
+
+      - name: Startdaten vom DWD
+        run: |
+          python -m pip install truststore==0.10.5
+          python android_start.py
+
+      - name: Seite bauen und ins Android-Projekt
+        working-directory: web
+        run: |
+          npm run build -- --mode android
+          npx cap sync android
+
+      - name: Schlüssel
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KEYSTORE_PASSWORT: ${{ secrets.ANDROID_KEYSTORE_PASSWORT }}
+        run: |
+          ziel="$RUNNER_TEMP/wetter.jks"
+          if [ -n "$KEYSTORE_B64" ] && [ -n "$KEYSTORE_PASSWORT" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$ziel"
+            echo "WETTER_KEYSTORE_PASSWORT=$KEYSTORE_PASSWORT" >> "$GITHUB_ENV"
+            echo "SCHLUESSEL=fest" >> "$GITHUB_ENV"
+          else
+            pw=$(openssl rand -hex 16)
+            keytool -genkeypair -keystore "$ziel" -alias wetter -keyalg RSA -keysize 2048 \
+              -validity 3650 -storepass "$pw" -keypass "$pw" -dname "CN=Wetter Wegwerf" >/dev/null
+            echo "::add-mask::$pw"
+            echo "WETTER_KEYSTORE_PASSWORT=$pw" >> "$GITHUB_ENV"
+            echo "SCHLUESSEL=wegwerf" >> "$GITHUB_ENV"
+            echo "::warning::Secrets ANDROID_KEYSTORE_B64/ANDROID_KEYSTORE_PASSWORT fehlen - signiert mit Wegwerfschlüssel"
+          fi
+          echo "WETTER_KEYSTORE=$ziel" >> "$GITHUB_ENV"
+
+      - name: APK bauen
+        working-directory: web/android
+        env:
+          WETTER_VERSION: ${{ env.VERSION }}
+          WETTER_VERSIONSNUMMER: ${{ github.run_number }}
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon --stacktrace
+          mkdir -p ../../apk
+          cp app/build/outputs/apk/release/app-release.apk "../../apk/Wetter-$VERSION.apk"
+
+      - name: Signatur prüfen
+        run: |
+          apksigner=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
+          "$apksigner" verify --print-certs "apk/Wetter-$VERSION.apk" | tee signatur.txt
+          groesse=$(du -k "apk/Wetter-$VERSION.apk" | cut -f1)
+          {
+            echo "### Wetter $VERSION (Android)"
+            echo "- APK: $((groesse / 1024)) MB"
+            echo "- Schlüssel: $SCHLUESSEL"
+            echo "- $(grep 'SHA-256' signatur.txt | head -1)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Wetter-Android-${{ env.VERSION }}
+          path: apk/*.apk
+          if-no-files-found: error
+          retention-days: 14

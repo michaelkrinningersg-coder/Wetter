@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Rückfall für Geräte ohne Verlauf; der Hintergrund selbst ist der Verlauf in drawable -->
+    <color name="ic_launcher_background">#2B5FE3</color>
+</resources>

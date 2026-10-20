@@ -4,17 +4,24 @@
   // Seite - 1.386 Zeilen sind schneller durchsucht als ein Aufruf dauert.
   import { suchen, tausend } from "./format.js";
 
-  let { stationen = [], aktuell = null, wahl } = $props();
+  let { stationen = [], favoriten = [], aktuell = null, wahl, vollbild = false } = $props();
 
   let offen = $state(false);
   let text = $state("");
   let markiert = $state(0);
   let feld = $state();
 
-  const treffer = $derived(suchen(stationen, text));
+  // ohne Suchtext: Favoriten zuerst, dann die schon geladenen, dann alle
+  const treffer = $derived.by(() => {
+    if (text.trim()) return suchen(stationen, text);
+    const fav = favoriten.map((f) => stationen.find((s) => s[0] === f)).filter(Boolean);
+    const geladen = stationen.filter((s) => s[6] && !favoriten.includes(s[0]));
+    const rest = stationen.filter((s) => !s[6] && !favoriten.includes(s[0]));
+    return [...fav, ...geladen, ...rest].slice(0, 80);
+  });
   const jahrHeute = new Date().getFullYear();
 
-  function oeffnen() {
+  export function oeffnen() {
     offen = true;
     text = "";
     markiert = 0;
@@ -43,7 +50,7 @@
   });
 </script>
 
-<div class="wahl-rahmen">
+<div class="wahl-rahmen" class:vollbild>
   <button class="wahl" onclick={oeffnen} title="Station wählen">
     <b>{aktuell?.name ?? "Station wählen"}</b>
     {#if aktuell}
@@ -56,13 +63,16 @@
     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
     <div class="schleier" onclick={() => (offen = false)}></div>
     <div class="liste karte">
-      <input
-        bind:this={feld}
-        bind:value={text}
-        onkeydown={taste}
-        class="feld"
-        placeholder="Name, Nummer oder Bundesland"
-      />
+      <div class="suchzeile">
+        <input
+          bind:this={feld}
+          bind:value={text}
+          onkeydown={taste}
+          class="feld"
+          placeholder="Name, Nummer oder Bundesland"
+        />
+        {#if vollbild}<button class="knopf" onclick={() => (offen = false)}>Schließen</button>{/if}
+      </div>
       <div class="zeilen">
         {#each treffer as s, i (s[0])}
           {@const [id, name, land, hoehe, von, bis, tage] = s}
@@ -74,7 +84,7 @@
             onmouseenter={() => (markiert = i)}
             onclick={() => nehmen(s)}
           >
-            <span class="name">{name}</span>
+            <span class="name">{favoriten.includes(id) ? "★ " : ""}{name}</span>
             <span class="num klein">{String(id).padStart(5, "0")}</span>
             <span class="klein">{land}</span>
             <span class="num klein rechts">{von}–{aktiv ? "heute" : bis?.slice(0, 4)}</span>
@@ -85,7 +95,7 @@
         {/each}
       </div>
       <div class="leise fuss">
-        {tausend(stationen.length)} Stationen · grau: keine aktuellen Daten mehr · mit Tagen: schon geladen
+        {tausend(stationen.length)} Stationen · ★ Favorit · grau: keine aktuellen Daten mehr · mit Tagen: schon geladen
       </div>
     </div>
   {/if}
@@ -104,6 +114,7 @@
     border: 1px solid var(--rand-stark);
     border-radius: 8px;
     background: var(--flaeche);
+    color: var(--text);
     cursor: pointer;
   }
   .wahl:hover {
@@ -135,8 +146,13 @@
     display: grid;
     gap: 8px;
   }
+  .suchzeile {
+    display: flex;
+    gap: 8px;
+  }
   .liste .feld {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
   }
   .zeilen {
     max-height: 420px;
@@ -174,5 +190,50 @@
   }
   .fuss {
     padding: 0 4px;
+  }
+  .wahl b {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Handy: Knopf füllt die Kopfzeile, die Liste den Bildschirm */
+  .vollbild .wahl {
+    width: 100%;
+    min-width: 0;
+  }
+  .vollbild .liste {
+    position: fixed;
+    inset: 0;
+    width: auto;
+    border-radius: 0;
+    padding: calc(12px + env(safe-area-inset-top)) 12px 12px;
+    grid-template-rows: auto 1fr auto;
+    color: var(--text);
+  }
+  .vollbild .zeilen {
+    max-height: none;
+  }
+  .vollbild .zeile {
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "name nummer" "land jahre";
+    row-gap: 0;
+    padding: 9px 8px;
+    border-bottom: 1px solid var(--rand);
+  }
+  .vollbild .zeile > :nth-child(1) {
+    grid-area: name;
+  }
+  .vollbild .zeile > :nth-child(2) {
+    grid-area: nummer;
+  }
+  .vollbild .zeile > :nth-child(3) {
+    grid-area: land;
+  }
+  .vollbild .zeile > :nth-child(4) {
+    grid-area: jahre;
+  }
+  .vollbild .zeile > :nth-child(5) {
+    display: none;
   }
 </style>

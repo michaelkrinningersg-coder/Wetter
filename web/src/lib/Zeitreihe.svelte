@@ -7,7 +7,7 @@
   import "uplot/dist/uPlot.min.css";
   import { de } from "./format.js";
 
-  let { reihe, name, groesse, aufloesung } = $props();
+  let { reihe, name, groesse, aufloesung, handy = false } = $props();
 
   let behaelter = $state();
   let uebersichtBreite = $state(800);
@@ -15,7 +15,7 @@
   let zeiger = $state(null);
   let plot = null;
 
-  const FARBE = { m: "#2563eb", x: "#dc2626", n: "#1d4ed8" };
+  const FARBE = { m: "#ea580c", x: "#dc2626", n: "#1d4ed8" };
   const GROESSE = { m: "Mittel", x: "Höchstwert", n: "Tiefstwert" };
   const AUFLOESUNG = { jahr: "Jahresmittel", monat: "Monatsmittel", tag: "Tageswerte" };
 
@@ -49,7 +49,7 @@
     const farbe = FARBE[groesse];
     const s = [{}];
     if (aufloesung === "jahr") {
-      s.push({ stroke: "#93c5fd", width: 0, points: { show: true, size: 5, fill: "#93c5fd", stroke: "#93c5fd" } });
+      s.push({ stroke: "#9aa1ad", width: 0, points: { show: true, size: 5, fill: "#b8bec8", stroke: "#b8bec8" } });
       s.push({ stroke: farbe, width: 2.2, points: { show: false } });
     } else if (aufloesung === "monat") {
       s.push({ stroke: farbe, width: 1, points: { show: false } });
@@ -183,6 +183,18 @@
 
   const xu = (t) => ((t - uebersicht.t0) / (uebersicht.t1 - uebersicht.t0 || 1)) * uebersichtBreite;
 
+  // Handy: kein Mausrad - Knöpfe zoomen um die Mitte des Ausschnitts
+  function zoomen(faktor) {
+    if (!plot || !ausschnitt) return;
+    const [lo, hi] = [uebersicht.t0, uebersicht.t1];
+    const mitte = (ausschnitt[0] + ausschnitt[1]) / 2;
+    const halb = Math.min((hi - lo) / 2, ((ausschnitt[1] - ausschnitt[0]) / 2) * faktor);
+    let min = mitte - halb, max = mitte + halb;
+    if (min < lo) ((max += lo - min), (min = lo));
+    if (max > hi) ((min -= max - hi), (max = hi));
+    plot.setScale("x", { min, max });
+  }
+
   let ziehen = false;
   function uebersichtZeigen(e) {
     if (!plot || !ausschnitt) return;
@@ -213,7 +225,15 @@
   <div class="karte grafik">
     <div class="kopf">
       <b>{titel}</b>
-      <span class="leise">ziehen = Ausschnitt · Rad = zoomen · Doppelklick = alles</span>
+      {#if handy}
+        <span class="zoom">
+          <button class="chip" onclick={() => zoomen(0.5)}>＋</button>
+          <button class="chip" onclick={() => zoomen(2)}>－</button>
+          <button class="chip" onclick={() => plot?.setScale("x", { min: uebersicht.t0, max: uebersicht.t1 })}>alles</button>
+        </span>
+      {:else}
+        <span class="leise">ziehen = Ausschnitt · Rad = zoomen · Doppelklick = alles</span>
+      {/if}
       <span class="raum"></span>
       <span class="num ablesen">{ablesen}</span>
     </div>
@@ -234,18 +254,20 @@
     <div
       class="uebersicht"
       bind:clientWidth={uebersichtBreite}
-      onmousedown={(e) => ((ziehen = true), uebersichtZeigen(e))}
-      onmousemove={(e) => ziehen && uebersichtZeigen(e)}
-      onmouseup={() => (ziehen = false)}
-      onmouseleave={() => (ziehen = false)}
+      onpointerdown={(e) => ((ziehen = true), e.currentTarget.setPointerCapture(e.pointerId), uebersichtZeigen(e))}
+      onpointermove={(e) => ziehen && uebersichtZeigen(e)}
+      onpointerup={() => (ziehen = false)}
+      onpointercancel={() => (ziehen = false)}
     >
       <svg width={uebersichtBreite} height={UH}>
         <path d={uebersicht.pfad} stroke="#cbd5e1" stroke-width="1.2" />
         {#if ausschnitt}
+          {@const x0 = Math.max(1, xu(ausschnitt[0]))}
+          {@const x1 = Math.min(uebersichtBreite - 1, xu(ausschnitt[1]))}
           <rect
-            x={xu(ausschnitt[0])}
+            x={x0}
             y="1"
-            width={Math.max(3, xu(ausschnitt[1]) - xu(ausschnitt[0]))}
+            width={Math.max(3, x1 - x0)}
             height={UH - 2}
             rx="4"
             class="rahmen"
@@ -253,7 +275,7 @@
         {/if}
       </svg>
     </div>
-    <div class="leise">Übersicht · der blaue Rahmen ist der sichtbare Ausschnitt - klicken oder ziehen verschiebt ihn</div>
+    <div class="leise">Übersicht · der Rahmen ist der sichtbare Ausschnitt - tippen oder ziehen verschiebt ihn</div>
   </div>
 </div>
 
@@ -261,6 +283,7 @@
   .stapel {
     display: grid;
     grid-template-rows: 1fr auto;
+    grid-template-columns: minmax(0, 1fr);
     gap: 12px;
     height: 100%;
     min-height: 0;
@@ -303,16 +326,44 @@
   .uebersicht {
     cursor: pointer;
     user-select: none;
+    touch-action: none;
+  }
+  .zoom {
+    display: inline-flex;
+    gap: 4px;
+  }
+
+  /* Handy: feste Höhe, Kopf darf umbrechen */
+  @media (max-width: 700px) {
+    .stapel {
+      height: auto;
+      grid-template-rows: auto auto;
+    }
+    .grafik {
+      height: 380px;
+      padding: 10px 6px 6px;
+    }
+    .kopf {
+      flex-wrap: wrap;
+      row-gap: 4px;
+    }
+    .kopf b {
+      white-space: normal;
+    }
+    .grafik,
+    .unten {
+      min-width: 0;
+    }
   }
   svg {
     display: block;
   }
   .rahmen {
-    fill: rgb(37 99 235 / 8%);
+    fill: rgb(234 88 12 / 8%);
     stroke: var(--akzent);
     stroke-width: 1.5;
   }
   :global(.u-select) {
-    background: rgb(37 99 235 / 10%);
+    background: rgb(234 88 12 / 10%);
   }
 </style>

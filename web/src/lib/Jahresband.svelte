@@ -280,4 +280,23 @@
     height: 8px;
     border-radius: 4px;
   }
+
+  /* Handy: untereinander, das Band in fester Höhe */
+  @media (max-width: 700px) {
+    .raster {
+      grid-template-columns: minmax(0, 1fr);
+      height: auto;
+    }
+    .grafik {
+      height: 360px;
+      padding: 10px 8px 6px;
+    }
+    .kopf {
+      flex-wrap: wrap;
+      row-gap: 2px;
+    }
+    .seite {
+      overflow: visible;
+    }
+  }
 </style>

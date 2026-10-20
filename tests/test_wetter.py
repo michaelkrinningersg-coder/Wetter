@@ -25,7 +25,8 @@ def test_start_ohne_netz(api):
     r = api.start()
     assert [s[1] for s in r["stationen"]] == ["Brocken", "Göttingen"]
     assert r["einstellungen"] == {"station": 1691, "qn": "alle", "ansicht": "band",
-                                  "rang_modus": "heute", "rang_prognose": True}
+                                  "rang_modus": "heute", "rang_prognose": True,
+                                  "favoriten": []}
 
 
 def test_einstellungen_bleiben(api):
@@ -72,3 +73,10 @@ def test_schalter_bleiben_auch_aus(api):
     assert api.start()["einstellungen"]["rang_prognose"] is False
     api.einstellung("rang_prognose", True)
     assert api.start()["einstellungen"]["rang_prognose"] is True
+
+
+def test_favoriten_als_liste(api):
+    assert api.einstellung("favoriten", [1691, 722]) == {"ok": True}
+    assert api.start()["einstellungen"]["favoriten"] == [1691, 722]
+    api.einstellung("favoriten", [])
+    assert api.start()["einstellungen"]["favoriten"] == []

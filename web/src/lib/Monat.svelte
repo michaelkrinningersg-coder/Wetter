@@ -216,4 +216,25 @@
   .fuss {
     padding-top: 6px;
   }
+
+  /* Handy: die Tabelle rollt quer, der Tag bleibt stehen */
+  @media (max-width: 700px) {
+    .rahmen {
+      height: auto;
+      padding: 10px 8px 6px;
+    }
+    .kopf {
+      flex-wrap: wrap;
+    }
+    .rollen {
+      max-height: 70vh;
+    }
+    td.l,
+    th.l {
+      position: sticky;
+      left: 0;
+      background: var(--flaeche);
+      z-index: 2;
+    }
+  }
 </style>

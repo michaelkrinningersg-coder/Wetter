@@ -1,4 +1,5 @@
-// Die Bruecke zu Python.
+// Die Bruecke zu Python - oder, in der Android-App, zum Rechenkern im
+// Handy (src/lokal/api.js), der dieselben Aufrufe beantwortet.
 //
 // Im Programm ruft die Seite ueber pywebview: window.pywebview.api.<name>.
 // pywebview liefert die Seite dabei selbst ueber einen kleinen HTTP-Server
@@ -25,6 +26,8 @@ async function dienstDa() {
 function wegFinden() {
   if (bereit) return bereit;
   bereit = new Promise((fertig) => {
+    // Android (Capacitor), oder im Browser mit ?lokal zum Ausprobieren
+    if (window.Capacitor?.isNativePlatform?.() || new URLSearchParams(location.search).has("lokal")) return fertig("lokal");
     if (bruecke()) return fertig("pywebview");
     let erledigt = false;
     const nimm = (weg) => {
@@ -56,7 +59,10 @@ function wegFinden() {
 export async function rufe(name, ...argumente) {
   const weg = await wegFinden();
   let antwort;
-  if (weg === "pywebview") {
+  if (weg === "lokal") {
+    const { lokal } = await import("../lokal/api.js");
+    antwort = await lokal[name](...argumente);
+  } else if (weg === "pywebview") {
     antwort = await window.pywebview.api[name](...argumente);
   } else {
     const r = await fetch(`/api/${name}`, {
@@ -68,6 +74,11 @@ export async function rufe(name, ...argumente) {
     antwort = await r.json();
   }
   return antwort ?? {};
+}
+
+// Laeuft die Seite als Android-App (oder mit ?lokal)?
+export async function aufDemHandy() {
+  return (await wegFinden()) === "lokal";
 }
 
 // Laeuft die Seite im Programmfenster (pywebview) - oder im Browser?

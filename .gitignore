@@ -20,3 +20,7 @@ startdaten/
 daten/
 *.log
 startfehler.txt
+
+# Android: Startdaten kommen beim Bau vom DWD, gebaute Seite
+web/public-android/
+webdist-android/

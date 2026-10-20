@@ -1,0 +1,13 @@
+{
+  "appId": "app.wetter.station",
+  "appName": "Wetter",
+  "webDir": "../webdist-android",
+  "android": {
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": false
+    }
+  }
+}
