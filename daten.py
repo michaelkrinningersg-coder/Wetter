@@ -36,6 +36,7 @@ import time
 
 import duckdb
 
+import auswertung
 import plausibel
 
 SCHEMA = """
@@ -95,6 +96,7 @@ class Daten:
         self.pfad = pfad
         self._con = duckdb.connect(pfad)
         self._schreiben = threading.Lock()
+        self._spalten: dict = {}            # (Station, QN) -> auswertung.Spalten
         self._umbauen()
         self._con.execute(SCHEMA)
         self._con.execute("INSERT OR REPLACE INTO meta VALUES ('schema', ?)",
@@ -208,6 +210,8 @@ class Daten:
             except Exception:
                 c.execute("ROLLBACK")
                 raise
+            finally:
+                self._spalten = {k: v for k, v in self._spalten.items() if k[0] != sid}
 
     @staticmethod
     def _csv(c, ordner, art, roh: bytes, sid, quelle, nach):
@@ -596,6 +600,52 @@ class Daten:
                 "j": [z[0] for z in zeilen],
                 "v": [_r(z[1], 2) for z in zeilen],
                 "glatt": [_r(z[2], 2) for z in zeilen], "spruenge": []}
+
+    # ------------------------------------------------------ Auswertungen
+    def spalten(self, sid, stufe) -> auswertung.Spalten:
+        """Die bereinigten Tage einer Station als Spalten - gemerkt, bis die
+        Station neu eingelesen wird."""
+        schluessel = (int(sid), plausibel.qn_min(stufe))
+        if schluessel not in self._spalten:
+            namen = ["tmk", "txk", "tnk", "fx", "fm", "rsk", "rskf", "sdk",
+                     "shk", "nm", "vpm", "pm", "upm", "tgk"]
+            zeilen = self._c().execute(
+                f"SELECT (datum - DATE '1970-01-01')::INTEGER, year(datum), "
+                f"month(datum), day(datum), {', '.join(namen)} FROM "
+                f"{plausibel.rein(stufe, 'station = ?')} ORDER BY datum",
+                [int(sid)]).fetchall()
+            self._spalten[schluessel] = auswertung.Spalten(zeilen, namen)
+        return self._spalten[schluessel]
+
+    def auswertung(self, sid, art: str, stufe, optionen: dict | None = None) -> dict:
+        """Eine der Auswertungen aus auswertung.py für eine Station."""
+        s = self.spalten(sid, stufe)
+        o = optionen or {}
+        if not s.n:
+            return {"leer": True}
+        if art == "rekorde":
+            return auswertung.rekorde(s)
+        if art == "geschichte":
+            d = o.get("datum")
+            return auswertung.geschichte(s, dt.date.fromisoformat(d) if d else None)
+        if art == "kenntage":
+            return auswertung.kenntage(s)
+        if art == "wellen":
+            return auswertung.wellen(s, o.get("art", "normal"), o.get("heiss", 30),
+                                     o.get("kalt", 0), o.get("min_tage", 3))
+        if art == "streifen":
+            return auswertung.klimastreifen(s)
+        if art in ("niederschlag", "sonne"):
+            return auswertung.summen(s, "rsk" if art == "niederschlag" else "sdk", o.get("jahr"))
+        if art == "schnee":
+            return auswertung.schnee(s)
+        if art == "wind":
+            return auswertung.wind(s)
+        if art == "frost":
+            return auswertung.frost(s)
+        if art == "prognose_verlauf":
+            return auswertung.prognose_verlauf(s, heute())
+        raise ValueError(f"Unbekannte Auswertung: {art}")
 
     def rekorde(self, sid, stufe) -> dict:
         c = self._c()

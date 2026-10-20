@@ -11,6 +11,7 @@
 // App (public-android/start/), so ist sofort etwas zu sehen.
 
 import { produktAusZip, produktLesen, stationenLesen, verzeichnisLesen, zusammenfuehren } from "./lesen.js";
+import { auswertung } from "./auswertung.js";
 import * as R from "./rechnen.js";
 
 const BASIS = "https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/daily/kl/";
@@ -265,6 +266,8 @@ export const lokal = {
         ansicht: await meta("ansicht", "band"),
         rang_modus: await meta("rang_modus", "heute"),
         rang_prognose: (await meta("rang_prognose", true)) !== false,
+        favoriten: (await meta("favoriten", [])) ?? [],
+        wellen: (await meta("wellen", {})) ?? {},
       };
       hintergrund(einstellungen.station);
       return { titel: "Wetter", version: VERSION, stationen: await stationsZeilen(), einstellungen, datenordner: "" };
@@ -272,7 +275,9 @@ export const lokal = {
   status: async () => ({ ...zustand }),
   einstellung: (name, wert) =>
     sicher(async () => {
-      await schreiben("meta", name, wert);
+      // Listen und Objekte aus der Seite sind Svelte-Proxys - die kann
+      // IndexedDB nicht speichern; als JSON hin und zurück sind es echte Werte
+      await schreiben("meta", name, wert === undefined ? null : JSON.parse(JSON.stringify(wert)));
       return { ok: true };
     }),
   stationen: () => sicher(async () => ({ stationen: await stationsZeilen() })),
@@ -311,5 +316,6 @@ export const lokal = {
     ),
   monat: (id, jahr = null, monat = null, qn = "alle") => sicher(() => mitReihe(id, (r) => R.monat(r, jahr, monat, qn))),
   rangliste: (id, modus = "heute", prognose = true, qn = "alle") => sicher(() => mitReihe(id, (r) => R.rangliste(r, modus, !!prognose, qn, heute()))),
+  auswertung: (id, art, qn = "alle", optionen = {}) => sicher(() => mitReihe(id, (r) => auswertung(r, art, qn, optionen, heute()))),
   zeitreihe: (id, groesse = "m", aufloesung = "jahr", qn = "alle") => sicher(() => mitReihe(id, (r) => R.zeitreihe(r, groesse, aufloesung, qn))),
 };

@@ -22,14 +22,23 @@ const TAG = 86400;
 
 // ------------------------------------------------------------- Kleinkram
 
-/** Runden wie Python: korrekt nach dem Binärwert, bei genau x,5 zur geraden Ziffer. */
+/**
+ * Runden wie Python: nach dem exakten Binärwert, bei einem echten Gleichstand
+ * (nur möglich, wenn x genau ,x5 ist, etwa 2,25) zur geraden Ziffer.
+ * Nicht über x * 10: 20,95 ist binär 20,94999…, aber 20,95 * 10 ergibt
+ * gerundet genau 209,5 - und schon stünde 21,0 statt 20,9 da.
+ */
 export function runden(x, stellen = 1) {
   if (x == null || Number.isNaN(x)) return null;
-  const y = x * 10 ** stellen;
-  if (Math.abs(y % 1) === 0.5) {
-    let r = Math.floor(y);
-    if (r % 2 !== 0) r += 1;
-    return r / 10 ** stellen;
+  // toFixed rechnet mit dem exakten Wert; 20 Stellen mehr zeigen, ob es ein Gleichstand ist
+  const lang = Math.abs(x).toFixed(stellen + 20);
+  const rest = lang.slice(lang.length - 20);
+  if (rest === "5" + "0".repeat(19)) {
+    const kopf = lang.slice(0, lang.length - 20);
+    const letzte = Number(kopf[kopf.length - 1] === "." ? kopf[kopf.length - 2] : kopf[kopf.length - 1]);
+    const ab = Number(kopf.endsWith(".") ? kopf.slice(0, -1) : kopf);
+    const r = letzte % 2 === 0 ? ab : ab + 10 ** -stellen;
+    return Number((Math.sign(x) * r).toFixed(stellen));
   }
   return Number(x.toFixed(stellen));
 }

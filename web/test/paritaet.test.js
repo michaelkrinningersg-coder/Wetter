@@ -9,6 +9,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import { produktLesen, zusammenfuehren } from "../src/lokal/lesen.js";
+import { auswertung } from "../src/lokal/auswertung.js";
 import * as R from "../src/lokal/rechnen.js";
 
 const ORDNER = new URL("./paritaet/", import.meta.url);
@@ -27,6 +28,7 @@ const AUFRUFE = {
   rangliste: (m, p, s) => R.rangliste(reihe, m, p, s, heute),
   zeitreihe: (g, a, s) => R.zeitreihe(reihe, g, a, s),
   zeitraum: () => R.zeitraum(reihe),
+  auswertung: (art, s, o) => auswertung(reihe, art, s, o, heute),
 };
 
 /**

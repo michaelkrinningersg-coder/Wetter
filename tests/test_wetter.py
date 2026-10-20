@@ -26,7 +26,7 @@ def test_start_ohne_netz(api):
     assert [s[1] for s in r["stationen"]] == ["Brocken", "Göttingen"]
     assert r["einstellungen"] == {"station": 1691, "qn": "alle", "ansicht": "band",
                                   "rang_modus": "heute", "rang_prognose": True,
-                                  "favoriten": []}
+                                  "favoriten": [], "wellen": {}}
 
 
 def test_einstellungen_bleiben(api):

@@ -124,6 +124,15 @@ AUFRUFE = (
     + [("zeitreihe", [g, a, "alle"]) for g in ("m", "x", "n") for a in ("jahr", "monat", "tag")]
     + [("zeitreihe", ["m", "jahr", "nur10"])]
     + [("zeitraum", [])]
+    + [("auswertung", [a, st, o]) for a, o in (
+        ("rekorde", {}), ("geschichte", {}), ("geschichte", {"datum": "2003-08-08"}),
+        ("geschichte", {"datum": "2024-02-29"}), ("kenntage", {}),
+        ("wellen", {}), ("wellen", {"art": "fest"}),
+        ("wellen", {"art": "eigen", "heiss": 25, "kalt": -2, "min_tage": 2}),
+        ("streifen", {}), ("niederschlag", {}), ("niederschlag", {"jahr": 2010}),
+        ("sonne", {}), ("sonne", {"jahr": 1997}), ("schnee", {}), ("wind", {}),
+        ("frost", {}), ("prognose_verlauf", {}))
+       for st in ("alle", "nur10")]
 )
 
 

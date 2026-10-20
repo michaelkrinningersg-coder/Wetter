@@ -15,6 +15,8 @@
   import { onMount } from "svelte";
   import { aufDemHandy, rufe } from "./lib/api.js";
   import { MONATE, datum, tausend } from "./lib/format.js";
+  import { AUFRUF, AUSWERTUNGEN, DATEN_OPTIONEN, HAUPT, IST_AUSWERTUNG, OPTIONEN, TITEL } from "./lib/ansichten.js";
+  import Auswertung from "./lib/Auswertung.svelte";
   import Jahresband from "./lib/Jahresband.svelte";
   import Monat from "./lib/Monat.svelte";
   import Rangliste from "./lib/Rangliste.svelte";
@@ -39,6 +41,8 @@
   let monat = $state(null);
   let liste = $state(null);
   let reihe = $state(null);
+  let auswertung = $state(null); // Ergebnis der gerade gezeigten Auswertung
+  let optionen = $state(structuredClone(OPTIONEN));
   let laedt = $state("");
   let fehler = $state("");
   let hintergrund = $state({ laeuft: "", meldung: "", stand: 0 });
@@ -56,12 +60,8 @@
     ["ab5", "ab 5"],
     ["nur10", "nur 10"],
   ];
-  const ANSICHTEN = [
-    ["band", "Jahresband", "▥"],
-    ["monat", "Monat", "▦"],
-    ["rang", "Rangliste", "≡"],
-    ["reihe", "Zeitreihe", "⌇"],
-  ];
+  const ANSICHTEN = HAUPT.map(([k, t, , s]) => [k, t, s]);
+  const ALLE = [...ANSICHTEN, ...AUSWERTUNGEN.map(([k, t, , s]) => [k, t, s])];
 
   async function sicher(arbeit) {
     try {
@@ -104,6 +104,11 @@
     } else if (ansicht === "monat") {
       const r = await sicher(() => rufe("monat", id, monatWahl?.[0] ?? null, monatWahl?.[1] ?? null, qn));
       if (!r.fehler) monat = r;
+    } else if (IST_AUSWERTUNG.has(ansicht)) {
+      const art = ansicht;
+      const o = Object.fromEntries((DATEN_OPTIONEN[art] ?? []).map((k) => [k, optionen[art][k]]));
+      const r = await sicher(() => rufe("auswertung", id, AUFRUF[art], qn, o));
+      if (!r.fehler && ansicht === art) auswertung = r;
     } else if (ansicht === "rang") {
       const r = await sicher(() => rufe("rangliste", id, rangModus, rangPrognose, qn));
       if (!r.fehler) liste = r;
@@ -120,7 +125,7 @@
 
   function setze(was, wert) {
     menue = "";
-    if (was === "ansicht") ((ansicht = wert), rufe("einstellung", "ansicht", wert));
+    if (was === "ansicht") ((ansicht = wert), (auswertung = null), (mehr = false), rufe("einstellung", "ansicht", wert));
     // QN gilt nur bis zum nächsten Start - jeder Start beginnt mit "alle"
     if (was === "qn") ((qn = wert), (band = null));
     if (was === "jahr") jahr = wert;
@@ -130,6 +135,13 @@
     if (was === "rangModus") ((rangModus = wert), rufe("einstellung", "rang_modus", wert));
     if (was === "rangPrognose") ((rangPrognose = wert), rufe("einstellung", "rang_prognose", wert));
     ansichtLaden();
+  }
+
+  /** Option der gerade gezeigten Auswertung; rechnet neu, wenn sie die Zahlen ändert. */
+  function setzeOption(name, wert) {
+    optionen[ansicht][name] = wert;
+    if (ansicht === "wellen") rufe("einstellung", "wellen", $state.snapshot(optionen.wellen));
+    if ((DATEN_OPTIONEN[ansicht] ?? []).includes(name)) ansichtLaden();
   }
 
   function favoritUmschalten() {
@@ -178,7 +190,8 @@
     datenordner = r.datenordner ?? "";
     stationen = r.stationen;
     favoriten = Array.isArray(r.einstellungen.favoriten) ? r.einstellungen.favoriten : [];
-    ansicht = ANSICHTEN.some(([k]) => k === r.einstellungen.ansicht) ? r.einstellungen.ansicht : "band";
+    ansicht = ALLE.some(([k]) => k === r.einstellungen.ansicht) ? r.einstellungen.ansicht : "band";
+    if (r.einstellungen.wellen) optionen.wellen = { ...optionen.wellen, ...r.einstellungen.wellen };
     rangModus = r.einstellungen.rang_modus === "jahr" ? "jahr" : "heute";
     rangPrognose = r.einstellungen.rang_prognose !== false;
     qn = "alle"; // so entschieden: immer mit allen Qualitätsstufen beginnen
@@ -242,6 +255,40 @@
         <button class="chip" class:an={!rangPrognose} onclick={() => setze("rangPrognose", false)}>ohne</button>
       </div>
     {/if}
+  {:else if ansicht === "rekorde"}
+    <div class="gruppe">
+      {#each [1, 3, 5, 10] as t}
+        <button class="chip" class:an={optionen.rekorde.tiefe === t} disabled={auswertung && t > auswertung.erlaubt} onclick={() => setzeOption("tiefe", t)}>
+          {t === 1 ? "Rekord" : `Top ${t}`}
+        </button>
+      {/each}
+    </div>
+  {:else if ansicht === "geschichte" && auswertung && !auswertung.leer}
+    <div class="gruppe">
+      <input class="chip datum" type="date" value={auswertung.datum} onchange={(e) => setzeOption("datum", e.currentTarget.value || null)} />
+      <button class="chip" onclick={() => setzeOption("datum", null)}>letzter Tag</button>
+    </div>
+  {:else if ansicht === "wellen"}
+    {@const w = optionen.wellen}
+    <div class="gruppe">
+      <button class="chip" class:an={w.art === "normal"} onclick={() => setzeOption("art", "normal")}>gegen Normal</button>
+      <button class="chip" class:an={w.art === "fest"} onclick={() => setzeOption("art", "fest")}>≥ 30 / &lt; 0 °C, 3 Tage</button>
+      <button class="chip" class:an={w.art === "eigen"} onclick={() => setzeOption("art", "eigen")}>eigene</button>
+    </div>
+    {#if w.art === "eigen"}
+      <div class="gruppe eingaben">
+        <label>Hitze ≥ <input type="number" step="0.5" value={w.heiss} onchange={(e) => setzeOption("heiss", Number(e.currentTarget.value))} /> °C</label>
+        <label>Kälte &lt; <input type="number" step="0.5" value={w.kalt} onchange={(e) => setzeOption("kalt", Number(e.currentTarget.value))} /> °C</label>
+        <label>ab <input type="number" min="1" max="30" value={w.min_tage} onchange={(e) => setzeOption("min_tage", Number(e.currentTarget.value))} /> Tagen</label>
+      </div>
+    {/if}
+  {:else if (ansicht === "niederschlag" || ansicht === "sonne") && auswertung && !auswertung.leer}
+    <div class="gruppe">
+      <select class="chip an" value={auswertung.jahr} onchange={(e) => setzeOption("jahr", Number(e.currentTarget.value))} title="Jahr">
+        {#each auswertung.jahre.map((z) => z.jahr).reverse() as y}<option value={y}>{y}</option>{/each}
+      </select>
+      <button class="chip" onclick={() => setzeOption("jahr", null)}>aktuell</button>
+    </div>
   {:else if ansicht === "reihe"}
     <div class="gruppe">
       {#each [["m", "Mittel"], ["x", "Max"], ["n", "Min"]] as [k, t]}
@@ -286,9 +333,11 @@
     <Monat {monat} />
   {:else if ansicht === "rang" && liste}
     <Rangliste {liste} name={station.station.name} />
+  {:else if IST_AUSWERTUNG.has(ansicht) && auswertung}
+    <Auswertung art={ansicht} d={auswertung} name={station.station.name} optionen={optionen[ansicht] ?? {}} setze={setzeOption} />
   {:else if ansicht === "reihe" && reihe}
     <Zeitreihe {reihe} name={station.station.name} {groesse} {aufloesung} {handy} />
-  {:else if band?.leer}
+  {:else if band?.leer && !IST_AUSWERTUNG.has(ansicht)}
     <div class="mitte leise">Für diese Station gibt es keine Temperaturwerte.</div>
   {:else if !fehler}
     <div class="mitte leise">Lade …</div>
@@ -328,12 +377,20 @@
       {#each ANSICHTEN as [k, t, s]}
         <button class:an={ansicht === k} onclick={() => setze("ansicht", k)}><span>{s}</span>{t}</button>
       {/each}
-      <button class:an={mehr} onclick={() => (mehr = !mehr)}><span>⋯</span>Mehr</button>
+      <button class:an={mehr || IST_AUSWERTUNG.has(ansicht)} onclick={() => (mehr = !mehr)}>
+        <span>⋯</span>{IST_AUSWERTUNG.has(ansicht) ? AUSWERTUNGEN.find((a) => a[0] === ansicht)[4] : "Mehr"}
+      </button>
     </nav>
     {#if mehr}
       <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
       <div class="h-schleier" onclick={() => (mehr = false)}></div>
       <div class="h-blatt">
+        <div class="lbl">Auswertungen</div>
+        <div class="h-raster">
+          {#each AUSWERTUNGEN as [k, t, , s]}
+            <button class:an={ansicht === k} onclick={() => setze("ansicht", k)}><span>{s}</span>{t}</button>
+          {/each}
+        </div>
         <div class="lbl">Qualitätsniveau (QN)</div>
         {@render qnSchalter()}
         <button class="knopf" onclick={favoritUmschalten} disabled={!station}>{istFavorit ? "★ Favorit entfernen" : "☆ Als Favorit merken"}</button>
@@ -372,6 +429,10 @@
                 {/each}
               {:else if k === "ansicht"}
                 {#each ANSICHTEN as [a, t2]}
+                  <button class:an={ansicht === a} onclick={() => setze("ansicht", a)}>{t2}</button>
+                {/each}
+                <div class="eintrag-leise">Auswertungen</div>
+                {#each AUSWERTUNGEN as [a, t2]}
                   <button class:an={ansicht === a} onclick={() => setze("ansicht", a)}>{t2}</button>
                 {/each}
               {:else if k === "daten"}
@@ -413,8 +474,16 @@
         <div class="b-titel">Ansicht</div>
       </div>
       <div class="b-gruppe">
+        <div class="b-inhalt b-raster">
+          {#each AUSWERTUNGEN as [k, t, , s, kurz]}
+            <button class="b-klein" class:an={ansicht === k} onclick={() => setze("ansicht", k)} title={t}><span>{s}</span>{kurz}</button>
+          {/each}
+        </div>
+        <div class="b-titel">Auswertungen</div>
+      </div>
+      <div class="b-gruppe">
         <div class="b-inhalt">{@render steuerung()}</div>
-        <div class="b-titel">{ansicht === "monat" ? "Zeitraum" : ansicht === "band" ? "Jahr" : ansicht === "rang" ? "Vergleich" : "Größe"}</div>
+        <div class="b-titel">{ansicht === "monat" ? "Zeitraum" : ansicht === "band" ? "Jahr" : ansicht === "rang" ? "Vergleich" : ansicht === "reihe" ? "Größe" : "Optionen"}</div>
       </div>
       <div class="b-gruppe">
         <div class="b-inhalt">{@render qnSchalter()}</div>
@@ -605,6 +674,53 @@
     opacity: 0.4;
     cursor: default;
   }
+  .b-raster {
+    display: grid;
+    grid-template-columns: repeat(6, auto);
+    gap: 1px 2px;
+  }
+  .b-klein {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 7px;
+    border: 0;
+    border-radius: 5px;
+    background: none;
+    color: var(--graphit-text);
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .b-klein span {
+    width: 16px;
+    text-align: center;
+  }
+  .b-klein:hover {
+    background: rgb(255 255 255 / 8%);
+  }
+  .b-klein.an {
+    background: var(--akzent-hell);
+    color: var(--akzent);
+    font-weight: 600;
+  }
+  .eingaben label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    padding: 0 6px;
+  }
+  .eingaben input {
+    width: 52px;
+    border: 1px solid var(--rand-stark);
+    border-radius: 6px;
+    padding: 2px 4px;
+    background: var(--flaeche);
+    color: var(--text);
+  }
+  input.datum {
+    color: inherit;
+  }
   /* Schalter im dunklen Band */
   .band :global(.gruppe) {
     background: transparent;
@@ -659,11 +775,19 @@
   }
 
   /* ---------------------------------------------------------------- Handy */
+  /* Spalte statt Raster: fehlt die Schalterzeile, rutscht sonst die
+     Navigation in die dehnbare Zeile und wird riesig */
   .handy {
-    display: grid;
-    grid-template-rows: auto auto minmax(0, 1fr) auto auto;
-    grid-template-columns: minmax(0, 1fr);
+    display: flex;
+    flex-direction: column;
     height: 100%;
+  }
+  .handy > * {
+    flex: none;
+  }
+  .handy > .h-inhalt {
+    flex: 1;
+    min-height: 0;
   }
   .h-kopf {
     display: flex;
@@ -773,6 +897,31 @@
     max-width: 100%;
     white-space: normal;
     overflow-wrap: anywhere;
+  }
+  .h-raster {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    width: 100%;
+  }
+  .h-raster button {
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    padding: 8px 4px;
+    border: 1px solid var(--rand);
+    border-radius: 10px;
+    background: var(--flaeche-2);
+    font-size: 11px;
+    text-align: center;
+  }
+  .h-raster button span {
+    font-size: 18px;
+  }
+  .h-raster button.an {
+    border-color: var(--akzent);
+    color: var(--akzent);
+    font-weight: 600;
   }
   details summary {
     cursor: pointer;

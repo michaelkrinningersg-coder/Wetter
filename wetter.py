@@ -115,6 +115,14 @@ def _liste(text) -> list[int]:
         return []
 
 
+def _objekt(text) -> dict:
+    try:
+        wert = json.loads(text)
+        return wert if isinstance(wert, dict) else {}
+    except (TypeError, ValueError):
+        return {}
+
+
 class Hinweis(Exception):
     """Was der Anwender wissen muss - kein Fehler im Programm."""
 
@@ -169,7 +177,8 @@ class Api:
                 "ansicht": db.meta("ansicht", "band"),
                 "rang_modus": db.meta("rang_modus", "heute"),
                 "rang_prognose": db.meta("rang_prognose", "1") != "0",
-                "favoriten": _liste(db.meta("favoriten", "[]"))}
+                "favoriten": _liste(db.meta("favoriten", "[]")),
+                "wellen": _objekt(db.meta("wellen", "{}"))}
 
     def _verzeichnis(self, neu=False) -> dict[int, str]:
         """Stationsnummer -> hist-Archiv; gemerkt, einmal am Tag neu."""
@@ -268,12 +277,14 @@ class Api:
     def einstellung(self, name: str, wert) -> dict:
         def arbeit():
             if name not in ("station", "qn", "ansicht", "rang_modus",
-                            "rang_prognose", "favoriten"):
+                            "rang_prognose", "favoriten", "wellen"):
                 raise Hinweis(f"Unbekannte Einstellung: {name}")
             if isinstance(wert, bool):
                 text = "1" if wert else "0"
             elif isinstance(wert, list):
                 text = json.dumps([int(v) for v in wert])
+            elif isinstance(wert, dict):
+                text = json.dumps(wert)
             else:
                 text = wert
             self._daten().meta_setzen(name, text)
@@ -338,6 +349,12 @@ class Api:
                   qn=plausibel.QN_VORGABE) -> dict:
         return self._sicher(lambda: self._daten().rangliste(
             int(sid), modus, bool(prognose), qn))
+
+    def auswertung(self, sid, art, qn=plausibel.QN_VORGABE, optionen=None) -> dict:
+        """Rekorde, Geschichte, Kenntage, Wellen, Klimastreifen,
+        Niederschlag, Sonne, Schnee, Wind, Frost, Prognose im Verlauf."""
+        return self._sicher(lambda: self._daten().auswertung(
+            int(sid), art, qn, optionen))
 
     def zeitreihe(self, sid, groesse="m", aufloesung="jahr",
                   qn=plausibel.QN_VORGABE) -> dict:
