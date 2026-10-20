@@ -146,6 +146,7 @@ class Api:
         self._stand = 0                     # zählt Datenänderungen
         self._hintergrund: threading.Thread | None = None
         self._vorhersage: dict = {}        # Station -> (Zeit, Antwort)
+        self._radar: dict = {}             # Ausschnitt -> (Zeit, Antwort)
 
     # ------------------------------------------------------------ Hilfen
     def _sicher(self, arbeit):
@@ -380,6 +381,21 @@ class Api:
             antwort = {"station": s, "abgerufen": time.time(),
                        **vorhersage.abrufen(s["lat"], s["lon"])}
             self._vorhersage[sid_] = (time.time(), antwort)
+            return antwort
+        return self._sicher(arbeit)
+
+    def radar(self, bbox, neu=False) -> dict:
+        """Regenradar für einen Ausschnitt [oben, links, unten, rechts] des
+        Radarrasters - 4 Minuten gemerkt, neue Bilder kommen alle 5."""
+        def arbeit():
+            schluessel = tuple(vorhersage.radar_bbox(bbox))
+            gemerkt = self._radar.get(schluessel)
+            if gemerkt and not neu and time.time() - gemerkt[0] < 4 * 60:
+                return gemerkt[1]
+            if not self._netz:
+                raise Hinweis("Ohne Netz kein Radar")
+            antwort = vorhersage.radar(schluessel)
+            self._radar = {schluessel: (time.time(), antwort)}
             return antwort
         return self._sicher(arbeit)
 

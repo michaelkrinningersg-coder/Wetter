@@ -102,6 +102,7 @@ async function mitgeliefert(name) {
 // ---------------------------------------------------------------- Zustand
 const reihen = new Map(); // id -> R.reihe(...)
 const vorhersagen = new Map(); // id -> [Zeit, Antwort]
+let radarGemerkt = null; // [Ausschnitt, Zeit, Antwort]
 const zustand = { laeuft: "", meldung: "", stand: 0 };
 let stationsliste = null;
 let laufend = Promise.resolve();
@@ -258,7 +259,7 @@ function sicher(arbeit) {
 async function stationsZeilen() {
   const g = await geladen();
   return (await liste())
-    .map((s) => [s.id, s.name, s.land, s.hoehe, +String(s.von).slice(0, 4), s.bis ? `${s.bis.slice(0, 4)}-${s.bis.slice(4, 6)}-${s.bis.slice(6, 8)}` : null, g[s.id] ?? 0])
+    .map((s) => [s.id, s.name, s.land, s.hoehe, +String(s.von).slice(0, 4), s.bis ? `${s.bis.slice(0, 4)}-${s.bis.slice(4, 6)}-${s.bis.slice(6, 8)}` : null, g[s.id] ?? 0, s.lat, s.lon])
     .sort((a, b) => a[1].localeCompare(b[1], "de"));
 }
 
@@ -338,6 +339,17 @@ export const lokal = {
   monat: (id, jahr = null, monat = null, qn = "alle", normal = null) => sicher(() => mitReihe(id, (r) => R.monat(r, jahr, monat, qn, normal))),
   rangliste: (id, modus = "heute", prognose = true, qn = "alle", normal = null) =>
     sicher(() => mitReihe(id, (r) => R.rangliste(r, modus, !!prognose, qn, heute(), normal))),
+  radar: (bbox, neu = false) =>
+    sicher(async () => {
+      const [o, l, u, r] = bbox.map((v) => Math.round(v));
+      const schluessel = `${o},${l},${u},${r}`;
+      if (!neu && radarGemerkt?.[0] === schluessel && Date.now() - radarGemerkt[1] < 4 * 60 * 1000) return radarGemerkt[2];
+      const antwort = await holenJson(`https://api.brightsky.dev/radar?bbox=${schluessel}&format=compressed`);
+      if (!antwort.radar) throw new Error(antwort.detail ?? "keine Radardaten");
+      const ergebnis = { bbox: [o, l, u, r], radar: antwort.radar };
+      radarGemerkt = [schluessel, Date.now(), ergebnis];
+      return ergebnis;
+    }),
   vorhersage: (id, neu = false) =>
     sicher(async () => {
       id = Number(id);

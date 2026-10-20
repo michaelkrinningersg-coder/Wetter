@@ -65,7 +65,8 @@ ORKAN = 118 / 3.6
 
 
 def _r(v, stellen=1):
-    return None if v is None else round(float(v), stellen)
+    # erst auf 9 Stellen, wie daten._r - gleiche Werte runden gleich
+    return None if v is None else round(round(float(v), 9), stellen)
 
 
 def _mittel(werte):

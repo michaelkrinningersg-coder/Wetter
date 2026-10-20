@@ -184,8 +184,33 @@ def test_erwartungswerte_aktuell():
         recent = datei.read()
     with open(os.path.join(ZIEL, "erwartet.json"), encoding="utf-8") as datei:
         erwartet = json.load(datei)["aufrufe"]
-    assert rechnen(hist, recent) == erwartet, \
-        "daten.py rechnet anders - python tests/paritaet.py neu laufen lassen"
+    fehler = []
+    _gleich(rechnen(hist, recent), erwartet, "", fehler)
+    assert not fehler, \
+        "daten.py rechnet anders - python tests/paritaet.py neu laufen lassen:\n" + "\n".join(fehler[:10])
+
+
+def _gleich(ist, soll, pfad, fehler):
+    """Gleich bis auf eine Einheit der letzten Stelle bei gerundeten Werten:
+    DuckDB summiert parallel, ein Mittel genau auf ,x5 kippt dann mal so,
+    mal so - dieselbe Toleranz wie web/test/paritaet.test.js."""
+    if isinstance(soll, float) or isinstance(ist, float):
+        if not (isinstance(ist, (int, float)) and isinstance(soll, (int, float))
+                and abs(ist - soll) <= 0.0100001):
+            fehler.append(f"{pfad}: {ist!r} statt {soll!r}")
+    elif isinstance(soll, dict) and isinstance(ist, dict):
+        if ist.keys() != soll.keys():
+            fehler.append(f"{pfad}: Schlüssel {sorted(ist)} statt {sorted(soll)}")
+        for k in soll:
+            if k in ist:
+                _gleich(ist[k], soll[k], f"{pfad}.{k}", fehler)
+    elif isinstance(soll, list) and isinstance(ist, list):
+        if len(ist) != len(soll):
+            fehler.append(f"{pfad}: Länge {len(ist)} statt {len(soll)}")
+        for i, (a, b) in enumerate(zip(ist, soll)):
+            _gleich(a, b, f"{pfad}[{i}]", fehler)
+    elif ist != soll:
+        fehler.append(f"{pfad}: {ist!r} statt {soll!r}")
 
 
 

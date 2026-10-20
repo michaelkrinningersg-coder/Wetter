@@ -224,7 +224,7 @@ def test_jahresband_platz_und_normal(db):
 def test_stationsliste_zaehlt_geladene_tage(db):
     db.einlesen(1, produkt(1, reihe(D(2000, 1, 1), D(2000, 1, 10))), None, "h")
     assert db.stationen() == [[1, "Prüfstadt", "Testland", 100, 1950,
-                               "2026-10-19", 10]]
+                               "2026-10-19", 10, 51.0, 10.0]]
 
 
 # ------------------------------------------------- Prognose und Rangliste

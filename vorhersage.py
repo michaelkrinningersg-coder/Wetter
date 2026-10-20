@@ -231,3 +231,31 @@ def abrufen(lat: float, lon: float) -> dict:
         jetzt = pool.submit(aktuell)
         modelle = list(pool.map(modell, MODELLE))
     return {"aktuell": jetzt.result(), "modelle": modelle}
+
+
+# ------------------------------------------------------------- Regenradar
+RADAR_ZEILEN, RADAR_SPALTEN = 1200, 1100
+
+
+def radar_bbox(bbox) -> tuple[int, int, int, int]:
+    """[oben, links, unten, rechts] als ganze Zahlen im Radarraster."""
+    o, l, u, r = (int(v) for v in bbox)
+    if not (0 <= o <= u < RADAR_ZEILEN and 0 <= l <= r < RADAR_SPALTEN):
+        raise ValueError(f"Ausschnitt außerhalb des Radarrasters: {bbox}")
+    return o, l, u, r
+
+
+def url_radar(bbox) -> str:
+    o, l, u, r = radar_bbox(bbox)
+    return f"https://api.brightsky.dev/radar?bbox={o},{l},{u},{r}&format=compressed"
+
+
+def radar(bbox) -> dict:
+    """Niederschlagsradar des DWD (RV, 1 km, 5 Minuten) über Bright Sky:
+    die letzte Stunde und die Vorhersage der nächsten, gepackt wie geliefert -
+    entpackt wird in der Seite (web/src/lib/radardaten.js)."""
+    antwort = _json(url_radar(bbox))
+    if "radar" not in antwort:
+        raise ValueError(antwort.get("detail") or "keine Radardaten")
+    return {"bbox": list(radar_bbox(bbox)), "radar": antwort["radar"]}
+

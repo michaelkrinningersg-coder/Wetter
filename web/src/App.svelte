@@ -20,6 +20,7 @@
   import { AUFRUF, AUSWERTUNGEN, DATEN_OPTIONEN, HANDY_NAV, HAUPT, IST_AUSWERTUNG, OPTIONEN, TITEL } from "./lib/ansichten.js";
   import Uebersicht from "./lib/Uebersicht.svelte";
   import Vorhersage from "./lib/Vorhersage.svelte";
+  import Radar from "./lib/Radar.svelte";
   import Auswertung from "./lib/Auswertung.svelte";
   import Jahresband from "./lib/Jahresband.svelte";
   import Monat from "./lib/Monat.svelte";
@@ -134,6 +135,8 @@
       vorhersageLaden();
     } else if (ansicht === "vorhersage") {
       await vorhersageLaden();
+    } else if (ansicht === "radar") {
+      // lädt selbst (Radar.svelte)
     } else if (ansicht === "band") {
       const r = await sicher(() => rufe("jahresband", id, jahr, qn, vergleich.von));
       if (!r.fehler) band = r;
@@ -408,6 +411,8 @@
   {/if}
   {#if ansicht === "uebersicht" && station}
     <Uebersicht name={station.station.name} {band} {monat} geschichte={geschichteKurz} {vorhersage} gehe={(a) => setze("ansicht", a)} />
+  {:else if ansicht === "radar" && station}
+    <Radar station={station.station} {stationen} />
   {:else if ansicht === "vorhersage" && vorhersage}
     <Vorhersage v={vorhersage} modell={vmodell} waehle={(m) => ((vmodell = m), rufe("einstellung", "vmodell", m))} />
   {:else if ansicht === "band" && band && !band.leer}

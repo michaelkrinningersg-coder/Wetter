@@ -5,6 +5,7 @@
 export const HAUPT = [
   ["uebersicht", "Übersicht", "Start", "uebersicht"],
   ["vorhersage", "Vorhersage", "Wetter", "vorhersage"],
+  ["radar", "Regenradar", "Radar", "radar"],
   ["band", "Jahresband", "Jahr", "band"],
   ["monat", "Monat", "Monat", "monat"],
   ["rang", "Rangliste", "Rang", "rang"],

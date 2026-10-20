@@ -100,7 +100,9 @@ def _tag_index(datum_sql: str) -> str:
 
 
 def _r(wert, stellen=1):
-    return None if wert is None else round(float(wert), stellen)
+    # erst auf 9 Stellen: DuckDB summiert parallel, das Rauschen in der 15.
+    # Stelle ließe einen Wert genau auf ,x5 sonst mal so, mal so kippen
+    return None if wert is None else round(round(float(wert), 9), stellen)
 
 
 class Daten:
@@ -156,16 +158,17 @@ class Daten:
             c.execute("COMMIT")
 
     def stationen(self) -> list[list]:
-        """Kompakt für die Suche: [id, name, land, hoehe, von, bis, tage]."""
+        """Kompakt für die Suche: [id, name, land, hoehe, von, bis, tage,
+        lat, lon]."""
         zeilen = self._c().execute("""
             SELECT s.id, s.name, s.land, s.hoehe, year(s.von), s.bis,
-                   coalesce(t.n, 0)
+                   coalesce(t.n, 0), s.lat, s.lon
             FROM station s
             LEFT JOIN (SELECT station, count(*) n FROM tag GROUP BY station) t
                    ON t.station = s.id
             ORDER BY s.name""").fetchall()
-        return [[i, n, l, h, v, b.isoformat() if b else None, t]
-                for i, n, l, h, v, b, t in zeilen]
+        return [[i, n, l, h, v, b.isoformat() if b else None, t, la, lo]
+                for i, n, l, h, v, b, t, la, lo in zeilen]
 
     def station(self, sid) -> dict | None:
         z = self._c().execute(

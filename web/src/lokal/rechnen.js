@@ -51,6 +51,11 @@ const TAG = 86400;
  */
 export function runden(x, stellen = 1) {
   if (x == null || Number.isNaN(x)) return null;
+  // erst auf 9 Stellen wie daten._r: Rauschen der Summen-Reihenfolge weg
+  return rundenGenau(rundenGenau(x, 9), stellen);
+}
+
+function rundenGenau(x, stellen) {
   // toFixed rechnet mit dem exakten Wert; 20 Stellen mehr zeigen, ob es ein Gleichstand ist
   const lang = Math.abs(x).toFixed(stellen + 20);
   const rest = lang.slice(lang.length - 20);
