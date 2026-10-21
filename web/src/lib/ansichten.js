@@ -54,5 +54,5 @@ export const DATEN_OPTIONEN = {
   sonne: ["jahr"],
 };
 
-// Handy: diese vier stehen unten, alles andere unter "Mehr"
-export const HANDY_NAV = ["uebersicht", "vorhersage", "band", "monat"];
+// Handy: diese fünf stehen unten, alles andere unter "Mehr"
+export const HANDY_NAV = ["uebersicht", "vorhersage", "radar", "band", "monat"];

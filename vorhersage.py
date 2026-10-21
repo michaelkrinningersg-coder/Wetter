@@ -25,6 +25,7 @@ Gleichheitstest prüft beide an abgelegten Antworten.
 
 from __future__ import annotations
 
+import datetime as dt
 import json
 import urllib.error
 import urllib.request
@@ -245,17 +246,61 @@ def radar_bbox(bbox) -> tuple[int, int, int, int]:
     return o, l, u, r
 
 
-def url_radar(bbox) -> str:
+RADAR_ZURUECK = (1, 2, 3, 6)   # Stunden zurück (Bright Sky hält rund 6 Stunden)
+RADAR_VOR = 2                  # Stunden Vorhersage (mehr rechnet der DWD nicht)
+
+
+def radar_schritt(zurueck: int) -> int:
+    """Minuten zwischen den gemessenen Bildern: ab 3 h 10, ab 6 h 15."""
+    return 15 if zurueck >= 6 else 10 if zurueck >= 3 else 5
+
+
+def radar_zeiten(jetzt: dt.datetime, zurueck: int) -> tuple[list[str], str, str]:
+    """(einzelne Zeitpunkte der Vergangenheit, Beginn und Ende des Blocks).
+
+    Bei 5 Minuten kommt alles in einem Block; bei 10/15 Minuten wird jedes
+    gemessene Bild einzeln geholt - Bright Sky kennt keine Schrittweite, und
+    so bleibt der Film klein. Die Vorhersage bleibt in 5-Minuten-Schritten.
+    """
+    jetzt = jetzt.replace(second=0, microsecond=0, minute=jetzt.minute - jetzt.minute % 5)
+    fmt = "%Y-%m-%dT%H:%MZ"
+    ende = (jetzt + dt.timedelta(hours=RADAR_VOR)).strftime(fmt)
+    schritt = radar_schritt(zurueck)
+    if schritt == 5:
+        return [], (jetzt - dt.timedelta(hours=zurueck)).strftime(fmt), ende
+    erster = jetzt - dt.timedelta(hours=zurueck)
+    erster = erster.replace(minute=erster.minute - erster.minute % schritt)
+    einzeln = []
+    t = erster
+    while t < jetzt:
+        einzeln.append(t.strftime(fmt))
+        t += dt.timedelta(minutes=schritt)
+    return einzeln, jetzt.strftime(fmt), ende
+
+
+def url_radar(bbox, von=None, bis=None) -> str:
     o, l, u, r = radar_bbox(bbox)
-    return f"https://api.brightsky.dev/radar?bbox={o},{l},{u},{r}&format=compressed"
+    zeit = f"&date={von}&last_date={bis}" if von else ""
+    return f"https://api.brightsky.dev/radar?bbox={o},{l},{u},{r}&format=compressed{zeit}"
 
 
-def radar(bbox) -> dict:
+def radar(bbox, zurueck: int = 1) -> dict:
     """Niederschlagsradar des DWD (RV, 1 km, 5 Minuten) über Bright Sky:
-    die letzte Stunde und die Vorhersage der nächsten, gepackt wie geliefert -
-    entpackt wird in der Seite (web/src/lib/radardaten.js)."""
-    antwort = _json(url_radar(bbox))
+    `zurueck` Stunden gemessen und 2 Stunden Vorhersage, gepackt wie
+    geliefert - entpackt wird in der Seite (web/src/lib/radardaten.js)."""
+    zurueck = zurueck if zurueck in RADAR_ZURUECK else 1
+    einzeln, von, bis = radar_zeiten(dt.datetime.now(dt.timezone.utc), zurueck)
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        block = pool.submit(_json, url_radar(bbox, von, bis))
+        teile = list(pool.map(lambda t: _json(url_radar(bbox, t, t)), einzeln))
+        antwort = block.result()
     if "radar" not in antwort:
         raise ValueError(antwort.get("detail") or "keine Radardaten")
-    return {"bbox": list(radar_bbox(bbox)), "radar": antwort["radar"]}
-
+    bilder = [b for t in teile for b in t.get("radar", [])] + antwort["radar"]
+    gesehen, frames = set(), []
+    for b in sorted(bilder, key=lambda b: b["timestamp"]):
+        if b["timestamp"] not in gesehen:
+            gesehen.add(b["timestamp"])
+            frames.append(b)
+    return {"bbox": list(radar_bbox(bbox)), "radar": frames, "zurueck": zurueck,
+            "schritt": radar_schritt(zurueck)}

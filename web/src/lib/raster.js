@@ -57,3 +57,23 @@ export function farbe(mmh) {
   for (const [ab, rgb] of STUFEN) if (mmh >= ab) f = rgb;
   return f;
 }
+
+// Filmlänge: Stunden zurück (Bright Sky hält rund 6 Stunden), dazu immer
+// 2 Stunden Vorhersage. Ab 3 h nur alle 10, ab 6 h alle 15 Minuten ein
+// gemessenes Bild - einzeln geholt, so bleibt der Film klein.
+export const RADAR_ZURUECK = [1, 2, 3, 6];
+export const radarSchritt = (zurueck) => (zurueck >= 6 ? 15 : zurueck >= 3 ? 10 : 5);
+
+/** {einzeln: [iso...], von, bis} wie vorhersage.radar_zeiten */
+export function radarZeiten(jetztMs, zurueck) {
+  const fmt = (ms) => new Date(ms).toISOString().slice(0, 16) + "Z";
+  const MIN = 60000;
+  const jetzt = Math.floor(jetztMs / (5 * MIN)) * 5 * MIN;
+  const bis = fmt(jetzt + 2 * 60 * MIN);
+  const schritt = radarSchritt(zurueck);
+  if (schritt === 5) return { einzeln: [], von: fmt(jetzt - zurueck * 60 * MIN), bis };
+  const erster = Math.floor((jetzt - zurueck * 60 * MIN) / (schritt * MIN)) * schritt * MIN;
+  const einzeln = [];
+  for (let t = erster; t < jetzt; t += schritt * MIN) einzeln.push(fmt(t));
+  return { einzeln, von: fmt(jetzt), bis };
+}

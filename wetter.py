@@ -195,7 +195,8 @@ class Api:
                 "wellen": _objekt(db.meta("wellen", "{}")),
                 "thema": db.meta("thema", "system"),
                 "normal": daten.normal_zeitraum(db.meta("normal", daten.NORMAL_VON))[0],
-                "ort": "gps" if db.meta("ort", "station") == "gps" else "station"}
+                "ort": "gps" if db.meta("ort", "station") == "gps" else "station",
+                "radar": _objekt(db.meta("radar", "{}"))}
 
     def _verzeichnis(self, neu=False) -> dict[int, str]:
         """Stationsnummer -> hist-Archiv; gemerkt, einmal am Tag neu."""
@@ -295,7 +296,7 @@ class Api:
         def arbeit():
             if name not in ("station", "qn", "ansicht", "rang_modus",
                             "rang_prognose", "favoriten", "wellen", "vmodell",
-                            "thema", "normal", "ort"):
+                            "thema", "normal", "ort", "radar"):
                 raise Hinweis(f"Unbekannte Einstellung: {name}")
             if isinstance(wert, bool):
                 text = "1" if wert else "0"
@@ -505,17 +506,17 @@ class Api:
             return {**(d or {"leer": True}), "laedt": laeuft}
         return self._sicher(arbeit)
 
-    def radar(self, bbox, neu=False) -> dict:
+    def radar(self, bbox, neu=False, zurueck=1) -> dict:
         """Regenradar für einen Ausschnitt [oben, links, unten, rechts] des
         Radarrasters - 4 Minuten gemerkt, neue Bilder kommen alle 5."""
         def arbeit():
-            schluessel = tuple(vorhersage.radar_bbox(bbox))
+            schluessel = (*vorhersage.radar_bbox(bbox), int(zurueck))
             gemerkt = self._radar.get(schluessel)
             if gemerkt and not neu and time.time() - gemerkt[0] < 4 * 60:
                 return gemerkt[1]
             if not self._netz:
                 raise Hinweis("Ohne Netz kein Radar")
-            antwort = vorhersage.radar(schluessel)
+            antwort = vorhersage.radar(schluessel[:4], int(zurueck))
             self._radar = {schluessel: (time.time(), antwort)}
             return antwort
         return self._sicher(arbeit)

@@ -57,6 +57,7 @@
   let deutschlandDaten = $state(null); // Top 50: letzte 7 Tage aller aktiven Stationen
   let ort = $state("station"); // Vorhersage für die Station oder "gps" = Standort des Geräts
   let ortHinweis = $state("");
+  let radarEinst = $state({}); // Film: zurueck, tempo, selbst
   // Widget und Meldungen am Handy (WetterNativ.java)
   let widget = $state({ ort: "station", modell: "icon_d2", unwetter: true, rekorde: true, gps: null });
   let widgetInfo = $state({ erlaubt: true, fehler: "" });
@@ -361,6 +362,7 @@
     if (r.einstellungen.thema) thema = r.einstellungen.thema;
     if (NORMALE.includes(r.einstellungen.normal)) vergleich.von = r.einstellungen.normal;
     if (r.einstellungen.ort === "gps") ort = "gps";
+    if (r.einstellungen.radar) radarEinst = r.einstellungen.radar;
     if (r.einstellungen.widget) widget = { ...widget, ...r.einstellungen.widget };
     rangModus = r.einstellungen.rang_modus === "jahr" ? "jahr" : "heute";
     rangPrognose = r.einstellungen.rang_prognose !== false;
@@ -529,7 +531,7 @@
   {:else if ansicht === "rekorde_de"}
     <RekordeDE daten={rekordeDe} oeffnen={stationOeffnen} neu={() => rekordeLaden(true)} rechnen={async () => { await rufe("rekorde_de_rechnen"); rekordeLaden(); }} />
   {:else if ansicht === "radar" && station}
-    <Radar station={station.station} {stationen} {meinStandort} />
+    <Radar station={station.station} {stationen} {meinStandort} einstellungen={radarEinst} merken={(e) => ((radarEinst = e), rufe("einstellung", "radar", e))} />
   {:else if ansicht === "vorhersage" && vorhersage}
     <Vorhersage v={vorhersage} modell={vmodell} waehle={(m) => ((vmodell = m), rufe("einstellung", "vmodell", m))} />
   {:else if ansicht === "band" && band && !band.leer}
@@ -1176,7 +1178,7 @@
   .h-nav {
     --symbol-akzent: var(--graphit-akzent);
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     background: var(--graphit);
     padding-bottom: env(safe-area-inset-bottom);
   }

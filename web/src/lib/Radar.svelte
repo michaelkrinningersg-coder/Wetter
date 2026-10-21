@@ -1,20 +1,27 @@
 <script>
   // Regenradar des DWD (RV-Komposit, 1 km, alle 5 Minuten, über Bright
-  // Sky): die letzte Stunde und die Vorhersage der nächsten als Film. Drei
-  // Ausschnitte (100 km, 250 km, Deutschland), Mittelpunkt ist die Station
-  // oder ein angetippter Punkt. Darunter die eigene einfache Karte
+  // Sky): 1 bis 6 Stunden zurück und 2 Stunden Vorhersage als Film, Tempo
+  // und Selbststart einstellbar. Ausschnitte 50, 100, 250 km und Deutschland,
+  // Mittelpunkt ist die Station, der eigene Standort oder ein angetippter Punkt. Darunter die eigene einfache Karte
   // (karte.json, Natural Earth) - beides im selben Raster, ohne Umrechnung.
   import { onDestroy, untrack } from "svelte";
   import { rufe } from "./api.js";
   import karte from "./karte.json";
   import { entpacken } from "./radardaten.js";
-  import { STUFEN, ausschnitt, farbe, mmProStunde, raster } from "./raster.js";
+  import { RADAR_ZURUECK, STUFEN, ausschnitt, farbe, mmProStunde, raster } from "./raster.js";
   import Symbol from "./Symbol.svelte";
 
   // station {name, lat, lon}; stationen: Zeilen der Suche; meinStandort: () => Promise {lat, lon}
-  let { station, stationen = [], meinStandort = null } = $props();
+  // einstellungen {zurueck, tempo (s je Bild), selbst (Autoplay)}; merken: speichert sie
+  let { station, stationen = [], meinStandort = null, einstellungen = {}, merken = () => {} } = $props();
+
+  let zurueck = $state(RADAR_ZURUECK.includes(einstellungen.zurueck) ? einstellungen.zurueck : 1);
+  let tempo = $state(Math.min(1.5, Math.max(0.05, Number(einstellungen.tempo) || 0.45)));
+  let selbst = $state(einstellungen.selbst !== false);
+  const sichern = () => merken({ zurueck, tempo, selbst });
 
   const ZOOMS = [
+    ["50", 50, "50 km"],
     ["100", 100, "100 km"],
     ["250", 250, "250 km"],
     ["de", null, "Deutschland"],
@@ -61,10 +68,13 @@
   const UHR = new Intl.DateTimeFormat("de-DE", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Berlin" });
   const uhr = (iso) => UHR.format(new Date(iso));
 
+  let ladeNr = 0;
   async function laden(b, neu = false) {
+    const nr = ++ladeNr;
     laedt = true;
     fehler = "";
-    const r = await rufe("radar", b, neu);
+    const r = await rufe("radar", b, neu, zurueck);
+    if (nr !== ladeNr) return; // inzwischen anderer Ausschnitt oder andere Filmlänge
     laedt = false;
     if (r.fehler) {
       fehler = r.fehler;
@@ -78,35 +88,45 @@
       if (Date.parse(x.zeit) <= jetzt) start = i;
     });
     daten = d;
-    bild = start;
+    bild = selbst ? 0 : start;
+    if (selbst && !laeuft) abspielen();
   }
 
   $effect(() => {
     const b = bbox;
+    zurueck;
     untrack(() => laden(b));
   });
 
-  // Film: alle 0,45 s ein Bild weiter, am Ende kurz stehen bleiben
+  // Film: je Bild `tempo` Sekunden, am Ende kurz stehen bleiben (4 Takte)
   let takt = null;
+  let pause = 0;
+  function weiter() {
+    if (!daten?.bilder.length) return;
+    if (bild >= daten.bilder.length - 1) {
+      if (++pause < 4) return planen();
+      pause = 0;
+      bild = 0;
+    } else bild += 1;
+    planen();
+  }
+  function planen() {
+    clearTimeout(takt);
+    if (laeuft) takt = setTimeout(weiter, tempo * 1000);
+  }
   function abspielen() {
     if (laeuft) {
       laeuft = false;
-      clearInterval(takt);
+      clearTimeout(takt);
       return;
     }
     if (!daten?.bilder.length) return;
     laeuft = true;
     if (bild >= daten.bilder.length - 1) bild = 0;
-    let pause = 0;
-    takt = setInterval(() => {
-      if (bild >= daten.bilder.length - 1) {
-        if (++pause < 4) return;
-        pause = 0;
-        bild = 0;
-      } else bild += 1;
-    }, 450);
+    pause = 0;
+    planen();
   }
-  onDestroy(() => clearInterval(takt));
+  onDestroy(() => clearTimeout(takt));
 
   // ---------------------------------------------------------------- Zeichnen
   const farbeVon = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -175,7 +195,7 @@
     const blau = farbeVon("--blau");
     ctx.globalAlpha = 0.35;
     linien(karte.seen, blau, 1);
-    linien(karte.fluesse, blau, km === 100 ? 1.3 : 0.9);
+    linien(karte.fluesse, blau, km && km <= 100 ? 1.3 : 0.9);
     ctx.globalAlpha = 1;
 
     // Radar
@@ -185,15 +205,28 @@
     // Grenzen über dem Radar
     const text = farbeVon("--text");
     const leise = farbeVon("--text-3");
-    linien(karte.laender, leise, 0.8, [4, 3]);
+    // Bundesländer im Zoom kräftig und über dem Regen: heller Rand, dann die Linie
+    const hell = farbeVon("--flaeche");
+    if (km) {
+      ctx.globalAlpha = 0.85;
+      linien(karte.laender, hell, 3.6);
+      ctx.globalAlpha = 1;
+      linien(karte.laender, farbeVon("--text-2"), 1.5);
+    } else {
+      linien(karte.laender, leise, 0.8, [4, 3]);
+    }
     linien(karte.grenzen, leise, 1);
-    linien(karte.deutschland, text, km ? 1.6 : 1.2);
+    if (km) {
+      ctx.globalAlpha = 0.85;
+      linien(karte.deutschland, hell, 4.4);
+      ctx.globalAlpha = 1;
+    }
+    linien(karte.deutschland, text, km ? 2 : 1.2);
 
     // Orte: je Ausschnitt weniger oder mehr; Beschriftungen überdecken sich nicht
     const belegt = [[0, h - 34, 110, h]]; // Maßstab unten links bleibt frei
     const frei = (bx) => !belegt.some((a) => bx[0] < a[2] && bx[2] > a[0] && bx[1] < a[3] && bx[3] > a[1]);
     const schrift = farbeVon("--schrift") || "sans-serif";
-    const hell = farbeVon("--flaeche");
     ctx.textBaseline = "middle";
     const ort = (name, gx, gy, gross, farbeText, r) => {
       const px = x(gx);
@@ -212,9 +245,9 @@
       ctx.strokeText(name, px + 5, py);
       ctx.fillText(name, px + 5, py);
     };
-    const rangBis = km === 100 ? 3 : km === 250 ? 2 : 1;
+    const rangBis = km && km <= 100 ? 3 : km === 250 ? 2 : 1;
     for (const [name, gx, gy, rang] of karte.orte) if (rang <= rangBis) ort(name, gx, gy, km ? 12 : 11, text, 2.4);
-    if (km === 100) for (const [name, gx, gy] of stationsPunkte) ort(name, gx, gy, 10.5, leise, 1.6);
+    if (km && km <= 100) for (const [name, gx, gy] of stationsPunkte) ort(name, gx, gy, 10.5, leise, 1.6);
 
     // Mittelpunkt
     const mx = x(punkt[0]);
@@ -230,7 +263,7 @@
     ctx.arc(mx, my, 2, 0, 2 * Math.PI);
     ctx.fill();
     // Maßstab: 10 bzw. 50 bzw. 100 km
-    const skala = km === 100 ? 10 : km === 250 ? 50 : 100;
+    const skala = km === 50 ? 5 : km === 100 ? 10 : km === 250 ? 50 : 100;
     ctx.fillStyle = text;
     ctx.fillRect(10, h - 14, skala * s, 3);
     ctx.font = `11px ${farbeVon("--schrift") || "sans-serif"}`;
@@ -286,6 +319,20 @@
       <span class="num uhr">{uhr(aktuell.zeit)}</span>
       <span class="marke" class:vorhersage>{vorhersage ? "Vorhersage" : "gemessen"}</span>
     </div>
+    <div class="film">
+      <label title="Wie weit zurück; Vorhersage immer 2 Stunden">
+        Film
+        <select class="chip" value={zurueck} onchange={(e) => ((zurueck = Number(e.currentTarget.value)), sichern())}>
+          {#each RADAR_ZURUECK as h}<option value={h}>{h} h zurück + 2 h{h >= 6 ? " (alle 15 Min)" : h >= 3 ? " (alle 10 Min)" : ""}</option>{/each}
+        </select>
+      </label>
+      <label class="tempo" title="Sekunden je Bild - rechts schneller">
+        Tempo
+        <input type="range" min="0.05" max="1.5" step="0.05" bind:value={tempo} onchange={sichern} />
+        <span class="num">{tempo.toFixed(2).replace(".", ",")} s</span>
+      </label>
+      <label class="haken"><input type="checkbox" bind:checked={selbst} onchange={sichern} /> selbst starten</label>
+    </div>
     <div class="legende">
       {#each STUFEN as [ab, [r, g, b]]}
         <span><i style:background="rgb({r} {g} {b})"></i>{String(ab).replace(".", ",")}</span>
@@ -299,7 +346,7 @@
   .radar {
     height: 100%;
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    grid-template-rows: auto minmax(0, 1fr) auto auto auto;
     gap: 8px;
   }
   .leiste {
@@ -335,6 +382,27 @@
   }
   .abspielen {
     width: 44px;
+  }
+  .film {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 16px;
+    font-size: 13px;
+    color: var(--text-2);
+  }
+  .film label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .tempo input {
+    direction: rtl;
+    width: 120px;
+    accent-color: var(--akzent);
+  }
+  .haken input {
+    accent-color: var(--akzent);
   }
   .uhr {
     font-size: 15px;

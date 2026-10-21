@@ -36,3 +36,14 @@ test("Komprimierte Bilder von Bright Sky lesen", () => {
   assert.deepEqual(r.bbox, [492, 490, 592, 590]);
   assert.ok(r.bilder.every((b) => b.werte.every((v) => v >= 0 && v < 20000)));
 });
+
+test("Filmlänge: Zeitpunkte wie vorhersage.radar_zeiten", async () => {
+  const { radarZeiten } = await import("../src/lib/raster.js");
+  const jetzt = Date.parse("2026-10-21T03:47:00Z");
+  const z6 = radarZeiten(jetzt, 6);
+  assert.equal(z6.einzeln.length, 24);
+  assert.deepEqual([z6.einzeln[0], z6.einzeln[1], z6.einzeln.at(-1), z6.von, z6.bis], ["2026-10-20T21:45Z", "2026-10-20T22:00Z", "2026-10-21T03:30Z", "2026-10-21T03:45Z", "2026-10-21T05:45Z"]);
+  const z1 = radarZeiten(jetzt, 1);
+  assert.deepEqual(z1, { einzeln: [], von: "2026-10-21T02:45Z", bis: "2026-10-21T05:45Z" });
+  assert.equal(radarZeiten(jetzt, 3).einzeln[0], "2026-10-21T00:40Z");
+});

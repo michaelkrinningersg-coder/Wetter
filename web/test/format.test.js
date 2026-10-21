@@ -82,6 +82,6 @@ test("Symbole: jede Ansicht, Auswertung und jedes Wetter hat eins", () => {
   assert.equal(wetterPfade("unbekannt"), null);
 });
 
-test("Handy-Leiste: vier verschiedene Hauptansichten", () => {
-  assert.deepEqual(HANDY_NAV, ["uebersicht", "vorhersage", "band", "monat"]);
+test("Handy-Leiste: fünf verschiedene Hauptansichten, Radar zwischen Wetter und Jahr", () => {
+  assert.deepEqual(HANDY_NAV, ["uebersicht", "vorhersage", "radar", "band", "monat"]);
 });

@@ -27,7 +27,7 @@ def test_start_ohne_netz(api):
     assert r["einstellungen"] == {"station": 1691, "qn": "alle", "ansicht": "uebersicht",
                                   "vmodell": "icon_d2", "rang_modus": "heute",
                                   "rang_prognose": True, "favoriten": [], "wellen": {},
-                                  "thema": "system", "normal": 1991, "ort": "station"}
+                                  "thema": "system", "normal": 1991, "ort": "station", "radar": {}}
 
 
 def test_einstellungen_bleiben(api):

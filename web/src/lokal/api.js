@@ -16,6 +16,7 @@ import { abrufen as vorhersageAbrufen } from "./vorhersage.js";
 import * as R from "./rechnen.js";
 import * as DE from "./deutschland.js";
 import { bytesAus, jsonAus } from "./antwort.js";
+import { RADAR_ZURUECK, radarSchritt, radarZeiten } from "../lib/raster.js";
 
 const BASIS = "https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/daily/kl/";
 const GOETTINGEN = 1691;
@@ -331,6 +332,7 @@ export const lokal = {
         thema: await meta("thema", "system"),
         normal: R.normalVon(await meta("normal", R.NORMAL_VON)),
         ort: (await meta("ort", "station")) === "gps" ? "gps" : "station",
+        radar: (await meta("radar", {})) ?? {},
         widget: { ort: "station", modell: "icon_d2", unwetter: true, rekorde: true, gps: null, ...((await meta("widget", {})) ?? {}) },
         rang_modus: await meta("rang_modus", "heute"),
         rang_prognose: (await meta("rang_prognose", true)) !== false,
@@ -426,14 +428,27 @@ export const lokal = {
       }
       return { ...(gespeichert ?? { leer: true }), laedt: !!deutschlandLauf };
     }),
-  radar: (bbox, neu = false) =>
+  radar: (bbox, neu = false, zurueck = 1) =>
     sicher(async () => {
       const [o, l, u, r] = bbox.map((v) => Math.round(v));
-      const schluessel = `${o},${l},${u},${r}`;
+      const z = RADAR_ZURUECK.includes(Number(zurueck)) ? Number(zurueck) : 1;
+      const schluessel = `${o},${l},${u},${r}|${z}`;
       if (!neu && radarGemerkt?.[0] === schluessel && Date.now() - radarGemerkt[1] < 4 * 60 * 1000) return radarGemerkt[2];
-      const antwort = await holenJson(`https://api.brightsky.dev/radar?bbox=${schluessel}&format=compressed`);
+      const basis = `https://api.brightsky.dev/radar?bbox=${o},${l},${u},${r}&format=compressed`;
+      const { einzeln, von, bis } = radarZeiten(Date.now(), z);
+      const block = holenJson(`${basis}&date=${von}&last_date=${bis}`);
+      // gemessene Bilder einzeln (ab 3 h), 6 gleichzeitig
+      const teile = [];
+      for (let i = 0; i < einzeln.length; i += 6) {
+        teile.push(...(await Promise.all(einzeln.slice(i, i + 6).map((t) => holenJson(`${basis}&date=${t}&last_date=${t}`)))));
+      }
+      const antwort = await block;
       if (!antwort.radar) throw new Error(antwort.detail ?? "keine Radardaten");
-      const ergebnis = { bbox: [o, l, u, r], radar: antwort.radar };
+      const gesehen = new Set();
+      const bilder = [...teile.flatMap((t) => t.radar ?? []), ...antwort.radar]
+        .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
+        .filter((b) => !gesehen.has(b.timestamp) && gesehen.add(b.timestamp));
+      const ergebnis = { bbox: [o, l, u, r], radar: bilder, zurueck: z, schritt: radarSchritt(z) };
       radarGemerkt = [schluessel, Date.now(), ergebnis];
       return ergebnis;
     }),
