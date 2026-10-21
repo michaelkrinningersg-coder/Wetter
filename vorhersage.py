@@ -10,13 +10,18 @@ und ein Wettersymbol.
 Modelle (so entschieden):
     ICON-D2      DWD, 2 km, rund 2 Tage           Open-Meteo icon_d2
     ICON-EU      DWD, 7 km                        Open-Meteo icon_eu
+    Harmonie     KNMI (NL) und DMI (DK), 2 km     Open-Meteo knmi_/dmi_harmonie_arome_europe
+    AROME        Météo-France, 2,5 km             Open-Meteo meteofrance_arome_france
+    ARPEGE       Météo-France Europa, 10 km       Open-Meteo meteofrance_arpege_europe
     ECMWF IFS    ECMWF, 25 km                     Open-Meteo ecmwf_ifs025
     GFS          NOAA                             Open-Meteo gfs_seamless
     Swiss HD     MeteoSwiss ICON-CH1/CH2, 1-2 km  Open-Meteo meteoswiss_icon_ch1/ch2
-                 (rechnet nur im Alpenraum - sonst "außerhalb des Gebiets")
+                 (rechnet nur bis etwa 50° Nord - sonst "außerhalb des Gebiets")
     MET Norway   eigener Dienst api.met.no        locationforecast/2.0/complete
 
-Alle Zeiten in UTC (ISO); die Seite zeigt sie in Ortszeit.
+Alle Zeiten in UTC (ISO); die Seite zeigt sie in Ortszeit. Open-Meteo
+liefert dazu den Vortag (past_days=1), damit der heutige Tag ab 0 Uhr
+Ortszeit vollständig ist - für die Tageswerte.
 
 Die Umwandlung in ein gemeinsames Format (`open_meteo`, `met_norway`,
 `bright_sky`) steht genauso in web/src/lokal/vorhersage.js; der
@@ -39,10 +44,14 @@ MODELLE = [
     # (Schlüssel, Name, Beschreibung, Quelle, Open-Meteo-Modell)
     ("icon_d2", "ICON-D2", "DWD, 2 km, rund 2 Tage", "open-meteo", "icon_d2"),
     ("icon_eu", "ICON-EU", "DWD, 7 km", "open-meteo", "icon_eu"),
+    ("knmi", "Harmonie KNMI", "Niederländischer Wetterdienst, 2 km, rund 2½ Tage", "open-meteo", "knmi_harmonie_arome_europe"),
+    ("dmi", "Harmonie DMI", "Dänischer Wetterdienst, 2 km, rund 2½ Tage", "open-meteo", "dmi_harmonie_arome_europe"),
+    ("arome", "AROME", "Météo-France, 2,5 km, rund 2 Tage", "open-meteo", "meteofrance_arome_france"),
+    ("arpege", "ARPEGE", "Météo-France Europa, 10 km", "open-meteo", "meteofrance_arpege_europe"),
     ("ecmwf", "ECMWF IFS", "Europäisches Zentrum, 25 km", "open-meteo", "ecmwf_ifs025"),
     ("gfs", "GFS", "NOAA (USA)", "open-meteo", "gfs_seamless"),
-    ("swiss1", "Swiss HD 1 km", "MeteoSwiss ICON-CH1, nur Alpenraum", "open-meteo", "meteoswiss_icon_ch1"),
-    ("swiss2", "Swiss HD 2 km", "MeteoSwiss ICON-CH2, nur Alpenraum", "open-meteo", "meteoswiss_icon_ch2"),
+    ("swiss1", "Swiss HD 1 km", "MeteoSwiss ICON-CH1, bis etwa 50° Nord", "open-meteo", "meteoswiss_icon_ch1"),
+    ("swiss2", "Swiss HD 2 km", "MeteoSwiss ICON-CH2, bis etwa 50° Nord", "open-meteo", "meteoswiss_icon_ch2"),
     ("metno", "MET Norway", "Norwegischer Wetterdienst", "met-norway", None),
 ]
 KENNUNG = "Wetter-App (github.com/michaelkrinningersg-coder/Wetter)"
@@ -197,7 +206,7 @@ def _json(url: str) -> dict:
 
 def url_open_meteo(lat, lon, modell) -> str:
     return (f"{OPEN_METEO}?latitude={lat:.4f}&longitude={lon:.4f}&hourly={STUNDEN_WERTE}"
-            f"&forecast_days=3&timezone=GMT&models={modell}")
+            f"&past_days=1&forecast_days=3&timezone=GMT&models={modell}")
 
 
 def url_met_norway(lat, lon) -> str:

@@ -9,10 +9,14 @@ const STUNDEN_WERTE = "temperature_2m,cloud_cover,precipitation,wind_speed_10m,w
 export const MODELLE = [
   ["icon_d2", "ICON-D2", "DWD, 2 km, rund 2 Tage", "open-meteo", "icon_d2"],
   ["icon_eu", "ICON-EU", "DWD, 7 km", "open-meteo", "icon_eu"],
+  ["knmi", "Harmonie KNMI", "Niederländischer Wetterdienst, 2 km, rund 2½ Tage", "open-meteo", "knmi_harmonie_arome_europe"],
+  ["dmi", "Harmonie DMI", "Dänischer Wetterdienst, 2 km, rund 2½ Tage", "open-meteo", "dmi_harmonie_arome_europe"],
+  ["arome", "AROME", "Météo-France, 2,5 km, rund 2 Tage", "open-meteo", "meteofrance_arome_france"],
+  ["arpege", "ARPEGE", "Météo-France Europa, 10 km", "open-meteo", "meteofrance_arpege_europe"],
   ["ecmwf", "ECMWF IFS", "Europäisches Zentrum, 25 km", "open-meteo", "ecmwf_ifs025"],
   ["gfs", "GFS", "NOAA (USA)", "open-meteo", "gfs_seamless"],
-  ["swiss1", "Swiss HD 1 km", "MeteoSwiss ICON-CH1, nur Alpenraum", "open-meteo", "meteoswiss_icon_ch1"],
-  ["swiss2", "Swiss HD 2 km", "MeteoSwiss ICON-CH2, nur Alpenraum", "open-meteo", "meteoswiss_icon_ch2"],
+  ["swiss1", "Swiss HD 1 km", "MeteoSwiss ICON-CH1, bis etwa 50° Nord", "open-meteo", "meteoswiss_icon_ch1"],
+  ["swiss2", "Swiss HD 2 km", "MeteoSwiss ICON-CH2, bis etwa 50° Nord", "open-meteo", "meteoswiss_icon_ch2"],
   ["metno", "MET Norway", "Norwegischer Wetterdienst", "met-norway", null],
 ];
 
@@ -116,7 +120,7 @@ export function brightSky(antwort) {
 }
 
 const f4 = (x) => Number(x).toFixed(4);
-export const urlOpenMeteo = (lat, lon, m) => `${OPEN_METEO}?latitude=${f4(lat)}&longitude=${f4(lon)}&hourly=${STUNDEN_WERTE}&forecast_days=3&timezone=GMT&models=${m}`;
+export const urlOpenMeteo = (lat, lon, m) => `${OPEN_METEO}?latitude=${f4(lat)}&longitude=${f4(lon)}&hourly=${STUNDEN_WERTE}&past_days=1&forecast_days=3&timezone=GMT&models=${m}`;
 export const urlMetNorway = (lat, lon) => `https://api.met.no/weatherapi/locationforecast/2.0/complete?lat=${f4(lat)}&lon=${f4(lon)}`;
 export const urlBrightSky = (lat, lon) => `https://api.brightsky.dev/current_weather?lat=${f4(lat)}&lon=${f4(lon)}`;
 

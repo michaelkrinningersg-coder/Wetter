@@ -3,7 +3,7 @@
 // dem nächsten Modell der Liste und tragen dessen Namen (`ersatz`).
 // Ohne Svelte, damit die Tests es direkt prüfen können.
 
-// feinste Auflösung zuerst: Swiss HD 1 km nur im Alpenraum, sonst ICON-D2
+// feinste Auflösung zuerst: Swiss HD 1 km nur bis etwa 50° Nord, sonst ICON-D2
 export const KURZFRIST = ["swiss1", "icon_d2", "swiss2", "icon_eu", "ecmwf", "gfs", "metno"];
 
 const ZONE = "Europe/Berlin";

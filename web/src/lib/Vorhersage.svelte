@@ -4,6 +4,8 @@
   // Zeiten kommen in UTC und werden hier in Ortszeit (Europe/Berlin) gezeigt.
   import { SYMBOL_TEXT, de, istTag } from "./format.js";
   import Symbol from "./Symbol.svelte";
+  import { ortsTag } from "./kurzfrist.js";
+  import { tageswerte } from "./tageswerte.js";
 
   let { v, modell, waehle } = $props();
 
@@ -17,6 +19,11 @@
 
   const gewaehlt = $derived(v.modelle.find((m) => m.id === modell && m.stunden) ?? v.modelle.find((m) => m.stunden));
 
+  // Tageswerte über den ganzen Ortstag 0-24 Uhr, auch die schon vergangenen Stunden
+  const werte = $derived(tageswerte(gewaehlt?.stunden));
+  const hh = (h) => String(h).padStart(2, "0");
+  const spanne = (w) => (w.von > 0 || w.bis < 23 ? `nur ${hh(w.von)}–${hh(w.bis)} Uhr` : "") + (w.luecken ? `${w.von > 0 || w.bis < 23 ? ", " : ""}teils 6-Stunden-Werte` : "");
+
   // ab der laufenden Stunde, nach Tagen gruppiert
   const tage = $derived.by(() => {
     if (!gewaehlt?.stunden) return [];
@@ -25,7 +32,7 @@
     for (const z of gewaehlt.stunden) {
       if (Date.parse(z[0]) < ab) continue;
       const k = tagSchluessel(z[0]);
-      if (!gruppen.length || gruppen.at(-1).k !== k) gruppen.push({ k, titel: tagKopf(z[0]), zeilen: [] });
+      if (!gruppen.length || gruppen.at(-1).k !== k) gruppen.push({ k, titel: tagKopf(z[0]), werte: werte.get(ortsTag(Date.parse(z[0]))), zeilen: [] });
       gruppen.at(-1).zeilen.push(z);
     }
     return gruppen;
@@ -83,7 +90,25 @@
         </thead>
         {#each tage as t}
           <tbody>
-            <tr class="tag"><td colspan="7">{t.titel}</td></tr>
+            <tr class="tag">
+              <td colspan="7">
+                <span class="titel">{t.titel}</span>
+                {#if t.werte}
+                  {@const w = t.werte}
+                  <span class="tw">
+                    <span title="Tagesmittel der Temperatur">Ø <b>{de(w.mittel)} °C</b></span>
+                    <span title="Höchstwert">↑ <b class="warm">{de(w.max.wert)} °C</b> {hh(w.max.h)} Uhr</span>
+                    <span title="Tiefstwert">↓ <b class="kalt">{de(w.min.wert)} °C</b> {hh(w.min.h)} Uhr</span>
+                    <span title="Niederschlag über den Tag">
+                      {#if w.regen != null && w.regen >= 0.05}<b class="nass">{de(w.regen)} mm</b>{w.arten.length ? ` ${w.arten.join(", ")}` : ""}{:else}trocken{/if}
+                    </span>
+                    {#if w.wind}<span title="stärkster mittlerer Wind">Wind bis <b>{de(w.wind.wert, 0)} km/h</b> {hh(w.wind.h)} Uhr</span>{/if}
+                    {#if w.boe}<span title="stärkste Böe">Böen bis <b class:sturm={w.boe.wert >= 75}>{de(w.boe.wert, 0)} km/h</b> {hh(w.boe.h)} Uhr</span>{/if}
+                    {#if spanne(w)}<span class="leise">{spanne(w)}</span>{/if}
+                  </span>
+                {/if}
+              </td>
+            </tr>
             {#each t.zeilen as [zeit, temp, wolken, regen, wind, boe, symbol, tag]}
               {@const h = stunde(zeit)}
               <tr class:nacht={!istTag(tag, zeit, v.station)}>
@@ -101,7 +126,7 @@
       </table>
     {/if}
   </div>
-  <div class="leise quellen">Vorhersage: Open-Meteo (CC BY 4.0) mit Modellen von DWD, ECMWF, NOAA, MeteoSwiss · MET Norway · aktuell: Bright Sky (DWD)</div>
+  <div class="leise quellen">Vorhersage: Open-Meteo (CC BY 4.0) mit Modellen von DWD, KNMI, DMI, Météo-France, ECMWF, NOAA, MeteoSwiss · MET Norway · aktuell: Bright Sky (DWD)</div>
 </div>
 
 <style>
@@ -191,9 +216,36 @@
   }
   tr.tag td {
     text-align: left;
-    font-weight: 600;
     background: var(--flaeche-2);
     padding-top: 8px;
+    white-space: normal;
+  }
+  .titel {
+    font-weight: 600;
+    margin-right: 14px;
+  }
+  .tw {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 2px 14px;
+    font-size: 12px;
+    color: var(--text-2);
+  }
+  .tw b {
+    font-weight: 600;
+    color: var(--text);
+  }
+  .tw b.warm {
+    color: var(--rot);
+  }
+  .tw b.kalt {
+    color: var(--blau);
+  }
+  .tw b.nass {
+    color: var(--blau);
+  }
+  .tw b.sturm {
+    color: var(--rot);
   }
   tr.nacht td {
     background: color-mix(in srgb, var(--flaeche-2) 70%, transparent);
