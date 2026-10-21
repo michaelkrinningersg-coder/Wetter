@@ -47,3 +47,17 @@ test("Filmlänge: Zeitpunkte wie vorhersage.radar_zeiten", async () => {
   assert.deepEqual(z1, { einzeln: [], von: "2026-10-21T02:45Z", bis: "2026-10-21T05:45Z" });
   assert.equal(radarZeiten(jetzt, 3).einzeln[0], "2026-10-21T00:40Z");
 });
+
+test("Kartenansicht: Zoom um einen Punkt hält ihn fest, Grenzen", async () => {
+  const { zoomUm, unterPunkt, ganzDeutschland, ansichtKlemmen, ZOOM_MIN } = await import("../src/lib/raster.js");
+  const a = { x: 500, y: 600, km: 100 };
+  const vor = unterPunkt(a, 120, 80, 400, 300);
+  const b = zoomUm(a, 2.5, 120, 80, 400, 300);
+  assert.equal(b.km, 40);
+  const nach = unterPunkt(b, 120, 80, 400, 300);
+  assert.ok(Math.abs(vor[0] - nach[0]) < 1e-9 && Math.abs(vor[1] - nach[1]) < 1e-9);
+  assert.equal(zoomUm(a, 1000, 0, 0, 400, 300).km, ZOOM_MIN);
+  const d = ganzDeutschland(360, 500);
+  assert.ok(Math.abs(d.km - 1100) < 1e-9);
+  assert.deepEqual(ansichtKlemmen({ x: -5, y: 5000, km: 50 }), { x: 0, y: 1200, km: 50 });
+});

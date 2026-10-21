@@ -14,10 +14,14 @@ function bytes(b64) {
 export function entpacken(antwort, bbox) {
   const zeilen = bbox[2] - bbox[0] + 1;
   const spalten = bbox[3] - bbox[1] + 1;
-  const bilder = (antwort.radar ?? []).map((b) => {
-    const roh = unzlibSync(bytes(b.precipitation_5));
-    const werte = new Uint16Array(roh.buffer, roh.byteOffset, roh.byteLength / 2);
-    return { zeit: b.timestamp, werte };
-  });
+  // erst beim Zeichnen entpacken: ganz Deutschland mit 49 Bildern wären
+  // entpackt über 100 MB, gepackt nur wenige
+  const bilder = (antwort.radar ?? []).map((b) => ({
+    zeit: b.timestamp,
+    get werte() {
+      const roh = unzlibSync(bytes(b.precipitation_5));
+      return new Uint16Array(roh.buffer, roh.byteOffset, roh.byteLength / 2);
+    },
+  }));
   return { bbox, zeilen, spalten, bilder };
 }

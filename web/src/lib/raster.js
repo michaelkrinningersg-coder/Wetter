@@ -77,3 +77,31 @@ export function radarZeiten(jetztMs, zurueck) {
   for (let t = erster; t < jetzt; t += schritt * MIN) einzeln.push(fmt(t));
   return { einzeln, von: fmt(jetzt), bis };
 }
+
+// Freie Kartenansicht (Finger, Mausrad): Mitte x/y im Raster und `km` über
+// die kürzere Seite der Zeichenfläche.
+export const ZOOM_MIN = 15;
+export const ZOOM_MAX = 1500;
+const klemme = (v, a, b) => Math.min(b, Math.max(a, v));
+
+export const ansichtKlemmen = (a) => ({ x: klemme(a.x, 0, SPALTEN), y: klemme(a.y, 0, ZEILEN), km: klemme(a.km, ZOOM_MIN, ZOOM_MAX) });
+
+/** Bildpunkte je km */
+export const massstab = (a, w, h) => Math.min(w, h) / a.km;
+
+/** ganz Deutschland (das ganze Raster) passend in w x h */
+export const ganzDeutschland = (w, h) => ({ x: SPALTEN / 2, y: ZEILEN / 2, km: Math.min(w, h) / Math.min(w / SPALTEN, h / ZEILEN) });
+
+/** Rasterpunkt unter dem Bildpunkt px, py */
+export function unterPunkt(a, px, py, w, h) {
+  const s = massstab(a, w, h);
+  return [a.x + (px - w / 2) / s, a.y + (py - h / 2) / s];
+}
+
+/** Zoom um `faktor` (> 1 hinein); der Rasterpunkt unter px, py bleibt stehen */
+export function zoomUm(a, faktor, px, py, w, h) {
+  const [gx, gy] = unterPunkt(a, px, py, w, h);
+  const km = klemme(a.km / faktor, ZOOM_MIN, ZOOM_MAX);
+  const s = Math.min(w, h) / km;
+  return ansichtKlemmen({ x: gx - (px - w / 2) / s, y: gy - (py - h / 2) / s, km });
+}
