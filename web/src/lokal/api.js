@@ -15,6 +15,7 @@ import { auswertung } from "./auswertung.js";
 import { abrufen as vorhersageAbrufen } from "./vorhersage.js";
 import * as R from "./rechnen.js";
 import * as DE from "./deutschland.js";
+import { bytesAus, jsonAus } from "./antwort.js";
 
 const BASIS = "https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/daily/kl/";
 const GOETTINGEN = 1691;
@@ -68,7 +69,7 @@ async function holen(pfad, binaer = true) {
       const antwort = await CapacitorHttp.get({ url, responseType: "arraybuffer", connectTimeout: 30000, readTimeout: 60000 });
       if (antwort.status >= 400) throw new Error(`HTTP ${antwort.status}`);
       // binär kommt als Base64 über die Brücke
-      const bytes = typeof antwort.data === "string" ? Uint8Array.from(atob(antwort.data), (c) => c.charCodeAt(0)) : new Uint8Array(antwort.data);
+      const bytes = bytesAus(antwort.data);
       return binaer ? bytes : new TextDecoder("latin1").decode(bytes);
     }
     const r = await fetch(url);
@@ -87,8 +88,8 @@ async function holenJson(url) {
       url, responseType: "arraybuffer", connectTimeout: 20000, readTimeout: 30000,
       headers: { "User-Agent": "Wetter-App (github.com/michaelkrinningersg-coder/Wetter)" },
     });
-    const bytes = typeof a.data === "string" ? Uint8Array.from(atob(a.data), (c) => c.charCodeAt(0)) : new Uint8Array(a.data);
-    return JSON.parse(new TextDecoder("utf-8").decode(bytes));
+    // JSON-Antworten liest CapacitorHttp selbst - trotz responseType (antwort.js)
+    return jsonAus(a.data);
   }
   const r = await fetch(url);
   return r.json();

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "test": "node --test test/format.test.js test/paritaet.test.js test/lesen.test.js test/vorhersage.test.js test/kurzfrist.test.js test/radar.test.js test/standort.test.js test/deutschland.test.js test/deutschland_lokal.test.js"
+    "test": "node --test test/format.test.js test/paritaet.test.js test/lesen.test.js test/vorhersage.test.js test/kurzfrist.test.js test/radar.test.js test/standort.test.js test/deutschland.test.js test/deutschland_lokal.test.js test/antwort.test.js"
   },
   "dependencies": {
     "@capacitor/core": "8.5.2",
