@@ -91,6 +91,40 @@ def neue_rekorde(s: auswertung.Spalten, ab_ord: int, bis_ord: int) -> list[dict]
     return aus
 
 
+KALENDERTAG_JAHRE = 20   # so viele Jahre mit Wert an diesem Kalendertag vorher
+KALENDERTAG_TAGE = 14    # Kalendertags-Rekorde der letzten 14 Tage (für die Meldungen)
+
+
+def kalendertag_rekorde(s: auswertung.Spalten, ab_ord: int, bis_ord: int) -> list[dict]:
+    """Tage zwischen ab_ord und bis_ord, deren Wert der beste je an diesem
+    Kalendertag war (echt besser als alle früheren), wenn es den Kalendertag
+    schon in mindestens KALENDERTAG_JAHRE Jahren mit Wert gab."""
+    aus = []
+    for spalte, richtung, titel, einheit, faktor in auswertung.REKORDE:
+        werte = getattr(s, spalte)
+        vz = -1 if richtung == "hoch" else 1
+        beste = {}   # Kalendertag -> (Schlüssel, i)
+        jahre = {}   # Kalendertag -> Anzahl Jahre mit Wert
+        for i in range(s.n):
+            w = werte[i]
+            if w is None:
+                continue
+            k = s.monat[i] * 100 + s.tag[i]
+            schluessel = vz * w
+            vorher = beste.get(k)
+            if ab_ord <= s.ord[i] <= bis_ord and jahre.get(k, 0) >= KALENDERTAG_JAHRE \
+                    and schluessel < vorher[0]:
+                aus.append({
+                    "_ord": s.ord[i], "datum": s.iso(i), "spalte": spalte, "richtung": richtung,
+                    "kategorie": titel, "einheit": einheit, "wert": auswertung._r(w * faktor),
+                    "jahre": jahre[k], "bisher": [auswertung._r(vz * vorher[0] * faktor), s.iso(vorher[1])],
+                })
+            if vorher is None or schluessel < vorher[0]:
+                beste[k] = (schluessel, i)
+            jahre[k] = jahre.get(k, 0) + 1
+    return aus
+
+
 def aktive_stationen() -> list[int]:
     """Stationen mit recent-Archiv beim DWD."""
     html = dwd.holen("recent/").decode("latin-1")
@@ -147,7 +181,7 @@ def berechnen(tage=TAGE, zwischenspeicher=None, fortschritt=None, nur=None) -> d
                 os.remove(os.path.join(zwischenspeicher, name))
     melden(f"{len(aktiv)} aktive Stationen")
 
-    eintraege, fehler, stand, gezaehlt = [], {}, None, 0
+    eintraege, kalendertag, fehler, stand, gezaehlt = [], [], {}, None, 0
 
     def auswerten(sid, hist, recent, ordner):
         """Eine Station: einlesen, ihre Rekorde im eigenen Fenster sammeln,
@@ -158,11 +192,12 @@ def berechnen(tage=TAGE, zwischenspeicher=None, fortschritt=None, nur=None) -> d
             db.einlesen(sid, hist, recent, verzeichnis.get(sid))
             s = db.spalten(sid, "alle")
             if not s.n:
-                return None, []
+                return None, ([], [])
             letzter = s.ord[-1]
             # eigenes Fenster bis zum letzten Tag der Station; gekürzt wird
             # am Ende auf das gemeinsame (ab dem jüngsten Stand aller)
-            return letzter, neue_rekorde(s, letzter - tage + 1, letzter)
+            return letzter, (neue_rekorde(s, letzter - tage + 1, letzter),
+                             kalendertag_rekorde(s, letzter - KALENDERTAG_TAGE + 1, letzter))
         finally:
             db.schliessen()
             for rest in (pfad, pfad + ".wal"):
@@ -180,14 +215,15 @@ def berechnen(tage=TAGE, zwischenspeicher=None, fortschritt=None, nur=None) -> d
             sid, lauf = laeufe.pop(0)
             try:
                 hist, recent = lauf.result()
-                letzter, liste = auswerten(sid, hist, recent, ordner)
+                letzter, (liste, kt) = auswerten(sid, hist, recent, ordner)
                 if letzter is not None:
                     stand = letzter if stand is None else max(stand, letzter)
                     st = stationen[sid]
-                    for e in liste:
+                    for e in liste + kt:
                         e.update({"id": sid, "name": st["name"], "land": st["land"],
                                   "hoehe": st["hoehe"]})
                     eintraege.extend(liste)
+                    kalendertag.extend(kt)
                     gezaehlt += 1
             except Exception as f:                                  # noqa: BLE001
                 fehler[sid] = str(f)[:200]
@@ -199,6 +235,9 @@ def berechnen(tage=TAGE, zwischenspeicher=None, fortschritt=None, nur=None) -> d
         raise RuntimeError("keine Station geladen")
     ab = stand - tage + 1
     eintraege = [e for e in eintraege if e.pop("_ord") >= ab]
+    ab_kt = stand - KALENDERTAG_TAGE + 1
+    kalendertag = [e for e in kalendertag if e.pop("_ord") >= ab_kt]
+    kalendertag.sort(key=lambda e: (e["datum"], e["kategorie"], e["name"]))
     eintraege.sort(key=lambda e: (e["datum"], e["kategorie"], e["platz"], e["name"]),
                    reverse=False)
     stand_iso = (dt.date(1970, 1, 1) + dt.timedelta(days=stand)).isoformat()
@@ -211,6 +250,8 @@ def berechnen(tage=TAGE, zwischenspeicher=None, fortschritt=None, nur=None) -> d
         "regel": "unter 3 Jahren nichts, ab 3 Platz 1, ab 20 Top 3, ab 30 Top 5, ab 50 Top 10",
         "ausfaelle": fehler,  # Stationen, die sich nicht laden ließen
         "eintraege": eintraege,
+        # Rekorde je Kalendertag (letzte 14 Tage) - für die Meldungen am Handy
+        "kalendertag": kalendertag,
     }
 
 

@@ -61,6 +61,8 @@ jobs:
         working-directory: web
         run: |
           npm run build -- --mode android
+          # Widget: Symbole und Layout frisch aus web/src/lib/symbole.js
+          node ../werkzeuge/widget_bauen.mjs
           npx cap sync android
 
       - name: Schlüssel

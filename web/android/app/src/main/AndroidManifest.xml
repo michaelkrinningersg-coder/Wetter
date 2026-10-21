@@ -24,6 +24,19 @@
 
         </activity>
 
+        <!-- Widget 4x3: 3 Tage Vorhersage (WetterWidget.java) -->
+        <receiver
+            android:name=".WetterWidget"
+            android:label="Wetter 3 Tage"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/wetter_widget_info" />
+        </receiver>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -41,4 +54,6 @@
     <!-- Standort: Vorhersage, Radar und nächste Station (fragt beim ersten Mal) -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Meldungen: Unwetter und Rekorde der Favoriten (Android 13+ fragt) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 </manifest>

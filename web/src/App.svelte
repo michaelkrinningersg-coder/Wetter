@@ -17,7 +17,9 @@
   import { MONATE, datum, tausend } from "./lib/format.js";
   import Symbol from "./lib/Symbol.svelte";
   import { NORMALE, normalText, vergleich } from "./lib/zeitraum.svelte.js";
-  import { meinStandort, naechsteStation } from "./lib/standort.js";
+  import { letzterStandort, meinStandort, naechsteStation } from "./lib/standort.js";
+  import { meldungenErlauben, nativ, widgetJetzt, widgetSetzen, widgetStatus } from "./lib/nativ.js";
+  import { MODELLE } from "./lokal/vorhersage.js";
   import { AUFRUF, AUSWERTUNGEN, DATEN_OPTIONEN, DEUTSCHLAND, HANDY_NAV, HAUPT, IST_AUSWERTUNG, OPTIONEN, TITEL } from "./lib/ansichten.js";
   import Uebersicht from "./lib/Uebersicht.svelte";
   import Vorhersage from "./lib/Vorhersage.svelte";
@@ -55,6 +57,9 @@
   let deutschlandDaten = $state(null); // Top 50: letzte 7 Tage aller aktiven Stationen
   let ort = $state("station"); // Vorhersage für die Station oder "gps" = Standort des Geräts
   let ortHinweis = $state("");
+  // Widget und Meldungen am Handy (WetterNativ.java)
+  let widget = $state({ ort: "station", modell: "icon_d2", unwetter: true, rekorde: true, gps: null });
+  let widgetInfo = $state({ erlaubt: true, fehler: "" });
   let geschichteKurz = $state(null); // für die Übersicht
   let vmodell = $state("icon_d2");
   let thema = $state("system"); // system, hell, dunkel
@@ -116,6 +121,7 @@
     vorhersage = null;
     geschichteKurz = null;
     rufe("einstellung", "station", id);
+    widgetAbgleichen();
     if (r.geladen) await listeNeu();
     await ansichtLaden();
     return true;
@@ -221,6 +227,11 @@
           const n = naechsteStation(stationen, p.lat, p.lon);
           r.station = { ...r.station, name: n ? `Mein Standort · bei ${n[0][1]}` : "Mein Standort", genau: p.genau };
           ortHinweis = "";
+          if (nativ()) {
+            widget = { ...widget, gps: { lat: p.lat, lon: p.lon } };
+            rufe("einstellung", "widget", $state.snapshot(widget));
+            if (widget.ort === "gps") widgetAbgleichen(false);
+          }
         }
       } catch (e) {
         ortHinweis = `${e.message} – gezeigt wird ${station.station.name}`;
@@ -260,6 +271,49 @@
     const id = station.station.id;
     favoriten = favoriten.includes(id) ? favoriten.filter((f) => f !== id) : [...favoriten, id];
     rufe("einstellung", "favoriten", favoriten);
+    widgetAbgleichen();
+  }
+
+  // ------------------------------------------- Widget und Meldungen (Handy)
+  async function widgetAbgleichen(neu = true) {
+    if (!nativ() || !station) return;
+    let ziel = { lat: station.station.lat, lon: station.station.lon, name: station.station.name };
+    if (widget.ort === "gps" && widget.gps) {
+      const n = naechsteStation(stationen, widget.gps.lat, widget.gps.lon);
+      ziel = { ...widget.gps, name: n ? `Mein Standort · bei ${n[0][1]}` : "Mein Standort" };
+    }
+    const m = MODELLE.find((x) => x[0] === widget.modell) ?? MODELLE[0];
+    await widgetSetzen({
+      ...ziel,
+      modell: m[3] === "met-norway" ? "metno" : m[4],
+      modellName: m[1],
+      favoriten: JSON.stringify(favoriten),
+      unwetter: widget.unwetter,
+      rekorde: widget.rekorde,
+      neu,
+    });
+    widgetInfo = await widgetStatus();
+    // einmal nach dem ersten Start fragen; später über "Meldungen erlauben"
+    if (!widgetInfo.erlaubt && (widget.unwetter || widget.rekorde) && !widget.gefragt) {
+      widget = { ...widget, gefragt: true };
+      rufe("einstellung", "widget", $state.snapshot(widget));
+      widgetInfo = { ...widgetInfo, ...(await meldungenErlauben()) };
+    }
+  }
+
+  async function widgetSetze(name, wert) {
+    widget = { ...widget, [name]: wert };
+    if (name === "ort" && wert === "gps") {
+      try {
+        const p = await meinStandort();
+        widget = { ...widget, gps: { lat: p.lat, lon: p.lon } };
+      } catch (e) {
+        ortHinweis = `Widget: ${e.message}`;
+      }
+    }
+    if ((name === "unwetter" || name === "rekorde") && wert && !widgetInfo.erlaubt) widgetInfo = { ...widgetInfo, ...(await meldungenErlauben()) };
+    rufe("einstellung", "widget", $state.snapshot(widget));
+    widgetAbgleichen();
   }
 
   async function aktualisieren() {
@@ -307,6 +361,7 @@
     if (r.einstellungen.thema) thema = r.einstellungen.thema;
     if (NORMALE.includes(r.einstellungen.normal)) vergleich.von = r.einstellungen.normal;
     if (r.einstellungen.ort === "gps") ort = "gps";
+    if (r.einstellungen.widget) widget = { ...widget, ...r.einstellungen.widget };
     rangModus = r.einstellungen.rang_modus === "jahr" ? "jahr" : "heute";
     rangPrognose = r.einstellungen.rang_prognose !== false;
     qn = "alle"; // so entschieden: immer mit allen Qualitätsstufen beginnen
@@ -558,6 +613,26 @@
         {@render qnSchalter()}
         <div class="lbl">Vergleichszeitraum (Normal)</div>
         <div class="gruppe">{@render normalWahl()}</div>
+        {#if nativ()}
+          <div class="lbl">Widget und Meldungen</div>
+          <div class="widget-wahl">
+            <div class="gruppe">
+              <button class="chip" class:an={widget.ort === "station"} onclick={() => widgetSetze("ort", "station")}>{station?.station.name ?? "Station"}</button>
+              <button class="chip" class:an={widget.ort === "gps"} onclick={() => widgetSetze("ort", "gps")}><Symbol name="standort" /> Mein Standort</button>
+            </div>
+            <select class="chip" value={widget.modell} onchange={(e) => widgetSetze("modell", e.currentTarget.value)} title="Modell im Widget">
+              {#each MODELLE as [k, t]}<option value={k}>{t}</option>{/each}
+            </select>
+            <label class="haken"><input type="checkbox" checked={widget.unwetter} onchange={(e) => widgetSetze("unwetter", e.currentTarget.checked)} /> Unwetter melden (Böen ab 75 km/h, Starkregen ab 15 mm/h, Gewitter – nächste 24 h)</label>
+            <label class="haken"><input type="checkbox" checked={widget.rekorde} onchange={(e) => widgetSetze("rekorde", e.currentTarget.checked)} /> Rekorde der Favoriten melden (Rekord, Top 3, Kalendertag – einmal am Tag mittags)</label>
+            {#if !widgetInfo.erlaubt && (widget.unwetter || widget.rekorde)}
+              <button class="knopf" onclick={async () => (widgetInfo = { ...widgetInfo, ...(await meldungenErlauben()) })}>Meldungen erlauben</button>
+            {/if}
+            <button class="knopf" onclick={() => (widgetAbgleichen(), widgetJetzt())}>Widget jetzt aktualisieren</button>
+            {#if widgetInfo.fehler}<div class="leise">Letzter Fehler: {widgetInfo.fehler}</div>{/if}
+            <div class="leise">Widget hinzufügen: lange auf den Startbildschirm drücken → Widgets → Wetter. {widget.ort === "gps" ? (widget.gps ? "Ort: zuletzt bestimmter Standort der App." : "Noch kein Standort bestimmt – einmal „Mein Standort“ antippen.") : ""}</div>
+          </div>
+        {/if}
         <div class="lbl">Farben</div>
         <div class="gruppe">
           {#each THEMEN as [t, t2]}
@@ -1207,6 +1282,21 @@
     place-items: center;
     height: 100%;
     font-size: 14px;
+  }
+  .widget-wahl {
+    display: grid;
+    gap: 8px;
+    justify-items: start;
+  }
+  .haken {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    font-size: 14px;
+  }
+  .haken input {
+    margin-top: 3px;
+    accent-color: var(--akzent);
   }
   .meldung {
     display: flex;

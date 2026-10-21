@@ -75,3 +75,18 @@ def test_nur_das_fenster():
     ab = ord_(von) + 365 * 23
     e = hoechst(rekorde_de.neue_rekorde(s, ab, ab + 3650))
     assert [(x["wert"], x["platz"], x["von"]) for x in e] == [(41.0, 1, 3)]
+
+
+def test_kalendertag_erst_ab_zwanzig_jahren_und_echt_besser():
+    von = dt.date(2000, 1, 1)
+    n = (dt.date(2026, 1, 10) - von).days + 1
+    werte = [5.0] * n
+    tag = lambda d: (d - von).days  # noqa: E731
+    for j in range(2000, 2026):            # jeder 5. Januar: 10,0 °C, 2010: 12,0
+        werte[tag(dt.date(j, 1, 5))] = 12.0 if j == 2010 else 10.0
+    werte[tag(dt.date(2015, 1, 6))] = 20.0   # 6. Januar: erst 15 Jahre - zählt nicht
+    werte[tag(dt.date(2026, 1, 5))] = 12.0   # gleich wie 2010 - zählt nicht
+    werte[tag(dt.date(2026, 1, 7))] = 15.0   # 7. Januar, 26 Jahre: neuer Rekord
+    s = spalten(von, werte)
+    e = [x for x in rekorde_de.kalendertag_rekorde(s, 0, 10**6) if x["kategorie"] == "Höchstwert"]
+    assert [(x["datum"], x["wert"], x["jahre"], x["bisher"][0]) for x in e] == [("2026-01-07", 15.0, 26, 5.0)]

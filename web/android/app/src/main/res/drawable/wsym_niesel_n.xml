@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- erzeugt von werkzeuge/widget_bauen.mjs aus web/src/lib/symbole.js -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path
+        android:pathData="M7 15a3.8 3.8 0 0 1-.55-7.56A5.2 5.2 0 0 1 16.5 6.5a4.25 4.25 0 0 1 .5 8.5z"
+        android:strokeWidth="1.7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeColor="#FFF3F4F6" />
+    <path
+        android:pathData="M8.5 18h.01"
+        android:strokeWidth="1.7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeColor="#FF60A5FA" />
+    <path
+        android:pathData="M12.5 18h.01"
+        android:strokeWidth="1.7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeColor="#FF60A5FA" />
+    <path
+        android:pathData="M16.5 18h.01"
+        android:strokeWidth="1.7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeColor="#FF60A5FA" />
+    <path
+        android:pathData="M10.5 21h.01"
+        android:strokeWidth="1.7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeColor="#FF60A5FA" />
+    <path
+        android:pathData="M14.5 21h.01"
+        android:strokeWidth="1.7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeColor="#FF60A5FA" />
+</vector>

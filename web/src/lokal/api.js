@@ -331,6 +331,7 @@ export const lokal = {
         thema: await meta("thema", "system"),
         normal: R.normalVon(await meta("normal", R.NORMAL_VON)),
         ort: (await meta("ort", "station")) === "gps" ? "gps" : "station",
+        widget: { ort: "station", modell: "icon_d2", unwetter: true, rekorde: true, gps: null, ...((await meta("widget", {})) ?? {}) },
         rang_modus: await meta("rang_modus", "heute"),
         rang_prognose: (await meta("rang_prognose", true)) !== false,
         favoriten: (await meta("favoriten", [])) ?? [],

@@ -26,6 +26,9 @@ export function meinStandort(neu = false) {
   );
 }
 
+/** Der zuletzt bestimmte Standort (oder null) - für das Widget */
+export const letzterStandort = () => gemerkt?.[1] ?? null;
+
 /** Entfernung in km (Großkreis) */
 export function entfernung(lat1, lon1, lat2, lon2) {
   const r = Math.PI / 180;
