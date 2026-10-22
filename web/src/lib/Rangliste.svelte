@@ -54,10 +54,10 @@
 <div class="karte rahmen">
   <div class="kopf">
     <b>
-      <span class="name">{name}: </span>Rangliste
+      <span class="name">{`${name}: `}</span>Rangliste
       {liste.modus === "heute" ? `1.1.–${datum(liste.letzter).slice(0, 6)}` : "ganze Jahre"}
     </b>
-    <span class="leise">{liste.zeilen.length} Jahre<span class="breit"> · Spaltenkopf klicken = sortieren</span></span>
+    <span class="leise">{liste.zeilen.length} Jahre<span class="breit">{" · Spaltenkopf klicken = sortieren"}</span></span>
   </div>
 
   {#if liste.prognose}

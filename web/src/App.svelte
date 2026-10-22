@@ -425,7 +425,7 @@
 {#snippet steuerung()}
   {#if (ansicht === "uebersicht" || ansicht === "vorhersage") && station}
     <div class="gruppe ort-gruppe" title="Vorhersage und aktuelles Wetter für">
-      <button class="chip" class:an={ort === "station"} onclick={() => ortSetzen("station")}>{station.station.name}</button>
+      <button class="chip" class:an={ort === "station"} onclick={() => ortSetzen("station")} title="Vorhersage für die Station {station.station.name}">Station</button>
       <button class="chip ort" class:an={ort === "gps"} onclick={() => ortSetzen("gps")} title="Standort dieses Geräts"><Symbol name="standort" /><span class="wort"> Standort</span></button>
       {#if istPunkt}<button class="chip an ort" onclick={() => (ortWahlOffen = true)} title="Anderen Punkt wählen">◉ {ort.name}</button>{/if}
       <button class="chip ort" onclick={() => (ortWahlOffen = true)} title="Ort auf der Karte oder per Name wählen"><Symbol name="radar" /><span class="wort"> Karte</span></button>
@@ -1049,7 +1049,7 @@
     }
   }
   /* schmalere Bildschirme: Station ohne Nummer und Höhe, Knöpfe enger */
-  @media (max-width: 1400px) {
+  @media (max-width: 1500px) {
     .band :global(.wahl small) {
       display: none;
     }
@@ -1058,6 +1058,15 @@
     }
     .b-knopf {
       padding: 4px 4px;
+    }
+  }
+  /* noch schmaler: Gruppen und Knöpfe enger */
+  @media (max-width: 1340px) {
+    .b-gruppe {
+      padding: 0 3px;
+    }
+    .b-knopf {
+      padding: 4px 2px;
     }
   }
   .b-stapel {
@@ -1222,14 +1231,8 @@
     flex: none;
   }
   /* Vorhersage für: darf am Handy umbrechen, damit "Karte …" sichtbar bleibt */
-  /* am Handy nur Symbole für Standort und Karte */
-  .h-steuer :global(.ort-gruppe .wort) {
-    display: none;
-  }
   .h-steuer :global(.ort-gruppe .chip) {
     max-width: 11em;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
   .h-steuer :global(.ort-gruppe) {
     flex: 1 1 auto;
@@ -1379,6 +1382,16 @@
   .haken input {
     margin-top: 3px;
     accent-color: var(--akzent);
+  }
+  /* Vorhersage für: Standort und Karte nur als Symbol (Name im Tooltip),
+     lange Orts- und Stationsnamen gekürzt - so passt die Leiste */
+  :global(.ort-gruppe .wort) {
+    display: none;
+  }
+  :global(.ort-gruppe .chip) {
+    max-width: 13em;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .ort-info {
     font-size: 13px;

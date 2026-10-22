@@ -58,6 +58,7 @@
   }
   svg text {
     font: 10px var(--mono);
+    font-variant-numeric: tabular-nums;
     fill: var(--text-3);
   }
   .gitter {

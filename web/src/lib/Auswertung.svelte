@@ -71,7 +71,7 @@
 
 <div class="auswertung">
   <div class="kopf">
-    <b><span class="name">{name}: </span>{TITEL[art]}</b>
+    <b><span class="name">{`${name}: `}</span>{TITEL[art]}</b>
     {#if art === "rekorde"}
       <span class="leise" title="unter 10 Jahren nur Platz 1, unter 20 bis 3, unter 50 bis 5">Reihe {de(d.jahre, 0)} Jahre · gezeigt bis Platz {d.erlaubt}</span>
     {:else if art === "geschichte"}
@@ -500,6 +500,7 @@
   }
   .kurve text {
     font: 10px var(--mono);
+    font-variant-numeric: tabular-nums;
     fill: var(--text-3);
   }
   .gitter {

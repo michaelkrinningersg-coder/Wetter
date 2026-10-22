@@ -101,12 +101,12 @@
       cursor: { y: false, points: { show: false }, drag: { x: true, y: false } },
       scales: { x: { time: true } },
       axes: [
-        { stroke: farbe("--text-3"), grid: { stroke: farbe("--gitter") }, ticks: { stroke: farbe("--rand") }, font: "11px Cascadia Mono, Consolas, monospace" },
+        { stroke: farbe("--text-3"), grid: { stroke: farbe("--gitter") }, ticks: { stroke: farbe("--rand") }, font: `11px ${getComputedStyle(document.documentElement).getPropertyValue("--schrift").trim() || "sans-serif"}` },
         {
           stroke: farbe("--text-3"),
           grid: { stroke: farbe("--gitter") },
           ticks: { stroke: farbe("--rand") },
-          font: "11px Cascadia Mono, Consolas, monospace",
+          font: `11px ${getComputedStyle(document.documentElement).getPropertyValue("--schrift").trim() || "sans-serif"}`,
           values: (u, v) => v.map((x) => de(x, Number.isInteger(x) ? 0 : 1)),
           size: 44,
         },
@@ -226,7 +226,7 @@
 <div class="stapel">
   <div class="karte grafik">
     <div class="kopf">
-      <b><span class="name">{name}: </span>{titel}</b>
+      <b><span class="name">{`${name}: `}</span>{titel}</b>
       {#if handy}
         <span class="zoom">
           <button class="chip" onclick={() => zoomen(0.5)}>＋</button>

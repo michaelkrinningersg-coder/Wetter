@@ -38,7 +38,9 @@
   --radius: 10px;
   --schrift: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system,
     "Inter", "Helvetica Neue", Arial, sans-serif;
-  --mono: "Cascadia Mono", "Consolas", ui-monospace, monospace;
+  /* Zahlen in derselben Schrift wie der Text, mit gleich breiten Ziffern
+     (tabular-nums an .num) - so bleiben Spalten bündig */
+  --mono: var(--schrift);
   color-scheme: light;
 }
 

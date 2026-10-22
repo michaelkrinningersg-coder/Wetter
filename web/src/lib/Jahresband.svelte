@@ -65,7 +65,7 @@
 <div class="raster">
   <div class="karte grafik">
     <div class="kopf">
-      <b><span class="name">{name} </span>{band.jahr}, Tag für Tag</b>
+      <b><span class="name">{`${name} `}</span>{band.jahr}, Tag für Tag</b>
       <span class="leise">
         Balken: Tiefst- bis Höchstwert, Farbe: Mittel gegen normal ·
         {#if band.normal_jahre}
@@ -223,6 +223,7 @@
   }
   svg text {
     font: 11px var(--mono);
+    font-variant-numeric: tabular-nums;
     fill: var(--text-3);
   }
   .gitter {
