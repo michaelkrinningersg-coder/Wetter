@@ -4,8 +4,10 @@ Wetter - aktuelles Wetter und Vorhersage
 
 Aktuell: Bright Sky (brightsky.dev) - Messungen des DWD, nächste Station,
 mit Bewölkung und Wetterlage. Vorhersage: je Modell eine Tabelle Stunde
-für Stunde, drei Tage - Temperatur, Bewölkung, Niederschlag, Wind, Böen
-und ein Wettersymbol.
+für Stunde, drei Tage - Temperatur, Bewölkung, Niederschlag, Wind, Böen,
+ein Wettersymbol und die Regenwahrscheinlichkeit (nur wo das Modell sie
+liefert, sonst None). Zeile: [zeit, temp, wolken, regen, wind, böe,
+symbol, tag, wahrscheinlichkeit].
 
 Modelle (so entschieden):
     ICON-D2      DWD, 2 km, rund 2 Tage           Open-Meteo icon_d2
@@ -39,7 +41,8 @@ from concurrent.futures import ThreadPoolExecutor
 import dwd
 
 OPEN_METEO = "https://api.open-meteo.com/v1/forecast"
-STUNDEN_WERTE = "temperature_2m,cloud_cover,precipitation,wind_speed_10m,wind_gusts_10m,weather_code,is_day"
+STUNDEN_WERTE = ("temperature_2m,cloud_cover,precipitation,wind_speed_10m,wind_gusts_10m,weather_code,is_day,"
+                 "precipitation_probability")
 MODELLE = [
     # (Schlüssel, Name, Beschreibung, Quelle, Open-Meteo-Modell)
     ("icon_d2", "ICON-D2", "DWD, 2 km, rund 2 Tage", "open-meteo", "icon_d2"),
@@ -155,8 +158,24 @@ def open_meteo(antwort: dict) -> dict:
         tag = wert("is_day")
         stunden.append([t + ":00Z", _r(temp), _r(wert("cloud_cover"), 0), _r(wert("precipitation")),
                         _r(wert("wind_speed_10m"), 0), _r(wert("wind_gusts_10m"), 0),
-                        symbol_wmo(wert("weather_code")), None if tag is None else bool(tag)])
+                        symbol_wmo(wert("weather_code")), None if tag is None else bool(tag),
+                        _r(wert("precipitation_probability"), 0)])
     return {"stunden": stunden} if stunden else {"fehler": "keine Werte für diesen Ort"}
+
+
+def aufteilen(antwort: dict, modell: str) -> dict:
+    """Eine Open-Meteo-Antwort für mehrere Modelle (models=a,b,...) -> die
+    Antwort für ein Modell, wie bei einer Einzelabfrage. Die Werte heißen
+    dort temperature_2m_icon_d2 usw.; ein Modell ohne Werte für den Ort
+    fehlt ganz - das wird zu "außerhalb des Modellgebiets"."""
+    if antwort.get("error"):
+        return antwort
+    h = antwort.get("hourly") or {}
+    endung = "_" + modell
+    werte = {k[:-len(endung)]: v for k, v in h.items() if k.endswith(endung)}
+    if not werte:
+        return {"error": True, "reason": "No data is available for this location"}
+    return {"hourly": {"time": h.get("time") or [], **werte}}
 
 
 def met_norway(antwort: dict, stunden_max=72) -> dict:
@@ -170,10 +189,11 @@ def met_norway(antwort: dict, stunden_max=72) -> dict:
         wind = jetzt.get("wind_speed")
         boe = jetzt.get("wind_speed_of_gust")
         regen = (naechste.get("details") or {}).get("precipitation_amount")
+        wkt = (naechste.get("details") or {}).get("probability_of_precipitation")
         stunden.append([e.get("time", "").replace("+00:00", "Z"), _r(jetzt.get("air_temperature")),
                         _r(jetzt.get("cloud_area_fraction"), 0), _r(regen),
                         _r(wind * 3.6, 0) if wind is not None else None,
-                        _r(boe * 3.6, 0) if boe is not None else None, symbol, tag])
+                        _r(boe * 3.6, 0) if boe is not None else None, symbol, tag, _r(wkt, 0)])
     return {"stunden": stunden} if stunden else {"fehler": "keine Werte"}
 
 
@@ -205,6 +225,7 @@ def _json(url: str) -> dict:
 
 
 def url_open_meteo(lat, lon, modell) -> str:
+    """modell: eines oder mehrere, mit Komma getrennt"""
     return (f"{OPEN_METEO}?latitude={lat:.4f}&longitude={lon:.4f}&hourly={STUNDEN_WERTE}"
             f"&past_days=1&forecast_days=3&timezone=GMT&models={modell}")
 
@@ -220,13 +241,25 @@ def url_bright_sky(lat, lon) -> str:
 def abrufen(lat: float, lon: float) -> dict:
     """Aktuell und alle Modelle gleichzeitig - jede Quelle für sich, ein
     Fehler bei einem Modell lässt die anderen stehen."""
-    def modell(m):
+    # alle Open-Meteo-Modelle in einer Abfrage - schont den Dienst und die
+    # Leitung (elf Verbindungen auf einmal liefen öfter in Zeitüberschreitungen)
+    om_modelle = [m[4] for m in MODELLE if m[3] == "open-meteo"]
+
+    def alle_open_meteo():
+        try:
+            return _json(url_open_meteo(lat, lon, ",".join(om_modelle)))
+        except Exception as fehler:                            # noqa: BLE001
+            return fehler
+
+    def modell(m, om_antwort):
         schluessel, name, text, quelle, om = m
         try:
             if quelle == "met-norway":
                 daten = met_norway(_json(url_met_norway(lat, lon)))
+            elif isinstance(om_antwort, Exception):
+                raise om_antwort
             else:
-                daten = open_meteo(_json(url_open_meteo(lat, lon, om)))
+                daten = open_meteo(aufteilen(om_antwort, om))
         except Exception as fehler:                            # noqa: BLE001
             daten = {"fehler": f"nicht erreichbar ({fehler})"}
         return {"id": schluessel, "name": name, "text": text, **daten}
@@ -237,9 +270,11 @@ def abrufen(lat: float, lon: float) -> dict:
         except Exception as fehler:                            # noqa: BLE001
             return {"fehler": f"nicht erreichbar ({fehler})"}
 
-    with ThreadPoolExecutor(max_workers=len(MODELLE) + 1) as pool:
+    with ThreadPoolExecutor(max_workers=3) as pool:
         jetzt = pool.submit(aktuell)
-        modelle = list(pool.map(modell, MODELLE))
+        norwegen = pool.submit(modell, next(m for m in MODELLE if m[3] == "met-norway"), None)
+        om_antwort = alle_open_meteo()
+    modelle = [norwegen.result() if m[3] == "met-norway" else modell(m, om_antwort) for m in MODELLE]
     return {"aktuell": jetzt.result(), "modelle": modelle}
 
 

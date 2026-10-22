@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import test from "node:test";
 
-import { brightSky, metNorway, openMeteo, symbolBrightsky, symbolMetno, symbolWmo } from "../src/lokal/vorhersage.js";
+import { MODELLE, aufteilen, brightSky, metNorway, openMeteo, symbolBrightsky, symbolMetno, symbolWmo } from "../src/lokal/vorhersage.js";
 
 const ORDNER = new URL("./vorhersage/", import.meta.url);
 const erwartet = JSON.parse(readFileSync(new URL("erwartet.json", ORDNER), "utf8"));
@@ -14,7 +14,8 @@ const glatt = (x) => JSON.parse(JSON.stringify(x));
 for (const name of readdirSync(ORDNER).filter((n) => n.endsWith(".json") && n !== "erwartet.json")) {
   test(name, () => {
     const antwort = JSON.parse(readFileSync(new URL(name, ORDNER), "utf8"));
-    const ist = name.startsWith("om_") ? openMeteo(antwort) : name.startsWith("metno") ? metNorway(antwort) : brightSky(antwort);
+    const mehr = () => Object.fromEntries(MODELLE.filter((m) => m[3] === "open-meteo").map((m) => [m[4], openMeteo(aufteilen(antwort, m[4]))]));
+    const ist = name.startsWith("om_") ? openMeteo(antwort) : name.startsWith("mehr_") ? mehr() : name.startsWith("metno") ? metNorway(antwort) : brightSky(antwort);
     assert.deepEqual(glatt(ist), erwartet[name]);
   });
 }

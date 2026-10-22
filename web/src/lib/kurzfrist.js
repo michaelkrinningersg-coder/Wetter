@@ -35,7 +35,7 @@ export function heuteMorgen(modelle, jetzt = Date.now()) {
       const tag = ortsTag(ms);
       if (tag !== heute && tag !== morgen) continue;
       if (s[1] == null) continue;
-      stunden.set(ms, { zeit: s[0], tag, h: ortsStunde(ms), temp: s[1], wolken: s[2], regen: s[3], wind: s[4], boe: s[5], symbol: s[6], tagLicht: s[7], ersatz: m === mit[0] ? null : m.name });
+      stunden.set(ms, { zeit: s[0], tag, h: ortsStunde(ms), temp: s[1], wolken: s[2], regen: s[3], wind: s[4], boe: s[5], symbol: s[6], tagLicht: s[7], wkt: s[8] ?? null, ersatz: m === mit[0] ? null : m.name });
     }
   }
   const tage = [heute, morgen].map((t) => {

@@ -249,6 +249,9 @@ def vorhersage_rechnen() -> dict:
             antwort = json.load(datei)
         if name.startswith("om_"):
             aus[name] = vorhersage.open_meteo(antwort)
+        elif name.startswith("mehr_"):
+            aus[name] = {m[4]: vorhersage.open_meteo(vorhersage.aufteilen(antwort, m[4]))
+                         for m in vorhersage.MODELLE if m[3] == "open-meteo"}
         elif name.startswith("metno"):
             aus[name] = vorhersage.met_norway(antwort)
         else:

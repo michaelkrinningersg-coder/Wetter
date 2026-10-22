@@ -5,7 +5,7 @@
 import { runden } from "./rechnen.js";
 
 const OPEN_METEO = "https://api.open-meteo.com/v1/forecast";
-const STUNDEN_WERTE = "temperature_2m,cloud_cover,precipitation,wind_speed_10m,wind_gusts_10m,weather_code,is_day";
+const STUNDEN_WERTE = "temperature_2m,cloud_cover,precipitation,wind_speed_10m,wind_gusts_10m,weather_code,is_day,precipitation_probability";
 export const MODELLE = [
   ["icon_d2", "ICON-D2", "DWD, 2 km, rund 2 Tage", "open-meteo", "icon_d2"],
   ["icon_eu", "ICON-EU", "DWD, 7 km", "open-meteo", "icon_eu"],
@@ -85,9 +85,21 @@ export function openMeteo(antwort) {
     stunden.push([
       t + ":00Z", r1(temp), r1(wert("cloud_cover"), 0), r1(wert("precipitation")), r1(wert("wind_speed_10m"), 0),
       r1(wert("wind_gusts_10m"), 0), symbolWmo(wert("weather_code")), tag == null ? null : !!tag,
+      r1(wert("precipitation_probability"), 0),
     ]);
   });
   return stunden.length ? { stunden } : { fehler: "keine Werte für diesen Ort" };
+}
+
+/** wie vorhersage.aufteilen: Antwort für mehrere Modelle -> ein Modell */
+export function aufteilen(antwort, modell) {
+  if (antwort?.error) return antwort;
+  const h = antwort?.hourly ?? {};
+  const endung = `_${modell}`;
+  const werte = {};
+  for (const [k, v] of Object.entries(h)) if (k.endsWith(endung)) werte[k.slice(0, -endung.length)] = v;
+  if (!Object.keys(werte).length) return { error: true, reason: "No data is available for this location" };
+  return { hourly: { time: h.time ?? [], ...werte } };
 }
 
 export function metNorway(antwort, stundenMax = 72) {
@@ -101,6 +113,7 @@ export function metNorway(antwort, stundenMax = 72) {
     return [
       (e.time ?? "").replace("+00:00", "Z"), r1(jetzt.air_temperature), r1(jetzt.cloud_area_fraction, 0),
       r1(naechste.details?.precipitation_amount), wind != null ? r1(wind * 3.6, 0) : null, boe != null ? r1(boe * 3.6, 0) : null, symbol, tag,
+      r1(naechste.details?.probability_of_precipitation, 0),
     ];
   });
   return stunden.length ? { stunden } : { fehler: "keine Werte" };
@@ -126,10 +139,20 @@ export const urlBrightSky = (lat, lon) => `https://api.brightsky.dev/current_wea
 
 /** Aktuell und alle Modelle gleichzeitig; `json(url)` holt und liest. */
 export async function abrufen(lat, lon, json) {
+  // alle Open-Meteo-Modelle in einer Abfrage, wie vorhersage.py
+  const omAntwort = json(urlOpenMeteo(lat, lon, MODELLE.filter((m) => m[3] === "open-meteo").map((m) => m[4]).join(","))).then(
+    (a) => a,
+    (e) => ({ fehlerObjekt: e }),
+  );
   const modell = async ([id, name, text, quelle, om]) => {
     let daten;
     try {
-      daten = quelle === "met-norway" ? metNorway(await json(urlMetNorway(lat, lon))) : openMeteo(await json(urlOpenMeteo(lat, lon, om)));
+      if (quelle === "met-norway") daten = metNorway(await json(urlMetNorway(lat, lon)));
+      else {
+        const a = await omAntwort;
+        if (a?.fehlerObjekt) throw a.fehlerObjekt;
+        daten = openMeteo(aufteilen(a, om));
+      }
     } catch (e) {
       daten = { fehler: `nicht erreichbar (${e?.message ?? e})` };
     }
