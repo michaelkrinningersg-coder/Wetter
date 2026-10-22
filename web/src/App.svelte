@@ -17,7 +17,7 @@
   import { MONATE, datum, tausend } from "./lib/format.js";
   import Symbol from "./lib/Symbol.svelte";
   import { NORMALE, normalText, vergleich } from "./lib/zeitraum.svelte.js";
-  import { letzterStandort, meinStandort, naechsteStation } from "./lib/standort.js";
+  import { entfernung, letzterStandort, meinStandort, naechsteStation } from "./lib/standort.js";
   import { meldungenErlauben, nativ, widgetJetzt, widgetSetzen, widgetStatus } from "./lib/nativ.js";
   import { MODELLE } from "./lokal/vorhersage.js";
   import { MITTEL, mittel } from "./lib/mittel.js";
@@ -32,6 +32,7 @@
   import Monat from "./lib/Monat.svelte";
   import Rangliste from "./lib/Rangliste.svelte";
   import Stationswahl from "./lib/Stationswahl.svelte";
+  import Ortswahl from "./lib/Ortswahl.svelte";
   import Zeitreihe from "./lib/Zeitreihe.svelte";
   import symbolRoh from "./lib/icon.svg?raw";
   const symbol = "data:image/svg+xml," + encodeURIComponent(symbolRoh);
@@ -56,8 +57,21 @@
   let vorhersage = $state(null);
   let rekordeDe = $state(null); // Rekorde Deutschland (für Seite und Laufband)
   let deutschlandDaten = $state(null); // Top 50: letzte 7 Tage aller aktiven Stationen
-  let ort = $state("station"); // Vorhersage für die Station oder "gps" = Standort des Geräts
+  // Vorhersage für: "station", "gps" (Standort des Geräts) oder ein Punkt
+  // {art: "punkt", name, lat, lon, hoehe, station: {id, name, hoehe}} aus der Ortswahl
+  let ort = $state("station");
   let ortHinweis = $state("");
+  let ortWahlOffen = $state(false);
+  const istPunkt = $derived(typeof ort === "object" && ort !== null);
+  // "Vorhersage: Torfhaus · Daten: Station Braunlage (6 km, −190 m)"
+  const ortInfo = $derived.by(() => {
+    if (!istPunkt || !station) return null;
+    const s = station.station;
+    const km = s.lat != null ? entfernung(ort.lat, ort.lon, s.lat, s.lon) : null;
+    const dh = ort.hoehe != null && s.hoehe != null ? s.hoehe - ort.hoehe : null;
+    const teile = [km != null ? `${tausend(Math.round(km))} km` : null, dh != null ? `${dh > 0 ? "+" : dh < 0 ? "−" : "±"}${Math.abs(Math.round(dh))} m` : null].filter(Boolean);
+    return { ort: ort.name, station: s.name, abstand: teile.join(", ") };
+  });
   let radarEinst = $state({}); // Film: zurueck, tempo, selbst
   // Widget und Meldungen am Handy (WetterNativ.java)
   let widget = $state({ ort: "station", modell: "icon_d2", unwetter: true, rekorde: true, gps: null });
@@ -214,8 +228,10 @@
   function ortSetzen(o) {
     ort = o;
     ortHinweis = "";
-    rufe("einstellung", "ort", o);
-    vorhersageLaden();
+    rufe("einstellung", "ort", typeof o === "object" ? $state.snapshot(o) : o);
+    // ein Punkt bringt seine Station für Jahr, Monat und Rekorde mit
+    if (typeof o === "object" && o.station?.id && o.station.id !== station?.station.id) stationLaden(o.station.id);
+    else vorhersageLaden();
   }
 
   async function rekordeLaden(neu = false) {
@@ -233,7 +249,18 @@
     const id = station.station.id;
     const nr = ++vorhersageNr;
     let r = null;
-    if (ort === "gps") {
+    if (istPunkt) {
+      const p = ort;
+      r = await rufe("vorhersage_ort", p.lat, p.lon, neu);
+      if (nr !== vorhersageNr) return;
+      if (r.fehler) {
+        ortHinweis = `${p.name}: ${r.fehler} – gezeigt wird ${station.station.name}`;
+        r = null;
+      } else {
+        r.station = { ...r.station, name: p.name, punkt: true };
+        ortHinweis = "";
+      }
+    } else if (ort === "gps") {
       // Standort des Geräts; klappt das nicht, die Station und ein Hinweis
       try {
         const p = await meinStandort();
@@ -376,7 +403,7 @@
     if (r.einstellungen.standardmodell) standard = r.einstellungen.standardmodell;
     if (r.einstellungen.thema) thema = r.einstellungen.thema;
     if (NORMALE.includes(r.einstellungen.normal)) vergleich.von = r.einstellungen.normal;
-    if (r.einstellungen.ort === "gps") ort = "gps";
+    if (r.einstellungen.ort === "gps" || typeof r.einstellungen.ort === "object") ort = r.einstellungen.ort;
     if (r.einstellungen.radar) radarEinst = r.einstellungen.radar;
     if (r.einstellungen.widget) widget = { ...widget, ...r.einstellungen.widget };
     rangModus = r.einstellungen.rang_modus === "jahr" ? "jahr" : "heute";
@@ -397,9 +424,11 @@
 <!-- Schalter der gerade gezeigten Ansicht: im Menüband wie auf dem Handy -->
 {#snippet steuerung()}
   {#if (ansicht === "uebersicht" || ansicht === "vorhersage") && station}
-    <div class="gruppe" title="Vorhersage und aktuelles Wetter für">
+    <div class="gruppe ort-gruppe" title="Vorhersage und aktuelles Wetter für">
       <button class="chip" class:an={ort === "station"} onclick={() => ortSetzen("station")}>{station.station.name}</button>
       <button class="chip ort" class:an={ort === "gps"} onclick={() => ortSetzen("gps")}><Symbol name="standort" /> Mein Standort</button>
+      {#if istPunkt}<button class="chip an ort" onclick={() => (ortWahlOffen = true)} title="Anderen Punkt wählen">◉ {ort.name}</button>{/if}
+      <button class="chip ort" onclick={() => (ortWahlOffen = true)} title="Ort auf der Karte oder per Name wählen"><Symbol name="radar" /> Karte …</button>
     </div>
   {/if}
   {#if ansicht === "band" && band && !band.leer}
@@ -530,6 +559,9 @@
 {/snippet}
 
 {#snippet inhalt()}
+  {#if ortInfo && (ansicht === "uebersicht" || ansicht === "vorhersage")}
+    <div class="ort-info">Vorhersage: <b>{ortInfo.ort}</b> · Daten: Station <b>{ortInfo.station}</b>{ortInfo.abstand ? ` (${ortInfo.abstand})` : ""}</div>
+  {/if}
   {#if ortHinweis && (ansicht === "uebersicht" || ansicht === "vorhersage")}
     <div class="meldung">{ortHinweis}</div>
   {/if}
@@ -807,6 +839,17 @@
 
 {#if laedt}
   <div class="schleier"><div class="karte hinweis">{laedt}</div></div>
+{/if}
+
+
+{#if ortWahlOffen && station}
+  <Ortswahl
+    {stationen}
+    start={{ lat: station.station.lat, lon: station.station.lon }}
+    aktuell={istPunkt ? ort : null}
+    onwahl={(p) => ((ortWahlOffen = false), ortSetzen(p))}
+    onschliessen={() => (ortWahlOffen = false)}
+  />
 {/if}
 
 <style>
@@ -1173,6 +1216,13 @@
     border-color: rgb(255 255 255 / 18%);
     flex: none;
   }
+  /* Vorhersage für: darf am Handy umbrechen, damit "Karte …" sichtbar bleibt */
+  .h-steuer :global(.ort-gruppe) {
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    border-radius: 16px;
+    white-space: nowrap;
+  }
   .h-steuer :global(.chip:not(.an)) {
     background: transparent;
     color: var(--graphit-text);
@@ -1312,6 +1362,11 @@
   .haken input {
     margin-top: 3px;
     accent-color: var(--akzent);
+  }
+  .ort-info {
+    font-size: 13px;
+    color: var(--text-2);
+    margin: -4px 0 10px;
   }
   .meldung {
     display: flex;

@@ -24,6 +24,17 @@ export function raster(lon, lat) {
   return [(X0 + rho * Math.sin(lam)) / 1000, -(Y0 - rho * Math.cos(lam)) / 1000];
 }
 
+/** Umkehrung von raster: [Spalte, Zeile] -> [Länge, Breite] (iterativ, auf < 1 m). */
+export function lage(gx, gy) {
+  const rs = gx * 1000 - X0; // rho * sin(lam)
+  const rc = Y0 + gy * 1000; // rho * cos(lam)
+  const rho = Math.hypot(rs, rc);
+  const tt = (rho * TC) / (A * MC);
+  let phi = Math.PI / 2 - 2 * Math.atan(tt);
+  for (let i = 0; i < 8; i++) phi = Math.PI / 2 - 2 * Math.atan(tt * ((1 - E * Math.sin(phi)) / (1 + E * Math.sin(phi))) ** (E / 2));
+  return [Math.atan2(rs, rc) / RAD + 10, phi / RAD];
+}
+
 /**
  * Ausschnitt [oben, links, unten, rechts] (ganze Zeilen/Spalten) um einen
  * Mittelpunkt mit `km` Kantenlänge, ins Raster geschoben; null = ganz.

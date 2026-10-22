@@ -159,6 +159,9 @@ function nacheinander(arbeit) {
   return lauf;
 }
 
+// Vorhersage-Ort wie _ort in wetter.py: "station", "gps" oder ein Punkt
+const ortAus = (o) => (o === "gps" || o === "station" ? o : typeof o?.lat === "number" && typeof o?.lon === "number" ? o : "station");
+
 async function meta(k, vorgabe = null) {
   const v = await lesen("meta", k);
   return v === undefined ? vorgabe : v;
@@ -331,7 +334,7 @@ export const lokal = {
         standardmodell: await meta("standardmodell", "mittel"),
         thema: await meta("thema", "system"),
         normal: R.normalVon(await meta("normal", R.NORMAL_VON)),
-        ort: (await meta("ort", "station")) === "gps" ? "gps" : "station",
+        ort: ortAus(await meta("ort", "station")),
         radar: (await meta("radar", {})) ?? {},
         widget: { ort: "station", modell: "icon_d2", unwetter: true, rekorde: true, gps: null, ...((await meta("widget", {})) ?? {}) },
         rang_modus: await meta("rang_modus", "heute"),
@@ -405,6 +408,12 @@ export const lokal = {
       const antwort = { ...d, quelle: "GitHub", selbst: false };
       rekordeGemerkt = [Date.now(), antwort];
       return antwort;
+    }),
+  hoehe: (lat, lon) =>
+    sicher(async () => {
+      const a = await holenJson(`https://api.open-meteo.com/v1/elevation?latitude=${Number(lat).toFixed(4)}&longitude=${Number(lon).toFixed(4)}`);
+      const h = a?.elevation?.[0];
+      return { hoehe: h == null ? null : Math.round(h) };
     }),
   vorhersage_ort: (lat, lon, neu = false) =>
     sicher(async () => {

@@ -51,3 +51,23 @@ export function naechsteStation(stationen, lat, lon, nurAktiv = true, jahr = new
   }
   return beste;
 }
+
+/**
+ * Station für die Klimadaten eines Punkts: aktiv (Daten bis mindestens
+ * Vorjahr), mindestens 30 Jahre, und die nächste - 100 m Höhenunterschied
+ * zählen wie 10 km Entfernung. hoehe null: nur die Entfernung.
+ * Liefert bis zu `anzahl` Vorschläge [{zeile, km, dh, wert}], bester zuerst.
+ */
+export function passendeStationen(stationen, lat, lon, hoehe = null, anzahl = 3, jahr = new Date().getFullYear()) {
+  const aus = [];
+  for (const z of stationen) {
+    if (z[7] == null || z[8] == null || !z[4] || !z[5]) continue;
+    const bis = Number(String(z[5]).slice(0, 4));
+    if (bis < jahr - 1 || bis - Number(String(z[4]).slice(0, 4)) + 1 < 30) continue;
+    const km = entfernung(lat, lon, z[7], z[8]);
+    const dh = hoehe == null || z[3] == null ? null : z[3] - hoehe;
+    aus.push({ zeile: z, km, dh, wert: km + (dh == null ? 0 : Math.abs(dh) / 10) });
+  }
+  aus.sort((a, b) => a.wert - b.wert);
+  return aus.slice(0, anzahl);
+}

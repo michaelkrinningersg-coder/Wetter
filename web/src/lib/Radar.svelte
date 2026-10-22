@@ -5,13 +5,13 @@
   // Karte zoomt stufenlos (zwei Finger, Mausrad, doppelt tippen) und lässt
   // sich ziehen, die Knöpfe 50/100/250 km/Deutschland bleiben als Schnellwahl.
   // Der Punkt ist die Station, der eigene Standort oder ein angetippter
-  // Punkt. Darunter die eigene einfache Karte (karte.json, Natural Earth) -
-  // beides im selben Raster, ohne Umrechnung.
+  // Punkt. Darunter die eigene einfache Karte (Karte.svelte) - beides im
+  // selben Raster, ohne Umrechnung.
   import { onDestroy, untrack } from "svelte";
   import { rufe } from "./api.js";
-  import karte from "./karte.json";
   import { entpacken } from "./radardaten.js";
-  import { RADAR_ZURUECK, SPALTEN, STUFEN, ZEILEN, ansichtKlemmen, farbe, ganzDeutschland, massstab, mmProStunde, raster, unterPunkt, zoomUm } from "./raster.js";
+  import { RADAR_ZURUECK, SPALTEN, STUFEN, ZEILEN, ansichtKlemmen, farbe, ganzDeutschland, mmProStunde, raster, unterPunkt } from "./raster.js";
+  import Karte from "./Karte.svelte";
   import Symbol from "./Symbol.svelte";
 
   // station {name, lat, lon}; stationen: Zeilen der Suche; meinStandort: () => Promise {lat, lon}
@@ -41,7 +41,6 @@
   let laeuft = $state(false);
   let breite = $state(0);
   let hoehe = $state(0);
-  let leinwand = $state();
 
   const stationsPunkt = $derived(raster(station.lon, station.lat));
   const punkt = $derived(mitte ?? stationsPunkt);
@@ -151,13 +150,7 @@
     pause = 0;
     planen();
   }
-  onDestroy(() => {
-    clearTimeout(takt);
-    clearTimeout(tippTakt);
-  });
-
-  // ---------------------------------------------------------------- Zeichnen
-  const farbeVon = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  onDestroy(() => clearTimeout(takt));
 
   // Farbe je Rohwert einmal vorrechnen (RGBA als eine Zahl, little endian)
   const TAFEL = new Uint32Array(65536);
@@ -187,211 +180,20 @@
     return c;
   }
 
-  $effect(() => {
-    if (!leinwand || !breite || !hoehe) return;
-    const w = breite;
-    const h = hoehe;
-    const dpr = window.devicePixelRatio || 1;
-    leinwand.width = Math.round(w * dpr);
-    leinwand.height = Math.round(h * dpr);
-    const ctx = leinwand.getContext("2d");
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.fillStyle = farbeVon("--flaeche-2");
-    ctx.fillRect(0, 0, w, h);
-
-    const km = ansicht.km;
-    const s = massstab(ansicht, w, h);
-    const x = (gx) => (gx - ansicht.x) * s + w / 2;
-    const y = (gy) => (gy - ansicht.y) * s + h / 2;
-    const nah = km <= 130;
-    const zoomt = km <= 400;
-
-    // Karte unter dem Radar: Seen
-    ctx.lineJoin = ctx.lineCap = "round";
-    const linien = (teile, stil, breiteLinie, strich = []) => {
-      ctx.strokeStyle = stil;
-      ctx.lineWidth = breiteLinie;
-      ctx.setLineDash(strich);
-      ctx.beginPath();
-      for (const t of teile) {
-        ctx.moveTo(x(t[0]), y(t[1]));
-        for (let i = 2; i < t.length; i += 2) ctx.lineTo(x(t[i]), y(t[i + 1]));
-      }
-      ctx.stroke();
-      ctx.setLineDash([]);
-    };
-    const blau = farbeVon("--blau");
-    ctx.globalAlpha = 0.35;
-    linien(karte.seen, blau, 1);
-    linien(karte.fluesse, blau, nah ? 1.3 : 0.9);
-    ctx.globalAlpha = 1;
-
-    // Radar: nur der sichtbare Teil des Rasters
-    if (daten?.bilder.length) {
-      const [gl, go] = unterPunkt(ansicht, 0, 0, w, h);
-      const sx0 = Math.max(0, Math.floor(gl));
-      const sy0 = Math.max(0, Math.floor(go));
-      const sx1 = Math.min(daten.spalten, Math.ceil(gl + w / s));
-      const sy1 = Math.min(daten.zeilen, Math.ceil(go + h / s));
-      if (sx1 > sx0 && sy1 > sy0) {
-        ctx.imageSmoothingEnabled = false;
-        const quelle = radarBild(daten, Math.min(bild, daten.bilder.length - 1));
-        ctx.drawImage(quelle, sx0, sy0, sx1 - sx0, sy1 - sy0, x(sx0), y(sy0), (sx1 - sx0) * s, (sy1 - sy0) * s);
-      }
-    }
-
-    // Grenzen über dem Radar
-    const text = farbeVon("--text");
-    const leise = farbeVon("--text-3");
-    // Bundesländer im Zoom kräftig und über dem Regen: heller Rand, dann die Linie
-    const hell = farbeVon("--flaeche");
-    if (zoomt) {
-      ctx.globalAlpha = 0.85;
-      linien(karte.laender, hell, 3.6);
-      ctx.globalAlpha = 1;
-      linien(karte.laender, farbeVon("--text-2"), 1.5);
-    } else {
-      linien(karte.laender, leise, 0.8, [4, 3]);
-    }
-    linien(karte.grenzen, leise, 1);
-    if (zoomt) {
-      ctx.globalAlpha = 0.85;
-      linien(karte.deutschland, hell, 4.4);
-      ctx.globalAlpha = 1;
-    }
-    linien(karte.deutschland, text, zoomt ? 2 : 1.2);
-
-    // Orte: je Zoom weniger oder mehr; Beschriftungen überdecken sich nicht
-    const belegt = [[0, h - 34, 110, h]]; // Maßstab unten links bleibt frei
-    const frei = (bx) => !belegt.some((a) => bx[0] < a[2] && bx[2] > a[0] && bx[1] < a[3] && bx[3] > a[1]);
-    const schrift = farbeVon("--schrift") || "sans-serif";
-    ctx.textBaseline = "middle";
-    const ort = (name, gx, gy, gross, farbeText, r) => {
-      const px = x(gx);
-      const py = y(gy);
-      if (px < 0 || py < 0 || px > w || py > h) return;
-      ctx.font = `${gross}px ${schrift}`;
-      const bx = [px - r, py - gross / 2 - 1, px + 6 + ctx.measureText(name).width, py + gross / 2 + 1];
-      if (!frei(bx)) return;
-      belegt.push(bx);
-      ctx.fillStyle = farbeText;
-      ctx.beginPath();
-      ctx.arc(px, py, r, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = hell;
-      ctx.strokeText(name, px + 5, py);
-      ctx.fillText(name, px + 5, py);
-    };
-    const rangBis = nah ? 3 : km <= 320 ? 2 : 1;
-    for (const [name, gx, gy, rang] of karte.orte) if (rang <= rangBis) ort(name, gx, gy, zoomt ? 12 : 11, text, 2.4);
-    if (nah) for (const [name, gx, gy] of stationsPunkte) ort(name, gx, gy, 10.5, leise, 1.6);
-
-    // Punkt (Station, Standort oder angetippt)
-    const mx = x(punkt[0]);
-    const my = y(punkt[1]);
-    const akzent = farbeVon("--akzent");
-    ctx.strokeStyle = akzent;
-    ctx.fillStyle = akzent;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(mx, my, 6, 0, 2 * Math.PI);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(mx, my, 2, 0, 2 * Math.PI);
-    ctx.fill();
-    // Maßstab: runde Länge um ein Achtel der Ansicht
-    const skala = [1, 2, 5, 10, 20, 50, 100, 200].findLast((v) => v <= km / 8) ?? 1;
-    ctx.fillStyle = text;
-    ctx.fillRect(10, h - 14, skala * s, 3);
-    ctx.font = `11px ${schrift}`;
-    ctx.fillText(`${skala} km`, 10, h - 24);
-  });
-
-  // ---------------------------------------------------------------- Bedienung
-  // Ein Finger/Maus zieht, zwei Finger zoomen, doppelt tippen vergrößert,
-  // einfach tippen setzt den Punkt; Mausrad zoomt um den Mauszeiger.
-  const zeiger = new Map(); // pointerId -> [x, y]
-  let geste = null;
-  let bewegt = false;
-  const abstand = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
-  function inLeinwand(e) {
-    const r = leinwand.getBoundingClientRect();
-    return [e.clientX - r.left, e.clientY - r.top];
+  // Regen auf die Karte: nur der sichtbare Teil des Rasters (Karte.svelte ruft das
+  // zwischen Wasser und Grenzen auf; liest daten und bild, zeichnet also mit)
+  function regen(ctx, { x, y, s, w, h }) {
+    if (!daten?.bilder.length) return;
+    const [gl, go] = unterPunkt(ansicht, 0, 0, w, h);
+    const sx0 = Math.max(0, Math.floor(gl));
+    const sy0 = Math.max(0, Math.floor(go));
+    const sx1 = Math.min(daten.spalten, Math.ceil(gl + w / s));
+    const sy1 = Math.min(daten.zeilen, Math.ceil(go + h / s));
+    if (sx1 <= sx0 || sy1 <= sy0) return;
+    ctx.imageSmoothingEnabled = false;
+    const quelle = radarBild(daten, Math.min(bild, daten.bilder.length - 1));
+    ctx.drawImage(quelle, sx0, sy0, sx1 - sx0, sy1 - sy0, x(sx0), y(sy0), (sx1 - sx0) * s, (sy1 - sy0) * s);
   }
-  function gesteBeginnen() {
-    const p = [...zeiger.values()];
-    if (p.length === 1) geste = { art: "ziehen", start: p[0], a: ansicht };
-    else if (p.length >= 2) {
-      geste = { art: "zwicken", abstand: Math.max(1, abstand(p[0], p[1])), mitte: [(p[0][0] + p[1][0]) / 2, (p[0][1] + p[1][1]) / 2], a: ansicht };
-      bewegt = true;
-    }
-  }
-  function runter(e) {
-    if (e.pointerType === "mouse" && e.button !== 0) return;
-    leinwand.setPointerCapture(e.pointerId);
-    if (!zeiger.size) bewegt = false;
-    zeiger.set(e.pointerId, inLeinwand(e));
-    gesteBeginnen();
-  }
-  function ziehen(e) {
-    if (!zeiger.has(e.pointerId) || !geste) return;
-    zeiger.set(e.pointerId, inLeinwand(e));
-    const p = [...zeiger.values()];
-    if (geste.art === "ziehen") {
-      const dx = p[0][0] - geste.start[0];
-      const dy = p[0][1] - geste.start[1];
-      if (!bewegt && Math.hypot(dx, dy) < 6) return;
-      bewegt = true;
-      const s = massstab(geste.a, breite, hoehe);
-      ansicht = ansichtKlemmen({ ...geste.a, x: geste.a.x - dx / s, y: geste.a.y - dy / s });
-    } else if (p.length >= 2) {
-      const m = [(p[0][0] + p[1][0]) / 2, (p[0][1] + p[1][1]) / 2];
-      const a = zoomUm(geste.a, abstand(p[0], p[1]) / geste.abstand, geste.mitte[0], geste.mitte[1], breite, hoehe);
-      const s = massstab(a, breite, hoehe);
-      ansicht = ansichtKlemmen({ ...a, x: a.x - (m[0] - geste.mitte[0]) / s, y: a.y - (m[1] - geste.mitte[1]) / s });
-    }
-  }
-  function hoch(e, abgebrochen = false) {
-    if (!zeiger.has(e.pointerId)) return;
-    const p = inLeinwand(e);
-    zeiger.delete(e.pointerId);
-    if (zeiger.size) return gesteBeginnen();
-    geste = null;
-    if (!bewegt && !abgebrochen) tippen(p);
-  }
-
-  let letzterTipp = null;
-  let tippTakt = null;
-  function tippen(p) {
-    const jetzt = Date.now();
-    if (letzterTipp && jetzt - letzterTipp.zeit < 300 && abstand(p, letzterTipp.p) < 30) {
-      clearTimeout(tippTakt);
-      letzterTipp = null;
-      ansicht = zoomUm(ansicht, 2, p[0], p[1], breite, hoehe);
-      return;
-    }
-    letzterTipp = { zeit: jetzt, p };
-    clearTimeout(tippTakt);
-    tippTakt = setTimeout(() => {
-      letzterTipp = null;
-      mitte = unterPunkt(ansicht, p[0], p[1], breite, hoehe);
-      mitteArt = "tipp";
-    }, 300);
-  }
-
-  // Mausrad: nicht passiv, sonst scrollt die Seite mit
-  $effect(() => {
-    if (!leinwand) return;
-    const rad = (e) => {
-      e.preventDefault();
-      const [px, py] = inLeinwand(e);
-      const schritte = e.deltaMode === 1 ? e.deltaY / 3 : e.deltaY / 100;
-      ansicht = zoomUm(ansicht, Math.pow(1.25, -schritte), px, py, breite, hoehe);
-    };
-    leinwand.addEventListener("wheel", rad, { passive: false });
-    return () => leinwand.removeEventListener("wheel", rad);
-  });
 
   const aktuell = $derived(daten?.bilder[Math.min(bild, daten.bilder.length - 1)]);
   const vorhersage = $derived(aktuell ? Date.parse(aktuell.zeit) > Date.now() : false);
@@ -416,22 +218,21 @@
     {#if ortFehler}<span class="leise">{ortFehler}</span>{/if}
   </div>
 
-  <div class="flaeche" bind:clientWidth={breite} bind:clientHeight={hoehe}>
+  <div class="flaeche">
+    <Karte
+      bind:ansicht
+      bind:breite
+      bind:hoehe
+      unten={regen}
+      {punkt}
+      {stationsPunkte}
+      ontipp={(gx, gy) => ((mitte = [gx, gy]), (mitteArt = "tipp"))}
+    />
     {#if fehler}
       <div class="leise mitte">{fehler}</div>
     {:else if !daten}
       <div class="leise mitte">Radar lädt …</div>
     {/if}
-    <canvas
-      bind:this={leinwand}
-      style:width="{breite}px"
-      style:height="{hoehe}px"
-      onpointerdown={runter}
-      onpointermove={ziehen}
-      onpointerup={(e) => hoch(e)}
-      onpointercancel={(e) => hoch(e, true)}
-      title="Ziehen verschiebt · zwei Finger oder Mausrad zoomen · doppelt tippen vergrößert · tippen setzt den Punkt"
-    ></canvas>
   </div>
 
   {#if daten?.bilder.length}
@@ -486,16 +287,6 @@
     border-radius: 8px;
     border: 1px solid var(--rand);
     background: var(--flaeche-2);
-  }
-  canvas {
-    position: absolute;
-    left: 0;
-    top: 0;
-    cursor: grab;
-    touch-action: none;
-  }
-  canvas:active {
-    cursor: grabbing;
   }
   .mitte {
     position: absolute;

@@ -234,6 +234,16 @@ def url_met_norway(lat, lon) -> str:
     return f"https://api.met.no/weatherapi/locationforecast/2.0/complete?lat={lat:.4f}&lon={lon:.4f}"
 
 
+def url_hoehe(lat, lon) -> str:
+    return f"https://api.open-meteo.com/v1/elevation?latitude={lat:.4f}&longitude={lon:.4f}"
+
+
+def hoehe(lat, lon) -> float | None:
+    """Höhe über dem Meer (m) eines Punkts - Open-Meteo, Geländemodell 90 m."""
+    wert = (_json(url_hoehe(lat, lon)).get("elevation") or [None])[0]
+    return None if wert is None else round(float(wert))
+
+
 def url_bright_sky(lat, lon) -> str:
     return f"https://api.brightsky.dev/current_weather?lat={lat:.4f}&lon={lon:.4f}"
 

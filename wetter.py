@@ -126,6 +126,14 @@ def _objekt(text) -> dict:
         return {}
 
 
+def _ort(text):
+    """Vorhersage-Ort: "station", "gps" oder ein Punkt {art, name, lat, lon, hoehe}."""
+    if text in ("station", "gps"):
+        return text
+    punkt = _objekt(text)
+    return punkt if isinstance(punkt.get("lat"), (int, float)) and isinstance(punkt.get("lon"), (int, float)) else "station"
+
+
 class Hinweis(Exception):
     """Was der Anwender wissen muss - kein Fehler im Programm."""
 
@@ -195,7 +203,7 @@ class Api:
                 "wellen": _objekt(db.meta("wellen", "{}")),
                 "thema": db.meta("thema", "system"),
                 "normal": daten.normal_zeitraum(db.meta("normal", daten.NORMAL_VON))[0],
-                "ort": "gps" if db.meta("ort", "station") == "gps" else "station",
+                "ort": _ort(db.meta("ort", "station")),
                 "radar": _objekt(db.meta("radar", "{}"))}
 
     def _verzeichnis(self, neu=False) -> dict[int, str]:
@@ -538,6 +546,14 @@ class Api:
                        "abgerufen": time.time(), **vorhersage.abrufen(la, lo)}
             self._vorhersage[schluessel] = (time.time(), antwort)
             return antwort
+        return self._sicher(arbeit)
+
+    def hoehe(self, lat, lon) -> dict:
+        """Höhe eines angetippten Punkts für die Wahl der passenden Station."""
+        def arbeit():
+            if not self._netz:
+                raise Hinweis("Ohne Netz keine Höhe")
+            return {"hoehe": vorhersage.hoehe(float(lat), float(lon))}
         return self._sicher(arbeit)
 
     def zeitreihe(self, sid, groesse="m", aufloesung="jahr",

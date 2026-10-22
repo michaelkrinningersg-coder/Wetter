@@ -61,3 +61,11 @@ test("Kartenansicht: Zoom um einen Punkt hält ihn fest, Grenzen", async () => {
   assert.ok(Math.abs(d.km - 1100) < 1e-9);
   assert.deepEqual(ansichtKlemmen({ x: -5, y: 5000, km: 50 }), { x: 0, y: 1200, km: 50 });
 });
+
+test("Raster hin und zurück: lage() kehrt raster() um", async () => {
+  const { lage } = await import("../src/lib/raster.js");
+  for (const [lon, lat] of [[9.94, 51.53], [10.6157, 51.7991], [6.1, 47.3], [14.9, 54.9]]) {
+    const [l, b] = lage(...raster(lon, lat));
+    assert.ok(Math.abs(l - lon) < 1e-6 && Math.abs(b - lat) < 1e-6, `${lon},${lat} -> ${l},${b}`);
+  }
+});

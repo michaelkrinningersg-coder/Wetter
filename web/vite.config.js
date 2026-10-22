@@ -16,6 +16,9 @@ export default defineConfig(({ mode }) => {
     base: "./",
     publicDir: android ? "public-android" : false,
     define: { __APP_VERSION__: JSON.stringify(process.env.VERSION || "v1.0") },
+    // JSON als Text mit JSON.parse: die Ortsliste (3 MB) kostet so beim Start
+    // fast nichts und wird erst beim Öffnen der Ortswahl gelesen
+    json: { stringify: true },
     build: {
       outDir: android ? "../webdist-android" : "../webdist",
       emptyOutDir: true,

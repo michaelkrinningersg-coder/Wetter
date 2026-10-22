@@ -30,6 +30,16 @@ def test_start_ohne_netz(api):
                                   "thema": "system", "normal": 1991, "ort": "station", "radar": {}}
 
 
+def test_ort_als_punkt(api):
+    punkt = {"art": "punkt", "name": "Torfhaus", "lat": 51.801, "lon": 10.537, "hoehe": 802}
+    assert api.einstellung("ort", punkt) == {"ok": True}
+    assert api.start()["einstellungen"]["ort"] == punkt
+    api.einstellung("ort", "gps")
+    assert api.start()["einstellungen"]["ort"] == "gps"
+    api.einstellung("ort", "{kaputt")
+    assert api.start()["einstellungen"]["ort"] == "station"
+
+
 def test_einstellungen_bleiben(api):
     assert api.einstellung("qn", "nur10") == {"ok": True}
     assert api.einstellung("unsinn", 1)["fehler"].startswith("Unbekannte")
