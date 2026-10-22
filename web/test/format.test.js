@@ -52,6 +52,21 @@ test("Suche: Nummer, Wortanfang, dann Teilwort", () => {
   assert.deepEqual(suchen(liste, "nieder").map((s) => s[0]), [1691]);
 });
 
+test("Suche: alle Namensteile, Reihenfolge egal, mitten im Wort", () => {
+  const liste = [
+    [1, "Harzgerode", "Sachsen-Anhalt"],
+    [2, "Oberharz am Brocken-Stiege", "Sachsen-Anhalt"],
+    [3, "Harzburg, Bad", "Niedersachsen"],
+    [4, "Bad Lauterberg im Harz", "Niedersachsen"],
+  ];
+  // Name beginnt so (alphabetisch), dann ein Namensteil, dann mitten im Wort
+  assert.deepEqual(suchen(liste, "harz").map((s) => s[0]), [3, 1, 4, 2]);
+  assert.deepEqual(suchen(liste, "bad harz").map((s) => s[0]), [4, 3]);
+  assert.deepEqual(suchen(liste, "harz bad").map((s) => s[0]), [4, 3]);
+  assert.deepEqual(suchen(liste, "harz sachsen-anhalt").map((s) => s[0]), [1, 2]);
+  assert.deepEqual(suchen(liste, "brocken stiege").map((s) => s[0]), [2]);
+});
+
 test("Sonnenhöhe und Tag/Nacht in Göttingen", () => {
   const ort = { lat: 51.5, lon: 9.95 };
   // Mittag zur Sommersonnenwende: 90 - 51,5 + 23,44

@@ -76,22 +76,26 @@ export function schritte(min, max, ziel = 6) {
 }
 
 /** Stationssuche: Name, Nummer oder Land; Treffer am Wortanfang zuerst. */
-export function suchen(stationen, text, grenze = 60) {
+export function suchen(stationen, text, grenze = Infinity) {
   const q = text.trim().toLowerCase();
   if (!q) return stationen.slice(0, grenze);
+  // jedes Wort muss vorkommen - im Namen, im Bundesland oder in der Nummer
+  const woerter = q.split(/[\s,]+/).filter(Boolean);
   const nummer = /^\d+$/.test(q) ? Number(q) : null;
   const treffer = [];
   for (const s of stationen) {
     const [id, name, land] = s;
     const n = name.toLowerCase();
-    let rang = -1;
+    const l = land.toLowerCase();
+    const nr = String(id).padStart(5, "0");
+    if (!woerter.every((w) => n.includes(w) || l.includes(w) || nr.includes(w))) continue;
+    // Rang: genaue Nummer, Name beginnt so, ein Namensteil beginnt so, sonst
+    let rang = 4;
     if (nummer !== null && id === nummer) rang = 0;
     else if (n.startsWith(q)) rang = 1;
-    else if (n.includes(" " + q) || n.includes("-" + q) || n.includes("(" + q)) rang = 2;
-    else if (n.includes(q)) rang = 3;
-    else if (land.toLowerCase().startsWith(q)) rang = 4;
-    else if (nummer !== null && String(id).padStart(5, "0").includes(q)) rang = 5;
-    if (rang >= 0) treffer.push([rang, s]);
+    else if (woerter.every((w) => n.startsWith(w) || n.includes(" " + w) || n.includes("-" + w) || n.includes("(" + w))) rang = 2;
+    else if (woerter.every((w) => n.includes(w))) rang = 3;
+    treffer.push([rang, s]);
   }
   treffer.sort((a, b) => a[0] - b[0] || a[1][1].localeCompare(b[1][1], "de"));
   return treffer.slice(0, grenze).map((t) => t[1]);

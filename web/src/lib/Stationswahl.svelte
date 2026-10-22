@@ -12,6 +12,9 @@
   let text = $state("");
   let markiert = $state(0);
   let feld = $state();
+  let knopf = $state();
+  // Lage der Liste: fest unter dem Knopf, damit das Menüband sie nicht abschneidet
+  let lage = $state({ top: 0, left: 0 });
 
   // ohne Suchtext: Favoriten zuerst, dann die schon geladenen, dann alle
   const treffer = $derived.by(() => {
@@ -19,11 +22,13 @@
     const fav = favoriten.map((f) => stationen.find((s) => s[0] === f)).filter(Boolean);
     const geladen = stationen.filter((s) => s[6] && !favoriten.includes(s[0]));
     const rest = stationen.filter((s) => !s[6] && !favoriten.includes(s[0]));
-    return [...fav, ...geladen, ...rest].slice(0, 80);
+    return [...fav, ...geladen, ...rest];
   });
   const jahrHeute = new Date().getFullYear();
 
   export function oeffnen() {
+    const r = knopf?.getBoundingClientRect();
+    if (r) lage = { top: r.bottom + 6, left: Math.max(8, Math.min(r.left, window.innerWidth - 660)) };
     offen = true;
     text = "";
     markiert = 0;
@@ -72,7 +77,7 @@
 </script>
 
 <div class="wahl-rahmen" class:vollbild>
-  <button class="wahl" onclick={oeffnen} title="Station wählen">
+  <button class="wahl" bind:this={knopf} onclick={oeffnen} title="Station wählen">
     <b>{aktuell?.name ?? "Station wählen"}</b>
     {#if aktuell}
       <small class="num">{String(aktuell.id).padStart(5, "0")} · {aktuell.hoehe} m</small>
@@ -83,14 +88,14 @@
   {#if offen}
     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
     <div class="schleier" onclick={() => (offen = false)}></div>
-    <div class="liste karte">
+    <div class="liste karte" style:top={vollbild ? null : `${lage.top}px`} style:left={vollbild ? null : `${lage.left}px`}>
       <div class="suchzeile">
         <input
           bind:this={feld}
           bind:value={text}
           onkeydown={taste}
           class="feld"
-          placeholder="Name, Nummer oder Bundesland"
+          placeholder="Name oder Teile davon, Nummer, Bundesland"
         />
         <button class="knopf nahe" onclick={inDerNaehe} title="Nächste aktive Station zum Standort dieses Geräts"><Symbol name="standort" /> In meiner Nähe</button>
         {#if vollbild}<button class="knopf" onclick={() => (offen = false)}>Schließen</button>{/if}
@@ -118,7 +123,7 @@
         {/each}
       </div>
       <div class="leise fuss">
-        {tausend(stationen.length)} Stationen · <Symbol name="favorit_an" groesse="1em" /> Favorit · grau: keine aktuellen Daten mehr · mit Tagen: schon geladen
+        {text.trim() ? `${tausend(treffer.length)} von ` : ""}{tausend(stationen.length)} Stationen · <Symbol name="favorit_an" groesse="1em" /> Favorit · grau: keine aktuellen Daten mehr · mit Tagen: schon geladen
       </div>
     </div>
   {/if}
@@ -165,17 +170,19 @@
   .schleier {
     position: fixed;
     inset: 0;
-    z-index: 10;
+    z-index: 30;
   }
   .liste {
-    position: absolute;
-    top: 38px;
-    left: 0;
-    z-index: 11;
+    position: fixed;
+    z-index: 31;
     width: 640px;
+    max-height: calc(100vh - 140px);
+    color: var(--text);
+    white-space: normal;
     padding: 10px;
     box-shadow: var(--schatten-hoch);
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 8px;
   }
   .suchzeile {
@@ -185,12 +192,19 @@
   .liste .feld {
     flex: 1;
     min-width: 0;
+    color: var(--text);
+    font-size: 15px;
+  }
+  .liste .feld::placeholder {
+    color: var(--text-3);
   }
   .zeilen {
-    max-height: 420px;
+    max-height: 480px;
     overflow: auto;
+    min-height: 0;
   }
   .zeile {
+    color: var(--text);
     display: grid;
     grid-template-columns: 1fr 56px 150px 90px 90px;
     gap: 8px;
@@ -240,11 +254,23 @@
     width: auto;
     border-radius: 0;
     padding: calc(12px + env(safe-area-inset-top)) 12px 12px;
-    grid-template-rows: auto 1fr auto;
+    max-height: none;
     color: var(--text);
+  }
+  .vollbild .suchzeile {
+    flex-wrap: wrap;
+  }
+  .vollbild .feld {
+    flex-basis: 100%;
+    height: 42px;
+    font-size: 17px;
+  }
+  .vollbild .suchzeile .knopf {
+    flex: 1;
   }
   .vollbild .zeilen {
     max-height: none;
+    flex: 1;
   }
   .vollbild .zeile {
     grid-template-columns: 1fr auto;
