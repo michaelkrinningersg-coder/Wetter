@@ -6,7 +6,7 @@
   //   darunter das Menüband mit den Gruppen Station, Ansicht, Zeitraum,
   //   Qualität und Daten. Graphit mit orangem Akzent.
   //   Handy: Kopfzeile mit Station, darunter die Schalter der Ansicht, unten
-  //   die Navigation; QN und Bereinigung unter "Mehr".
+  //   die Navigation; Bereinigung unter "Mehr".
   //
   // Alles kommt über `rufe()` - am PC aus Python, auf Android aus dem
   // Rechenkern im Handy. Beim Start zeigt die Seite sofort den gespeicherten
@@ -41,7 +41,8 @@
   let station = $state(null); // {station, zeitraum, abruf}
   let favoriten = $state([]);
   let ansicht = $state("band");
-  let qn = $state("alle");
+  // so entschieden: immer alle Qualitätsstufen des DWD, keine Auswahl
+  const qn = "alle";
   let jahr = $state(null);
   let groesse = $state("m");
   let aufloesung = $state("jahr");
@@ -115,14 +116,9 @@
   let handy = $state(false);
   let menue = $state(""); // offenes Menü der Menüleiste
   let hilfe = $state(false);
-  let mehr = $state(false); // Handy: Blatt mit QN und Bereinigung
+  let mehr = $state(false); // Handy: Blatt mit weiteren Ansichten und Einstellungen
   let wahl = $state(); // Stationswahl, zum Öffnen aus dem Menü
 
-  const QN = [
-    ["alle", "alle"],
-    ["ab5", "ab 5"],
-    ["nur10", "nur 10"],
-  ];
   const ANSICHTEN = HAUPT.map(([k, t, kurz, s]) => [k, t, s, kurz]);
   const ALLE = [...ANSICHTEN, ...AUSWERTUNGEN.map(([k, t, , s]) => [k, t, s]), ...DEUTSCHLAND.map(([k, t, , s]) => [k, t, s])];
 
@@ -214,7 +210,6 @@
     menue = "";
     if (was === "ansicht") ((ansicht = wert), (auswertung = null), (mehr = false), rufe("einstellung", "ansicht", wert));
     // QN gilt nur bis zum nächsten Start - jeder Start beginnt mit "alle"
-    if (was === "qn") ((qn = wert), (band = null));
     if (was === "normal") ((vergleich.von = wert), (band = null), (geschichteKurz = null), rufe("einstellung", "normal", wert));
     if (was === "jahr") jahr = wert;
     if (was === "groesse") groesse = wert;
@@ -408,7 +403,6 @@
     if (r.einstellungen.widget) widget = { ...widget, ...r.einstellungen.widget };
     rangModus = r.einstellungen.rang_modus === "jahr" ? "jahr" : "heute";
     rangPrognose = r.einstellungen.rang_prognose !== false;
-    qn = "alle"; // so entschieden: immer mit allen Qualitätsstufen beginnen
     await stationLaden(r.einstellungen.station);
     horchen();
   });
@@ -541,13 +535,6 @@
   </select>
 {/snippet}
 
-{#snippet qnSchalter()}
-  <div class="gruppe" title="Qualitätsniveau des DWD: welche Tage zählen">
-    {#each QN as [k, t]}
-      <button class="chip" class:an={qn === k} onclick={() => setze("qn", k)}>{t}</button>
-    {/each}
-  </div>
-{/snippet}
 
 {#snippet bilanzText()}
   {#if band?.bilanz}
@@ -609,7 +596,7 @@
     <li>Mittel außerhalb Tiefst- bis Höchstwert: nur das Mittel fällt weg.</li>
     <li>Sprung über 15 K zum Vortag: wird markiert, nie entfernt.</li>
     <li>Wind 0–250 km/h (Mittel nicht über der Böe), Niederschlag 0–300 mm, Sonne 0–16,5 h, Schnee 0–800 cm, Bedeckung 0–8, Feuchte 0–100 %, Luftdruck 500–1100 hPa, Dampfdruck 0–125 hPa, Erdboden −50 … +50 °C.</li>
-    <li>QN (Qualitätsniveau des DWD) umschaltbar: alle, ab 5, nur 10.</li>
+    <li>Es zählen alle Qualitätsstufen (QN) des DWD.</li>
   </ul>
   <h4>Prognose</h4>
   <p>Jahresmittel am 31.12. = bisher gemessen plus der Rest des Jahres, wie er in den letzten 30 Jahren war: 10 %, Median, 90 %.</p>
@@ -658,8 +645,6 @@
             <button class:an={ansicht === k} onclick={() => setze("ansicht", k)} title={t}><span><Symbol name={s} /></span>{kurz}</button>
           {/each}
         </div>
-        <div class="lbl">Qualitätsniveau (QN)</div>
-        {@render qnSchalter()}
         <div class="lbl">Vergleichszeitraum (Normal)</div>
         <div class="gruppe">{@render normalWahl()}</div>
         {#if nativ()}
@@ -739,9 +724,6 @@
                 {/each}
               {:else if k === "daten"}
                 <button onclick={aktualisieren} disabled={!!laedt || !station}>Aktualisieren</button>
-                {#each QN as [q, t2]}
-                  <button class:an={qn === q} onclick={() => setze("qn", q)}>QN {t2}</button>
-                {/each}
                 <div class="eintrag-leise">Vergleichszeitraum</div>
                 {#each NORMALE as n}
                   <button class:an={vergleich.von === n} onclick={() => setze("normal", n)}>Normal {normalText(n)}</button>
@@ -792,8 +774,8 @@
         <div class="b-titel">{ansicht === "monat" ? "Zeitraum" : ansicht === "band" ? "Jahr" : ansicht === "rang" ? "Vergleich" : ansicht === "reihe" ? "Größe" : "Optionen"}</div>
       </div>
       <div class="b-gruppe">
-        <div class="b-inhalt b-stapel">{@render qnSchalter()}{@render normalWahl()}</div>
-        <div class="b-titel">QN · Normal</div>
+        <div class="b-inhalt b-stapel">{@render normalWahl()}</div>
+        <div class="b-titel">Normal</div>
       </div>
       <div class="b-gruppe">
         <div class="b-inhalt">

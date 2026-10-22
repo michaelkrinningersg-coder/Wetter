@@ -22,12 +22,6 @@
   const tagKopf = (iso) => new Intl.DateTimeFormat("de-DE", { weekday: "long", day: "2-digit", month: "2-digit", timeZone: ZONE }).format(new Date(iso));
   const tagSchluessel = (iso) => new Intl.DateTimeFormat("de-DE", { day: "2-digit", month: "2-digit", timeZone: ZONE }).format(new Date(iso));
 
-  // Modelle ohne Werte, je Grund: [[grund, [modell, ...]], ...]
-  const ohneWerte = $derived.by(() => {
-    const g = new Map();
-    for (const m of v.modelle.filter((x) => x.fehler)) g.set(m.fehler, [...(g.get(m.fehler) ?? []), m]);
-    return [...g];
-  });
   const gewaehlt = $derived(v.modelle.find((m) => m.id === modell && m.stunden) ?? v.modelle.find((m) => m.stunden));
 
   // Tageswerte über den ganzen Ortstag 0-24 Uhr, auch die schon vergangenen Stunden
@@ -81,17 +75,11 @@
       {/each}
     </div>
     {#if gewaehlt}
-      <div class="leise" title={gewaehlt.liste ?? null}>{gewaehlt.text} · Stand {uhr(new Date(v.abgerufen * 1000).toISOString())}</div>
-      {#if gewaehlt.id === standard}
-        <div class="leise">★ Standard, auch für Start und Widget</div>
-      {:else}
+      {#if gewaehlt.id !== standard}
         <button class="chip standard" onclick={() => standardSetzen(gewaehlt.id)}>★ {gewaehlt.name} als Standard</button>
       {/if}
     {/if}
-    <!-- Modelle ohne Werte: nach Grund zusammengefasst -->
-    {#each ohneWerte as [grund, ms]}
-      <div class="leise">{ms.map((m) => m.name).join(", ")}: {grund === "Ort liegt außerhalb des Modellgebiets" ? "außerhalb des Modellgebiets" : grund}</div>
-    {/each}
+
   </div>
 
   <div class="karte tabelle">
