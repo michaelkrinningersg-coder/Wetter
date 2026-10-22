@@ -13,7 +13,8 @@
     ansicht = $bindable({ x: 550, y: 600, km: 100 }), // Mitte im Raster, km über die kürzere Seite
     breite = $bindable(0),
     hoehe = $bindable(0),
-    unten = null, // (ctx, {x, y, s, w, h}) - wird vor den Grenzen gezeichnet
+    unten = null, // (ctx, {x, y, s, w, h, ansicht}) - wird vor den Grenzen gezeichnet
+    neu = null, // ändert sich, wenn `unten` anders zeichnet (Radar: Bild im Film)
     punkt = null, // [Spalte, Zeile] - der orange Punkt
     punktName = "", // Beschriftung am Punkt
     pins = [], // [{gx, gy, name}] - Favoriten
@@ -38,81 +39,119 @@
   // ab wie vielen Einwohnern ein Ort aus der Ortsliste beschriftet wird
   const mindestens = (km) => (km > 600 ? Infinity : km > 250 ? 50000 : km > 120 ? 10000 : km > 60 ? 2000 : km > 25 ? 300 : 0);
 
-  const farbeVon = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  // Linien der Karte einmal als Pfade im Raster (km)
+  const PFADE = Object.fromEntries(
+    ["seen", "fluesse", "laender", "grenzen", "deutschland"].map((k) => {
+      const p = new Path2D();
+      for (const t of karte[k]) {
+        p.moveTo(t[0], t[1]);
+        for (let i = 2; i < t.length; i += 2) p.lineTo(t[i], t[i + 1]);
+      }
+      return [k, p];
+    }),
+  );
 
+  // Farben einmal je Bild aus dem Stylesheet (getComputedStyle ist teuer)
+  function farben() {
+    const st = getComputedStyle(document.documentElement);
+    const f = (n) => st.getPropertyValue(n).trim();
+    return { grund: f("--flaeche-2"), blau: f("--blau"), text: f("--text"), text2: f("--text-2"), leise: f("--text-3"), hell: f("--flaeche"), akzent: f("--akzent"), schrift: f("--schrift") || "sans-serif" };
+  }
+  // Textbreiten merken - measureText für dieselben Namen bei jedem Bild kostet
+  const breiten = new Map();
+
+  // Zeichnen höchstens einmal je Bildschirmbild; die Werte werden vorher in
+  // einfache Variablen kopiert - jeder Zugriff auf einen reaktiven Wert in den
+  // Schleifen (86.000 Orte, tausende Linienpunkte) ginge sonst durch Svelte
+  let bildAnfrage = 0;
   $effect(() => {
     if (!leinwand || !breite || !hoehe) return;
-    const w = breite;
-    const h = hoehe;
+    neu;
+    const stand = { a: { ...ansicht }, w: breite, h: hoehe, unten, punkt, punktName, pins, stationsPunkte, orte, xy: orteXY };
+    cancelAnimationFrame(bildAnfrage);
+    bildAnfrage = requestAnimationFrame(() => zeichnen(stand));
+  });
+  onDestroy(() => cancelAnimationFrame(bildAnfrage));
+
+  function zeichnen({ a, w, h, unten, punkt, punktName, pins, stationsPunkte, orte, xy: orteXY }) {
+    const fb = farben();
     const dpr = window.devicePixelRatio || 1;
-    leinwand.width = Math.round(w * dpr);
-    leinwand.height = Math.round(h * dpr);
+    if (leinwand.width !== Math.round(w * dpr) || leinwand.height !== Math.round(h * dpr)) {
+      leinwand.width = Math.round(w * dpr);
+      leinwand.height = Math.round(h * dpr);
+    }
     const ctx = leinwand.getContext("2d");
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.fillStyle = farbeVon("--flaeche-2");
+    ctx.fillStyle = fb.grund;
     ctx.fillRect(0, 0, w, h);
 
-    const km = ansicht.km;
-    const s = massstab(ansicht, w, h);
-    const x = (gx) => (gx - ansicht.x) * s + w / 2;
-    const y = (gy) => (gy - ansicht.y) * s + h / 2;
+    const km = a.km;
+    const s = massstab(a, w, h);
+    const ox = w / 2 - a.x * s;
+    const oy = h / 2 - a.y * s;
+    const x = (gx) => gx * s + ox;
+    const y = (gy) => gy * s + oy;
     const nah = km <= 130;
     const zoomt = km <= 400;
 
-    // Wasser
+    // Wasser. Linien als fertige Pfade im Raster (einmal gebaut), gezeichnet
+    // mit der Zoom-Verschiebung - Breite und Striche dafür durch s geteilt
     ctx.lineJoin = ctx.lineCap = "round";
-    const linien = (teile, stil, breiteLinie, strich = []) => {
+    const linien = (pfad, stil, breiteLinie, strich = []) => {
+      ctx.setTransform(dpr * s, 0, 0, dpr * s, dpr * ox, dpr * oy);
       ctx.strokeStyle = stil;
-      ctx.lineWidth = breiteLinie;
-      ctx.setLineDash(strich);
-      ctx.beginPath();
-      for (const t of teile) {
-        ctx.moveTo(x(t[0]), y(t[1]));
-        for (let i = 2; i < t.length; i += 2) ctx.lineTo(x(t[i]), y(t[i + 1]));
-      }
-      ctx.stroke();
+      ctx.lineWidth = breiteLinie / s;
+      ctx.setLineDash(strich.map((v) => v / s));
+      ctx.stroke(pfad);
       ctx.setLineDash([]);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
-    const blau = farbeVon("--blau");
+    const blau = fb.blau;
     ctx.globalAlpha = 0.35;
-    linien(karte.seen, blau, 1);
-    linien(karte.fluesse, blau, nah ? 1.3 : 0.9);
+    linien(PFADE.seen, blau, 1);
+    linien(PFADE.fluesse, blau, nah ? 1.3 : 0.9);
     ctx.globalAlpha = 1;
 
-    unten?.(ctx, { x, y, s, w, h });
+    unten?.(ctx, { x, y, s, w, h, ansicht: a });
 
     // Grenzen - im Zoom kräftig und über dem Regen: heller Rand, dann die Linie
-    const text = farbeVon("--text");
-    const leise = farbeVon("--text-3");
-    const hell = farbeVon("--flaeche");
+    const { text, leise, hell } = fb;
     if (zoomt) {
       ctx.globalAlpha = 0.85;
-      linien(karte.laender, hell, 3.6);
+      linien(PFADE.laender, hell, 3.6);
       ctx.globalAlpha = 1;
-      linien(karte.laender, farbeVon("--text-2"), 1.5);
+      linien(PFADE.laender, fb.text2, 1.5);
     } else {
-      linien(karte.laender, leise, 0.8, [4, 3]);
+      linien(PFADE.laender, leise, 0.8, [4, 3]);
     }
-    linien(karte.grenzen, leise, 1);
+    linien(PFADE.grenzen, leise, 1);
     if (zoomt) {
       ctx.globalAlpha = 0.85;
-      linien(karte.deutschland, hell, 4.4);
+      linien(PFADE.deutschland, hell, 4.4);
       ctx.globalAlpha = 1;
     }
-    linien(karte.deutschland, text, zoomt ? 2 : 1.2);
+    linien(PFADE.deutschland, text, zoomt ? 2 : 1.2);
 
     // Beschriftungen überdecken sich nicht; wer zuerst kommt, steht
     const belegt = [[0, h - 34, 110, h]]; // Maßstab unten links bleibt frei
     const frei = (bx) => !belegt.some((a) => bx[0] < a[2] && bx[2] > a[0] && bx[1] < a[3] && bx[3] > a[1]);
-    const schrift = farbeVon("--schrift") || "sans-serif";
+    const schrift = fb.schrift;
     ctx.textBaseline = "middle";
     const marke = (name, gx, gy, gross, farbeText, r, form = "punkt") => {
       const px = x(gx);
       const py = y(gy);
       if (px < 0 || py < 0 || px > w || py > h) return;
-      ctx.font = `${gross}px ${schrift}`;
-      const bx = [px - r, py - gross / 2 - 1, px + 6 + ctx.measureText(name).width, py + gross / 2 + 1];
+      const schluessel = `${gross}|${name}`;
+      let tb = breiten.get(schluessel);
+      if (tb == null) {
+        ctx.font = `${gross}px ${schrift}`;
+        tb = ctx.measureText(name).width;
+        if (breiten.size > 20000) breiten.clear();
+        breiten.set(schluessel, tb);
+      }
+      const bx = [px - r, py - gross / 2 - 1, px + 6 + tb, py + gross / 2 + 1];
       if (!frei(bx)) return;
+      ctx.font = `${gross}px ${schrift}`;
       belegt.push(bx);
       ctx.fillStyle = farbeText;
       ctx.beginPath();
@@ -130,7 +169,7 @@
     };
 
     // der gewählte Punkt und die Favoriten zuerst - sie sollen immer zu sehen sein
-    const akzent = farbeVon("--akzent");
+    const akzent = fb.akzent;
     if (punkt && punktName) marke(punktName, punkt[0], punkt[1], 13, akzent, 0.1);
     for (const p of pins) marke(p.name, p.gx, p.gy, 12, akzent, 3.4);
 
@@ -140,7 +179,7 @@
     // mehr Orte aus der Ortsliste (nach Einwohnern sortiert) und Gipfel
     if (orteXY) {
       const ab = mindestens(km);
-      const [gl, go] = unterPunkt(ansicht, 0, 0, w, h);
+      const [gl, go] = unterPunkt(a, 0, 0, w, h);
       const gr = gl + w / s;
       const gu = go + h / s;
       let gesetzt = 0;
@@ -151,7 +190,7 @@
         const gy = orteXY.gy[i];
         if (gx < gl || gx > gr || gy < go || gy > gu) continue;
         const vorher = belegt.length;
-        if (gipfel) marke(`${orte.n[i]}${orte.h[i] != null ? ` ${orte.h[i]}` : ""}`, gx, gy, 10.5, farbeVon("--text-2"), 2.6, "gipfel");
+        if (gipfel) marke(`${orte.n[i]}${orte.h[i] != null ? ` ${orte.h[i]}` : ""}`, gx, gy, 10.5, fb.text2, 2.6, "gipfel");
         else marke(orte.n[i], gx, gy, orte.e[i] >= 10000 ? 12 : 11, text, orte.e[i] >= 10000 ? 2.4 : 1.8);
         if (belegt.length > vorher) gesetzt++;
       }
@@ -178,7 +217,7 @@
     ctx.fillRect(10, h - 14, skala * s, 3);
     ctx.font = `11px ${schrift}`;
     ctx.fillText(`${skala} km`, 10, h - 24);
-  });
+  }
 
   // ---------------------------------------------------------------- Bedienung
   // Ein Finger/Maus zieht, zwei Finger zoomen, doppelt tippen vergrößert,

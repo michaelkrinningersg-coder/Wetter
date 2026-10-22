@@ -181,10 +181,10 @@
   }
 
   // Regen auf die Karte: nur der sichtbare Teil des Rasters (Karte.svelte ruft das
-  // zwischen Wasser und Grenzen auf; liest daten und bild, zeichnet also mit)
-  function regen(ctx, { x, y, s, w, h }) {
+  // zwischen Wasser und Grenzen auf; neu={[daten, bild]} zeichnet bei jedem Filmbild)
+  function regen(ctx, { x, y, s, w, h, ansicht: a }) {
     if (!daten?.bilder.length) return;
-    const [gl, go] = unterPunkt(ansicht, 0, 0, w, h);
+    const [gl, go] = unterPunkt(a, 0, 0, w, h);
     const sx0 = Math.max(0, Math.floor(gl));
     const sy0 = Math.max(0, Math.floor(go));
     const sx1 = Math.min(daten.spalten, Math.ceil(gl + w / s));
@@ -224,6 +224,7 @@
       bind:breite
       bind:hoehe
       unten={regen}
+      neu={[daten, bild]}
       {punkt}
       {stationsPunkte}
       ontipp={(gx, gy) => ((mitte = [gx, gy]), (mitteArt = "tipp"))}

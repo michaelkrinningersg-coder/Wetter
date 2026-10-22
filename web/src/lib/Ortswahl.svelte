@@ -16,7 +16,8 @@
   // onwahl(punkt): {art: "punkt", name, lat, lon, hoehe, station}; onschliessen()
   let { stationen = [], start, aktuell = null, onwahl, onschliessen } = $props();
 
-  let orte = $state(null);
+  // roh, ohne Svelte-Proxy: 86.000 Einträge je Bild durch einen Proxy kosten Sekunden
+  let orte = $state.raw(null);
   let ladeFehler = $state("");
   onMount(async () => {
     try {
