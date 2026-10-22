@@ -16,11 +16,14 @@ export const ortsTag = (ms) => TAG.format(new Date(ms));
 const ortsStunde = (ms) => Number(STUNDE.formatToParts(new Date(ms)).find((t) => t.type === "hour").value);
 
 /**
- * modelle: Liste aus der Vorhersage ({id, name, stunden}), jetzt: ms.
- * Liefert {modell, tage: [{titel, tag, min, max, regen, stunden}]} oder null.
+ * modelle: Liste aus der Vorhersage ({id, name, stunden}), jetzt: ms,
+ * erstes: das Standardmodell (auch "mittel") - es geht vor, Lücken füllt
+ * die Kurzfrist-Reihenfolge. Liefert {modell, tage: [{titel, tag, min, max,
+ * regen, stunden}]} oder null.
  */
-export function heuteMorgen(modelle, jetzt = Date.now()) {
-  const mit = KURZFRIST.map((id) => modelle?.find((m) => m.id === id && m.stunden?.length)).filter(Boolean);
+export function heuteMorgen(modelle, jetzt = Date.now(), erstes = null) {
+  const reihe = erstes ? [erstes, ...KURZFRIST.filter((id) => id !== erstes)] : KURZFRIST;
+  const mit = reihe.map((id) => modelle?.find((m) => m.id === id && m.stunden?.length)).filter(Boolean);
   if (!mit.length) return null;
   const heute = ortsTag(jetzt);
   const morgen = ortsTag(Date.parse(`${heute}T12:00:00Z`) + 86400000);

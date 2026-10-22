@@ -188,7 +188,7 @@ class Api:
         return {"station": int(db.meta("station", GOETTINGEN)),
                 "qn": db.meta("qn", plausibel.QN_VORGABE),
                 "ansicht": db.meta("ansicht", "uebersicht"),
-                "vmodell": db.meta("vmodell", "icon_d2"),
+                "standardmodell": db.meta("standardmodell", "mittel"),
                 "rang_modus": db.meta("rang_modus", "heute"),
                 "rang_prognose": db.meta("rang_prognose", "1") != "0",
                 "favoriten": _liste(db.meta("favoriten", "[]")),
@@ -295,7 +295,7 @@ class Api:
     def einstellung(self, name: str, wert) -> dict:
         def arbeit():
             if name not in ("station", "qn", "ansicht", "rang_modus",
-                            "rang_prognose", "favoriten", "wellen", "vmodell",
+                            "rang_prognose", "favoriten", "wellen", "standardmodell",
                             "thema", "normal", "ort", "radar"):
                 raise Hinweis(f"Unbekannte Einstellung: {name}")
             if isinstance(wert, bool):

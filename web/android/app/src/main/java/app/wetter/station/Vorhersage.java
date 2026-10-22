@@ -9,10 +9,14 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
+import java.util.TreeMap;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,24 +67,33 @@ final class Vorhersage {
     }
 
     // --------------------------------------------------------- Abrufen
-    /** modell: Open-Meteo-Name (icon_d2, ecmwf_ifs025 ...) oder "metno". */
+    /** modell: Open-Meteo-Name (icon_d2, ecmwf_ifs025 ...), "metno" oder "mittel". */
     static List<Stunde> abrufen(double lat, double lon, String modell) throws IOException, JSONException {
         if ("metno".equals(modell)) return metNorway(lat, lon);
+        if ("mittel".equals(modell)) return mittel(lat, lon);
         return openMeteo(lat, lon, modell);
     }
 
-    static List<Stunde> openMeteo(double lat, double lon, String modell) throws IOException, JSONException {
+    private static JSONObject openMeteoAntwort(double lat, double lon, String modelle) throws IOException, JSONException {
         String adresse = String.format(Locale.ROOT,
             "https://api.open-meteo.com/v1/forecast?latitude=%.4f&longitude=%.4f"
                 + "&hourly=temperature_2m,precipitation,weather_code,is_day,wind_gusts_10m"
-                + "&forecast_days=3&timezone=GMT&models=%s", lat, lon, modell);
+                + "&forecast_days=3&timezone=GMT&models=%s", lat, lon, modelle);
         JSONObject a = new JSONObject(holen(adresse));
         if (a.optBoolean("error", false)) {
             String grund = a.optString("reason", "Fehler");
             if (grund.contains("No data is available for this location")) grund = "Ort liegt außerhalb des Modellgebiets";
             throw new IOException(grund);
         }
-        JSONObject h = a.getJSONObject("hourly");
+        return a.getJSONObject("hourly");
+    }
+
+    static List<Stunde> openMeteo(double lat, double lon, String modell) throws IOException, JSONException {
+        return stunden(openMeteoAntwort(lat, lon, modell), "");
+    }
+
+    /** Stunden aus "hourly"; endung "_icon_d2" usw. bei mehreren Modellen in einer Antwort. */
+    private static List<Stunde> stunden(JSONObject h, String endung) throws JSONException {
         JSONArray zeit = h.getJSONArray("time");
         SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.ROOT);
         f.setTimeZone(UTC);
@@ -92,13 +105,13 @@ final class Vorhersage {
             } catch (ParseException e) {
                 continue;
             }
-            s.temp = zahl(h.optJSONArray("temperature_2m"), i);
+            s.temp = zahl(h.optJSONArray("temperature_2m" + endung), i);
             if (Double.isNaN(s.temp)) continue;
-            s.regen = zahl(h.optJSONArray("precipitation"), i);
-            s.boe = zahl(h.optJSONArray("wind_gusts_10m"), i);
-            double code = zahl(h.optJSONArray("weather_code"), i);
+            s.regen = zahl(h.optJSONArray("precipitation" + endung), i);
+            s.boe = zahl(h.optJSONArray("wind_gusts_10m" + endung), i);
+            double code = zahl(h.optJSONArray("weather_code" + endung), i);
             s.art = Double.isNaN(code) ? null : symbolWmo((int) code);
-            double tag = zahl(h.optJSONArray("is_day"), i);
+            double tag = zahl(h.optJSONArray("is_day" + endung), i);
             s.tag = Double.isNaN(tag) ? null : tag > 0.5;
             aus.add(s);
         }
@@ -141,6 +154,124 @@ final class Vorhersage {
             aus.add(s);
         }
         return aus;
+    }
+
+    // ------------------------------------------------ Mittel aller Modelle
+    // Wie web/src/lib/mittel.js: feine Modelle zählen doppelt, das Symbol ist
+    // das der Mehrheit (Niederschlag ab der Hälfte), MET Norway nur stündlich.
+    static final String[] MITTEL_MODELLE = {"icon_d2", "icon_eu", "knmi_harmonie_arome_europe",
+        "dmi_harmonie_arome_europe", "meteofrance_arome_france", "meteofrance_arpege_europe",
+        "ecmwf_ifs025", "gfs_seamless", "meteoswiss_icon_ch1", "meteoswiss_icon_ch2"};
+    static final List<String> FEIN = Arrays.asList("icon_d2", "knmi_harmonie_arome_europe",
+        "dmi_harmonie_arome_europe", "meteofrance_arome_france", "meteoswiss_icon_ch1", "meteoswiss_icon_ch2");
+    static final List<String> NASS = Arrays.asList("gewitter", "glatteis", "schnee", "schneeschauer",
+        "schneeregen", "starkregen", "regen", "schauer", "niesel");
+    static final List<String> TROCKEN = Arrays.asList("klar", "heiter", "wolkig", "bedeckt", "nebel", "wind");
+
+    private static final class Summe {
+        double temp, gTemp, regen, gRegen, boe, gBoe;
+        Boolean tag;
+        final Map<String, Double> symbole = new HashMap<>();
+    }
+
+    static List<Stunde> mittel(double lat, double lon) throws IOException, JSONException {
+        TreeMap<Long, Summe> summen = new TreeMap<>();
+        int modelle = 0;
+        IOException letzter = null;
+        try {
+            StringBuilder liste = new StringBuilder();             // String.join erst ab Android 8
+            for (String m : MITTEL_MODELLE) liste.append(liste.length() > 0 ? "," : "").append(m);
+            JSONObject h = openMeteoAntwort(lat, lon, liste.toString());
+            for (String m : MITTEL_MODELLE) {
+                if (!h.has("temperature_2m_" + m)) continue;      // außerhalb des Modellgebiets
+                List<Stunde> l = stunden(h, "_" + m);
+                if (l.isEmpty()) continue;
+                modelle++;
+                dazu(summen, l, FEIN.contains(m) ? 2 : 1);
+            }
+        } catch (IOException e) {
+            letzter = e;
+        }
+        try {
+            List<Stunde> l = metNorway(lat, lon);
+            List<Stunde> stuendlich = new ArrayList<>();
+            for (int i = 0; i < l.size(); i++) {
+                long naechste = i + 1 < l.size() ? l.get(i + 1).ms : -1;
+                if (naechste > 0 && naechste - l.get(i).ms > 3600000L) continue;
+                if (naechste < 0 && i > 0 && l.get(i).ms - l.get(i - 1).ms > 3600000L) continue;
+                stuendlich.add(l.get(i));
+            }
+            if (!stuendlich.isEmpty()) {
+                modelle++;
+                dazu(summen, stuendlich, 1);
+            }
+        } catch (IOException e) {
+            if (letzter == null) letzter = e;
+        }
+        if (modelle == 0) throw letzter != null ? letzter : new IOException("kein Modell liefert Werte");
+        List<Stunde> aus = new ArrayList<>();
+        for (Map.Entry<Long, Summe> e : summen.entrySet()) {
+            Summe z = e.getValue();
+            Stunde s = new Stunde();
+            s.ms = e.getKey();
+            s.temp = z.temp / z.gTemp;
+            s.regen = z.gRegen > 0 ? z.regen / z.gRegen : Double.NaN;
+            s.boe = z.gBoe > 0 ? z.boe / z.gBoe : Double.NaN;
+            s.art = mehrheit(z.symbole);
+            s.tag = z.tag;
+            aus.add(s);
+        }
+        return aus;
+    }
+
+    private static void dazu(TreeMap<Long, Summe> summen, List<Stunde> l, double g) {
+        for (Stunde s : l) {
+            Summe z = summen.get(s.ms);
+            if (z == null) {
+                z = new Summe();
+                summen.put(s.ms, z);
+            }
+            z.temp += s.temp * g;
+            z.gTemp += g;
+            if (!Double.isNaN(s.regen)) {
+                z.regen += s.regen * g;
+                z.gRegen += g;
+            }
+            if (!Double.isNaN(s.boe)) {
+                z.boe += s.boe * g;
+                z.gBoe += g;
+            }
+            if (s.art != null) z.symbole.put(s.art, z.symbole.getOrDefault(s.art, 0.0) + g);
+            if (z.tag == null) z.tag = s.tag;
+        }
+    }
+
+    /** Symbol der Mehrheit wie mehrheit() in mittel.js. */
+    static String mehrheit(Map<String, Double> gewichte) {
+        double nass = 0, alle = 0;
+        for (Map.Entry<String, Double> e : gewichte.entrySet()) {
+            alle += e.getValue();
+            if (NASS.contains(e.getKey())) nass += e.getValue();
+        }
+        if (alle == 0) return null;
+        boolean regen = nass > 0 && nass * 2 >= alle;
+        String best = null;
+        double bestG = -1;
+        for (Map.Entry<String, Double> e : gewichte.entrySet()) {
+            String k = e.getKey();
+            if (NASS.contains(k) != regen) continue;
+            double g = e.getValue();
+            if (g > bestG || (g == bestG && rang(k) > rang(best))) {
+                best = k;
+                bestG = g;
+            }
+        }
+        return best;
+    }
+
+    private static int rang(String s) {
+        if (s == null) return Integer.MIN_VALUE;
+        return NASS.contains(s) ? -NASS.indexOf(s) : TROCKEN.indexOf(s);
     }
 
     private static double zahl(JSONArray a, int i) {

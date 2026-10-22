@@ -45,3 +45,15 @@ test("Kein Modell, kein Ergebnis; Mitternacht und Sommerzeit", () => {
   assert.equal(ortsTag(Date.parse("2026-10-20T22:30:00Z")), "2026-10-21");
   assert.equal(ortsTag(Date.parse("2026-01-20T22:30:00Z")), "2026-01-20");
 });
+
+test("Standardmodell geht vor, auch das Mittel", () => {
+  const jetzt = Date.parse("2026-10-20T08:00:00Z");
+  const modelle = [
+    { id: "mittel", name: "Mittel", stunden: reihe("2026-10-20T00:00:00Z", 72, 1) },
+    { id: "icon_d2", name: "ICON-D2", stunden: reihe("2026-10-20T00:00:00Z", 48, 8) },
+    { id: "gfs", name: "GFS", stunden: reihe("2026-10-20T00:00:00Z", 72, 4) },
+  ];
+  assert.equal(heuteMorgen(modelle, jetzt, "mittel").modell, "Mittel");
+  assert.equal(heuteMorgen(modelle, jetzt, "gfs").modell, "GFS");
+  assert.equal(heuteMorgen(modelle, jetzt).modell, "ICON-D2");
+});

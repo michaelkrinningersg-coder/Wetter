@@ -328,7 +328,7 @@ export const lokal = {
         station: await meta("station", GOETTINGEN),
         qn: await meta("qn", "alle"),
         ansicht: await meta("ansicht", "uebersicht"),
-        vmodell: await meta("vmodell", "icon_d2"),
+        standardmodell: await meta("standardmodell", "mittel"),
         thema: await meta("thema", "system"),
         normal: R.normalVon(await meta("normal", R.NORMAL_VON)),
         ort: (await meta("ort", "station")) === "gps" ? "gps" : "station",

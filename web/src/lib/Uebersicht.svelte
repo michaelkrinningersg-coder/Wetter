@@ -9,10 +9,10 @@
   import Laufband from "./Laufband.svelte";
   import Symbol from "./Symbol.svelte";
 
-  let { name, band, monat, geschichte, vorhersage, rekorde = null, gehe } = $props();
+  let { name, band, monat, geschichte, vorhersage, standard = null, rekorde = null, gehe } = $props();
 
   const a = $derived(vorhersage?.aktuell);
-  const hm = $derived(vorhersage ? heuteMorgen(vorhersage.modelle) : null);
+  const hm = $derived(vorhersage ? heuteMorgen(vorhersage.modelle, Date.now(), standard) : null);
 
   const gestern = $derived.by(() => {
     if (!band?.tage?.length) return null;
@@ -27,7 +27,7 @@
   let offen = $state({});
   const umschalten = (tag, k) => (offen = { ...offen, [tag]: offen[tag] === k ? null : k });
   const hh = (h) => String(h).padStart(2, "0");
-  const REGEN_TEXT = { trocken: "", "möglich": "möglich", zeitweise: "zeitweise", anhaltend: "" };
+  const REGEN_TEXT = { trocken: "trocken", "möglich": "Regen möglich", zeitweise: "zeitweise", anhaltend: "" };
   const temps = (t) => (t.min == null ? "–" : Math.round(t.min) === Math.round(t.max) ? `${de(t.max, 0)}°` : `${de(t.min, 0)}–${de(t.max, 0)}°`);
 </script>
 
@@ -93,7 +93,7 @@
 
   <div class="karte hm">
     <div class="hm-kopf">
-      <span class="lbl">Heute und morgen{hm ? ` · ${hm.modell}` : ""}</span>
+      <span class="lbl">Heute und morgen{hm ? ` · ${hm.modell === "Mittel" ? "Mittel aller Modelle" : hm.modell}` : ""}</span>
       <button class="chip" onclick={() => gehe("vorhersage")}>alle Modelle ›</button>
     </div>
     {#if hm}
@@ -109,44 +109,39 @@
                 · Regen {de(t.regen)} mm
               </div>
             </div>
-            <div class="tz">
-              {#each zeiten as z (z.k)}
-                {#if z.leer}
-                  <div class="tz-spalte leer"><span class="tz-name"><b class="lang">{z.name}</b><b class="kurz">{z.kurz}</b></span><small class="num">{hh(z.von)}–{hh(z.bis)}</small></div>
-                {:else}
+              <div class="v-zeilen">
+                {#each zeiten.filter((z) => !z.leer) as z (z.k)}
                   {@const tagL = istTag(z.mitte.tagLicht, z.mitte.zeit, vorhersage.station)}
-                  <button class="tz-spalte" class:auf={auf === z} class:nacht={!tagL} onclick={() => umschalten(t.tag, z.k)} aria-expanded={auf === z} title="{z.name} {hh(z.ab)}–{hh(z.bis)} Uhr: {SYMBOL_TEXT[z.symbol] ?? ''}{z.art === 'möglich' ? ', Regen möglich' : ''}">
-                    <span class="tz-name"><b class="lang">{z.name}</b><b class="kurz">{z.kurz}</b></span>
-                    <small class="num">{hh(z.ab)}–{hh(z.bis)}</small>
+                  <button class="v-zeile" class:auf={auf === z} class:nacht={!tagL} onclick={() => umschalten(t.tag, z.k)}>
+                    <span class="tz-name"><b>{z.name}</b><small class="num">{hh(z.ab)}–{hh(z.bis)}</small></span>
                     <span class="tz-sym"><Symbol wetter={z.symbol} tag={tagL} /></span>
                     <span class="tz-temp num">{temps(z)}</span>
-                    <span class="tz-regen num" class:nass={z.regen >= 0.05}>{z.regen >= 0.05 ? `${de(z.regen)} mm` : "–"}</span>
-                    <span class="tz-wkt num" class:hoch={z.wkt >= 50}>{z.wkt != null ? `${de(z.wkt, 0)} %` : ""}</span>
-                    <small class="tz-art">{REGEN_TEXT[z.art]}</small>
-                    <span class="tz-wind num" class:windig={z.boe >= WINDIG_AB}>
-                      {#if z.boe != null && z.boe >= WINDIG_AB}<Symbol name="windsack" titel="Böen ab {WINDIG_AB} km/h" />{de(z.wind, 0)}/{de(z.boe, 0)}{:else}{de(z.wind, 0)}{/if}
+                    <span class="v-regen">
+                      {#if z.regen >= 0.05}<b class="nass num">{de(z.regen)} mm</b>{/if}
+                      {#if z.wkt != null}<span class="tz-wkt num" class:hoch={z.wkt >= 50}>{de(z.wkt, 0)} %</span>{/if}
+                      {#if REGEN_TEXT[z.art]}<span class="leise">{REGEN_TEXT[z.art]}</span>{/if}
                     </span>
+                    <span class="tz-wind num" class:windig={z.boe >= WINDIG_AB}>{#if z.boe >= WINDIG_AB}<Symbol name="windsack" />{de(z.wind, 0)}/{de(z.boe, 0)}{:else}{de(z.wind, 0)}{/if}</span>
                   </button>
+                {#if auf === z}
+                  <table>
+                    <caption>{auf.name} · {hh(auf.ab)}–{hh(auf.bis)} Uhr</caption>
+                    <tbody>
+                      {#each auf.stunden as s}
+                        <tr class:nacht={!istTag(s.tagLicht, s.zeit, vorhersage.station)} class:ersatz={s.ersatz} title={s.ersatz ? `aus ${s.ersatz}` : null}>
+                          <td class="num leise">{hh(s.h)}</td>
+                          <td class="sym"><Symbol wetter={s.symbol} tag={istTag(s.tagLicht, s.zeit, vorhersage.station)} titel={SYMBOL_TEXT[s.symbol]} /></td>
+                          <td class="num temp" style:color={s.temp >= 25 ? "var(--rot)" : s.temp < 0 ? "var(--blau)" : null}>{de(s.temp)}°</td>
+                          <td class="num" class:nass={s.regen >= 0.1}>{s.regen >= 0.1 ? `${de(s.regen)} mm` : ""}</td>
+                          <td class="num leise">{s.wkt != null ? `${de(s.wkt, 0)} %` : ""}</td>
+                          <td class="num leise">{de(s.wind, 0)}{s.boe != null && s.boe >= WINDIG_AB ? `/${de(s.boe, 0)}` : ""}</td>
+                        </tr>
+                      {/each}
+                    </tbody>
+                  </table>
                 {/if}
-              {/each}
-            </div>
-            {#if auf}
-              <table>
-                <caption>{auf.name} · {hh(auf.ab)}–{hh(auf.bis)} Uhr</caption>
-                <tbody>
-                  {#each auf.stunden as s}
-                    <tr class:nacht={!istTag(s.tagLicht, s.zeit, vorhersage.station)} class:ersatz={s.ersatz} title={s.ersatz ? `aus ${s.ersatz}` : null}>
-                      <td class="num leise">{hh(s.h)}</td>
-                      <td class="sym"><Symbol wetter={s.symbol} tag={istTag(s.tagLicht, s.zeit, vorhersage.station)} titel={SYMBOL_TEXT[s.symbol]} /></td>
-                      <td class="num temp" style:color={s.temp >= 25 ? "var(--rot)" : s.temp < 0 ? "var(--blau)" : null}>{de(s.temp)}°</td>
-                      <td class="num" class:nass={s.regen >= 0.1}>{s.regen >= 0.1 ? `${de(s.regen)} mm` : ""}</td>
-                      <td class="num leise">{s.wkt != null ? `${de(s.wkt, 0)} %` : ""}</td>
-                      <td class="num leise">{de(s.wind, 0)}{s.boe != null && s.boe >= WINDIG_AB ? `/${de(s.boe, 0)}` : ""}</td>
-                    </tr>
-                  {/each}
-                </tbody>
-              </table>
-            {/if}
+                {/each}
+              </div>
           </div>
         {/each}
       </div>
@@ -242,65 +237,6 @@
     border-bottom: 1px solid var(--rand);
     z-index: 1;
   }
-  .tz {
-    display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 3px;
-    margin-top: 6px;
-  }
-  .tz-spalte {
-    display: grid;
-    justify-items: center;
-    align-content: start;
-    gap: 2px;
-    padding: 6px 2px 5px;
-    border: 1px solid var(--rand);
-    border-radius: 8px;
-    background: var(--flaeche);
-    font: inherit;
-    color: inherit;
-    text-align: center;
-    cursor: pointer;
-    min-width: 0;
-  }
-  .tz-spalte:hover {
-    border-color: var(--akzent);
-  }
-  .tz-spalte.nacht {
-    background: color-mix(in srgb, var(--flaeche-2) 80%, transparent);
-  }
-  .tz-spalte.auf {
-    border-color: var(--akzent);
-    box-shadow: inset 0 -3px 0 var(--akzent);
-  }
-  .tz-spalte.leer {
-    cursor: default;
-    opacity: 0.45;
-    border-style: dashed;
-  }
-  .tz-spalte small {
-    font-size: 10px;
-    color: var(--text-3);
-  }
-  .tz-name {
-    font-size: 12px;
-    white-space: nowrap;
-  }
-  .tz-name .kurz {
-    display: none;
-  }
-  /* lange Namen nur, wenn die Spalten breit genug sind */
-  .hm-tag {
-    container-type: inline-size;
-  }
-  @container (max-width: 680px) {
-    .tz-name .lang {
-      display: none;
-    }
-    .tz-name .kurz {
-      display: inline;
-    }
-  }
   .tz-sym {
     display: flex;
     font-size: 28px;
@@ -309,22 +245,19 @@
   }
   .tz-temp {
     font-weight: 600;
-    font-size: 13px;
+    font-size: 15px;
     white-space: nowrap;
   }
   .tz-regen,
   .tz-wkt,
   .tz-wind {
-    font-size: 11px;
+    font-size: 12px;
     white-space: nowrap;
     color: var(--text-2);
   }
   .tz-wkt.hoch {
     color: var(--blau);
     font-weight: 600;
-  }
-  .tz-art {
-    min-height: 1.2em;
   }
   .tz-wind {
     display: flex;
@@ -334,6 +267,46 @@
   .tz-wind.windig {
     color: var(--text);
     font-weight: 600;
+  }
+  /* je Tageszeit eine Zeile */
+  .v-zeilen {
+    display: grid;
+    margin-top: 6px;
+  }
+  .v-zeile {
+    display: grid;
+    grid-template-columns: 92px 34px 64px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 4px;
+    border: 0;
+    border-bottom: 1px solid var(--rand);
+    background: none;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .v-zeile.nacht {
+    background: color-mix(in srgb, var(--flaeche-2) 80%, transparent);
+  }
+  .v-zeile.auf {
+    box-shadow: inset 3px 0 0 var(--akzent);
+  }
+  .v-zeile .tz-name {
+    display: grid;
+    line-height: 1.15;
+  }
+  .v-zeile .tz-name small {
+    font-size: 10px;
+    color: var(--text-3);
+  }
+  .v-regen {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 8px;
+    font-size: 12px;
+    align-items: baseline;
   }
   caption {
     text-align: left;
@@ -412,25 +385,15 @@
       padding: 2px 2px;
       font-size: 12px;
     }
-    .tz {
-      gap: 2px;
+    .v-zeile {
+      grid-template-columns: 94px 30px 56px minmax(0, 1fr) auto;
+      gap: 4px;
     }
-    .tz-name {
-      font-size: 11px;
+    .v-zeile .tz-name b {
+      font-size: 13px;
     }
     .tz-sym {
       font-size: 24px;
-    }
-    .tz-temp {
-      font-size: 12px;
-    }
-    .tz-regen,
-    .tz-wkt,
-    .tz-wind {
-      font-size: 10px;
-    }
-    .tz-spalte small {
-      font-size: 9px;
     }
   }
 </style>

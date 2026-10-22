@@ -20,6 +20,7 @@
   import { letzterStandort, meinStandort, naechsteStation } from "./lib/standort.js";
   import { meldungenErlauben, nativ, widgetJetzt, widgetSetzen, widgetStatus } from "./lib/nativ.js";
   import { MODELLE } from "./lokal/vorhersage.js";
+  import { MITTEL, mittel } from "./lib/mittel.js";
   import { AUFRUF, AUSWERTUNGEN, DATEN_OPTIONEN, DEUTSCHLAND, HANDY_NAV, HAUPT, IST_AUSWERTUNG, OPTIONEN, TITEL } from "./lib/ansichten.js";
   import Uebersicht from "./lib/Uebersicht.svelte";
   import Vorhersage from "./lib/Vorhersage.svelte";
@@ -62,7 +63,20 @@
   let widget = $state({ ort: "station", modell: "icon_d2", unwetter: true, rekorde: true, gps: null });
   let widgetInfo = $state({ erlaubt: true, fehler: "" });
   let geschichteKurz = $state(null); // für die Übersicht
-  let vmodell = $state("icon_d2");
+  // Standard-Vorhersage: "mittel" (aller Modelle) oder ein Modell - gilt für
+  // Wetter, Startseite, Widget und Meldungen
+  let standard = $state(MITTEL);
+  // Vorhersage mit dem Mittel aller Modelle vorne
+  const vorhersageMit = $derived.by(() => {
+    if (!vorhersage?.modelle) return vorhersage;
+    const m = mittel(vorhersage.modelle);
+    return m ? { ...vorhersage, modelle: [m, ...vorhersage.modelle] } : vorhersage;
+  });
+  function standardSetzen(id) {
+    standard = id;
+    rufe("einstellung", "standardmodell", id);
+    widgetAbgleichen();
+  }
   let thema = $state("system"); // system, hell, dunkel
   const THEMEN = [
     ["system", "Wie das System"],
@@ -283,11 +297,12 @@
       const n = naechsteStation(stationen, widget.gps.lat, widget.gps.lon);
       ziel = { ...widget.gps, name: n ? `Mein Standort · bei ${n[0][1]}` : "Mein Standort" };
     }
-    const m = MODELLE.find((x) => x[0] === widget.modell) ?? MODELLE[0];
+    const m = MODELLE.find((x) => x[0] === standard);
     await widgetSetzen({
       ...ziel,
-      modell: m[3] === "met-norway" ? "metno" : m[4],
-      modellName: m[1],
+      // "mittel" rechnet Vorhersage.java selbst aus allen Modellen
+      modell: !m ? MITTEL : m[3] === "met-norway" ? "metno" : m[4],
+      modellName: m?.[1] ?? "Mittel",
       favoriten: JSON.stringify(favoriten),
       unwetter: widget.unwetter,
       rekorde: widget.rekorde,
@@ -358,7 +373,7 @@
     favoriten = Array.isArray(r.einstellungen.favoriten) ? r.einstellungen.favoriten : [];
     ansicht = ALLE.some(([k]) => k === r.einstellungen.ansicht) ? r.einstellungen.ansicht : "band";
     if (r.einstellungen.wellen) optionen.wellen = { ...optionen.wellen, ...r.einstellungen.wellen };
-    if (r.einstellungen.vmodell) vmodell = r.einstellungen.vmodell;
+    if (r.einstellungen.standardmodell) standard = r.einstellungen.standardmodell;
     if (r.einstellungen.thema) thema = r.einstellungen.thema;
     if (NORMALE.includes(r.einstellungen.normal)) vergleich.von = r.einstellungen.normal;
     if (r.einstellungen.ort === "gps") ort = "gps";
@@ -525,7 +540,7 @@
     </div>
   {/if}
   {#if ansicht === "uebersicht" && station}
-    <Uebersicht name={vorhersage?.station?.ort ? vorhersage.station.name : station.station.name} {band} {monat} geschichte={geschichteKurz} {vorhersage} rekorde={rekordeDe} gehe={(a) => setze("ansicht", a)} />
+    <Uebersicht name={vorhersage?.station?.ort ? vorhersage.station.name : station.station.name} {band} {monat} geschichte={geschichteKurz} vorhersage={vorhersageMit} {standard} rekorde={rekordeDe} gehe={(a) => setze("ansicht", a)} />
   {:else if ansicht === "top50"}
     <DeutschlandTop daten={deutschlandDaten} oeffnen={(id) => stationLaden(id).then((ok) => ok && setze("ansicht", "monat"))} neu={async () => { const r = await rufe("deutschland", true); if (!r.fehler) deutschlandDaten = r; }} />
   {:else if ansicht === "rekorde_de"}
@@ -533,7 +548,7 @@
   {:else if ansicht === "radar" && station}
     <Radar station={station.station} {stationen} {meinStandort} einstellungen={radarEinst} merken={(e) => ((radarEinst = e), rufe("einstellung", "radar", e))} />
   {:else if ansicht === "vorhersage" && vorhersage}
-    <Vorhersage v={vorhersage} modell={vmodell} waehle={(m) => ((vmodell = m), rufe("einstellung", "vmodell", m))} />
+    <Vorhersage v={vorhersageMit} {standard} {standardSetzen} />
   {:else if ansicht === "band" && band && !band.leer}
     <Jahresband {band} name={station.station.name} />
   {:else if ansicht === "monat" && monat && !monat.leer}
@@ -622,9 +637,7 @@
               <button class="chip" class:an={widget.ort === "station"} onclick={() => widgetSetze("ort", "station")}>{station?.station.name ?? "Station"}</button>
               <button class="chip" class:an={widget.ort === "gps"} onclick={() => widgetSetze("ort", "gps")}><Symbol name="standort" /> Mein Standort</button>
             </div>
-            <select class="chip" value={widget.modell} onchange={(e) => widgetSetze("modell", e.currentTarget.value)} title="Modell im Widget">
-              {#each MODELLE as [k, t]}<option value={k}>{t}</option>{/each}
-            </select>
+            <span class="leise">Modell: {MODELLE.find((x) => x[0] === standard)?.[1] ?? "Mittel aller Modelle"} – wie unter Wetter als Standard gesetzt</span>
             <label class="haken"><input type="checkbox" checked={widget.unwetter} onchange={(e) => widgetSetze("unwetter", e.currentTarget.checked)} /> Unwetter melden (Böen ab 75 km/h, Starkregen ab 15 mm/h, Gewitter – nächste 24 h)</label>
             <label class="haken"><input type="checkbox" checked={widget.rekorde} onchange={(e) => widgetSetze("rekorde", e.currentTarget.checked)} /> Rekorde der Favoriten melden (Rekord, Top 3, Kalendertag – einmal am Tag mittags)</label>
             {#if !widgetInfo.erlaubt && (widget.unwetter || widget.rekorde)}

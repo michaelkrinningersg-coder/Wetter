@@ -7,7 +7,12 @@
   import { ortsTag } from "./kurzfrist.js";
   import { tageswerte } from "./tageswerte.js";
 
-  let { v, modell, waehle } = $props();
+  // standard: Modell-Schlüssel oder "mittel"; standardSetzen(id) merkt ihn sich
+  let { v, standard, standardSetzen } = $props();
+  // angezeigt wird zuerst der Standard, umschalten nur für diesen Besuch
+  let auswahl = $state(null);
+  const modell = $derived(auswahl ?? standard);
+  const waehle = (id) => (auswahl = id);
 
   const ZONE = "Europe/Berlin";
   const STUNDE = new Intl.DateTimeFormat("de-DE", { hour: "numeric", hourCycle: "h23", timeZone: ZONE });
@@ -65,12 +70,17 @@
     <div class="wahl">
       {#each v.modelle as m}
         <button class="chip" class:an={gewaehlt?.id === m.id} disabled={!m.stunden} onclick={() => waehle(m.id)} title={m.fehler ?? m.text}>
-          {m.name}
+          {#if m.id === standard}<span class="stern" title="Standard">★</span>{/if}{m.name}
         </button>
       {/each}
     </div>
     {#if gewaehlt}
       <div class="leise">{gewaehlt.text} · Stand {uhr(new Date(v.abgerufen * 1000).toISOString())} Uhr</div>
+      {#if gewaehlt.id === standard}
+        <div class="leise">★ Standard – gilt auch für Startseite, Widget und Meldungen</div>
+      {:else}
+        <button class="chip standard" onclick={() => standardSetzen(gewaehlt.id)}>★ {gewaehlt.name} als Standard</button>
+      {/if}
     {/if}
     {#each v.modelle.filter((m) => m.fehler) as m}
       <div class="leise">{m.name}: {m.fehler}</div>
@@ -109,14 +119,14 @@
                 {/if}
               </td>
             </tr>
-            {#each t.zeilen as [zeit, temp, wolken, regen, wind, boe, symbol, tag]}
+            {#each t.zeilen as [zeit, temp, wolken, regen, wind, boe, symbol, tag, , sp]}
               {@const h = stunde(zeit)}
               <tr class:nacht={!istTag(tag, zeit, v.station)}>
                 <td class="l num">{String(h).padStart(2, "0")}</td>
                 <td class="symbol"><Symbol wetter={symbol} tag={istTag(tag, zeit, v.station)} titel={SYMBOL_TEXT[symbol]} /></td>
-                <td class="num temp" style:color={temp >= 25 ? "var(--rot)" : temp < 0 ? "var(--blau)" : null}>{de(temp)}</td>
+                <td class="num temp" style:color={temp >= 25 ? "var(--rot)" : temp < 0 ? "var(--blau)" : null}>{de(temp)}{#if sp?.n > 1}<small class="spanne">{de(sp.tmin, 0)}…{de(sp.tmax, 0)}</small>{/if}</td>
                 <td class="l"><span class="wolken" style:background={wolkenBalken(wolken)}>{de(wolken, 0)}</span></td>
-                <td class="num" class:nass={regen >= 0.1}>{regen ? de(regen) : "–"}</td>
+                <td class="num" class:nass={regen >= 0.1}>{regen ? de(regen) : "–"}{#if sp?.n > 1 && sp.rmax >= 0.1}<small class="spanne">{de(sp.rmin)}…{de(sp.rmax)}</small>{/if}</td>
                 <td class="num">{de(wind, 0)}</td>
                 <td class="num" class:sturm={boe >= 75}>{boe == null ? "–" : de(boe, 0)}</td>
               </tr>
@@ -257,6 +267,20 @@
   }
   .temp {
     font-weight: 600;
+  }
+  .spanne {
+    display: block;
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--text-3);
+    line-height: 1.1;
+  }
+  .stern {
+    color: var(--akzent);
+    margin-right: 3px;
+  }
+  .chip.standard {
+    justify-self: start;
   }
   .wolken {
     display: inline-block;
