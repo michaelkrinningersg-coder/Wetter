@@ -1,5 +1,5 @@
-// Heute und morgen Stunde für Stunde mit dem feinsten Kurzfristmodell, das
-// für den Ort Werte liefert. Stunden jenseits seiner Reichweite kommen aus
+// Heute, morgen und übermorgen Stunde für Stunde mit dem Standardmodell
+// bzw. dem feinsten Kurzfristmodell, das für den Ort Werte liefert. Stunden jenseits seiner Reichweite kommen aus
 // dem nächsten Modell der Liste und tragen dessen Namen (`ersatz`).
 // Ohne Svelte, damit die Tests es direkt prüfen können.
 
@@ -19,14 +19,14 @@ const ortsStunde = (ms) => Number(STUNDE.formatToParts(new Date(ms)).find((t) =>
  * modelle: Liste aus der Vorhersage ({id, name, stunden}), jetzt: ms,
  * erstes: das Standardmodell (auch "mittel") - es geht vor, Lücken füllt
  * die Kurzfrist-Reihenfolge. Liefert {modell, tage: [{titel, tag, min, max,
- * regen, stunden}]} oder null.
+ * regen, stunden}]} oder null; `anzahl` Tage ab heute.
  */
-export function heuteMorgen(modelle, jetzt = Date.now(), erstes = null) {
+export function heuteMorgen(modelle, jetzt = Date.now(), erstes = null, anzahl = 3) {
   const reihe = erstes ? [erstes, ...KURZFRIST.filter((id) => id !== erstes)] : KURZFRIST;
   const mit = reihe.map((id) => modelle?.find((m) => m.id === id && m.stunden?.length)).filter(Boolean);
   if (!mit.length) return null;
   const heute = ortsTag(jetzt);
-  const morgen = ortsTag(Date.parse(`${heute}T12:00:00Z`) + 86400000);
+  const tageListe = Array.from({ length: anzahl }, (_, i) => ortsTag(Date.parse(`${heute}T12:00:00Z`) + i * 86400000));
   const ab = jetzt - 3600 * 1000; // die laufende Stunde gehört dazu
 
   // je Stunde das erste Modell der Liste, das einen Wert hat
@@ -36,17 +36,18 @@ export function heuteMorgen(modelle, jetzt = Date.now(), erstes = null) {
       const ms = Date.parse(s[0]);
       if (ms < ab || stunden.has(ms)) continue;
       const tag = ortsTag(ms);
-      if (tag !== heute && tag !== morgen) continue;
+      if (!tageListe.includes(tag)) continue;
       if (s[1] == null) continue;
       stunden.set(ms, { zeit: s[0], tag, h: ortsStunde(ms), temp: s[1], wolken: s[2], regen: s[3], wind: s[4], boe: s[5], symbol: s[6], tagLicht: s[7], wkt: s[8] ?? null, ersatz: m === mit[0] ? null : m.name });
     }
   }
-  const tage = [heute, morgen].map((t) => {
+  const TITEL = ["Heute", "Morgen", "Übermorgen"];
+  const tage = tageListe.map((t, i) => {
     const z = [...stunden.entries()].filter(([, s]) => s.tag === t).sort((a, b) => a[0] - b[0]).map(([, s]) => s);
     const temps = z.map((s) => s.temp);
     return {
       tag: t,
-      titel: t === heute ? "Heute" : "Morgen",
+      titel: TITEL[i] ?? KOPF.format(new Date(`${t}T12:00:00Z`)),
       datum: z.length ? KOPF.format(new Date(z[0].zeit)) : "",
       min: temps.length ? Math.min(...temps) : null,
       max: temps.length ? Math.max(...temps) : null,

@@ -57,3 +57,11 @@ test("Standardmodell geht vor, auch das Mittel", () => {
   assert.equal(heuteMorgen(modelle, jetzt, "gfs").modell, "GFS");
   assert.equal(heuteMorgen(modelle, jetzt).modell, "ICON-D2");
 });
+
+test("Drei Tage: heute, morgen, übermorgen", () => {
+  const jetzt = Date.parse("2026-10-20T08:00:00Z");
+  const r = heuteMorgen([{ id: "icon_eu", name: "ICON-EU", stunden: reihe("2026-10-20T00:00:00Z", 96, 5) }], jetzt);
+  assert.deepEqual(r.tage.map((t) => [t.titel, t.tag]), [["Heute", "2026-10-20"], ["Morgen", "2026-10-21"], ["Übermorgen", "2026-10-22"]]);
+  assert.equal(r.tage[2].stunden.length, 24);
+  assert.equal(heuteMorgen([{ id: "icon_eu", name: "ICON-EU", stunden: reihe("2026-10-20T00:00:00Z", 96, 5) }], jetzt, null, 2).tage.length, 2);
+});

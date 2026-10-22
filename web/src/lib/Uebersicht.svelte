@@ -26,6 +26,19 @@
   // je Tag eine aufgeklappte Tageszeit: {"2026-10-22": "mittag"}
   let offen = $state({});
   const umschalten = (tag, k) => (offen = { ...offen, [tag]: offen[tag] === k ? null : k });
+
+  // Handy: nur ein Tag, Wischen nach links/rechts oder Tippen oben wechselt
+  let tagNr = $state(0);
+  let wisch = null;
+  const wischStart = (e) => (wisch = [e.touches[0].clientX, e.touches[0].clientY]);
+  function wischEnde(e) {
+    if (!wisch || !hm) return;
+    const dx = e.changedTouches[0].clientX - wisch[0];
+    const dy = e.changedTouches[0].clientY - wisch[1];
+    wisch = null;
+    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    tagNr = Math.min(hm.tage.length - 1, Math.max(0, tagNr + (dx < 0 ? 1 : -1)));
+  }
   const hh = (h) => String(h).padStart(2, "0");
   const REGEN_TEXT = { trocken: "trocken", "möglich": "Regen möglich", zeitweise: "zeitweise", anhaltend: "" };
   const temps = (t) => (t.min == null ? "–" : Math.round(t.min) === Math.round(t.max) ? `${de(t.max, 0)}°` : `${de(t.min, 0)}–${de(t.max, 0)}°`);
@@ -93,15 +106,18 @@
 
   <div class="karte hm">
     <div class="hm-kopf">
-      <span class="lbl">Heute und morgen{hm ? ` · ${hm.modell === "Mittel" ? "Mittel aller Modelle" : hm.modell}` : ""}</span>
+      <span class="lbl">Die nächsten Tage{hm ? ` · ${hm.modell === "Mittel" ? "Mittel aller Modelle" : hm.modell}` : ""}</span>
       <button class="chip" onclick={() => gehe("vorhersage")}>alle Modelle ›</button>
     </div>
     {#if hm}
-      <div class="hm-tage">
-        {#each hm.tage as t}
+      <div class="tag-wahl">
+        {#each hm.tage as t, i}<button class="chip" class:an={tagNr === i} onclick={() => (tagNr = i)}>{t.titel}</button>{/each}
+      </div>
+      <div class="hm-tage" ontouchstart={wischStart} ontouchend={wischEnde}>
+        {#each hm.tage as t, i}
           {@const zeiten = tageszeiten(t.stunden)}
           {@const auf = zeiten.find((z) => z.k === offen[t.tag] && !z.leer)}
-          <div class="hm-tag">
+          <div class="hm-tag" class:weg={i !== tagNr}>
             <div class="hm-titel">
               <b>{t.titel}</b> <span class="leise">{t.datum}</span>
               <div class="text-2">
@@ -148,7 +164,7 @@
       {#if hm.tage.some((t) => t.stunden.some((s) => s.ersatz))}
         <div class="leise">Blasser: jenseits der Reichweite von {hm.modell}, Werte aus {hm.tage.flatMap((t) => t.stunden).find((s) => s.ersatz)?.ersatz}.</div>
       {/if}
-      <div class="leise">Tippen auf eine Tageszeit zeigt ihre Stunden · Regen in mm und höchste Regenwahrscheinlichkeit · Wind km/h, ab 40 km/h Böen mit Windsack (Wind/Böe)</div>
+      <div class="leise">Tippen auf eine Tageszeit zeigt ihre Stunden · am Handy wischen wechselt den Tag · Regen in mm und höchste Regenwahrscheinlichkeit · Wind km/h, ab 40 km/h Böen mit Windsack (Wind/Böe)</div>
     {:else}
       <div class="leise">{vorhersage ? "kein Kurzfristmodell liefert Werte für diesen Ort" : "lädt …"}</div>
     {/if}
@@ -221,9 +237,12 @@
     justify-content: space-between;
     gap: 8px;
   }
+  .tag-wahl {
+    display: none;
+  }
   .hm-tage {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 18px;
     overflow: auto;
     min-height: 0;
@@ -377,6 +396,17 @@
       grid-template-columns: minmax(0, 1fr);
       gap: 14px;
       overflow: visible;
+      touch-action: pan-y;
+    }
+    .hm-tag.weg {
+      display: none;
+    }
+    .tag-wahl {
+      display: flex;
+      gap: 6px;
+    }
+    .tag-wahl .chip {
+      flex: 1;
     }
     .hm-titel {
       position: static;
