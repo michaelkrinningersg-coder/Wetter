@@ -65,7 +65,7 @@
 <div class="raster">
   <div class="karte grafik">
     <div class="kopf">
-      <b>{name} {band.jahr}, Tag für Tag</b>
+      <b><span class="name">{name} </span>{band.jahr}, Tag für Tag</b>
       <span class="leise">
         Balken: Tiefst- bis Höchstwert, Farbe: Mittel gegen normal ·
         {#if band.normal_jahre}
@@ -144,8 +144,7 @@
         <div class="text-2 num">Band {de(p.tief, 2)} – {de(p.hoch, 2)} °C</div>
         <div class="text-2">Platz <b>{p.platz}</b> ({p.platz_hoch}–{p.platz_tief}) von {p.von} Jahren</div>
         <div class="leise">
-          Bisher gemessen plus der Rest des Jahres ({p.rest_tage} Tage), wie er in {p.vergleichsjahre} der Jahre
-          {p.jahre[0]}–{p.jahre[1]} war: 10 % · Median · 90 %
+          Rest ({p.rest_tage} Tage) wie in {p.jahre[0]}–{p.jahre[1]}: 10 % · Median · 90 %
         </div>
       </div>
     {/if}
@@ -284,6 +283,9 @@
 
   /* Handy: untereinander, das Band in fester Höhe */
   @media (max-width: 700px) {
+    .name {
+      display: none;
+    }
     .raster {
       grid-template-columns: minmax(0, 1fr);
       height: auto;

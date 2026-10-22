@@ -426,9 +426,9 @@
   {#if (ansicht === "uebersicht" || ansicht === "vorhersage") && station}
     <div class="gruppe ort-gruppe" title="Vorhersage und aktuelles Wetter für">
       <button class="chip" class:an={ort === "station"} onclick={() => ortSetzen("station")}>{station.station.name}</button>
-      <button class="chip ort" class:an={ort === "gps"} onclick={() => ortSetzen("gps")}><Symbol name="standort" /> Mein Standort</button>
+      <button class="chip ort" class:an={ort === "gps"} onclick={() => ortSetzen("gps")} title="Standort dieses Geräts"><Symbol name="standort" /><span class="wort"> Standort</span></button>
       {#if istPunkt}<button class="chip an ort" onclick={() => (ortWahlOffen = true)} title="Anderen Punkt wählen">◉ {ort.name}</button>{/if}
-      <button class="chip ort" onclick={() => (ortWahlOffen = true)} title="Ort auf der Karte oder per Name wählen"><Symbol name="radar" /> Karte …</button>
+      <button class="chip ort" onclick={() => (ortWahlOffen = true)} title="Ort auf der Karte oder per Name wählen"><Symbol name="radar" /><span class="wort"> Karte</span></button>
     </div>
   {/if}
   {#if ansicht === "band" && band && !band.leer}
@@ -498,7 +498,7 @@
     {@const w = optionen.wellen}
     <div class="gruppe">
       <button class="chip" class:an={w.art === "normal"} onclick={() => setzeOption("art", "normal")}>gegen Normal</button>
-      <button class="chip" class:an={w.art === "fest"} onclick={() => setzeOption("art", "fest")}>≥ 30 / &lt; 0 °C, 3 Tage</button>
+      <button class="chip" class:an={w.art === "fest"} onclick={() => setzeOption("art", "fest")} title="Höchstwert ≥ 30 °C bzw. &lt; 0 °C, mind. 3 Tage">30/0 °C</button>
       <button class="chip" class:an={w.art === "eigen"} onclick={() => setzeOption("art", "eigen")}>eigene</button>
     </div>
     {#if w.art === "eigen"}
@@ -560,7 +560,7 @@
 
 {#snippet inhalt()}
   {#if ortInfo && (ansicht === "uebersicht" || ansicht === "vorhersage")}
-    <div class="ort-info">Vorhersage: <b>{ortInfo.ort}</b> · Daten: Station <b>{ortInfo.station}</b>{ortInfo.abstand ? ` (${ortInfo.abstand})` : ""}</div>
+    <div class="ort-info"><span>Vorhersage <b>{ortInfo.ort}</b> ·</span> <span>Daten <b>{ortInfo.station}</b>{ortInfo.abstand ? ` (${ortInfo.abstand})` : ""}</span></div>
   {/if}
   {#if ortHinweis && (ansicht === "uebersicht" || ansicht === "vorhersage")}
     <div class="meldung">{ortHinweis}</div>
@@ -642,20 +642,20 @@
       <div class="h-blatt">
         <div class="lbl">Ansichten</div>
         <div class="h-raster">
-          {#each HAUPT.filter(([k]) => !HANDY_NAV.includes(k)) as [k, t, , s]}
-            <button class:an={ansicht === k} onclick={() => setze("ansicht", k)}><span><Symbol name={s} /></span>{t}</button>
+          {#each HAUPT.filter(([k]) => !HANDY_NAV.includes(k)) as [k, t, kurz, s]}
+            <button class:an={ansicht === k} onclick={() => setze("ansicht", k)} title={t}><span><Symbol name={s} /></span>{kurz}</button>
           {/each}
         </div>
         <div class="lbl">Auswertungen</div>
         <div class="h-raster">
-          {#each AUSWERTUNGEN as [k, t, , s]}
-            <button class:an={ansicht === k} onclick={() => setze("ansicht", k)}><span><Symbol name={s} /></span>{t}</button>
+          {#each AUSWERTUNGEN as [k, t, , s, kurz]}
+            <button class:an={ansicht === k} onclick={() => setze("ansicht", k)} title={t}><span><Symbol name={s} /></span>{kurz}</button>
           {/each}
         </div>
         <div class="lbl">Deutschland</div>
         <div class="h-raster">
-          {#each DEUTSCHLAND as [k, t, , s]}
-            <button class:an={ansicht === k} onclick={() => setze("ansicht", k)}><span><Symbol name={s} /></span>{t}</button>
+          {#each DEUTSCHLAND as [k, t, , s, kurz]}
+            <button class:an={ansicht === k} onclick={() => setze("ansicht", k)} title={t}><span><Symbol name={s} /></span>{kurz}</button>
           {/each}
         </div>
         <div class="lbl">Qualitätsniveau (QN)</div>
@@ -669,15 +669,15 @@
               <button class="chip" class:an={widget.ort === "station"} onclick={() => widgetSetze("ort", "station")}>{station?.station.name ?? "Station"}</button>
               <button class="chip" class:an={widget.ort === "gps"} onclick={() => widgetSetze("ort", "gps")}><Symbol name="standort" /> Mein Standort</button>
             </div>
-            <span class="leise">Modell: {MODELLE.find((x) => x[0] === standard)?.[1] ?? "Mittel aller Modelle"} – wie unter Wetter als Standard gesetzt</span>
-            <label class="haken"><input type="checkbox" checked={widget.unwetter} onchange={(e) => widgetSetze("unwetter", e.currentTarget.checked)} /> Unwetter melden (Böen ab 75 km/h, Starkregen ab 15 mm/h, Gewitter – nächste 24 h)</label>
-            <label class="haken"><input type="checkbox" checked={widget.rekorde} onchange={(e) => widgetSetze("rekorde", e.currentTarget.checked)} /> Rekorde der Favoriten melden (Rekord, Top 3, Kalendertag – einmal am Tag mittags)</label>
+            <span class="leise">Modell: {MODELLE.find((x) => x[0] === standard)?.[1] ?? "Mittel"} (★ Standard unter Wetter)</span>
+            <label class="haken"><input type="checkbox" checked={widget.unwetter} onchange={(e) => widgetSetze("unwetter", e.currentTarget.checked)} /> Unwetter melden <small class="leise">Böen ≥ 75 km/h, Starkregen ≥ 15 mm/h, Gewitter</small></label>
+            <label class="haken"><input type="checkbox" checked={widget.rekorde} onchange={(e) => widgetSetze("rekorde", e.currentTarget.checked)} /> Rekorde der Favoriten <small class="leise">täglich mittags</small></label>
             {#if !widgetInfo.erlaubt && (widget.unwetter || widget.rekorde)}
               <button class="knopf" onclick={async () => (widgetInfo = { ...widgetInfo, ...(await meldungenErlauben()) })}>Meldungen erlauben</button>
             {/if}
             <button class="knopf" onclick={() => (widgetAbgleichen(), widgetJetzt())}>Widget jetzt aktualisieren</button>
             {#if widgetInfo.fehler}<div class="leise">Letzter Fehler: {widgetInfo.fehler}</div>{/if}
-            <div class="leise">Widget hinzufügen: lange auf den Startbildschirm drücken → Widgets → Wetter. {widget.ort === "gps" ? (widget.gps ? "Ort: zuletzt bestimmter Standort der App." : "Noch kein Standort bestimmt – einmal „Mein Standort“ antippen.") : ""}</div>
+            <div class="leise">Hinzufügen: Startbildschirm lange drücken → Widgets → Wetter{widget.ort === "gps" && !widget.gps ? " · noch kein Standort bestimmt" : ""}</div>
           </div>
         {/if}
         <div class="lbl">Farben</div>
@@ -1202,13 +1202,18 @@
   }
   .h-steuer {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     padding: 8px 10px;
     overflow-x: auto;
     background: var(--graphit-2);
     white-space: nowrap;
   }
-  .h-steuer:empty {
+  .h-steuer :global(label) {
+    color: var(--graphit-text);
+  }
+  .h-steuer:empty,
+  .h-steuer:not(:has(*)) {
     display: none;
   }
   .h-steuer :global(.gruppe) {
@@ -1217,6 +1222,15 @@
     flex: none;
   }
   /* Vorhersage für: darf am Handy umbrechen, damit "Karte …" sichtbar bleibt */
+  /* am Handy nur Symbole für Standort und Karte */
+  .h-steuer :global(.ort-gruppe .wort) {
+    display: none;
+  }
+  .h-steuer :global(.ort-gruppe .chip) {
+    max-width: 11em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .h-steuer :global(.ort-gruppe) {
     flex: 1 1 auto;
     flex-wrap: wrap;
@@ -1292,7 +1306,7 @@
   }
   .h-raster {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 6px;
     width: 100%;
   }
@@ -1304,8 +1318,11 @@
     border: 1px solid var(--rand);
     border-radius: 10px;
     background: var(--flaeche-2);
-    font-size: 11px;
+    font-size: 11.5px;
     text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .h-raster button span {
     display: flex;
@@ -1367,6 +1384,9 @@
     font-size: 13px;
     color: var(--text-2);
     margin: -4px 0 10px;
+  }
+  .ort-info span {
+    white-space: nowrap;
   }
   .meldung {
     display: flex;

@@ -34,7 +34,7 @@
       <tr>
         {#each spalten as sp}
           <th class:l={sp.links} class:an={nach === sp.key} onclick={() => klick(sp.key)}>
-            {sp.titel}{#if nach === sp.key}{ab ? " ▾" : " ▴"}{/if}
+            {sp.titel}{#if nach === sp.key}{ab ? "\u00a0▾" : "\u00a0▴"}{/if}
             {#if sp.einheit}<small>{sp.einheit}</small>{/if}
           </th>
         {/each}
@@ -102,5 +102,32 @@
   }
   tr.blass td {
     color: var(--text-3);
+  }
+  /* Handy: enger, Köpfe dürfen umbrechen, erste Spalte bleibt beim seitlichen Rollen stehen */
+  @media (max-width: 700px) {
+    table {
+      font-size: 12.5px;
+    }
+    th {
+      white-space: normal;
+      padding: 4px 5px;
+      vertical-align: bottom;
+    }
+    td {
+      padding: 4px 5px;
+    }
+    th:first-child,
+    td:first-child {
+      position: sticky;
+      left: 0;
+      background: var(--flaeche);
+      z-index: 1;
+    }
+    th:first-child {
+      z-index: 2;
+    }
+    tr.markiert td:first-child {
+      background: var(--akzent-hell);
+    }
   }
 </style>

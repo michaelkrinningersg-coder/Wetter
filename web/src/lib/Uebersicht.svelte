@@ -41,6 +41,8 @@
   }
   const hh = (h) => String(h).padStart(2, "0");
   const REGEN_TEXT = { trocken: "trocken", "möglich": "Regen möglich", zeitweise: "zeitweise", anhaltend: "" };
+  // "trocken" nur, wenn keine Wahrscheinlichkeit dasteht - sonst sagt die Zahl es schon
+  const regenText = (z) => (z.art === "trocken" && z.wkt != null ? "" : REGEN_TEXT[z.art]);
   const temps = (t) => (t.min == null ? "–" : Math.round(t.min) === Math.round(t.max) ? `${de(t.max, 0)}°` : `${de(t.min, 0)}–${de(t.max, 0)}°`);
 </script>
 
@@ -106,7 +108,7 @@
 
   <div class="karte hm">
     <div class="hm-kopf">
-      <span class="lbl">Die nächsten Tage{hm ? ` · ${hm.modell === "Mittel" ? "Mittel aller Modelle" : hm.modell}` : ""}</span>
+      <span class="lbl">Vorhersage{hm ? ` · ${hm.modell}` : ""}</span>
       <button class="chip" onclick={() => gehe("vorhersage")}>alle Modelle ›</button>
     </div>
     {#if hm}
@@ -135,7 +137,7 @@
                     <span class="v-regen">
                       {#if z.regen >= 0.05}<b class="nass num">{de(z.regen)} mm</b>{/if}
                       {#if z.wkt != null}<span class="tz-wkt num" class:hoch={z.wkt >= 50}>{de(z.wkt, 0)} %</span>{/if}
-                      {#if REGEN_TEXT[z.art]}<span class="leise">{REGEN_TEXT[z.art]}</span>{/if}
+                      {#if regenText(z)}<span class="leise">{regenText(z)}</span>{/if}
                     </span>
                     <span class="tz-wind num" class:windig={z.boe >= WINDIG_AB}>{#if z.boe >= WINDIG_AB}<Symbol name="windsack" />{de(z.wind, 0)}/{de(z.boe, 0)}{:else}{de(z.wind, 0)}{/if}</span>
                   </button>
@@ -164,13 +166,13 @@
       {#if hm.tage.some((t) => t.stunden.some((s) => s.ersatz))}
         <div class="leise">Blasser: jenseits der Reichweite von {hm.modell}, Werte aus {hm.tage.flatMap((t) => t.stunden).find((s) => s.ersatz)?.ersatz}.</div>
       {/if}
-      <div class="leise">Tippen auf eine Tageszeit zeigt ihre Stunden · am Handy wischen wechselt den Tag · Regen in mm und höchste Regenwahrscheinlichkeit · Wind km/h, ab 40 km/h Böen mit Windsack (Wind/Böe)</div>
+      <div class="leise">Tippen zeigt die Stunden · Wind/Böe in km/h</div>
     {:else}
       <div class="leise">{vorhersage ? "kein Kurzfristmodell liefert Werte für diesen Ort" : "lädt …"}</div>
     {/if}
   </div>
 
-  <div class="leise fuss">Tippen bzw. klicken führt in die Ansicht · Stand der Messwerte {datum(band?.letzter)}</div>
+  <div class="leise fuss">Messwerte bis {datum(band?.letzter)}</div>
 </div>
 
 <style>

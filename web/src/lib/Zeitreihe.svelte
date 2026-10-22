@@ -32,7 +32,7 @@
 
   const titel = $derived(
     reihe.t.length
-      ? `${name}: ${GROESSE[groesse]}, ${AUFLOESUNG[aufloesung]} ${jahrVon(reihe.t[0])}–${jahrVon(reihe.t.at(-1))}`
+      ? `${GROESSE[groesse]}, ${AUFLOESUNG[aufloesung]} ${jahrVon(reihe.t[0])}–${jahrVon(reihe.t.at(-1))}`
       : `${name}: keine Werte`,
   );
 
@@ -226,7 +226,7 @@
 <div class="stapel">
   <div class="karte grafik">
     <div class="kopf">
-      <b>{titel}</b>
+      <b><span class="name">{name}: </span>{titel}</b>
       {#if handy}
         <span class="zoom">
           <button class="chip" onclick={() => zoomen(0.5)}>＋</button>
@@ -242,8 +242,7 @@
     <div class="plot" bind:this={behaelter}></div>
     <div class="leise fuss">
       {#if aufloesung === "jahr"}
-        Punkte: einzelne Jahre (nur Jahre mit mindestens 330 gemessenen Tagen) · Linie: Mittel über 31 Jahre (am Rand
-        der Reihe über die vorhandenen)
+        Punkte: Jahre mit mind. 330 Tagen · Linie: Mittel über 31 Jahre
       {:else if aufloesung === "monat"}
         Nur Monate mit mindestens 90 % gemessener Tage
       {:else}
@@ -277,7 +276,7 @@
         {/if}
       </svg>
     </div>
-    <div class="leise">Übersicht · der Rahmen ist der sichtbare Ausschnitt - tippen oder ziehen verschiebt ihn</div>
+    <div class="leise">Übersicht: Rahmen = Ausschnitt, tippen oder ziehen</div>
   </div>
 </div>
 
@@ -323,9 +322,12 @@
   .unten {
     padding: 10px 14px 8px;
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 4px;
   }
   .uebersicht {
+    min-width: 0;
+    overflow: hidden;
     cursor: pointer;
     user-select: none;
     touch-action: none;
@@ -351,6 +353,9 @@
     }
     .kopf b {
       white-space: normal;
+    }
+    .name {
+      display: none;
     }
     .grafik,
     .unten {

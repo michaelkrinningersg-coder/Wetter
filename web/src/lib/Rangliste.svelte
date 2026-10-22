@@ -54,10 +54,10 @@
 <div class="karte rahmen">
   <div class="kopf">
     <b>
-      {name}: Rangliste der Jahresmittel
-      {liste.modus === "heute" ? `– 1. Januar bis ${datum(liste.letzter).slice(0, 6)}` : "– ganze Jahre"}
+      <span class="name">{name}: </span>Rangliste
+      {liste.modus === "heute" ? `1.1.–${datum(liste.letzter).slice(0, 6)}` : "ganze Jahre"}
     </b>
-    <span class="leise">{liste.zeilen.length} Jahre · Spaltenkopf klicken = sortieren</span>
+    <span class="leise">{liste.zeilen.length} Jahre<span class="breit"> · Spaltenkopf klicken = sortieren</span></span>
   </div>
 
   {#if liste.prognose}
@@ -68,7 +68,7 @@
       <span class="leise-t">Band {de(p.tief, 2)} – {de(p.hoch, 2)} °C</span>
       <span>→ Platz <b>{p.platz}</b> <span class="leise-t">({p.platz_hoch}–{p.platz_tief})</span> von {p.von}</span>
       <span class="leise">
-        Rest des Jahres ({p.rest_tage} Tage) aus {p.vergleichsjahre} Vergleichsjahren {p.jahre[0]}–{p.jahre[1]}: 10 %, Median, 90 %
+        Rest ({p.rest_tage} Tage) wie in {p.jahre[0]}–{p.jahre[1]}: 10 % · Median · 90 %
       </span>
     </div>
   {/if}
@@ -90,10 +90,10 @@
         {#each zeilen as z (z.jahr)}
           <tr class:aktuell={z.jahr === liste.jahr} class:prog={z.prognose}>
             <td class="num">{z.platz}</td>
-            <td class="num">{z.jahr}{#if z.prognose}<span class="marke">Prognose</span>{/if}</td>
+            <td class="num">{z.jahr}{#if z.prognose}<span class="marke" title="Prognose">P</span>{/if}</td>
             <td class="num">
               {de(z.m, 2)}
-              {#if z.prognose}<span class="leise-t">({de(z.tief, 2)}–{de(z.hoch, 2)})</span>{/if}
+              {#if z.prognose}<span class="leise-t breit">({de(z.tief, 2)}–{de(z.hoch, 2)})</span>{/if}
             </td>
             <td class="num" style:color={z.abw > 0 ? "var(--rot)" : "var(--blau)"}>{mitVorzeichen(z.abw, 2)}</td>
             <td class="num leise-t">{z.tage ?? "–"}</td>
@@ -243,6 +243,13 @@
     td,
     th {
       padding: 4px 5px;
+    }
+    /* Name steht schon oben im Kopf; Band und Balken sind am Handy zu breit */
+    .name,
+    .breit,
+    th.balken-k,
+    td.balken {
+      display: none;
     }
   }
 </style>

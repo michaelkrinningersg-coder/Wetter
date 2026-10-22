@@ -71,13 +71,13 @@
 
 <div class="auswertung">
   <div class="kopf">
-    <b>{name}: {TITEL[art]}</b>
+    <b><span class="name">{name}: </span>{TITEL[art]}</b>
     {#if art === "rekorde"}
-      <span class="leise">Reihe {de(d.jahre)} Jahre – gezeigt werden bis Platz {d.erlaubt} (unter 10 Jahren nur Platz 1, unter 20 bis 3, unter 50 bis 5)</span>
+      <span class="leise" title="unter 10 Jahren nur Platz 1, unter 20 bis 3, unter 50 bis 5">Reihe {de(d.jahre, 0)} Jahre · gezeigt bis Platz {d.erlaubt}</span>
     {:else if art === "geschichte"}
       <span class="leise">{datum(d.datum)} in allen Jahren der Reihe · Platz 1 = am wärmsten</span>
     {:else if art === "kenntage"}
-      <span class="leise">Sommertag ≥ 25 °C · heißer Tag ≥ 30 °C · Tropennacht Tiefstwert ≥ 20 °C · Frosttag Tiefstwert &lt; 0 °C · Eistag Höchstwert &lt; 0 °C · Bodenfrost 5 cm &lt; 0 °C</span>
+      <span class="leise">°C: Sommertag ≥ 25 · heiß ≥ 30 · Tropennacht Min ≥ 20 · Frost Min &lt; 0 · Eis Max &lt; 0 · Bodenfrost &lt; 0</span>
     {:else if art === "wellen"}
       <span class="leise">
         {#if d.art === "normal"}mind. 5 Tage Tagesmittel über dem 90-%- bzw. unter dem 10-%-Wert des Normals {normalText()}
@@ -86,15 +86,15 @@
     {:else if art === "streifen"}
       <span class="leise">Jahresmittel gegen das Mittel {normalText()} ({de(d.bezug, 2)} °C) · nur Jahre mit mind. 330 Tagen</span>
     {:else if art === "niederschlag" || art === "sonne"}
-      <span class="leise">{d.jahr} aufsummiert (orange) gegen {normalText()}: Median gestrichelt, grau 10–90 %</span>
+      <span class="leise">{d.jahr} aufsummiert (orange) · {normalText()}: Median gestrichelt, grau 10–90 %</span>
     {:else if art === "schnee"}
       <span class="leise">Winter 1. Okt. – 30. Apr. · Schneetag ≥ 1 cm Schneehöhe</span>
     {:else if art === "wind"}
       <span class="leise">Sturmtag: Böe ≥ 75 km/h · Orkanböe ≥ 118 km/h</span>
     {:else if art === "frost"}
-      <span class="leise">Luft: Tiefstwert 2 m &lt; 0 °C · Boden: 5 cm &lt; 0 °C · letzter Frost vor, erster ab dem 1. Juli</span>
+      <span class="leise">Tiefstwert &lt; 0 °C in 2 m (Luft) und 5 cm (Boden) · Grenze 1. Juli</span>
     {:else if art === "verlauf"}
-      <span class="leise">Was die Prognose fürs Jahresende an jedem Tag gesagt hätte – Linie Median, grau 10–90 %</span>
+      <span class="leise">Prognose fürs Jahresende, Tag für Tag · Linie Median, grau 10–90 %</span>
     {/if}
   </div>
 
@@ -189,7 +189,9 @@
     <!-- ============================================================= Wellen -->
     {:else if art === "wellen"}
       <div class="karte breit">
+        <div class="lbl">Hitzewellen-Tage je Jahr</div>
         <Balken punkte={d.jahre.map((z) => [z.jahr, z.hitze_tage])} farbe="var(--rot)" einheit="Hitzewellen-Tage" hoehe={160} />
+        <div class="lbl">Kältewellen-Tage je Jahr</div>
         <Balken punkte={d.jahre.map((z) => [z.jahr, z.kaelte_tage])} farbe="var(--blau)" einheit="Kältewellen-Tage" hoehe={160} />
       </div>
       <div class="kacheln zwei-spalten">
@@ -265,6 +267,9 @@
           {/if}
           <div class="leise">Jahressumme normal {normalText()}: {de(d.normal)} {einheit}</div>
           <table class="klein">
+            <thead>
+              <tr><th class="l"></th><th>{d.jahr}</th><th>normal</th><th>±</th></tr>
+            </thead>
             <tbody>
               {#each d.monate as mo}
                 {@const a = mo.normal != null ? mo.summe - mo.normal : null}
@@ -529,7 +534,26 @@
   table.klein td.l {
     text-align: left;
   }
+  table.klein th {
+    padding: 2px 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-3);
+    text-align: right;
+    border-bottom: 1px solid var(--rand);
+  }
   @media (max-width: 700px) {
+    /* der Name steht am Handy schon oben im Kopf */
+    .name {
+      display: none;
+    }
+    .karte {
+      min-width: 0;
+    }
+    .karte .gruppe {
+      flex-wrap: wrap;
+      border-radius: 16px;
+    }
     .raster {
       grid-template-columns: minmax(0, 1fr);
     }

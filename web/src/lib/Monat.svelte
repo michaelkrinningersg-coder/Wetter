@@ -48,7 +48,7 @@
   <div class="kopf">
     <b>{MONATE[monat.monat - 1]} {monat.jahr}, Tag für Tag</b>
     <span class="leise">
-      Mittel gefärbt nach Abweichung vom Normal · Wind in km/h (DWD: m/s) · leer = fehlt oder unplausibel
+      Farbe: Abweichung vom Normal · leer = fehlt oder unplausibel
     </span>
   </div>
   <div class="rollen">
@@ -236,6 +236,14 @@
       left: 0;
       background: var(--flaeche);
       z-index: 2;
+    }
+    table {
+      font-size: 12.5px;
+    }
+    td,
+    th {
+      padding-left: 5px;
+      padding-right: 5px;
     }
   }
 </style>

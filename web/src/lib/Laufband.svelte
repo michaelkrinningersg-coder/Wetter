@@ -22,7 +22,7 @@
   <button class="laufband karte" onclick={gehe} title="Alle Rekorde Deutschland">
     <span class="kopf"><Symbol name="rekorde_de" /> Rekorde</span>
     {#if !eintraege.length}
-      <span class="leise">keine neuen Rekorde in Deutschland in den 7 Tagen bis {kurz(rekorde.stand)} – alle der letzten 12 Monate ›</span>
+      <span class="leise">keine neuen in 7 Tagen bis {kurz(rekorde.stand)} · alle ›</span>
     {:else}
     <span class="fenster">
       <span class="lauf" style:animation-duration="{dauer}s">

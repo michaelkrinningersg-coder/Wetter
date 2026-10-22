@@ -77,7 +77,8 @@ export function mittel(modelle) {
   return {
     id: MITTEL,
     name: "Mittel",
-    text: `Mittel aus ${mit.length} Modellen (${mit.map((m) => m.name).join(", ")}) · feine Modelle doppelt`,
+    text: `Mittel aus ${mit.length} Modellen · feine doppelt`,
+    liste: mit.map((m) => m.name).join(", "),
     stunden: zeilen,
     anzahl: mit.length,
   };

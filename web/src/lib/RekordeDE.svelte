@@ -44,10 +44,10 @@
       <div class="lbl">Rekorde Deutschland · letzte 12 Monate</div>
       {#if daten && !daten.leer}
         <div class="text-2">
-          Stand {kurz(daten.stand)} · {daten.stationen} Stationen · {daten.eintraege.length} Rekorde · Quelle: {daten.quelle}
+          Stand {kurz(daten.stand)} · {daten.stationen} Stationen · {daten.eintraege.length} Rekorde
         </div>
       {/if}
-      <div class="leise">Zählt, wenn der Wert beim Messen so weit vorn lag: ab 3 Jahren Reihe nur Platz 1, ab 20 Jahren Top 3, ab 30 Top 5, ab 50 Top 10; kürzere Reihen gar nicht. Gleicher Wert wie früher: der frühere bleibt vorn.</div>
+      <div class="leise" title="Gleicher Wert wie früher: der frühere bleibt vorn · Quelle: {daten.quelle}">Reihe ab 3 Jahren: Platz 1 · ab 20: Top 3 · ab 30: Top 5 · ab 50: Top 10</div>
     </div>
     <div class="knoepfe">
       {#if tage.length}

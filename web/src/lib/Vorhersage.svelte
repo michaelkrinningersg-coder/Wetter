@@ -22,6 +22,12 @@
   const tagKopf = (iso) => new Intl.DateTimeFormat("de-DE", { weekday: "long", day: "2-digit", month: "2-digit", timeZone: ZONE }).format(new Date(iso));
   const tagSchluessel = (iso) => new Intl.DateTimeFormat("de-DE", { day: "2-digit", month: "2-digit", timeZone: ZONE }).format(new Date(iso));
 
+  // Modelle ohne Werte, je Grund: [[grund, [modell, ...]], ...]
+  const ohneWerte = $derived.by(() => {
+    const g = new Map();
+    for (const m of v.modelle.filter((x) => x.fehler)) g.set(m.fehler, [...(g.get(m.fehler) ?? []), m]);
+    return [...g];
+  });
   const gewaehlt = $derived(v.modelle.find((m) => m.id === modell && m.stunden) ?? v.modelle.find((m) => m.stunden));
 
   // Tageswerte über den ganzen Ortstag 0-24 Uhr, auch die schon vergangenen Stunden
@@ -68,22 +74,23 @@
 
   <div class="karte modelle">
     <div class="wahl">
-      {#each v.modelle as m}
-        <button class="chip" class:an={gewaehlt?.id === m.id} disabled={!m.stunden} onclick={() => waehle(m.id)} title={m.fehler ?? m.text}>
+      {#each v.modelle.filter((m) => m.stunden) as m}
+        <button class="chip" class:an={gewaehlt?.id === m.id} onclick={() => waehle(m.id)} title={m.liste ?? m.text}>
           {#if m.id === standard}<span class="stern" title="Standard">★</span>{/if}{m.name}
         </button>
       {/each}
     </div>
     {#if gewaehlt}
-      <div class="leise">{gewaehlt.text} · Stand {uhr(new Date(v.abgerufen * 1000).toISOString())} Uhr</div>
+      <div class="leise" title={gewaehlt.liste ?? null}>{gewaehlt.text} · Stand {uhr(new Date(v.abgerufen * 1000).toISOString())}</div>
       {#if gewaehlt.id === standard}
-        <div class="leise">★ Standard – gilt auch für Startseite, Widget und Meldungen</div>
+        <div class="leise">★ Standard, auch für Start und Widget</div>
       {:else}
         <button class="chip standard" onclick={() => standardSetzen(gewaehlt.id)}>★ {gewaehlt.name} als Standard</button>
       {/if}
     {/if}
-    {#each v.modelle.filter((m) => m.fehler) as m}
-      <div class="leise">{m.name}: {m.fehler}</div>
+    <!-- Modelle ohne Werte: nach Grund zusammengefasst -->
+    {#each ohneWerte as [grund, ms]}
+      <div class="leise">{ms.map((m) => m.name).join(", ")}: {grund === "Ort liegt außerhalb des Modellgebiets" ? "außerhalb des Modellgebiets" : grund}</div>
     {/each}
   </div>
 
@@ -126,7 +133,7 @@
                 <td class="symbol"><Symbol wetter={symbol} tag={istTag(tag, zeit, v.station)} titel={SYMBOL_TEXT[symbol]} /></td>
                 <td class="num temp" style:color={temp >= 25 ? "var(--rot)" : temp < 0 ? "var(--blau)" : null}>{de(temp)}{#if sp?.n > 1}<small class="spanne">{de(sp.tmin, 0)}…{de(sp.tmax, 0)}</small>{/if}</td>
                 <td class="l"><span class="wolken" style:background={wolkenBalken(wolken)}>{de(wolken, 0)}</span></td>
-                <td class="num" class:nass={regen >= 0.1}>{regen ? de(regen) : "–"}{#if sp?.n > 1 && sp.rmax >= 0.1}<small class="spanne">{de(sp.rmin)}…{de(sp.rmax)}</small>{/if}</td>
+                <td class="num" class:nass={regen >= 0.1}>{regen ? de(regen) : "–"}{#if sp?.n > 1 && regen >= 0.1}<small class="spanne">{de(sp.rmin)}…{de(sp.rmax)}</small>{/if}</td>
                 <td class="num">{de(wind, 0)}</td>
                 <td class="num" class:sturm={boe >= 75}>{boe == null ? "–" : de(boe, 0)}</td>
               </tr>

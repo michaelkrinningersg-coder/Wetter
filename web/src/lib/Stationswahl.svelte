@@ -123,7 +123,7 @@
         {/each}
       </div>
       <div class="leise fuss">
-        {text.trim() ? `${tausend(treffer.length)} von ` : ""}{tausend(stationen.length)} Stationen · <Symbol name="favorit_an" groesse="1em" /> Favorit · grau: keine aktuellen Daten mehr · mit Tagen: schon geladen
+        {text.trim() ? `${tausend(treffer.length)} von ` : ""}{tausend(stationen.length)} · <Symbol name="favorit_an" groesse="1em" /> Favorit · grau: nicht mehr aktiv
       </div>
     </div>
   {/if}
@@ -163,6 +163,7 @@
   .wahl small {
     color: var(--text-3);
     font-size: 12px;
+    white-space: nowrap;
   }
   .pfeil {
     font-size: 12px;
@@ -273,7 +274,7 @@
     flex: 1;
   }
   .vollbild .zeile {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr 6.5em;
     grid-template-areas: "name nummer" "land jahre";
     row-gap: 0;
     padding: 9px 8px;
@@ -284,6 +285,7 @@
   }
   .vollbild .zeile > :nth-child(2) {
     grid-area: nummer;
+    text-align: right;
   }
   .vollbild .zeile > :nth-child(3) {
     grid-area: land;
