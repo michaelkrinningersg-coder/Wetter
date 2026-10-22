@@ -81,6 +81,9 @@
   // Standard-Vorhersage: "mittel" (aller Modelle) oder ein Modell - gilt für
   // Wetter, Startseite, Widget und Meldungen
   let standard = $state(MITTEL);
+  // gezeigtes Modell (Klappliste auf Start und Wetter) - null = der Standard
+  let modellWahl = $state(null);
+  const gezeigtesModell = $derived(modellWahl ?? standard);
   // Vorhersage mit dem Mittel aller Modelle vorne
   const vorhersageMit = $derived.by(() => {
     if (!vorhersage?.modelle) return vorhersage;
@@ -89,6 +92,7 @@
   });
   function standardSetzen(id) {
     standard = id;
+    modellWahl = null;
     rufe("einstellung", "standardmodell", id);
     widgetAbgleichen();
   }
@@ -559,7 +563,7 @@
     </div>
   {/if}
   {#if ansicht === "uebersicht" && station}
-    <Uebersicht name={vorhersage?.station?.ort ? vorhersage.station.name : station.station.name} {band} {monat} geschichte={geschichteKurz} vorhersage={vorhersageMit} {standard} rekorde={rekordeDe} gehe={(a) => setze("ansicht", a)} />
+    <Uebersicht name={vorhersage?.station?.ort ? vorhersage.station.name : station.station.name} {band} {monat} geschichte={geschichteKurz} vorhersage={vorhersageMit} {standard} modell={gezeigtesModell} waehle={(id) => (modellWahl = id)} rekorde={rekordeDe} gehe={(a) => setze("ansicht", a)} />
   {:else if ansicht === "top50"}
     <DeutschlandTop daten={deutschlandDaten} oeffnen={(id) => stationLaden(id).then((ok) => ok && setze("ansicht", "monat"))} neu={async () => { const r = await rufe("deutschland", true); if (!r.fehler) deutschlandDaten = r; }} />
   {:else if ansicht === "rekorde_de"}
@@ -567,7 +571,7 @@
   {:else if ansicht === "radar" && station}
     <Radar station={station.station} {stationen} {meinStandort} einstellungen={radarEinst} merken={(e) => ((radarEinst = e), rufe("einstellung", "radar", e))} />
   {:else if ansicht === "vorhersage" && vorhersage}
-    <Vorhersage v={vorhersageMit} {standard} {standardSetzen} />
+    <Vorhersage v={vorhersageMit} {standard} {standardSetzen} modell={gezeigtesModell} waehle={(id) => (modellWahl = id)} />
   {:else if ansicht === "band" && band && !band.leer}
     <Jahresband {band} name={station.station.name} />
   {:else if ansicht === "monat" && monat && !monat.leer}
@@ -998,23 +1002,6 @@
     opacity: 0.4;
     cursor: default;
   }
-  .b-raster {
-    display: grid;
-    grid-template-columns: repeat(6, auto);
-    gap: 1px 2px;
-  }
-  .b-klein {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 2px 7px;
-    border: 0;
-    border-radius: 5px;
-    background: none;
-    color: var(--graphit-text);
-    font-size: 12px;
-    cursor: pointer;
-  }
   .b-knopf i {
     font-style: normal;
   }
@@ -1062,19 +1049,6 @@
   }
   .b-stapel select {
     font-size: 12px;
-  }
-  .b-klein span {
-    display: flex;
-    width: 16px;
-    justify-content: center;
-  }
-  .b-klein:hover {
-    background: rgb(255 255 255 / 8%);
-  }
-  .b-klein.an {
-    background: var(--akzent-hell);
-    color: var(--akzent);
-    font-weight: 600;
   }
   .eingaben label {
     display: inline-flex;

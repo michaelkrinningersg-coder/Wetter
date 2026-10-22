@@ -8,11 +8,13 @@
   import { WINDIG_AB, tageszeiten } from "./tageszeiten.js";
   import Laufband from "./Laufband.svelte";
   import Symbol from "./Symbol.svelte";
+  import ModellWahl from "./ModellWahl.svelte";
 
-  let { name, band, monat, geschichte, vorhersage, standard = null, rekorde = null, gehe } = $props();
+  // modell: gezeigtes Vorhersagemodell (Klappliste, gemeinsam mit Wetter), waehle(id) ändert es
+  let { name, band, monat, geschichte, vorhersage, standard = null, modell = null, waehle = () => {}, rekorde = null, gehe } = $props();
 
   const a = $derived(vorhersage?.aktuell);
-  const hm = $derived(vorhersage ? heuteMorgen(vorhersage.modelle, Date.now(), standard) : null);
+  const hm = $derived(vorhersage ? heuteMorgen(vorhersage.modelle, Date.now(), modell ?? standard) : null);
 
   const gestern = $derived.by(() => {
     if (!band?.tage?.length) return null;
@@ -108,8 +110,8 @@
 
   <div class="karte hm">
     <div class="hm-kopf">
-      <span class="lbl">Vorhersage{hm ? ` · ${hm.modell}` : ""}</span>
-      <button class="chip" onclick={() => gehe("vorhersage")}>alle Modelle ›</button>
+      <span class="lbl">Vorhersage</span>
+      {#if vorhersage?.modelle}<ModellWahl modelle={vorhersage.modelle} wert={modell ?? standard} {standard} {waehle} />{/if}
     </div>
     {#if hm}
       <div class="tag-wahl">
@@ -269,7 +271,6 @@
     font-size: 15px;
     white-space: nowrap;
   }
-  .tz-regen,
   .tz-wkt,
   .tz-wind {
     font-size: 12px;

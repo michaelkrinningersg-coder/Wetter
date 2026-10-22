@@ -4,15 +4,13 @@
   // Zeiten kommen in UTC und werden hier in Ortszeit (Europe/Berlin) gezeigt.
   import { SYMBOL_TEXT, de, istTag } from "./format.js";
   import Symbol from "./Symbol.svelte";
+  import ModellWahl from "./ModellWahl.svelte";
   import { ortsTag } from "./kurzfrist.js";
   import { tageswerte } from "./tageswerte.js";
 
   // standard: Modell-Schlüssel oder "mittel"; standardSetzen(id) merkt ihn sich
-  let { v, standard, standardSetzen } = $props();
-  // angezeigt wird zuerst der Standard, umschalten nur für diesen Besuch
-  let auswahl = $state(null);
-  const modell = $derived(auswahl ?? standard);
-  const waehle = (id) => (auswahl = id);
+  // modell: gezeigtes Modell (Auswahl der Klappliste oder Standard), waehle(id) ändert es
+  let { v, standard, standardSetzen, modell, waehle } = $props();
 
   const ZONE = "Europe/Berlin";
   const STUNDE = new Intl.DateTimeFormat("de-DE", { hour: "numeric", hourCycle: "h23", timeZone: ZONE });
@@ -67,18 +65,7 @@
   </div>
 
   <div class="karte modelle">
-    <div class="wahl">
-      {#each v.modelle.filter((m) => m.stunden) as m}
-        <button class="chip" class:an={gewaehlt?.id === m.id} onclick={() => waehle(m.id)} title={m.liste ?? m.text}>
-          {#if m.id === standard}<span class="stern" title="Standard">★</span>{/if}{m.name}
-        </button>
-      {/each}
-    </div>
-    {#if gewaehlt}
-      {#if gewaehlt.id !== standard}
-        <button class="chip standard" onclick={() => standardSetzen(gewaehlt.id)}>★ {gewaehlt.name} als Standard</button>
-      {/if}
-    {/if}
+    <ModellWahl modelle={v.modelle} wert={gewaehlt?.id} {standard} {waehle} {standardSetzen} />
 
   </div>
 
@@ -183,11 +170,6 @@
     display: grid;
     gap: 2px;
   }
-  .wahl {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
   table {
     border-collapse: collapse;
     width: 100%;
@@ -269,13 +251,6 @@
     font-weight: 400;
     color: var(--text-3);
     line-height: 1.1;
-  }
-  .stern {
-    color: var(--akzent);
-    margin-right: 3px;
-  }
-  .chip.standard {
-    justify-self: start;
   }
   .wolken {
     display: inline-block;
